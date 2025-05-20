@@ -12,7 +12,7 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-export default function AuthModal({ isOpen, initialView, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { signInWithGoogle } = useAuth();
 
   // Handle Google sign in - this is the only supported authentication method

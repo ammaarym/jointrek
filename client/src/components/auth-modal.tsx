@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CarTaxiFront, X } from "lucide-react";
+import { CarTaxiFront, X, LogIn, Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
+import { FcGoogle } from "react-icons/fc";
 
 // Type definitions
 interface AuthModalProps {

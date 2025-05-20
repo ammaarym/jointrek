@@ -87,6 +87,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      
+      // Create a user profile in Firestore if needed
+      const userRef = doc(db, 'users', result.user.uid);
+      const userSnapshot = await getDoc(userRef);
+      
+      if (!userSnapshot.exists()) {
+        const userData = {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          createdAt: serverTimestamp(),
+          rides: 0,
+          rating: 5.0
+        };
+        
+        await setDoc(userRef, userData);
+      }
+      
+      toast({
+        title: "Welcome to GatorLift!",
+        description: "You have successfully signed in with Google.",
+      });
+      
+      return result;
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({
+          title: "Sign in failed",
+          description: error.message || "Failed to sign in with Google",
+          variant: "destructive"
+        });
+      }
+      
+      throw error;
+    }
+  };
+
   // Sign out
   const signOut = async () => {
     try {
@@ -106,6 +150,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     isUFEmail,
   };

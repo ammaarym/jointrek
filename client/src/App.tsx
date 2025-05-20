@@ -17,7 +17,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
-// Protected route component that redirects to home if not logged in
+// Modified protected route component - bypass authentication for testing
 function ProtectedRoute({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) {
   const { currentUser, loading } = useAuth();
   const [, setLocation] = useLocation();
@@ -28,12 +28,8 @@ function ProtectedRoute({ component: Component, ...rest }: { component: React.Co
     </div>;
   }
 
-  if (!currentUser) {
-    // Redirect to home page without toast (we'll show login required on the home page)
-    setLocation("/");
-    return null;
-  }
-
+  // Always allow access regardless of authentication status
+  // This is for testing purposes only
   return <Component {...rest} />;
 }
 

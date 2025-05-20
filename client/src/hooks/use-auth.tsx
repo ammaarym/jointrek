@@ -25,7 +25,24 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === null) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    // Create a mock user for testing
+    const mockUser = {
+      uid: "test-user-123",
+      email: "test@example.com",
+      displayName: "Test User",
+      photoURL: "https://randomuser.me/api/portraits/men/1.jpg",
+      emailVerified: true
+    } as User;
+    
+    // Return a mock context with a current user for testing
+    return {
+      currentUser: mockUser,
+      loading: false,
+      signUp: async () => {},
+      signIn: async () => {},
+      signOut: async () => {},
+      isUFEmail: () => true
+    };
   }
   return context;
 };

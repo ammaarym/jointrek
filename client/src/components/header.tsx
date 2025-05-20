@@ -74,8 +74,8 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
             {!currentUser ? (
               <div className="hidden md:block">
                 <Button
-                  variant="ghost"
-                  className="text-black font-medium hover:text-orange-600"
+                  variant="outline"
+                  className="text-black font-medium hover:text-orange-600 border-black"
                   onClick={onLogin}
                 >
                   Log In

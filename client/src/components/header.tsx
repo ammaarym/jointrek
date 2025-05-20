@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ThemeToggle } from "./ui/theme-toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -36,55 +35,53 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-dark-background shadow-md border-b border-neutral-200 dark:border-neutral-800">
+    <header className="sticky top-0 z-50 bg-white shadow-md border-b border-neutral-200">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <CarTaxiFront className="text-primary-orange h-6 w-6" />
-            <span className="text-xl font-semibold text-primary-blue dark:text-white">
+            <CarTaxiFront className="text-orange-600 h-6 w-6" />
+            <span className="text-xl font-semibold text-black">
               GatorLift
             </span>
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/">
-              <a className={`text-neutral-700 dark:text-neutral-200 hover:text-primary-orange dark:hover:text-primary-orange ${location === "/" ? "text-primary-orange" : ""}`}>
+              <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/" ? "text-orange-600" : ""}`}>
                 Home
-              </a>
+              </span>
             </Link>
             <Link href="/find-rides">
-              <a className={`text-neutral-700 dark:text-neutral-200 hover:text-primary-orange dark:hover:text-primary-orange ${location === "/find-rides" ? "text-primary-orange" : ""}`}>
+              <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/find-rides" ? "text-orange-600" : ""}`}>
                 Find Rides
-              </a>
+              </span>
             </Link>
             <Link href="/post-ride">
-              <a className={`text-neutral-700 dark:text-neutral-200 hover:text-primary-orange dark:hover:text-primary-orange ${location === "/post-ride" ? "text-primary-orange" : ""}`}>
+              <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/post-ride" ? "text-orange-600" : ""}`}>
                 Post Ride
-              </a>
+              </span>
             </Link>
             {currentUser && (
               <Link href="/messages">
-                <a className={`text-neutral-700 dark:text-neutral-200 hover:text-primary-orange dark:hover:text-primary-orange ${location === "/messages" ? "text-primary-orange" : ""}`}>
+                <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/messages" ? "text-orange-600" : ""}`}>
                   Messages
-                </a>
+                </span>
               </Link>
             )}
           </div>
 
           <div className="flex items-center space-x-4">
-            <ThemeToggle />
-
             {!currentUser ? (
               <div className="hidden md:block">
                 <Button
                   variant="ghost"
-                  className="text-primary-blue dark:text-white font-medium hover:text-primary-orange"
+                  className="text-black font-medium hover:text-orange-600"
                   onClick={onLogin}
                 >
                   Log In
                 </Button>
                 <Button
-                  className="ml-4 bg-primary-orange text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
+                  className="ml-4 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
                   onClick={onSignup}
                 >
                   Sign Up
@@ -183,55 +180,55 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-neutral-200 dark:border-neutral-800">
+        <div className="md:hidden border-t border-neutral-200">
           <div className="space-y-1 px-4 py-3">
             <Link href="/">
-              <a
-                className={`block py-2 text-neutral-700 dark:text-neutral-200 ${
-                  location === "/" ? "text-primary-orange" : ""
+              <span
+                className={`block py-2 text-neutral-700 cursor-pointer ${
+                  location === "/" ? "text-orange-600" : ""
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
-              </a>
+              </span>
             </Link>
             <Link href="/find-rides">
-              <a
-                className={`block py-2 text-neutral-700 dark:text-neutral-200 ${
-                  location === "/find-rides" ? "text-primary-orange" : ""
+              <span
+                className={`block py-2 text-neutral-700 cursor-pointer ${
+                  location === "/find-rides" ? "text-orange-600" : ""
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Find Rides
-              </a>
+              </span>
             </Link>
             <Link href="/post-ride">
-              <a
-                className={`block py-2 text-neutral-700 dark:text-neutral-200 ${
-                  location === "/post-ride" ? "text-primary-orange" : ""
+              <span
+                className={`block py-2 text-neutral-700 cursor-pointer ${
+                  location === "/post-ride" ? "text-orange-600" : ""
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Post Ride
-              </a>
+              </span>
             </Link>
             {currentUser && (
               <Link href="/messages">
-                <a
-                  className={`block py-2 text-neutral-700 dark:text-neutral-200 ${
-                    location === "/messages" ? "text-primary-orange" : ""
+                <span
+                  className={`block py-2 text-neutral-700 cursor-pointer ${
+                    location === "/messages" ? "text-orange-600" : ""
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Messages
-                </a>
+                </span>
               </Link>
             )}
             {!currentUser && (
-              <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700 mt-2">
+              <div className="pt-2 border-t border-neutral-200 mt-2">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-0 text-neutral-700 dark:text-neutral-200"
+                  className="w-full justify-start px-0 text-neutral-700"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onLogin();
@@ -240,7 +237,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                   Log In
                 </Button>
                 <Button
-                  className="w-full mt-2 bg-primary-orange text-white"
+                  className="w-full mt-2 bg-orange-600 text-white"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onSignup();

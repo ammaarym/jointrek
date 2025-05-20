@@ -31,7 +31,14 @@ export function formatTime(time: string): string {
 }
 
 export function validateUFEmail(email: string): boolean {
-  return email.endsWith('@ufl.edu');
+  if (!email) return false;
+  
+  // Make sure it's a valid email format first
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return false;
+  
+  // Then validate that it's specifically a UF email
+  return email.toLowerCase().endsWith('@ufl.edu');
 }
 
 export function validatePassword(password: string): boolean {

@@ -92,11 +92,26 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
   // Handle Google sign in
   const handleGoogleSignIn = async () => {
     try {
+      // Show warning that this feature might not be fully configured
+      toast({
+        title: "Google Sign-in",
+        description: "Please use your UF email (@ufl.edu) for authentication. If Google sign-in fails, try email/password instead.",
+        duration: 5000,
+      });
+      
       await signInWithGoogle();
       onClose();
-    } catch (error) {
-      // Error is already handled in the hook
+    } catch (error: any) {
       console.log("Google sign-in process ended");
+      
+      // If it's a Firebase configuration error, show a helpful message
+      if (error?.code === 'auth/configuration-not-found') {
+        toast({
+          title: "Google Sign-in Unavailable",
+          description: "Please use email/password login instead. Remember to use your UF email (@ufl.edu).",
+          duration: 5000,
+        });
+      }
     }
   };
 

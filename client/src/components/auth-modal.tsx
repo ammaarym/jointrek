@@ -16,24 +16,18 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-// Login form schema
+// Login form schema - allow any email for testing
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address").refine(
-    (email) => email.endsWith("@ufl.edu"),
-    { message: "Must use a UF email address (@ufl.edu)" }
-  ),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
-// Signup form schema
+// Signup form schema - allow any email for testing
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address").refine(
-    (email) => email.endsWith("@ufl.edu"),
-    { message: "Must use a UF email address (@ufl.edu)" }
-  ),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
   termsAccepted: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and privacy policy",
   }),

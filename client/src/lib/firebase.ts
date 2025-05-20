@@ -3,15 +3,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
-// Firebase configuration with the provided credentials
+// Firebase configuration with environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDxYAWHsdSZ9Gg4jxT9RzlJUYNp53Y86Wk",
-  authDomain: "gatorlift-a1a82.firebaseapp.com",
-  projectId: "gatorlift-a1a82",
-  storageBucket: "gatorlift-a1a82.firebasestorage.app",
-  messagingSenderId: "209031169433",
-  appId: "1:209031169433:web:2baa364be6ae249df23f08",
-  measurementId: "G-1V352MHT6K"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

@@ -50,11 +50,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Sign up with email and password
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
-    // Validate UF email
-    if (!isUFEmail(email)) {
-      throw new Error("You must use a UF email address (@ufl.edu) to sign up.");
-    }
-
+    // For testing purposes - allow any email
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -62,13 +58,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await updateProfile(result.user, {
         displayName: `${firstName} ${lastName}`
       });
-
-      // Send email verification
-      await sendEmailVerification(result.user);
       
       toast({
         title: "Account created",
-        description: "Please check your email to verify your account.",
+        description: "You're now logged in to GatorLift!",
       });
     } catch (error: any) {
       console.error(error);

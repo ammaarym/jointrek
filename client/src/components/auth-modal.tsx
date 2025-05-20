@@ -50,50 +50,19 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function AuthModal({ isOpen, initialView, onClose }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<"login" | "signup">(initialView);
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signInWithGoogle } = useAuth();
 
-  // Login form
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  // Signup form
-  const signupForm = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      termsAccepted: false,
-    },
-  });
-
-  // Handle login form submission
-  const handleLogin = async (values: LoginFormValues) => {
-    try {
-      await signIn(values.email, values.password);
-      onClose();
-    } catch (error) {
-      if (error instanceof Error) {
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    }
-  };
-  
-  // Handle Google sign in
+  // Handle Google sign in - this is the only supported authentication method
   const handleGoogleSignIn = async () => {
     try {
-      // Start the Google sign-in process
-      // This will redirect the user away from the app
+      // Show informative toast before redirecting
+      toast({
+        title: "UF Email Authentication",
+        description: "You'll be redirected to sign in with your UF email (@ufl.edu)",
+        duration: 3000,
+      });
+      
+      // Start the Google sign-in process with redirect
       await signInWithGoogle();
       
       // This part won't execute until after redirect cycle completes
@@ -102,22 +71,6 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
       console.log("Google sign-in process ended");
       
       // Error handling is done in the auth hook
-    }
-  };
-
-  // Handle signup form submission
-  const handleSignup = async (values: SignupFormValues) => {
-    try {
-      await signUp(values.email, values.password, values.firstName, values.lastName);
-      onClose();
-    } catch (error) {
-      if (error instanceof Error) {
-        toast({
-          title: "Signup failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
     }
   };
 
@@ -133,30 +86,6 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
         >
           <X className="h-6 w-6" />
         </button>
-
-        {/* Tab navigation */}
-        <div className="flex">
-          <button
-            className={`flex-1 py-4 text-center font-medium border-b-2 ${
-              activeTab === "login"
-                ? "border-primary-blue dark:border-primary-orange text-primary-blue dark:text-primary-orange"
-                : "border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400"
-            }`}
-            onClick={() => setActiveTab("login")}
-          >
-            Log In
-          </button>
-          <button
-            className={`flex-1 py-4 text-center font-medium border-b-2 ${
-              activeTab === "signup"
-                ? "border-primary-orange text-primary-orange"
-                : "border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400"
-            }`}
-            onClick={() => setActiveTab("signup")}
-          >
-            Sign Up
-          </button>
-        </div>
 
         {/* Login Form */}
         {activeTab === "login" && (

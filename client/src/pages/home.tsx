@@ -1,27 +1,19 @@
-import React, { useState } from "react";
-import { Link } from "wouter";
+import React from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CarTaxiFront, User, MapPin, Shield, Lock, Check, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import AuthModal from "@/components/auth-modal";
 
 export default function Home() {
   const { currentUser } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authType, setAuthType] = useState<"login" | "signup">("login");
+  const [, navigate] = useLocation();
 
-  const openLogin = () => {
-    setAuthType("login");
-    setShowAuthModal(true);
+  const handleLogin = () => {
+    navigate("/login");
   };
 
-  const openSignup = () => {
-    setAuthType("signup");
-    setShowAuthModal(true);
-  };
-
-  const closeAuthModal = () => {
-    setShowAuthModal(false);
+  const handleSignup = () => {
+    navigate("/login");
   };
 
   return (
@@ -68,7 +60,7 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row gap-3 mt-4">
                       <Button 
                         className="bg-orange-600 text-white flex items-center justify-center"
-                        onClick={openLogin}
+                        onClick={handleLogin}
                       >
                         <LogIn className="w-4 h-4 mr-2" />
                         Log In
@@ -76,7 +68,7 @@ export default function Home() {
                       <Button 
                         variant="outline" 
                         className="border-orange-600 text-orange-600 flex items-center justify-center"
-                        onClick={openSignup}
+                        onClick={handleSignup}
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Sign Up
@@ -111,14 +103,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
-      {showAuthModal && (
-        <AuthModal 
-          isOpen={showAuthModal} 
-          initialView={authType}
-          onClose={closeAuthModal} 
-        />
-      )}
 
       {/* How It Works Section */}
       <section className="py-16 bg-gray-50">

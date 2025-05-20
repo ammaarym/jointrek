@@ -7,17 +7,17 @@ import NotFound from "@/pages/not-found";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
 import FindRides from "@/pages/find-rides";
 import PostRide from "@/pages/post-ride";
 import Messages from "@/pages/messages";
 import Profile from "@/pages/profile";
-import AuthModal from "@/components/auth-modal";
 import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
-// Modified protected route component - bypass authentication for testing
+// Protected route component that redirects to login page if not authenticated
 function ProtectedRoute({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) {
   const { currentUser, loading } = useAuth();
   const [, setLocation] = useLocation();
@@ -28,8 +28,21 @@ function ProtectedRoute({ component: Component, ...rest }: { component: React.Co
     </div>;
   }
 
-  // Always allow access regardless of authentication status
-  // This is for testing purposes only
+  // If not authenticated, redirect to login page
+  if (!currentUser) {
+    // Use timeout to avoid immediate redirect issues
+    setTimeout(() => {
+      setLocation("/login");
+    }, 100);
+    
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <p className="mb-4 text-orange-600 font-semibold">Access restricted</p>
+        <p>Redirecting to login page...</p>
+      </div>
+    </div>;
+  }
+
   return <Component {...rest} />;
 }
 
@@ -37,6 +50,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
       <Route path="/find-rides">
         {(params) => <ProtectedRoute component={FindRides} path="/find-rides" />}
       </Route>
@@ -55,21 +69,13 @@ function Router() {
 }
 
 function App() {
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authType, setAuthType] = useState<"login" | "signup">("login");
-
+  // Header navigation handlers that redirect to login page
   const openLogin = () => {
-    setAuthType("login");
-    setShowAuthModal(true);
+    window.location.href = '/login';
   };
 
   const openSignup = () => {
-    setAuthType("signup");
-    setShowAuthModal(true);
-  };
-
-  const closeAuthModal = () => {
-    setShowAuthModal(false);
+    window.location.href = '/login';
   };
 
   return (
@@ -84,13 +90,6 @@ function App() {
                 <Router />
               </main>
               <Footer />
-              {showAuthModal && (
-                <AuthModal 
-                  isOpen={showAuthModal} 
-                  initialView={authType}
-                  onClose={closeAuthModal} 
-                />
-              )}
             </div>
           </AuthProvider>
         </ThemeProvider>

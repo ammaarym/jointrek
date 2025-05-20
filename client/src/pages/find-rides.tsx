@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { MapPin, Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,44 +24,270 @@ export default function FindRides() {
   const [sortBy, setSortBy] = useState("departureTime");
 
   // Function to load rides from Firestore
+  // Mock data function to generate rides
+  const getMockRides = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Create 6 mock rides with realistic data
+    const mockRides: Ride[] = [
+      {
+        id: "ride1",
+        driver: {
+          id: "driver1",
+          name: "Alex Johnson",
+          photoUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+          rating: 4.8,
+          totalRides: 42,
+          phone: "352-555-1234",
+          instagram: "alex_j_driver"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "UF Campus"
+        },
+        destination: {
+          city: "Orlando",
+          area: "UCF Area"
+        },
+        departureTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0)
+        },
+        arrivalTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30)
+        },
+        seatsTotal: 4,
+        seatsLeft: 2,
+        price: 25,
+        genderPreference: "no-preference",
+        carModel: "Honda Civic 2022",
+        notes: "I'll be leaving from Reitz Union. No smoking please. Small bags only.",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride2",
+        driver: {
+          id: "driver2",
+          name: "Sophia Williams",
+          photoUrl: "https://randomuser.me/api/portraits/women/44.jpg",
+          rating: 4.9,
+          totalRides: 78,
+          phone: "352-555-2345",
+          instagram: "sophia_drives"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "Butler Plaza"
+        },
+        destination: {
+          city: "Miami",
+          area: "South Beach"
+        },
+        departureTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0)
+        },
+        arrivalTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 30)
+        },
+        seatsTotal: 3,
+        seatsLeft: 1,
+        price: 45,
+        genderPreference: "female",
+        carModel: "Toyota Camry 2023",
+        notes: "AC will be on. Stops for lunch, my treat!",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride3",
+        driver: {
+          id: "driver3",
+          name: "Michael Chen",
+          photoUrl: "https://randomuser.me/api/portraits/men/67.jpg",
+          rating: 4.7,
+          totalRides: 24,
+          phone: "352-555-3456"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "The Swamp"
+        },
+        destination: {
+          city: "Tampa",
+          area: "Downtown"
+        },
+        departureTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 30)
+        },
+        arrivalTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0)
+        },
+        seatsTotal: 5,
+        seatsLeft: 3,
+        price: 20,
+        genderPreference: "no-preference",
+        carModel: "Tesla Model 3",
+        notes: "Electric car, smooth ride. USB chargers available.",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride4",
+        driver: {
+          id: "driver4",
+          name: "Emma Rodriguez",
+          photoUrl: "https://randomuser.me/api/portraits/women/23.jpg",
+          rating: 4.6,
+          totalRides: 18,
+          instagram: "emma_r23"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "Oaks Mall"
+        },
+        destination: {
+          city: "Jacksonville",
+          area: "Riverside"
+        },
+        departureTime: {
+          toDate: () => tomorrow
+        },
+        arrivalTime: {
+          toDate: () => new Date(tomorrow.getTime() + 2 * 60 * 60 * 1000)
+        },
+        seatsTotal: 4,
+        seatsLeft: 4,
+        price: 15,
+        genderPreference: "no-preference",
+        notes: "New driver, but experienced! Just moved from California.",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride5",
+        driver: {
+          id: "driver5",
+          name: "James Smith",
+          photoUrl: "https://randomuser.me/api/portraits/men/42.jpg",
+          rating: 5.0,
+          totalRides: 112,
+          phone: "352-555-7890",
+          instagram: "jsmith_rides"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "UF Health"
+        },
+        destination: {
+          city: "Tallahassee",
+          area: "FSU Campus"
+        },
+        departureTime: {
+          toDate: () => tomorrow
+        },
+        arrivalTime: {
+          toDate: () => new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000)
+        },
+        seatsTotal: 3,
+        seatsLeft: 2,
+        price: 30,
+        genderPreference: "male",
+        carModel: "Jeep Wrangler",
+        notes: "Going to visit friends at FSU. I drive safely but like my music loud!",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride6",
+        driver: {
+          id: "driver6",
+          name: "Olivia Garcia",
+          photoUrl: "https://randomuser.me/api/portraits/women/57.jpg",
+          rating: 4.9,
+          totalRides: 34,
+          phone: "352-555-4321",
+          instagram: "olivia_drives_uf"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "Sorority Row"
+        },
+        destination: {
+          city: "Atlanta",
+          area: "Midtown"
+        },
+        departureTime: {
+          toDate: () => new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000)
+        },
+        arrivalTime: {
+          toDate: () => new Date(tomorrow.getTime() + 28 * 60 * 60 * 1000)
+        },
+        seatsTotal: 4,
+        seatsLeft: 3,
+        price: 40,
+        genderPreference: "no-preference",
+        carModel: "Subaru Outback",
+        notes: "Weekend trip to Atlanta! Good vibes only, please.",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      }
+    ];
+    
+    return mockRides;
+  };
+
   const loadRides = async () => {
     setLoading(true);
     try {
-      let ridesQuery = query(
-        collection(db, "rides"),
-        where("origin.city", "==", origin),
-        orderBy("departureTime")
-      );
-
-      // Add destination filter if provided
-      if (destination) {
-        ridesQuery = query(
-          collection(db, "rides"),
-          where("origin.city", "==", origin),
-          where("destination.city", "==", destination),
-          orderBy("departureTime")
-        );
+      // Use mock data instead of Firestore
+      let ridesList = getMockRides();
+      
+      // Filter by origin
+      if (origin) {
+        ridesList = ridesList.filter(ride => 
+          ride.origin.city.toLowerCase().includes(origin.toLowerCase()));
       }
-
-      const querySnapshot = await getDocs(ridesQuery);
-      const ridesList: Ride[] = [];
-
-      querySnapshot.forEach((doc) => {
-        ridesList.push({ id: doc.id, ...doc.data() } as Ride);
-      });
-
+      
+      // Filter by destination
+      if (destination) {
+        ridesList = ridesList.filter(ride => 
+          ride.destination.city.toLowerCase().includes(destination.toLowerCase()));
+      }
+      
       // Filter by date if provided
       if (date) {
         const selectedDate = new Date(date).setHours(0, 0, 0, 0);
-        setRides(
-          ridesList.filter((ride) => {
-            const rideDate = new Date(ride.departureTime).setHours(0, 0, 0, 0);
-            return rideDate === selectedDate;
-          })
-        );
-      } else {
-        setRides(ridesList);
+        ridesList = ridesList.filter(ride => {
+          const rideDate = ride.departureTime.toDate().setHours(0, 0, 0, 0);
+          return rideDate === selectedDate;
+        });
       }
+      
+      // Sort rides
+      if (sortBy === "priceLow") {
+        ridesList.sort((a, b) => a.price - b.price);
+      } else if (sortBy === "priceHigh") {
+        ridesList.sort((a, b) => b.price - a.price);
+      } else {
+        // Default sort by departure time
+        ridesList.sort((a, b) => a.departureTime.toDate().getTime() - b.departureTime.toDate().getTime());
+      }
+      
+      setRides(ridesList);
     } catch (error) {
       console.error("Error loading rides:", error);
       toast({

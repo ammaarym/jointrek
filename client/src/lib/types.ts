@@ -1,5 +1,15 @@
 import { Timestamp } from "firebase/firestore";
 
+// Custom mock timestamp that's compatible with Firestore Timestamp
+export interface MockTimestamp {
+  toDate: () => Date;
+  seconds?: number;
+  nanoseconds?: number;
+  toMillis?: () => number;
+  isEqual?: (other: Timestamp) => boolean;
+  toJSON?: () => { seconds: number, nanoseconds: number };
+}
+
 export interface Location {
   city: string;
   area: string;
@@ -11,6 +21,9 @@ export interface UserProfile {
   photoUrl: string;
   rating: number;
   totalRides: number;
+  phone?: string;
+  instagram?: string;
+  snapchat?: string;
 }
 
 export interface Ride {
@@ -18,15 +31,15 @@ export interface Ride {
   driver: UserProfile;
   origin: Location;
   destination: Location;
-  departureTime: Timestamp;
-  arrivalTime: Timestamp;
+  departureTime: Timestamp | MockTimestamp;
+  arrivalTime: Timestamp | MockTimestamp;
   seatsTotal: number;
   seatsLeft: number;
   price: number;
   genderPreference: string;
   carModel?: string;
   notes?: string;
-  createdAt: Timestamp;
+  createdAt: Timestamp | MockTimestamp;
   rideType: "driver" | "passenger";
   passengers?: string[];
 }

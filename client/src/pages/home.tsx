@@ -194,10 +194,8 @@ export default function Home() {
                 <p className="text-neutral-600 mb-4">
                   Most rides on Friday afternoons and Sunday evenings.
                 </p>
-                <Link href="/find-rides?destination=Orlando">
-                  <a className="text-orange-600 hover:underline text-sm font-medium">
-                    Find 28 rides available →
-                  </a>
+                <Link href="/find-rides?destination=Orlando" className="text-orange-600 hover:underline text-sm font-medium inline-block">
+                  Find 28 rides available →
                 </Link>
               </div>
             </div>
@@ -219,10 +217,8 @@ export default function Home() {
                 <p className="text-neutral-600 mb-4">
                   Popular for long weekends and holiday breaks.
                 </p>
-                <Link href="/find-rides?destination=Miami">
-                  <a className="text-orange-600 hover:underline text-sm font-medium">
-                    Find 15 rides available →
-                  </a>
+                <Link href="/find-rides?destination=Miami" className="text-orange-600 hover:underline text-sm font-medium inline-block">
+                  Find 15 rides available →
                 </Link>
               </div>
             </div>
@@ -244,10 +240,8 @@ export default function Home() {
                 <p className="text-neutral-600 mb-4">
                   Frequent rides throughout the week and weekends.
                 </p>
-                <Link href="/find-rides?destination=Tampa">
-                  <a className="text-orange-600 hover:underline text-sm font-medium">
-                    Find 22 rides available →
-                  </a>
+                <Link href="/find-rides?destination=Tampa" className="text-orange-600 hover:underline text-sm font-medium inline-block">
+                  Find 22 rides available →
                 </Link>
               </div>
             </div>

@@ -54,7 +54,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Sign up with email and password
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
-    // For testing purposes - allow any email
+    // Validate UF email
+    if (!isUFEmail(email)) {
+      toast({
+        title: "Registration Failed",
+        description: "Please use your UF email address (@ufl.edu) to create an account.",
+        variant: "destructive"
+      });
+      throw new Error("Please use a valid UF email address");
+    }
+    
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -62,6 +71,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await updateProfile(result.user, {
         displayName: `${firstName} ${lastName}`
       });
+      
+      // Create a user profile in Firestore
+      const userRef = doc(db, 'users', result.user.uid);
+      const userData = {
+        uid: result.user.uid,
+        email: email,
+        displayName: `${firstName} ${lastName}`,
+        firstName: firstName,
+        lastName: lastName,
+        photoURL: "",
+        createdAt: serverTimestamp(),
+        rides: 0,
+        rating: 5.0
+      };
+      
+      await setDoc(userRef, userData);
       
       toast({
         title: "Account created",
@@ -75,6 +100,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Sign in with email and password
   const signIn = async (email: string, password: string) => {
+    // Validate UF email
+    if (!isUFEmail(email)) {
+      toast({
+        title: "Access Denied",
+        description: "Please use your UF email address (@ufl.edu) to sign in.",
+        variant: "destructive"
+      });
+      throw new Error("Please use a valid UF email address");
+    }
+    
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
@@ -91,6 +126,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      
+      // Validate if the email is a UF email
+      const email = result.user.email;
+      if (email && !isUFEmail(email)) {
+        // Sign the user out immediately
+        await firebaseSignOut(auth);
+        
+        toast({
+          title: "Access Denied",
+          description: "Please use your UF email address (@ufl.edu) to sign in.",
+          variant: "destructive"
+        });
+        
+        throw new Error("Non-UF email used for sign-in");
+      }
       
       // Create a user profile in Firestore if needed
       const userRef = doc(db, 'users', result.user.uid);
@@ -112,14 +162,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       toast({
         title: "Welcome to GatorLift!",
-        description: "You have successfully signed in with Google.",
+        description: "You have successfully signed in with your UF email.",
       });
       
       return result;
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       
-      if (error.code !== 'auth/popup-closed-by-user') {
+      if (error.code !== 'auth/popup-closed-by-user' && error.message !== "Non-UF email used for sign-in") {
         toast({
           title: "Sign in failed",
           description: error.message || "Failed to sign in with Google",

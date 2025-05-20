@@ -171,55 +171,85 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
+        console.log("Checking for redirect result...");
+        
         // Get the redirect result when user returns from Google auth
         const result = await getRedirectResult(auth);
+        console.log("Redirect result received:", result ? "success" : "no result");
         
         // If there's a result, user has completed Google sign-in
         if (result && result.user) {
+          console.log("User successfully signed in with Google");
+          
           // Validate if the email is a UF email
           const email = result.user.email;
+          console.log("Email domain check:", email);
+          
           if (email && !isUFEmail(email)) {
+            console.log("Non-UF email detected, signing out user");
             // Sign the user out immediately
             await firebaseSignOut(auth);
             
             toast({
               title: "Access Denied",
               description: "Please use your UF email address (@ufl.edu) to sign in.",
-              variant: "destructive"
+              variant: "destructive",
+              duration: 5000
             });
             
             throw new Error("Non-UF email used for sign-in");
           }
           
-          // If we reach here, authentication was successful with a UF email
+          console.log("UF email confirmed, proceeding with account setup");
           
+          // If we reach here, authentication was successful with a UF email
           // Create a user profile in Firestore if needed
           try {
             const userRef = doc(db, 'users', result.user.uid);
             const userSnapshot = await getDoc(userRef);
             
             if (!userSnapshot.exists()) {
+              console.log("Creating new user profile in Firestore");
+              
               const userData = {
                 uid: result.user.uid,
                 email: result.user.email,
-                displayName: result.user.displayName,
-                photoURL: result.user.photoURL,
+                displayName: result.user.displayName || email?.split('@')[0] || "UF Student",
+                photoURL: result.user.photoURL || "",
                 createdAt: serverTimestamp(),
                 rides: 0,
                 rating: 5.0
               };
               
               await setDoc(userRef, userData);
+            } else {
+              console.log("Existing user profile found");
             }
+            
+            // Force a state update to ensure the UI reflects the authenticated state
+            setCurrentUser(result.user);
             
             toast({
               title: "Welcome to GatorLift!",
               description: "You have successfully signed in with your UF email.",
+              duration: 5000
             });
+            
+            // Navigate user back to home page
+            window.location.href = '/';
           } catch (dbError) {
-            console.log("Database error:", dbError);
+            console.error("Database error:", dbError);
             // Don't fail the auth if the database operation fails
+            
+            // Still show success message
+            toast({
+              title: "Welcome to GatorLift!",
+              description: "You have successfully signed in with your UF email.",
+              duration: 5000
+            });
           }
+        } else {
+          console.log("No redirect result found");
         }
       } catch (error: any) {
         console.error("Google redirect result error:", error);
@@ -228,7 +258,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           toast({
             title: "Authentication Error",
             description: error.message || "Failed to complete Google sign-in",
-            variant: "destructive"
+            variant: "destructive",
+            duration: 5000
           });
         }
       }

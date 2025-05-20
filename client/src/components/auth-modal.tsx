@@ -231,15 +231,22 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
-                      onClick={handleGoogleSignIn}
-                      disabled={loginForm.formState.isSubmitting}
+                      className="w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white opacity-70"
+                      onClick={() => {
+                        toast({
+                          title: "Google Sign-in Unavailable",
+                          description: "Please use email/password login with your UF email instead.",
+                          variant: "destructive",
+                          duration: 5000,
+                        });
+                      }}
+                      disabled={true}
                     >
                       <FcGoogle className="h-5 w-5" />
-                      Sign in with Google (UF Emails Only)
+                      Google Sign-in (Currently Unavailable)
                     </Button>
-                    <p className="text-xs text-center mt-2 text-muted-foreground">
-                      Only @ufl.edu email addresses are allowed to access this application
+                    <p className="text-xs text-center mt-2 text-red-500 dark:text-red-400">
+                      Google sign-in is temporarily unavailable. Please use email/password with your @ufl.edu address.
                     </p>
                   </div>
                 </div>

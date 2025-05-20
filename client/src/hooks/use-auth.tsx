@@ -6,9 +6,12 @@ import {
   onAuthStateChanged, 
   signOut as firebaseSignOut,
   updateProfile,
-  sendEmailVerification
+  sendEmailVerification,
+  signInWithPopup,
+  GoogleAuthProvider
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, googleProvider, db } from "@/lib/firebase";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
 
 interface AuthContextType {
@@ -16,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   isUFEmail: (email: string) => boolean;
 }
@@ -25,24 +29,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === null) {
-    // Create a mock user for testing
-    const mockUser = {
-      uid: "test-user-123",
-      email: "test@example.com",
-      displayName: "Test User",
-      photoURL: "https://randomuser.me/api/portraits/men/1.jpg",
-      emailVerified: true
-    } as User;
-    
-    // Return a mock context with a current user for testing
-    return {
-      currentUser: mockUser,
-      loading: false,
-      signUp: async () => {},
-      signIn: async () => {},
-      signOut: async () => {},
-      isUFEmail: () => true
-    };
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

@@ -125,6 +125,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Sign in with Google
   const signInWithGoogle = async () => {
     try {
+      // Inform the user about requirements
+      toast({
+        title: "Google Sign-In",
+        description: "Please use your UF email address to complete authentication.",
+      });
+      
       const result = await signInWithPopup(auth, googleProvider);
       
       // Validate if the email is a UF email
@@ -142,22 +148,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error("Non-UF email used for sign-in");
       }
       
-      // Create a user profile in Firestore if needed
-      const userRef = doc(db, 'users', result.user.uid);
-      const userSnapshot = await getDoc(userRef);
+      // If we reach here, authentication was successful with a UF email
       
-      if (!userSnapshot.exists()) {
-        const userData = {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName,
-          photoURL: result.user.photoURL,
-          createdAt: serverTimestamp(),
-          rides: 0,
-          rating: 5.0
-        };
+      // Create a user profile in Firestore if needed
+      try {
+        const userRef = doc(db, 'users', result.user.uid);
+        const userSnapshot = await getDoc(userRef);
         
-        await setDoc(userRef, userData);
+        if (!userSnapshot.exists()) {
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            createdAt: serverTimestamp(),
+            rides: 0,
+            rating: 5.0
+          };
+          
+          await setDoc(userRef, userData);
+        }
+      } catch (dbError) {
+        console.log("Database error:", dbError);
+        // Don't fail the auth if the database operation fails
       }
       
       toast({
@@ -169,10 +182,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       
-      if (error.code !== 'auth/popup-closed-by-user' && error.message !== "Non-UF email used for sign-in") {
+      // Check for specific Firebase errors
+      if (error.code === 'auth/configuration-not-found') {
+        toast({
+          title: "Authentication Error",
+          description: "Google sign-in is not properly configured. Please use email/password instead.",
+          variant: "destructive"
+        });
+      } else if (error.code !== 'auth/popup-closed-by-user' && error.message !== "Non-UF email used for sign-in") {
         toast({
           title: "Sign in failed",
-          description: error.message || "Failed to sign in with Google",
+          description: "There was a problem with Google sign-in. Please use email/password instead.",
           variant: "destructive"
         });
       }

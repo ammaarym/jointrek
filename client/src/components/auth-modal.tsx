@@ -222,15 +222,21 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
                     </div>
                   </div>
                   
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-4 w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
-                    onClick={handleGoogleSignIn}
-                  >
-                    <FcGoogle className="h-5 w-5" />
-                    Sign in with Google
-                  </Button>
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
+                      onClick={handleGoogleSignIn}
+                      disabled={loginForm.formState.isSubmitting}
+                    >
+                      <FcGoogle className="h-5 w-5" />
+                      Sign in with Google (UF Emails Only)
+                    </Button>
+                    <p className="text-xs text-center mt-2 text-muted-foreground">
+                      Only @ufl.edu email addresses are allowed to access this application
+                    </p>
+                  </div>
                 </div>
               </div>
             </form>
@@ -375,15 +381,21 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
                     </div>
                   </div>
                   
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-4 w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
-                    onClick={handleGoogleSignIn}
-                  >
-                    <FcGoogle className="h-5 w-5" />
-                    Sign up with Google
-                  </Button>
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
+                      onClick={handleGoogleSignIn}
+                      disabled={signupForm.formState.isSubmitting}
+                    >
+                      <FcGoogle className="h-5 w-5" />
+                      Sign up with Google (UF Emails Only)
+                    </Button>
+                    <p className="text-xs text-center mt-2 text-muted-foreground">
+                      Only @ufl.edu email addresses are allowed to access this application
+                    </p>
+                  </div>
                 </div>
               </div>
             </form>

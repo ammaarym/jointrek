@@ -56,18 +56,27 @@ export default function PostRide() {
   });
 
   const onSubmit = async (data: PostRideFormValues) => {
-    // Allow posting even without authentication for testing
+    // Check if user is logged in
+    if (!currentUser) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in with your UF email to post a ride.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       // Calculate estimated arrival time (2 hours after departure for now)
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
+      // User is definitely logged in here because of our earlier check
       const rideData = {
         driver: {
-          id: currentUser.uid,
-          name: currentUser.displayName || "Anonymous",
-          photoUrl: currentUser.photoURL || "",
+          id: currentUser!.uid,
+          name: currentUser!.displayName || "Anonymous",
+          photoUrl: currentUser!.photoURL || "",
           rating: 5.0, // Default for new users
           totalRides: 0,
         },

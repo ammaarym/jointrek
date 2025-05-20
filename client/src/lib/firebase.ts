@@ -18,6 +18,9 @@ if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PRO
   console.error("Missing essential Firebase environment variables!");
 }
 
+// Print current origin for debugging
+console.log("Current origin:", window.location.origin);
+
 // Initialize Firebase only once
 let app;
 try {
@@ -37,14 +40,17 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
 
-// Set auth parameters to force account selection
-// But remove domain restriction to avoid UF login issues
+// Set minimum auth parameters to improve reliability
+// No domain restriction to avoid UF login issues
 googleProvider.setCustomParameters({
-  prompt: 'select_account',
-  login_hint: 'username@ufl.edu'
+  prompt: 'select_account'
 });
 
+// Get firestore database reference
 export const db = getFirestore(app);
+
+// Only initialize analytics in browser environment
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
+// Export the app as default
 export default app;

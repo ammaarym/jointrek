@@ -68,18 +68,18 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row gap-3 mt-4">
                       <Button 
                         className="bg-orange-600 text-white flex items-center justify-center"
-                        onClick={() => window.location.href = "/find-rides"}
+                        onClick={openLogin}
                       >
                         <LogIn className="w-4 h-4 mr-2" />
-                        Find Rides
+                        Log In
                       </Button>
                       <Button 
                         variant="outline" 
                         className="border-orange-600 text-orange-600 flex items-center justify-center"
-                        onClick={() => window.location.href = "/post-ride"}
+                        onClick={openSignup}
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
-                        Post Ride
+                        Sign Up
                       </Button>
                     </div>
                   </div>

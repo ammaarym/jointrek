@@ -427,11 +427,11 @@ export default function FindRides() {
             </div>
 
             <Button
-              className="w-full bg-primary-orange text-white py-3 rounded-md font-medium hover:bg-opacity-90 transition"
+              className="w-full bg-orange-600 text-white py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition"
               onClick={handleSearch}
             >
               <Search className="w-4 h-4 mr-2" />
-              Search Rides
+              Apply Filters
             </Button>
           </div>
         </div>
@@ -446,7 +446,11 @@ export default function FindRides() {
               <span className="text-neutral-500 dark:text-neutral-400 mr-3">
                 Sort by:
               </span>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(value) => {
+                setSortBy(value);
+                // Apply sorting immediately when changed
+                setTimeout(handleSearch, 100);
+              }}>
                 <SelectTrigger className="w-[180px] bg-white dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>

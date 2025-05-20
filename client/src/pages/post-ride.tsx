@@ -138,10 +138,11 @@ export default function PostRide() {
                   <div className="grid grid-cols-2 gap-4">
                     <Button
                       type="button"
+                      variant="outline"
                       className={`flex items-center justify-center p-4 border-2 ${
                         isDriver
-                          ? "border-primary-blue bg-blue-50 dark:bg-blue-900/20 text-primary-blue dark:text-blue-300"
-                          : "border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300"
+                          ? "border-orange-600 bg-orange-50 text-orange-600"
+                          : "border-neutral-300 text-neutral-700"
                       } rounded-lg font-medium`}
                       onClick={() => handleRideTypeChange("driver")}
                     >
@@ -150,10 +151,11 @@ export default function PostRide() {
                     </Button>
                     <Button
                       type="button"
+                      variant="outline"
                       className={`flex items-center justify-center p-4 border-2 ${
                         !isDriver
-                          ? "border-primary-blue bg-blue-50 dark:bg-blue-900/20 text-primary-blue dark:text-blue-300"
-                          : "border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300"
+                          ? "border-orange-600 bg-orange-50 text-orange-600"
+                          : "border-neutral-300 text-neutral-700"
                       } rounded-lg font-medium`}
                       onClick={() => handleRideTypeChange("passenger")}
                     >

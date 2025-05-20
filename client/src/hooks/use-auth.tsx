@@ -124,9 +124,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Sign in with Google - uses redirect method for better mobile experience
+  // Sign in with Google - uses popup method for better compatibility
   const signInWithGoogle = async () => {
     try {
+      // Log auth state before signing in
+      console.log("Starting Google sign-in process");
+      console.log("Auth provider configuration:", googleProvider);
+      console.log("Current auth state:", auth.currentUser);
+      
       // Inform the user about requirements
       toast({
         title: "Google Sign-In",
@@ -134,13 +139,60 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         duration: 5000,
       });
       
-      // Use redirect method as recommended for mobile devices
-      await signInWithRedirect(auth, googleProvider);
+      // Try using popup method instead of redirect for debugging
+      console.log("Attempting Google sign-in with popup");
+      const result = await signInWithPopup(auth, googleProvider);
       
-      // We won't reach here until after the redirect cycle completes
-      return null;
+      console.log("Google sign-in successful:", result.user);
+      
+      // Check if the email is from UF
+      if (result.user.email && !isUFEmail(result.user.email)) {
+        console.log("Non-UF email detected, signing out user");
+        await firebaseSignOut(auth);
+        
+        toast({
+          title: "Access Denied",
+          description: "Please use your UF email address (@ufl.edu) to sign in.",
+          variant: "destructive",
+          duration: 5000
+        });
+        
+        throw new Error("Non-UF email used for sign-in");
+      }
+      
+      // Create user profile if needed
+      console.log("Creating/updating user profile");
+      const userRef = doc(db, 'users', result.user.uid);
+      const userSnapshot = await getDoc(userRef);
+      
+      if (!userSnapshot.exists()) {
+        const userData = {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName || result.user.email?.split('@')[0] || "UF Student",
+          photoURL: result.user.photoURL || "",
+          createdAt: serverTimestamp(),
+          rides: 0,
+          rating: 5.0
+        };
+        
+        await setDoc(userRef, userData);
+      }
+      
+      toast({
+        title: "Welcome to GatorLift!",
+        description: "You have successfully signed in with your UF email.",
+        duration: 5000
+      });
+      
+      // Force state update
+      setCurrentUser(result.user);
+      
+      return result;
     } catch (error: any) {
       console.error("Google sign-in error:", error);
+      console.log("Error code:", error.code);
+      console.log("Error message:", error.message);
       
       // Check for specific Firebase errors
       if (error.code === 'auth/configuration-not-found') {
@@ -155,7 +207,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           description: "This domain is not authorized in Firebase. Please add it to your Firebase console's authorized domains.",
           variant: "destructive"
         });
-      } else if (error.code !== 'auth/popup-closed-by-user' && error.message !== "Non-UF email used for sign-in") {
+      } else if (error.code === 'auth/popup-blocked') {
+        toast({
+          title: "Popup Blocked",
+          description: "The authentication popup was blocked by your browser. Please enable popups for this site.",
+          variant: "destructive"
+        });
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        toast({
+          title: "Authentication Cancelled",
+          description: "You closed the Google sign-in window. Please try again.",
+          variant: "destructive"
+        });
+      } else if (error.message !== "Non-UF email used for sign-in") {
         toast({
           title: "Sign in failed",
           description: error.message || "There was a problem with Google sign-in.",

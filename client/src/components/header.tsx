@@ -152,21 +152,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
-                        <a className="flex items-center cursor-pointer">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
-                        </a>
-                      </Link>
+                    <DropdownMenuItem onClick={() => window.location.href = "/profile"} className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/my-rides">
-                        <a className="flex items-center cursor-pointer">
-                          <CarTaxiFront className="mr-2 h-4 w-4" />
-                          <span>My Rides</span>
-                        </a>
-                      </Link>
+                    <DropdownMenuItem onClick={() => window.location.href = "/my-rides"} className="cursor-pointer">
+                      <CarTaxiFront className="mr-2 h-4 w-4" />
+                      <span>My Rides</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="cursor-pointer">

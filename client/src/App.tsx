@@ -17,58 +17,38 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
-// Protected route component that redirects to login page if not authenticated
-function ProtectedRoute({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) {
+// This component will be used inside the AuthProvider
+function AppRoutes() {
   const { currentUser, loading } = useAuth();
-  const [, setLocation] = useLocation();
+  
+  // Protected route component that redirects to login page if not authenticated
+  const ProtectedRoute = ({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) => {
+    const [, setLocation] = useLocation();
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
-    </div>;
-  }
+    if (loading) {
+      return <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
+      </div>;
+    }
 
-  // If not authenticated, redirect to login page
-  if (!currentUser) {
-    // Use timeout to avoid immediate redirect issues
-    setTimeout(() => {
-      setLocation("/login");
-    }, 100);
-    
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <p className="mb-4 text-orange-600 font-semibold">Access restricted</p>
-        <p>Redirecting to login page...</p>
-      </div>
-    </div>;
-  }
+    // If not authenticated, redirect to login page
+    if (!currentUser) {
+      // Use timeout to avoid immediate redirect issues
+      setTimeout(() => {
+        setLocation("/login");
+      }, 100);
+      
+      return <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="mb-4 text-orange-600 font-semibold">Access restricted</p>
+          <p>Redirecting to login page...</p>
+        </div>
+      </div>;
+    }
 
-  return <Component {...rest} />;
-}
+    return <Component {...rest} />;
+  };
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/find-rides">
-        {(params) => <ProtectedRoute component={FindRides} path="/find-rides" />}
-      </Route>
-      <Route path="/post-ride">
-        {(params) => <ProtectedRoute component={PostRide} path="/post-ride" />}
-      </Route>
-      <Route path="/messages">
-        {(params) => <ProtectedRoute component={Messages} path="/messages" />}
-      </Route>
-      <Route path="/profile">
-        {(params) => <ProtectedRoute component={Profile} path="/profile" />}
-      </Route>
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
   // Header navigation handlers that redirect to login page
   const openLogin = () => {
     window.location.href = '/login';
@@ -79,18 +59,40 @@ function App() {
   };
 
   return (
+    <div className="min-h-screen flex flex-col">
+      <Toaster />
+      <Header onLogin={openLogin} onSignup={openSignup} />
+      <main className="flex-grow">
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/login" component={Login} />
+          <Route path="/find-rides">
+            {(params) => <ProtectedRoute component={FindRides} path="/find-rides" />}
+          </Route>
+          <Route path="/post-ride">
+            {(params) => <ProtectedRoute component={PostRide} path="/post-ride" />}
+          </Route>
+          <Route path="/messages">
+            {(params) => <ProtectedRoute component={Messages} path="/messages" />}
+          </Route>
+          <Route path="/profile">
+            {(params) => <ProtectedRoute component={Profile} path="/profile" />}
+          </Route>
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <Toaster />
-              <Header onLogin={openLogin} onSignup={openSignup} />
-              <main className="flex-grow">
-                <Router />
-              </main>
-              <Footer />
-            </div>
+            <AppRoutes />
           </AuthProvider>
         </ThemeProvider>
       </TooltipProvider>

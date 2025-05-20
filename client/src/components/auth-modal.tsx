@@ -28,13 +28,24 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
       // Start the Google sign-in process with popup
       const result = await signInWithGoogle();
       
-      // If authentication was successful, close the modal
+      // If authentication was successful, close the modal and redirect
       if (result) {
-        console.log("Authentication successful, closing modal");
+        console.log("Authentication successful with", result.user.email);
+        
+        // Close the modal first
         onClose();
         
-        // Navigate user to Find Rides page
-        window.location.href = '/find-rides';
+        // Show welcome toast
+        toast({
+          title: "Welcome to GatorLift!",
+          description: "Successfully logged in. Redirecting to Find Rides...",
+          duration: 3000,
+        });
+        
+        // Navigate user to Find Rides page after a short delay
+        setTimeout(() => {
+          window.location.href = '/find-rides';
+        }, 500);
       }
     } catch (error) {
       console.log("Google sign-in process ended");

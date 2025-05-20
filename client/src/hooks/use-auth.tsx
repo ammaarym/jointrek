@@ -146,13 +146,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error.code === 'auth/configuration-not-found') {
         toast({
           title: "Authentication Error",
-          description: "Google sign-in is not properly configured. Please use email/password instead.",
+          description: "Google sign-in is not properly configured. Firebase configuration may be missing.",
+          variant: "destructive"
+        });
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          title: "Domain Not Authorized",
+          description: "This domain is not authorized in Firebase. Please add it to your Firebase console's authorized domains.",
           variant: "destructive"
         });
       } else if (error.code !== 'auth/popup-closed-by-user' && error.message !== "Non-UF email used for sign-in") {
         toast({
           title: "Sign in failed",
-          description: "There was a problem with Google sign-in. Please use email/password instead.",
+          description: error.message || "There was a problem with Google sign-in.",
           variant: "destructive"
         });
       }

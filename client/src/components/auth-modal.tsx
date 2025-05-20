@@ -84,7 +84,7 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
             
             <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
               <p className="text-center text-sm text-blue-800 dark:text-blue-300">
-                <strong>How it works:</strong> You'll be redirected to Google to sign in with your UF email account for secure authentication.
+                <strong>Setup Instructions:</strong> Add your Replit domain to Firebase console's authorized domains list under Authentication → Settings.
               </p>
             </div>
           </div>

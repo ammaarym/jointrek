@@ -21,15 +21,21 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
       // Show informative toast before redirecting
       toast({
         title: "UF Email Authentication",
-        description: "You'll be redirected to sign in with your UF email (@ufl.edu)",
+        description: "A Google sign-in popup will open. Please use your UF email (@ufl.edu).",
         duration: 3000,
       });
       
-      // Start the Google sign-in process with redirect
-      await signInWithGoogle();
+      // Start the Google sign-in process with popup
+      const result = await signInWithGoogle();
       
-      // This part won't execute until after redirect cycle completes
-      onClose();
+      // If authentication was successful, close the modal
+      if (result) {
+        console.log("Authentication successful, closing modal");
+        onClose();
+        
+        // Navigate user to Find Rides page
+        window.location.href = '/find-rides';
+      }
     } catch (error) {
       console.log("Google sign-in process ended");
       

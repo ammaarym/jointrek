@@ -1,0 +1,121 @@
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { 
+  User, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged, 
+  signOut as firebaseSignOut,
+  updateProfile,
+  sendEmailVerification
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { toast } from "@/hooks/use-toast";
+
+interface AuthContextType {
+  currentUser: User | null;
+  loading: boolean;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  isUFEmail: (email: string) => boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === null) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Check if email is from UF domain
+  const isUFEmail = (email: string) => {
+    return email.endsWith("@ufl.edu");
+  };
+
+  // Sign up with email and password
+  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+    // Validate UF email
+    if (!isUFEmail(email)) {
+      throw new Error("You must use a UF email address (@ufl.edu) to sign up.");
+    }
+
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with display name
+      await updateProfile(result.user, {
+        displayName: `${firstName} ${lastName}`
+      });
+
+      // Send email verification
+      await sendEmailVerification(result.user);
+      
+      toast({
+        title: "Account created",
+        description: "Please check your email to verify your account.",
+      });
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message || "Failed to create account");
+    }
+  };
+
+  // Sign in with email and password
+  const signIn = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message || "Failed to sign in");
+    }
+  };
+
+  // Sign out
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    } catch (error: any) {
+      console.error(error);
+      throw new Error(error.message || "Failed to sign out");
+    }
+  };
+
+  const value = {
+    currentUser,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    isUFEmail,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

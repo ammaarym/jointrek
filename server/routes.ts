@@ -1,0 +1,544 @@
+import type { Express, Request, Response, NextFunction } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema } from "@shared/schema";
+import * as admin from 'firebase-admin';
+import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
+
+// Extend Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: admin.auth.DecodedIdToken;
+    }
+  }
+}
+
+const initFirebase = () => {
+  try {
+    // Initialize Firebase Admin SDK
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 
+                      `firebase-adminsdk-${process.env.VITE_FIREBASE_PROJECT_ID}@${process.env.VITE_FIREBASE_PROJECT_ID}.iam.gserviceaccount.com`,
+          // In a production environment, you would use a proper private key
+          // Here we're using a workaround for demo purposes
+          privateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKj\nMzEfYyjiWA4R4/M2bS1GB4t7NXp98C3SC6dVMvDuictGeurT8jNbvJZHtCSuYEvu\nNMoSfm76oqFvAp8Gy0iz5sxjZmSnXyCdPEovGhLa0VzMaQ8s+CLOyS56YyCFGeJZ\n-----END PRIVATE KEY-----\n',
+        }),
+        databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}.firebaseio.com`
+      });
+    }
+    console.log("Firebase Admin SDK initialized successfully");
+  } catch (error) {
+    console.error("Error initializing Firebase Admin SDK:", error);
+  }
+};
+
+// Middleware to verify Firebase authentication
+const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
+    
+    const token = authHeader.split("Bearer ")[1];
+    
+    // Verify the token with Firebase Admin
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    
+    // Check if it's a UF email
+    if (!decodedToken.email || !decodedToken.email.endsWith("@ufl.edu")) {
+      return res.status(403).json({ message: "Forbidden: Only UF emails are allowed" });
+    }
+    
+    // Add user info to request
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return res.status(401).json({ message: "Unauthorized: Invalid token" });
+  }
+};
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Firebase
+  initFirebase();
+  
+  const httpServer = createServer(app);
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  // === User Routes ===
+  
+  // Get current user
+  app.get("/api/users/me", authenticate, async (req, res) => {
+    try {
+      const user = await storage.getUserByFirebaseUid(req.user.uid);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Create or update user
+  app.post("/api/users", authenticate, async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse({
+        firebaseUid: req.user.uid,
+        email: req.user.email,
+        displayName: req.user.name || req.body.displayName,
+        photoUrl: req.user.picture || req.body.photoUrl,
+        emailVerified: req.user.email_verified || false
+      });
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByFirebaseUid(req.user.uid);
+      
+      if (existingUser) {
+        // Update existing user
+        const updatedUser = await storage.updateUser(req.user.uid, userData);
+        return res.json(updatedUser);
+      }
+      
+      // Create new user
+      const newUser = await storage.createUser(userData);
+      res.status(201).json(newUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid user data", 
+          errors: fromZodError(error).message 
+        });
+      }
+      
+      console.error("Error creating/updating user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // === Ride Routes ===
+  
+  // Get all rides
+  app.get("/api/rides", async (req, res) => {
+    try {
+      const origin = req.query.origin as string;
+      const destination = req.query.destination as string;
+      
+      if (!origin) {
+        return res.status(400).json({ message: "Origin query parameter is required" });
+      }
+      
+      const rides = await storage.getRidesByLocation(origin, destination);
+      res.json(rides);
+    } catch (error) {
+      console.error("Error fetching rides:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get a specific ride
+  app.get("/api/rides/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+      
+      const ride = await storage.getRide(id);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+      
+      res.json(ride);
+    } catch (error) {
+      console.error("Error fetching ride:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Create a ride
+  app.post("/api/rides", authenticate, async (req, res) => {
+    try {
+      const rideData = insertRideSchema.parse({
+        ...req.body,
+        driverId: req.user.uid
+      });
+      
+      const ride = await storage.createRide(rideData);
+      res.status(201).json(ride);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid ride data", errors: error.errors });
+      }
+      
+      console.error("Error creating ride:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Update a ride
+  app.patch("/api/rides/:id", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+      
+      const ride = await storage.getRide(id);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+      
+      // Ensure the user owns the ride
+      if (ride.driverId !== req.user.uid) {
+        return res.status(403).json({ message: "You can only update your own rides" });
+      }
+      
+      const updatedRide = await storage.updateRide(id, req.body);
+      res.json(updatedRide);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid ride data", errors: error.errors });
+      }
+      
+      console.error("Error updating ride:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Delete a ride
+  app.delete("/api/rides/:id", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+      
+      const ride = await storage.getRide(id);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+      
+      // Ensure the user owns the ride
+      if (ride.driverId !== req.user.uid) {
+        return res.status(403).json({ message: "You can only delete your own rides" });
+      }
+      
+      await storage.deleteRide(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting ride:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get rides by driver
+  app.get("/api/users/me/rides", authenticate, async (req, res) => {
+    try {
+      const rides = await storage.getRidesByDriver(req.user.uid);
+      res.json(rides);
+    } catch (error) {
+      console.error("Error fetching user rides:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get rides booked by a passenger
+  app.get("/api/users/me/bookings", authenticate, async (req, res) => {
+    try {
+      const bookings = await storage.getBookingsByPassenger(req.user.uid);
+      
+      // Get the ride details for each booking
+      const rides = await Promise.all(
+        bookings.map(async (booking) => {
+          const ride = await storage.getRide(booking.rideId);
+          return { ...ride, bookingId: booking.id, bookingStatus: booking.status };
+        })
+      );
+      
+      res.json(rides.filter(ride => ride !== undefined));
+    } catch (error) {
+      console.error("Error fetching user bookings:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // === Booking Routes ===
+  
+  // Create a booking
+  app.post("/api/bookings", authenticate, async (req, res) => {
+    try {
+      const { rideId } = req.body;
+      
+      if (!rideId) {
+        return res.status(400).json({ message: "rideId is required" });
+      }
+      
+      const ride = await storage.getRide(rideId);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+      
+      // Check if there are available seats
+      if (ride.seatsLeft <= 0) {
+        return res.status(400).json({ message: "No seats available for this ride" });
+      }
+      
+      // Check if user has already booked this ride
+      const userBookings = await storage.getBookingsByPassenger(req.user.uid);
+      const existingBooking = userBookings.find(booking => 
+        booking.rideId === rideId && 
+        ['pending', 'confirmed'].includes(booking.status)
+      );
+      
+      if (existingBooking) {
+        return res.status(400).json({ message: "You have already booked this ride" });
+      }
+      
+      const bookingData = insertBookingSchema.parse({
+        rideId,
+        passengerId: req.user.uid,
+        status: "pending"
+      });
+      
+      const booking = await storage.createBooking(bookingData);
+      
+      // Create a conversation between driver and passenger if it doesn't exist
+      const existingConversation = await storage.getConversationByParticipants([
+        req.user.uid,
+        ride.driverId
+      ]);
+      
+      if (!existingConversation) {
+        await storage.createConversation({
+          participants: [req.user.uid, ride.driverId],
+          rideId
+        });
+      }
+      
+      res.status(201).json(booking);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid booking data", errors: error.errors });
+      }
+      
+      console.error("Error creating booking:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Update booking status
+  app.patch("/api/bookings/:id", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid booking ID" });
+      }
+      
+      if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const booking = await storage.getBooking(id);
+      
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      const ride = await storage.getRide(booking.rideId);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Associated ride not found" });
+      }
+      
+      // Only the ride driver can confirm/cancel a booking, or the passenger can cancel their own booking
+      if (
+        (status === 'confirmed' && ride.driverId !== req.user.uid) ||
+        (status === 'cancelled' && ride.driverId !== req.user.uid && booking.passengerId !== req.user.uid)
+      ) {
+        return res.status(403).json({ message: "Unauthorized to update this booking" });
+      }
+      
+      // If confirming and no seats left
+      if (status === 'confirmed' && ride.seatsLeft <= 0 && booking.status !== 'confirmed') {
+        return res.status(400).json({ message: "No seats available for this ride" });
+      }
+      
+      const updatedBooking = await storage.updateBookingStatus(id, status);
+      res.json(updatedBooking);
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // === Message & Conversation Routes ===
+  
+  // Get user's conversations
+  app.get("/api/conversations", authenticate, async (req, res) => {
+    try {
+      const conversations = await storage.getConversationsByUser(req.user.uid);
+      
+      // Enrich conversation data with participants info
+      const enrichedConversations = await Promise.all(
+        conversations.map(async (conversation) => {
+          const participants = await Promise.all(
+            conversation.participants
+              .filter(id => id !== req.user.uid)
+              .map(async (id) => {
+                const user = await storage.getUserByFirebaseUid(id);
+                return user ? {
+                  id: user.firebaseUid,
+                  displayName: user.displayName,
+                  photoUrl: user.photoUrl
+                } : null;
+              })
+          );
+          
+          return {
+            ...conversation,
+            participantsData: participants.filter(p => p !== null)
+          };
+        })
+      );
+      
+      res.json(enrichedConversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get a specific conversation
+  app.get("/api/conversations/:id", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+      }
+      
+      const conversation = await storage.getConversation(id);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Ensure the user is a participant
+      if (!conversation.participants.includes(req.user.uid)) {
+        return res.status(403).json({ message: "You are not a participant in this conversation" });
+      }
+      
+      // Get messages for this conversation
+      const messages = await storage.getMessagesByConversation(id);
+      
+      res.json({
+        conversation,
+        messages
+      });
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Create a conversation
+  app.post("/api/conversations", authenticate, async (req, res) => {
+    try {
+      const { participantId, rideId } = req.body;
+      
+      if (!participantId) {
+        return res.status(400).json({ message: "participantId is required" });
+      }
+      
+      // Check if the conversation already exists
+      const existingConversation = await storage.getConversationByParticipants([
+        req.user.uid,
+        participantId
+      ]);
+      
+      if (existingConversation) {
+        return res.json(existingConversation);
+      }
+      
+      // Create new conversation
+      const conversationData = insertConversationSchema.parse({
+        participants: [req.user.uid, participantId],
+        rideId
+      });
+      
+      const conversation = await storage.createConversation(conversationData);
+      res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid conversation data", errors: error.errors });
+      }
+      
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Send a message
+  app.post("/api/messages", authenticate, async (req, res) => {
+    try {
+      const { conversationId, text } = req.body;
+      
+      if (!conversationId || !text) {
+        return res.status(400).json({ message: "conversationId and text are required" });
+      }
+      
+      const conversation = await storage.getConversation(conversationId);
+      
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Ensure the user is a participant
+      if (!conversation.participants.includes(req.user.uid)) {
+        return res.status(403).json({ message: "You are not a participant in this conversation" });
+      }
+      
+      const messageData = insertMessageSchema.parse({
+        conversationId,
+        senderId: req.user.uid,
+        text
+      });
+      
+      const message = await storage.createMessage(messageData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid message data", errors: error.errors });
+      }
+      
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  return httpServer;
+}

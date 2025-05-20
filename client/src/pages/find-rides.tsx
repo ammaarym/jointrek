@@ -435,6 +435,13 @@ export default function FindRides() {
         ridesList.sort((a, b) => a.departureTime.toDate().getTime() - b.departureTime.toDate().getTime());
       }
       
+      // Filter by gender preference if selected
+      if (genderPreference === "female") {
+        ridesList = ridesList.filter(ride => ride.genderPreference === "female");
+      } else if (genderPreference === "male") {
+        ridesList = ridesList.filter(ride => ride.genderPreference === "male");
+      }
+      
       setRides(ridesList);
     } catch (error) {
       console.error("Error loading rides:", error);
@@ -460,15 +467,6 @@ export default function FindRides() {
 
   // Function to handle booking a ride
   const handleBookRide = (rideId: string) => {
-    if (!currentUser) {
-      toast({
-        title: "Login required",
-        description: "You need to log in to book a ride",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // This would be implemented with Firestore in a real application
     toast({
       title: "Ride booked!",

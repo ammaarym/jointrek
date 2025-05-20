@@ -29,8 +29,10 @@ export default function FindRides() {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter = new Date(tomorrow);
+    dayAfter.setDate(dayAfter.getDate() + 1);
     
-    // Create 6 mock rides with realistic data
+    // Create 10 mock rides with realistic data
     const mockRides: Ride[] = [
       {
         id: "ride1",
@@ -243,6 +245,151 @@ export default function FindRides() {
         notes: "Weekend trip to Atlanta! Good vibes only, please.",
         createdAt: {
           toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride7",
+        driver: {
+          id: "driver7",
+          name: "David Wilson",
+          photoUrl: "https://randomuser.me/api/portraits/men/22.jpg",
+          rating: 4.8,
+          totalRides: 56,
+          phone: "352-555-9876",
+          instagram: "david_wilson_uf"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "Innovation Square"
+        },
+        destination: {
+          city: "St. Augustine",
+          area: "Historic District"
+        },
+        departureTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0)
+        },
+        arrivalTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 11, 0)
+        },
+        seatsTotal: 3,
+        seatsLeft: 2,
+        price: 22,
+        genderPreference: "no-preference",
+        carModel: "Kia Soul",
+        notes: "Day trip to St. Augustine! Will stop for coffee along the way.",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride8",
+        driver: {
+          id: "driver8",
+          name: "Jessica Taylor",
+          photoUrl: "https://randomuser.me/api/portraits/women/29.jpg",
+          rating: 4.9,
+          totalRides: 37,
+          phone: "352-555-2468",
+          snapchat: "jess_taylor_uf"
+        },
+        origin: {
+          city: "Orlando",
+          area: "Disney Springs"
+        },
+        destination: {
+          city: "Gainesville",
+          area: "UF Campus"
+        },
+        departureTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 30)
+        },
+        arrivalTime: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 20, 45)
+        },
+        seatsTotal: 4,
+        seatsLeft: 1,
+        price: 27,
+        genderPreference: "female",
+        carModel: "Mazda CX-5",
+        notes: "Heading back to UF after a day at Disney. Good music and good vibes!",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride9",
+        driver: {
+          id: "driver9",
+          name: "Ryan Clark",
+          photoUrl: "https://randomuser.me/api/portraits/men/75.jpg",
+          rating: 4.6,
+          totalRides: 19,
+          phone: "352-555-3698",
+          instagram: "ryanc_drives"
+        },
+        origin: {
+          city: "Gainesville",
+          area: "UF Health"
+        },
+        destination: {
+          city: "Tampa",
+          area: "USF Campus"
+        },
+        departureTime: {
+          toDate: () => new Date(dayAfter.getFullYear(), dayAfter.getMonth(), dayAfter.getDate(), 7, 30)
+        },
+        arrivalTime: {
+          toDate: () => new Date(dayAfter.getFullYear(), dayAfter.getMonth(), dayAfter.getDate(), 10, 0)
+        },
+        seatsTotal: 2,
+        seatsLeft: 2,
+        price: 18,
+        genderPreference: "no-preference",
+        carModel: "Ford Focus",
+        notes: "Early morning ride to Tampa. Coffee included!",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        },
+        rideType: "driver"
+      },
+      {
+        id: "ride10",
+        driver: {
+          id: "driver10",
+          name: "Maria Lopez",
+          photoUrl: "https://randomuser.me/api/portraits/women/62.jpg",
+          rating: 5.0,
+          totalRides: 88,
+          phone: "352-555-7412",
+          instagram: "maria_lopez_uf",
+          snapchat: "maria_lopez22"
+        },
+        origin: {
+          city: "Jacksonville",
+          area: "Downtown"
+        },
+        destination: {
+          city: "Gainesville",
+          area: "Butler Plaza"
+        },
+        departureTime: {
+          toDate: () => new Date(dayAfter.getFullYear(), dayAfter.getMonth(), dayAfter.getDate(), 14, 0)
+        },
+        arrivalTime: {
+          toDate: () => new Date(dayAfter.getFullYear(), dayAfter.getMonth(), dayAfter.getDate(), 16, 0)
+        },
+        seatsTotal: 4,
+        seatsLeft: 3,
+        price: 20,
+        genderPreference: "no-preference",
+        carModel: "Volkswagen Jetta",
+        notes: "Regular commuter between Jacksonville and Gainesville. Very reliable!",
+        createdAt: {
+          toDate: () => new Date(now.getFullYear(), now.getMonth(), now.getDate())
         },
         rideType: "driver"
       }

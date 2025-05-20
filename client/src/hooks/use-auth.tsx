@@ -8,6 +8,8 @@ import {
   updateProfile,
   sendEmailVerification,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider
 } from "firebase/auth";
 import { auth, googleProvider, db } from "@/lib/firebase";
@@ -122,63 +124,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Sign in with Google
+  // Sign in with Google - uses redirect method for better mobile experience
   const signInWithGoogle = async () => {
     try {
       // Inform the user about requirements
       toast({
         title: "Google Sign-In",
-        description: "Please use your UF email address to complete authentication.",
+        description: "Please use your UF email address (@ufl.edu) to sign in.",
+        duration: 5000,
       });
       
-      const result = await signInWithPopup(auth, googleProvider);
+      // Use redirect method as recommended for mobile devices
+      await signInWithRedirect(auth, googleProvider);
       
-      // Validate if the email is a UF email
-      const email = result.user.email;
-      if (email && !isUFEmail(email)) {
-        // Sign the user out immediately
-        await firebaseSignOut(auth);
-        
-        toast({
-          title: "Access Denied",
-          description: "Please use your UF email address (@ufl.edu) to sign in.",
-          variant: "destructive"
-        });
-        
-        throw new Error("Non-UF email used for sign-in");
-      }
-      
-      // If we reach here, authentication was successful with a UF email
-      
-      // Create a user profile in Firestore if needed
-      try {
-        const userRef = doc(db, 'users', result.user.uid);
-        const userSnapshot = await getDoc(userRef);
-        
-        if (!userSnapshot.exists()) {
-          const userData = {
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL,
-            createdAt: serverTimestamp(),
-            rides: 0,
-            rating: 5.0
-          };
-          
-          await setDoc(userRef, userData);
-        }
-      } catch (dbError) {
-        console.log("Database error:", dbError);
-        // Don't fail the auth if the database operation fails
-      }
-      
-      toast({
-        title: "Welcome to GatorLift!",
-        description: "You have successfully signed in with your UF email.",
-      });
-      
-      return result;
+      // We won't reach here until after the redirect cycle completes
+      return null;
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       
@@ -200,6 +160,77 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw error;
     }
   };
+  
+  // Handle the redirect result when user returns from Google auth
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        // Get the redirect result when user returns from Google auth
+        const result = await getRedirectResult(auth);
+        
+        // If there's a result, user has completed Google sign-in
+        if (result && result.user) {
+          // Validate if the email is a UF email
+          const email = result.user.email;
+          if (email && !isUFEmail(email)) {
+            // Sign the user out immediately
+            await firebaseSignOut(auth);
+            
+            toast({
+              title: "Access Denied",
+              description: "Please use your UF email address (@ufl.edu) to sign in.",
+              variant: "destructive"
+            });
+            
+            throw new Error("Non-UF email used for sign-in");
+          }
+          
+          // If we reach here, authentication was successful with a UF email
+          
+          // Create a user profile in Firestore if needed
+          try {
+            const userRef = doc(db, 'users', result.user.uid);
+            const userSnapshot = await getDoc(userRef);
+            
+            if (!userSnapshot.exists()) {
+              const userData = {
+                uid: result.user.uid,
+                email: result.user.email,
+                displayName: result.user.displayName,
+                photoURL: result.user.photoURL,
+                createdAt: serverTimestamp(),
+                rides: 0,
+                rating: 5.0
+              };
+              
+              await setDoc(userRef, userData);
+            }
+            
+            toast({
+              title: "Welcome to GatorLift!",
+              description: "You have successfully signed in with your UF email.",
+            });
+          } catch (dbError) {
+            console.log("Database error:", dbError);
+            // Don't fail the auth if the database operation fails
+          }
+        }
+      } catch (error: any) {
+        console.error("Google redirect result error:", error);
+        
+        if (error.message !== "Non-UF email used for sign-in") {
+          toast({
+            title: "Authentication Error",
+            description: error.message || "Failed to complete Google sign-in",
+            variant: "destructive"
+          });
+        }
+      }
+    };
+    
+    // Process the redirect result when component mounts
+    handleRedirectResult();
+  }, []);
 
   // Sign out
   const signOut = async () => {

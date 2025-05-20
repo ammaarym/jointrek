@@ -42,7 +42,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function AuthModal({ isOpen, initialView, onClose }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState<"login" | "signup">(initialView);
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -78,6 +78,17 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
           variant: "destructive",
         });
       }
+    }
+  };
+  
+  // Handle Google sign in
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      onClose();
+    } catch (error) {
+      // Error is already handled in the hook
+      console.log("Google sign-in process ended");
     }
   };
 
@@ -197,6 +208,29 @@ export default function AuthModal({ isOpen, initialView, onClose }: AuthModalPro
                 >
                   {loginForm.formState.isSubmitting ? "Logging in..." : "Log In"}
                 </Button>
+                
+                <div className="mt-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-neutral-300 dark:border-neutral-600" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="bg-white dark:bg-neutral-800 px-2 text-neutral-500 dark:text-neutral-400">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4 w-full flex items-center justify-center gap-2 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-white"
+                    onClick={handleGoogleSignIn}
+                  >
+                    <FcGoogle className="h-5 w-5" />
+                    Sign in with Google
+                  </Button>
+                </div>
               </div>
             </form>
           </div>

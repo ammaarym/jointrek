@@ -76,15 +76,15 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                 <Button
                   variant="outline"
                   className="text-black font-medium hover:text-orange-600 border-black"
-                  onClick={() => window.location.href = "/find-rides"}
+                  onClick={onLogin}
                 >
-                  Find Rides
+                  Log In
                 </Button>
                 <Button
                   className="ml-4 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
-                  onClick={() => window.location.href = "/post-ride"}
+                  onClick={onSignup}
                 >
-                  Post Ride
+                  Sign Up
                 </Button>
               </div>
             ) : (

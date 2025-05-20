@@ -13,6 +13,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Log if we are missing important environment variables
+if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID) {
+  console.error("Missing essential Firebase environment variables!");
+}
+
 // Initialize Firebase only once
 let app;
 try {
@@ -27,12 +32,17 @@ try {
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-// Configure Google provider to request email
+
+// Configure Google provider for UF email authentication
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+
+// Set auth parameters to force account selection and prefer UF emails
 googleProvider.setCustomParameters({
   prompt: 'select_account',
-  // Only allow UF email domains
-  hd: 'ufl.edu'
+  login_hint: 'username@ufl.edu'
 });
+
 export const db = getFirestore(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 

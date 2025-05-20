@@ -147,18 +147,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Check if the email is from UF
       if (result.user.email && !isUFEmail(result.user.email)) {
-        console.log("Non-UF email detected, signing out user");
-        await firebaseSignOut(auth);
+        console.log("Non-UF email detected:", result.user.email);
         
+        // Show a clear error message
         toast({
           title: "Access Denied",
-          description: "Please use your UF email address (@ufl.edu) to sign in.",
+          description: "Only UF email addresses (@ufl.edu) are allowed. Please try again with your UF email.",
           variant: "destructive",
-          duration: 5000
+          duration: 7000
         });
+        
+        // Sign out the user immediately
+        console.log("Signing out non-UF user");
+        await firebaseSignOut(auth);
+        
+        // Make sure the state is updated to reflect signed out status
+        setCurrentUser(null);
         
         throw new Error("Non-UF email used for sign-in");
       }
+      
+      console.log("UF email verification successful!");
       
       // Create user profile if needed
       console.log("Creating/updating user profile");

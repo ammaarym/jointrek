@@ -77,7 +77,8 @@ export default function FindRides() {
           rating: 4.9,
           totalRides: 78,
           phone: "352-555-2345",
-          instagram: "sophia_drives"
+          instagram: "sophia_drives",
+          snapchat: "sophia_uf"
         },
         origin: {
           city: "Gainesville",

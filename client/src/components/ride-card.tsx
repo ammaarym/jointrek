@@ -199,21 +199,45 @@ export default function RideCard({ ride, onBook }: RideCardProps) {
                 </div>
               </div>
               
-              {currentUser && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {ride.driver.phone && (
-                    <div className="flex items-center text-neutral-700">
-                      <Phone className="w-4 h-4 mr-2 text-neutral-500" />
-                      <span>{ride.driver.phone}</span>
-                    </div>
-                  )}
-                  
-                  {ride.driver.instagram && (
-                    <div className="flex items-center text-neutral-700">
-                      <Instagram className="w-4 h-4 mr-2 text-neutral-500" />
-                      <span>@{ride.driver.instagram}</span>
-                    </div>
-                  )}
+              {currentUser ? (
+                <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
+                  <h5 className="font-medium text-neutral-900 mb-3">Contact Information</h5>
+                  <div className="grid grid-cols-1 gap-3">
+                    {ride.driver.phone && (
+                      <div className="flex items-center text-neutral-700">
+                        <Phone className="w-5 h-5 mr-3 text-orange-600" />
+                        <span className="font-medium">{ride.driver.phone}</span>
+                      </div>
+                    )}
+                    
+                    {ride.driver.instagram && (
+                      <div className="flex items-center text-neutral-700">
+                        <Instagram className="w-5 h-5 mr-3 text-orange-600" />
+                        <span className="font-medium">@{ride.driver.instagram}</span>
+                      </div>
+                    )}
+                    
+                    {ride.driver.snapchat && (
+                      <div className="flex items-center text-neutral-700">
+                        <svg 
+                          className="w-5 h-5 mr-3 text-orange-600" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM18.5 12.75C18.5 12.75 16.5 12.5 16 12.5C15.5 12.5 15.25 12.75 15 13C14.75 13.25 14 14.1383 13.5 14C13 13.8617 11.8 13 10.5 11.5C9.2 10 8.75 9 8.75 9C8.75 9 8.5 8.75 8 9.5C7.5 10.25 7 10.5 6.5 10.5C6 10.5 5 10.5 5 10.5C5 8.25 6.5 6.25 8.75 6.25C11 6.25 12.25 7.75 13.5 7.75C14.75 7.75 16.25 6.25 18.5 6.25C18.5 7.75 18.5 10.625 18.5 12.75Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        <span className="font-medium">{ride.driver.snapchat}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 bg-orange-50 p-3 rounded-lg border border-orange-100 text-orange-800 text-sm">
+                  Login to see contact information
                 </div>
               )}
             </div>

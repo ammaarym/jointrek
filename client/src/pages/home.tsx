@@ -1,11 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { CarTaxiFront, User, MapPin } from "lucide-react";
+import { CarTaxiFront, User, MapPin, Shield, Lock, Check, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import AuthModal from "@/components/auth-modal";
 
 export default function Home() {
   const { currentUser } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authType, setAuthType] = useState<"login" | "signup">("login");
+
+  const openLogin = () => {
+    setAuthType("login");
+    setShowAuthModal(true);
+  };
+
+  const openSignup = () => {
+    setAuthType("signup");
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+  };
 
   return (
     <div>
@@ -22,24 +39,86 @@ export default function Home() {
                 The safe, convenient way for UF students to carpool to campus,
                 back home, or anywhere in between.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  asChild
-                  className="bg-orange-600 text-white px-6 py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-center"
-                >
-                  <Link href="/find-rides">Find a Ride</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-black text-white px-6 py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-center"
-                >
-                  <Link href="/post-ride">Offer a Ride</Link>
-                </Button>
-              </div>
+              
+              {currentUser ? (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    asChild
+                    className="bg-orange-600 text-white px-6 py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-center"
+                  >
+                    <Link href="/find-rides">Find a Ride</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="bg-black text-white px-6 py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-center"
+                  >
+                    <Link href="/post-ride">Offer a Ride</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center max-w-2xl mx-auto">
+                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6 text-left w-full">
+                    <h3 className="font-semibold text-orange-700 text-lg flex items-center mb-2">
+                      <Lock className="w-5 h-5 mr-2" />
+                      Please sign in to continue
+                    </h3>
+                    <p className="text-orange-700 mb-3">
+                      GatorLift is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                      <Button 
+                        className="bg-orange-600 text-white flex items-center justify-center"
+                        onClick={openLogin}
+                      >
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Log In
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="border-orange-600 text-orange-600 flex items-center justify-center"
+                        onClick={openSignup}
+                      >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Sign Up
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 w-full">
+                    <div className="flex items-start">
+                      <div className="shrink-0 bg-orange-100 rounded-full p-2 mt-1 mr-3">
+                        <Shield className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="font-medium text-gray-900">UF Students Only</h4>
+                        <p className="text-sm text-gray-600">Verified UF emails ensure you're traveling with fellow Gators.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="shrink-0 bg-orange-100 rounded-full p-2 mt-1 mr-3">
+                        <Check className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="font-medium text-gray-900">Secure & Easy</h4>
+                        <p className="text-sm text-gray-600">Find rides or offer your own in just a few clicks after signing in.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
+      
+      {showAuthModal && (
+        <AuthModal 
+          isOpen={showAuthModal} 
+          initialView={authType}
+          onClose={closeAuthModal} 
+        />
+      )}
 
       {/* How It Works Section */}
       <section className="py-16 bg-gray-50">

@@ -37,12 +37,11 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
 
-// Set auth parameters to force account selection and restrict to UF emails
+// Set auth parameters to force account selection
+// But remove domain restriction to avoid UF login issues
 googleProvider.setCustomParameters({
   prompt: 'select_account',
-  login_hint: 'username@ufl.edu',
-  // The hd parameter restricts to specific domains
-  hd: 'ufl.edu'
+  login_hint: 'username@ufl.edu'
 });
 
 export const db = getFirestore(app);

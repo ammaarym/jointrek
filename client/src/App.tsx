@@ -79,23 +79,25 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <Toaster />
-            <Header onLogin={openLogin} onSignup={openSignup} />
-            <main className="flex-grow">
-              <Router />
-            </main>
-            <Footer />
-            {showAuthModal && (
-              <AuthModal 
-                isOpen={showAuthModal} 
-                initialView={authType}
-                onClose={closeAuthModal} 
-              />
-            )}
-          </div>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="min-h-screen flex flex-col">
+              <Toaster />
+              <Header onLogin={openLogin} onSignup={openSignup} />
+              <main className="flex-grow">
+                <Router />
+              </main>
+              <Footer />
+              {showAuthModal && (
+                <AuthModal 
+                  isOpen={showAuthModal} 
+                  initialView={authType}
+                  onClose={closeAuthModal} 
+                />
+              )}
+            </div>
+          </AuthProvider>
+        </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -12,8 +12,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only once
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log("Firebase initialized successfully");
+} catch (error) {
+  console.error("Firebase initialization error", error);
+  // If already initialized, use the existing app
+  app = initializeApp(firebaseConfig, "GatorLift");
+}
 
 // Initialize Firebase services
 export const auth = getAuth(app);

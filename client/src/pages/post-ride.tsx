@@ -55,8 +55,15 @@ export default function PostRide() {
     },
   });
 
+  // Add state for tracking form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const onSubmit = async (data: PostRideFormValues) => {
-    console.log("Form submission started with values:", data);
+    // Check if already submitting to prevent duplicate submissions
+    if (isSubmitting) return;
+    
+    const startTime = performance.now();
+    console.log("Form submission started at:", new Date().toISOString());
     
     // Check if user is logged in
     if (!currentUser) {
@@ -68,29 +75,25 @@ export default function PostRide() {
       return;
     }
 
+    // Set submitting state to true to show loading UI
+    setIsSubmitting(true);
+    
     try {
       // Calculate estimated arrival time (2 hours after departure for now)
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
-      // Create contact info object
-      const contactInfo = {
-        email: currentUser.email || '',
-        phone: data.phone || currentUser.phoneNumber || '',
-        instagram: data.instagram || '',
-        snapchat: data.snapchat || ''
-      };
-
-      // Create simplified ride data
+      // Create lean ride data with minimal driver information
       const rideData = {
-        driver: {
-          id: currentUser.uid,
-          name: currentUser.displayName || "Anonymous",
-          photoUrl: currentUser.photoURL || "",
-          rating: 5.0, // Default for new users
-          totalRides: 0,
-          contactInfo: contactInfo
-        },
+        // Only include essential driver information
+        driverId: currentUser.uid,
+        driverName: currentUser.displayName || "Anonymous",
+        driverEmail: currentUser.email || '',
+        driverPhone: data.phone || currentUser.phoneNumber || '',
+        driverInstagram: data.instagram || '',
+        driverSnapchat: data.snapchat || '',
+        
+        // Location data
         origin: {
           city: data.origin,
           area: data.originArea,
@@ -99,6 +102,8 @@ export default function PostRide() {
           city: data.destination,
           area: data.destinationArea,
         },
+        
+        // Ride details
         departureTime: Timestamp.fromDate(departureDateTime),
         arrivalTime: Timestamp.fromDate(arrivalDateTime),
         seatsTotal: parseInt(data.availableSeats || "1"),
@@ -111,14 +116,19 @@ export default function PostRide() {
         rideType: data.rideType,
       };
 
-      console.log("Posting ride with data:", rideData);
+      console.log("Processing ride data took:", performance.now() - startTime, "ms");
       
       // Create a reference to the rides collection
       const ridesCollection = collection(db, "rides");
       
+      // Measure how long the Firestore write takes
+      const writeStartTime = performance.now();
+      
       // Add document to Firestore
       const docRef = await addDoc(ridesCollection, rideData);
-      console.log("Document written with ID:", docRef.id);
+      
+      const writeEndTime = performance.now();
+      console.log(`Firestore write completed in ${writeEndTime - writeStartTime}ms, document ID:`, docRef.id);
       
       // Show success message
       toast({
@@ -126,8 +136,11 @@ export default function PostRide() {
         description: "Your ride has been posted successfully.",
       });
 
-      // Navigate to find-rides page without using window.location (which can be slow/unreliable)
+      // Navigate immediately without delay
       setLocation("/find-rides");
+      
+      // Log total processing time
+      console.log(`Total form submission process took ${performance.now() - startTime}ms`);
     } catch (error) {
       console.error("Error posting ride:", error);
       
@@ -137,6 +150,9 @@ export default function PostRide() {
         description: `Error: ${error.message || "Failed to post ride. Please try again."}`,
         variant: "destructive",
       });
+      
+      // Reset submitting state to allow retry
+      setIsSubmitting(false);
     }
   };
 
@@ -469,9 +485,16 @@ export default function PostRide() {
                 <Button
                   type="submit"
                   className="submit-btn w-full bg-orange-600 text-white py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-lg"
-                  disabled={form.formState.isSubmitting}
+                  disabled={isSubmitting}
                 >
-                  {form.formState.isSubmitting ? "Posting..." : "Post Ride"}
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="mr-2 animate-spin w-5 h-5 border-2 border-t-transparent border-white rounded-full"></div>
+                      Posting...
+                    </div>
+                  ) : (
+                    "Post Ride"
+                  )}
                 </Button>
               </div>
             </div>

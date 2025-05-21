@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import RideCard from '../components/ride-card';
+import { adaptPostgresRideToCardFormat } from '../lib/ride-adapter';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -188,28 +189,7 @@ export default function FindRidesPage() {
           filteredRides.map((ride) => (
             <RideCard 
               key={ride.id.toString()} 
-              ride={{
-                ...ride,
-                // Convert to expected format for the RideCard component
-                driver: {
-                  id: ride.driverId,
-                  name: 'UF Driver', // This would come from user lookup
-                  photoUrl: 'https://ui-avatars.com/api/?name=UF+Driver&background=orange&color=fff',
-                  rating: 5,
-                  totalRides: 0,
-                  contactInfo: {
-                    email: ride.driverId + '@ufl.edu',
-                  }
-                },
-                origin: {
-                  city: ride.origin,
-                  area: ride.originArea
-                },
-                destination: {
-                  city: ride.destination,
-                  area: ride.destinationArea
-                }
-              }} 
+              ride={adaptPostgresRideToCardFormat(ride)}
             />
           ))
         ) : (

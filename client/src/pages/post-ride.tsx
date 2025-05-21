@@ -28,6 +28,10 @@ const postRideSchema = z.object({
   genderPreference: z.string(),
   carModel: z.string().optional(),
   notes: z.string().optional(),
+  // Contact fields
+  phone: z.string().optional(),
+  instagram: z.string().optional(),
+  snapchat: z.string().optional(),
 });
 
 type PostRideFormValues = z.infer<typeof postRideSchema>;
@@ -52,6 +56,10 @@ export default function PostRide() {
       genderPreference: "no-preference",
       carModel: "",
       notes: "",
+      // Contact fields
+      phone: "",
+      instagram: "",
+      snapchat: "",
     },
   });
 
@@ -83,15 +91,23 @@ export default function PostRide() {
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
-      // Create lean ride data with minimal driver information
+      // Create ride data that maintains compatibility with existing components
+      // but is still optimized for performance
       const rideData = {
-        // Only include essential driver information
-        driverId: currentUser.uid,
-        driverName: currentUser.displayName || "Anonymous",
-        driverEmail: currentUser.email || '',
-        driverPhone: data.phone || currentUser.phoneNumber || '',
-        driverInstagram: data.instagram || '',
-        driverSnapchat: data.snapchat || '',
+        // Keep the driver object structure for compatibility with RideCard component
+        driver: {
+          id: currentUser.uid,
+          name: currentUser.displayName || "Anonymous",
+          photoUrl: currentUser.photoURL || "",
+          rating: 5.0, // Default for new users
+          totalRides: 0,
+          contactInfo: {
+            email: currentUser.email || '',
+            phone: data.phone || currentUser.phoneNumber || '',
+            instagram: data.instagram || '',
+            snapchat: data.snapchat || ''
+          }
+        },
         
         // Location data
         origin: {
@@ -141,7 +157,7 @@ export default function PostRide() {
       
       // Log total processing time
       console.log(`Total form submission process took ${performance.now() - startTime}ms`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error posting ride:", error);
       
       // More helpful error message with the specific error

@@ -69,6 +69,8 @@ export default function PostRidePostgres() {
     }
     
     try {
+      setLoading(true);
+      
       // Calculate departure time by combining date and time
       const combinedDepartureTime = combineDateTime(departureDate, departureTime);
       
@@ -90,8 +92,12 @@ export default function PostRidePostgres() {
         rideType
       };
       
-      // Post ride
-      await createRide(ride);
+      // Post ride using the postgres API directly
+      const newRide = await createRide(ride);
+      
+      if (!newRide) {
+        throw new Error("Failed to create ride");
+      }
       
       // Show success message
       toast({
@@ -101,12 +107,15 @@ export default function PostRidePostgres() {
       
       // Redirect to My Rides page
       setLocation('/my-rides');
-    } catch (error) {
+    } catch (err: any) {
+      console.error("Error posting ride:", err);
       toast({
         title: "Error",
-        description: error.message || "Failed to post ride",
+        description: err.message || "Failed to post ride",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
   

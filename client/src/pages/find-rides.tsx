@@ -465,12 +465,31 @@ export default function FindRides() {
     loadRides();
   };
 
-  // Function to handle booking a ride
-  const handleBookRide = (rideId: string) => {
-    // This would be implemented with Firestore in a real application
+  // Function to handle editing a ride
+  const handleEditRide = (ride: Ride) => {
+    if (!currentUser) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in with your UF email to edit a ride.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Only allow editing if the user is the ride creator
+    if (ride.driver.id !== currentUser.uid) {
+      toast({
+        title: "Access denied",
+        description: "You can only edit rides that you've created.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // For now, just show a toast indicating this feature is coming soon
     toast({
-      title: "Ride booked!",
-      description: "Your ride has been booked successfully.",
+      title: "Edit ride",
+      description: "Ride editing functionality is coming soon!",
     });
   };
 
@@ -656,7 +675,7 @@ export default function FindRides() {
           ) : rides.length > 0 ? (
             <div className="space-y-4">
               {rides.map((ride) => (
-                <RideCard key={ride.id} ride={ride} onBook={handleBookRide} />
+                <RideCard key={ride.id} ride={ride} onEdit={handleEditRide} />
               ))}
               
               {rides.length > 5 && (

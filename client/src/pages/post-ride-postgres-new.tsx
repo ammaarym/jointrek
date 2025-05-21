@@ -85,7 +85,7 @@ export default function PostRidePostgres() {
         arrivalTime: new Date(combinedDepartureTime.getTime() + 2 * 60 * 60 * 1000), // Estimate 2 hours later
         seatsTotal: parseInt(availableSeats),
         seatsLeft: parseInt(availableSeats),
-        price: parseFloat(price),
+        price: price,
         genderPreference,
         carModel,
         notes,

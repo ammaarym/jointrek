@@ -149,7 +149,7 @@ export default function PostRide() {
         });
         
         // Navigate to find-rides after successful submission
-        setLocation("/find-rides");
+        window.location.href = "/find-rides";
       } catch (firestoreError) {
         console.error("Firestore error:", firestoreError);
         

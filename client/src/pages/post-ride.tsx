@@ -159,7 +159,7 @@ export default function PostRide() {
         });
         
         // Still navigate away
-        setLocation("/find-rides");
+        window.location.href = "/find-rides";
       }
     } catch (error) {
       console.error("Error posting ride:", error);

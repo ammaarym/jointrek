@@ -39,8 +39,15 @@ router.get("/:id", async (req: Request, res: Response) => {
 // POST /api/rides - Create a new ride
 router.post("/", async (req: Request, res: Response) => {
   try {
+    // Convert string dates to Date objects
+    const rideData = {
+      ...req.body,
+      departureTime: req.body.departureTime ? new Date(req.body.departureTime) : undefined,
+      arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
+    };
+    
     // Validate the request body against our schema
-    const validationResult = insertRideSchema.safeParse(req.body);
+    const validationResult = insertRideSchema.safeParse(rideData);
     
     if (!validationResult.success) {
       return res.status(400).json({ 
@@ -73,8 +80,15 @@ router.put("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Ride not found" });
     }
     
+    // Convert string dates to Date objects if present
+    const rideData = {
+      ...req.body,
+      departureTime: req.body.departureTime ? new Date(req.body.departureTime) : undefined,
+      arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
+    };
+    
     // Validate the request body against our schema
-    const validationResult = insertRideSchema.partial().safeParse(req.body);
+    const validationResult = insertRideSchema.partial().safeParse(rideData);
     
     if (!validationResult.success) {
       return res.status(400).json({ 

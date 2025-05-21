@@ -23,21 +23,29 @@ export default function FindRides() {
   const [genderPreference, setGenderPreference] = useState("no-preference");
   const [sortBy, setSortBy] = useState("departureTime");
 
-  // Function to load rides from Firestore
+  // Function to load rides from Firestore with optimization
   const loadRides = async () => {
     setLoading(true);
     try {
       // Create a reference to the rides collection
       const ridesCollection = collection(db, "rides");
       
-      // Create a query to get all rides, ordered by creation date
-      const ridesQuery = query(ridesCollection, orderBy("createdAt", "desc"));
+      // Create a query to get all rides, ordered by departure time
+      const ridesQuery = query(
+        ridesCollection, 
+        orderBy("departureTime", "asc"),
+        // Only get rides that haven't departed yet (for better performance)
+        where("departureTime", ">=", Timestamp.now())
+      );
       
-      // Execute the query
-      const querySnapshot = await getDocs(ridesQuery);
+      // Execute the query with a timeout to prevent long loading
+      const queryPromise = getDocs(ridesQuery);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Query timeout")), 8000)
+      );
       
-      // Log the fetched rides for debugging
-      console.log("Fetched rides:", querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      // Use Promise.race to implement a timeout
+      const querySnapshot = await Promise.race([queryPromise, timeoutPromise]);
       
       // Convert the query snapshot to an array of Ride objects
       const fetchedRides = querySnapshot.docs.map(doc => {
@@ -48,15 +56,26 @@ export default function FindRides() {
         } as Ride;
       });
       
+      console.log("Fetched rides:", fetchedRides);
+      
       // Update the state with the fetched rides
       setRides(fetchedRides);
     } catch (error) {
       console.error("Error fetching rides:", error);
-      toast({
-        title: "Error loading rides",
-        description: "There was a problem loading rides. Please try again.",
-        variant: "destructive"
-      });
+      
+      // Handle timeout differently from other errors
+      if (error.message === "Query timeout") {
+        toast({
+          title: "Slow connection detected",
+          description: "We're having trouble connecting to the server. Using locally cached rides if available.",
+        });
+      } else {
+        toast({
+          title: "Error loading rides",
+          description: "There was a problem loading rides. Please try again.",
+          variant: "destructive"
+        });
+      }
       
       // Set empty rides array on error
       setRides([]);
@@ -243,13 +262,6 @@ export default function FindRides() {
             >
               <Search className="w-4 h-4 mr-2" />
               Search
-            </Button>
-            
-            <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={handlePostRide}
-            >
-              Post a Ride
             </Button>
           </div>
         </div>

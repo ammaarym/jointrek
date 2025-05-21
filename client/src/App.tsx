@@ -10,6 +10,8 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import FindRides from "@/pages/find-rides";
 import PostRide from "@/pages/post-ride";
+import FindRidesPostgres from "@/pages/find-rides-postgres";
+import PostRidePostgres from "@/pages/post-ride-postgres";
 import Profile from "@/pages/profile";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -73,10 +75,10 @@ function AppRoutes() {
           <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/find-rides">
-            {(params) => <ProtectedRoute component={FindRides} path="/find-rides" />}
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" />}
           </Route>
           <Route path="/post-ride">
-            {(params) => <ProtectedRoute component={PostRide} path="/post-ride" />}
+            {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" />}
           </Route>
           <Route path="/my-rides">
             {(params) => (

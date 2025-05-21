@@ -70,6 +70,9 @@ const rideSchema = z.object({
   price: z.string().min(1, { message: "Price is required" }),
   genderPreference: z.string().default("no-preference"),
   carModel: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  instagram: z.string().optional(),
+  snapchat: z.string().optional(),
   notes: z.string().optional()
 });
 
@@ -97,6 +100,9 @@ export default function PostRidePostgres() {
       price: "",
       genderPreference: "no-preference",
       carModel: "",
+      phoneNumber: "",
+      instagram: "",
+      snapchat: "",
       notes: ""
     }
   });
@@ -448,6 +454,63 @@ export default function PostRidePostgres() {
                       <FormControl>
                         <Input 
                           placeholder="e.g. Toyota Camry, Silver" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Phone Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. 352-123-4567" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="instagram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Instagram</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. @yourusername" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="snapchat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Snapchat</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. yourusername" 
                           className="h-12 rounded-md border-gray-200"
                           {...field}
                         />

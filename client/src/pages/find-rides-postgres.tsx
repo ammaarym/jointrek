@@ -216,92 +216,122 @@ export default function FindRidesPostgres() {
             const adaptedRide = adaptPostgresRideToCardFormat(ride);
             
             return (
-              <Card key={ride.id} className="overflow-hidden h-full flex flex-col">
-                <CardContent className="p-4 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {ride.origin} → {ride.destination}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(new Date(ride.departureTime))}
-                      </p>
-                    </div>
-                    <div className="text-lg font-bold text-primary">
-                      ${ride.price}
-                    </div>
-                  </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Card key={ride.id} className="overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold">
+                            {ride.origin} → {ride.destination}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDate(new Date(ride.departureTime))}
+                          </p>
+                        </div>
+                        <div className="text-lg font-bold text-primary">
+                          ${ride.price}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2 space-y-1 text-sm flex-1">
+                        <div className="flex items-center">
+                          <FaUser className="text-primary mr-2 flex-shrink-0" />
+                          <span className="truncate">Driver: {adaptedRide.driver.name.split(' ')[0]}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <FaCar className="text-primary mr-2 flex-shrink-0" />
+                          <span className="truncate">{ride.carModel || 'Car not specified'}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
+                          <span>{ride.seatsLeft} seat(s) available</span>
+                        </div>
+                        <div className="flex items-start">
+                          <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
+                          <div>
+                            <div className="truncate">From: {ride.originArea}</div>
+                            <div className="truncate">To: {ride.destinationArea}</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 pt-3 border-t">
+                        <Button 
+                          variant="outline" 
+                          className="w-full text-primary border-primary hover:bg-primary/10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Contact Driver
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl text-primary">Ride Details</DialogTitle>
+                    <DialogDescription>
+                      Connect with the driver to coordinate your ride
+                    </DialogDescription>
+                  </DialogHeader>
                   
-                  <div className="mt-2 space-y-1 text-sm flex-1">
-                    <div className="flex items-center">
-                      <FaUser className="text-primary mr-2 flex-shrink-0" />
-                      <span className="truncate">Driver: {adaptedRide.driver.name}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
+                    <div className="space-y-4">
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <h4 className="font-medium flex items-center text-primary mb-2">
+                          <FaUser className="mr-2" /> Driver
+                        </h4>
+                        <p className="text-lg">{adaptedRide.driver.name.split(' ')[0]}</p>
+                        <p className="text-sm break-all mt-1">{adaptedRide.driver.contactInfo.email}</p>
+                      </div>
+                      
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <h4 className="font-medium flex items-center text-primary mb-2">
+                          <FaCalendarAlt className="mr-2" /> Schedule
+                        </h4>
+                        <p>{formatDate(new Date(ride.departureTime))}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <FaCar className="text-primary mr-2 flex-shrink-0" />
-                      <span className="truncate">{ride.carModel || 'Car not specified'}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
-                      <span>{ride.seatsLeft} seat(s) available</span>
-                    </div>
-                    <div className="flex items-start">
-                      <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <div className="truncate">From: {ride.originArea}</div>
-                        <div className="truncate">To: {ride.destinationArea}</div>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <h4 className="font-medium flex items-center text-primary mb-2">
+                          <FaMapMarkerAlt className="mr-2" /> Route
+                        </h4>
+                        <p><span className="font-medium">From:</span> {ride.origin} ({ride.originArea})</p>
+                        <p><span className="font-medium">To:</span> {ride.destination} ({ride.destinationArea})</p>
+                      </div>
+                      
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <h4 className="font-medium flex items-center text-primary mb-2">
+                          <FaCar className="mr-2" /> Ride Info
+                        </h4>
+                        <p><span className="font-medium">Seats:</span> {ride.seatsLeft} available</p>
+                        <p><span className="font-medium">Price:</span> ${ride.price}</p>
+                        {ride.carModel && <p><span className="font-medium">Car:</span> {ride.carModel}</p>}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="mt-4 pt-3 border-t">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className="w-full text-primary border-primary hover:bg-primary/10"
-                        >
-                          Contact Driver
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Driver Contact Information</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium">Driver</h4>
-                            <p>{adaptedRide.driver.name.split(' ')[0]}</p>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <h4 className="font-medium">Email</h4>
-                            <p>{adaptedRide.driver.contactInfo.email}</p>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <h4 className="font-medium">Ride Details</h4>
-                            <p>From: {ride.origin} ({ride.originArea})</p>
-                            <p>To: {ride.destination} ({ride.destinationArea})</p>
-                            <p>Departure: {formatDate(new Date(ride.departureTime))}</p>
-                            <p>Available Seats: {ride.seatsLeft}</p>
-                            <p>Price: ${ride.price}</p>
-                            {ride.carModel && <p>Car: {ride.carModel}</p>}
-                            {ride.notes && <p>Notes: {ride.notes}</p>}
-                          </div>
-                        </div>
-                        <DialogFooter className="sm:justify-start">
-                          <DialogClose asChild>
-                            <Button type="button" variant="secondary">
-                              Close
-                            </Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CardContent>
-              </Card>
+                  {ride.notes && (
+                    <div className="bg-muted/50 p-4 rounded-lg mb-6">
+                      <h4 className="font-medium flex items-center text-primary mb-2">
+                        <BiMessageDetail className="mr-2" /> Notes
+                      </h4>
+                      <p>{ride.notes}</p>
+                    </div>
+                  )}
+                  
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button type="button" className="bg-primary text-white hover:bg-primary/90">
+                        Done
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             );
           })
         ) : (

@@ -44,15 +44,22 @@ export function usePostgresRides() {
     }
   };
 
+  // Define a memoized version of loadMyRides that won't cause repeated calls
   const loadMyRides = async (userId: string) => {
+    // If we already have rides and are not in an error state, don't reload
+    if (myRides.length > 0 && !error) {
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
     try {
-      // Use a simple GET request with no fetch API
+      // Use a simple GET request with proper headers
       const response = await fetch('/api/user-rides', {
         method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           'X-User-ID': userId
         }
       });

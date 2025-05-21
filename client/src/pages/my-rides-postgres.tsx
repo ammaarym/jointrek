@@ -74,12 +74,12 @@ export default function MyRidesPostgres() {
     }
   });
 
-  // Load rides when component mounts
+  // Load rides only once when component mounts
   React.useEffect(() => {
     if (currentUser) {
       loadMyRides(currentUser.uid);
     }
-  }, [currentUser, loadMyRides]);
+  }, [currentUser?.uid]);
 
   // Handle posting a new ride
   const handlePostRide = () => {

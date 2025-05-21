@@ -70,10 +70,21 @@ export async function fetchRideById(id: number): Promise<Ride | null> {
  */
 export async function createRide(rideData: any): Promise<Ride | null> {
   try {
+    // Get the current user from Firebase Auth
+    const auth = await import('firebase/auth').then(m => m.getAuth());
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/rides`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-User-ID': currentUser.uid,
+        'X-User-Email': currentUser.email || '',
+        'X-User-Name': currentUser.displayName || ''
       },
       body: JSON.stringify(rideData)
     });
@@ -147,9 +158,20 @@ export async function deleteRide(id: number): Promise<boolean> {
  */
 export async function fetchMyRides(): Promise<Ride[]> {
   try {
+    // Get the current user from Firebase Auth
+    const auth = await import('firebase/auth').then(m => m.getAuth());
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/user-rides`, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-User-ID': currentUser.uid,
+        'X-User-Email': currentUser.email || '',
+        'X-User-Name': currentUser.displayName || ''
       }
     });
     

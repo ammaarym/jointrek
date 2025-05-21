@@ -52,11 +52,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/">
-              <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/" ? "text-orange-600" : ""}`}>
-                Home
-              </span>
-            </Link>
+            {!currentUser && (
+              <Link href="/">
+                <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/" ? "text-orange-600" : ""}`}>
+                  Home
+                </span>
+              </Link>
+            )}
             {currentUser && (
               <>
                 <Link href="/find-rides">
@@ -69,9 +71,9 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     Post a Ride
                   </span>
                 </Link>
-                <Link href="/messages">
-                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/messages" ? "text-orange-600" : ""}`}>
-                    Messages
+                <Link href="/my-rides">
+                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/my-rides" ? "text-orange-600" : ""}`}>
+                    My Rides
                   </span>
                 </Link>
               </>
@@ -142,11 +144,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-neutral-200">
             <div className="flex flex-col space-y-3">
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                <span className={`block py-2 px-3 rounded-md ${location === "/" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
-                  Home
-                </span>
-              </Link>
+              {!currentUser && (
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className={`block py-2 px-3 rounded-md ${location === "/" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                    Home
+                  </span>
+                </Link>
+              )}
               
               {currentUser ? (
                 <>
@@ -160,9 +164,9 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                       Post a Ride
                     </span>
                   </Link>
-                  <Link href="/messages" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className={`block py-2 px-3 rounded-md ${location === "/messages" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
-                      Messages
+                  <Link href="/my-rides" onClick={() => setIsMobileMenuOpen(false)}>
+                    <span className={`block py-2 px-3 rounded-md ${location === "/my-rides" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                      My Rides
                     </span>
                   </Link>
                   <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>

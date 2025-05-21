@@ -10,9 +10,8 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import FindRides from "@/pages/find-rides";
 import PostRide from "@/pages/post-ride";
-import Messages from "@/pages/messages";
 import Profile from "@/pages/profile";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
@@ -58,6 +57,13 @@ function AppRoutes() {
     window.location.href = '/login';
   };
 
+  // This renders after successful login - redirect to app's main page
+  useEffect(() => {
+    if (currentUser && window.location.pathname === '/') {
+      window.location.href = '/find-rides';
+    }
+  }, [currentUser]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Toaster />
@@ -72,8 +78,14 @@ function AppRoutes() {
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRide} path="/post-ride" />}
           </Route>
-          <Route path="/messages">
-            {(params) => <ProtectedRoute component={Messages} path="/messages" />}
+          <Route path="/my-rides">
+            {(params) => (
+              <Suspense fallback={<div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
+              </div>}>
+                <ProtectedRoute component={React.lazy(() => import("@/pages/my-rides"))} path="/my-rides" />
+              </Suspense>
+            )}
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}

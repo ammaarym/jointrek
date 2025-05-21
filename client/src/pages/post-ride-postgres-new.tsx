@@ -29,11 +29,25 @@ const FLORIDA_CITIES = [
   "Sarasota"
 ];
 
-// Time periods for departure
-const TIME_PERIODS = [
-  { label: "Morning (8am-12pm)", value: "morning", hour: 9 },
-  { label: "Afternoon (12pm-5pm)", value: "afternoon", hour: 14 },
-  { label: "Evening (5pm-9pm)", value: "evening", hour: 18 }
+// Specific time options for departure
+const TIME_OPTIONS = [
+  { label: "6:00 AM", value: "06:00" },
+  { label: "7:00 AM", value: "07:00" },
+  { label: "8:00 AM", value: "08:00" },
+  { label: "9:00 AM", value: "09:00" },
+  { label: "10:00 AM", value: "10:00" },
+  { label: "11:00 AM", value: "11:00" },
+  { label: "12:00 PM", value: "12:00" },
+  { label: "1:00 PM", value: "13:00" },
+  { label: "2:00 PM", value: "14:00" },
+  { label: "3:00 PM", value: "15:00" },
+  { label: "4:00 PM", value: "16:00" },
+  { label: "5:00 PM", value: "17:00" },
+  { label: "6:00 PM", value: "18:00" },
+  { label: "7:00 PM", value: "19:00" },
+  { label: "8:00 PM", value: "20:00" },
+  { label: "9:00 PM", value: "21:00" },
+  { label: "10:00 PM", value: "22:00" }
 ];
 
 // Gender preference options
@@ -326,13 +340,23 @@ export default function PostRidePostgres() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="block mb-2">Departure Time (Required)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="time" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select time" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {TIME_OPTIONS.map(time => (
+                            <SelectItem key={time.value} value={time.value}>
+                              {time.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

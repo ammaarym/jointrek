@@ -81,12 +81,11 @@ export class PostgresStorage implements IStorage {
   }
 
   async getRidesInFuture(): Promise<Ride[]> {
-    const now = new Date();
+    // For now, return all rides without filtering by date
     return await db
       .select()
       .from(rides)
-      .where(gte(rides.departureTime, now))
-      .orderBy(rides.departureTime);
+      .orderBy(desc(rides.departureTime));
   }
 
   async createRide(rideData: InsertRide): Promise<Ride> {

@@ -56,6 +56,8 @@ export default function PostRide() {
   });
 
   const onSubmit = async (data: PostRideFormValues) => {
+    console.log("Form submission started with values:", data);
+    
     // Check if user is logged in
     if (!currentUser) {
       toast({
@@ -64,13 +66,6 @@ export default function PostRide() {
         variant: "destructive",
       });
       return;
-    }
-
-    // Indicate submitting state in the UI
-    const submitButton = document.querySelector('button[type="submit"]');
-    if (submitButton) {
-      submitButton.setAttribute('disabled', 'true');
-      submitButton.textContent = 'Posting...';
     }
 
     try {
@@ -118,36 +113,30 @@ export default function PostRide() {
 
       console.log("Posting ride with data:", rideData);
       
-      // Now try to save to Firestore
+      // Create a reference to the rides collection
       const ridesCollection = collection(db, "rides");
       
-      // Add the document to Firestore
+      // Add document to Firestore
       const docRef = await addDoc(ridesCollection, rideData);
-      console.log("Document written with ID: ", docRef.id);
+      console.log("Document written with ID:", docRef.id);
       
+      // Show success message
       toast({
-        title: "Success!",
+        title: "Ride Posted!",
         description: "Your ride has been posted successfully.",
       });
-      
-      // Wait briefly then redirect more reliably
-      setTimeout(() => {
-        window.location.replace("/find-rides");
-      }, 1000);
+
+      // Navigate to find-rides page without using window.location (which can be slow/unreliable)
+      setLocation("/find-rides");
     } catch (error) {
       console.error("Error posting ride:", error);
       
+      // More helpful error message with the specific error
       toast({
-        title: "Error",
-        description: "There was a problem posting your ride. Please try again.",
+        title: "Posting Error",
+        description: `Error: ${error.message || "Failed to post ride. Please try again."}`,
         variant: "destructive",
       });
-      
-      // Reset button state to allow retry
-      if (submitButton) {
-        submitButton.removeAttribute('disabled');
-        submitButton.textContent = 'Post Ride';
-      }
     }
   };
 

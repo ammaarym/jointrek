@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Car, User, Calendar, Clock, MapPin, DollarSign } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
+// Define the form schema
 const postRideSchema = z.object({
   rideType: z.enum(["driver", "passenger"]),
   origin: z.string().min(1, "Origin is required"),
@@ -34,13 +35,15 @@ const postRideSchema = z.object({
   snapchat: z.string().optional(),
 });
 
+// Type for form values
 type PostRideFormValues = z.infer<typeof postRideSchema>;
 
 export default function PostRide() {
   const [, setLocation] = useLocation();
   const { currentUser } = useAuth();
   const [isDriver, setIsDriver] = useState(true);
-
+  
+  // Form setup with validation
   const form = useForm<PostRideFormValues>({
     resolver: zodResolver(postRideSchema),
     defaultValues: {
@@ -63,17 +66,20 @@ export default function PostRide() {
     },
   });
 
-  // Add state for tracking form submission
+  // Track submission state for UI feedback
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  // Handle form submission
   const onSubmit = async (data: PostRideFormValues) => {
-    // Check if already submitting to prevent duplicate submissions
-    if (isSubmitting) return;
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      console.log("Submission already in progress, ignoring duplicate submission");
+      return;
+    }
     
-    const startTime = performance.now();
-    console.log("Form submission started at:", new Date().toISOString());
+    console.log("Form submission started with data:", data);
     
-    // Check if user is logged in
+    // Check authentication
     if (!currentUser) {
       toast({
         title: "Authentication Required",
@@ -83,91 +89,78 @@ export default function PostRide() {
       return;
     }
 
-    // Set submitting state to true to show loading UI
+    // Update UI to show loading state
     setIsSubmitting(true);
     
     try {
-      // Calculate estimated arrival time (2 hours after departure for now)
+      // Calculate ride times
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
-
-      // Create ride data that maintains compatibility with existing components
-      // but is still optimized for performance
+      
+      // Create ride data object compatible with existing components
       const rideData = {
-        // Keep the driver object structure for compatibility with RideCard component
         driver: {
           id: currentUser.uid,
           name: currentUser.displayName || "Anonymous",
           photoUrl: currentUser.photoURL || "",
-          rating: 5.0, // Default for new users
+          rating: 5.0,
           totalRides: 0,
           contactInfo: {
             email: currentUser.email || '',
-            phone: data.phone || currentUser.phoneNumber || '',
+            phone: data.phone || '',
             instagram: data.instagram || '',
             snapchat: data.snapchat || ''
           }
         },
-        
-        // Location data
         origin: {
           city: data.origin,
-          area: data.originArea,
+          area: data.originArea || '',
         },
         destination: {
           city: data.destination,
-          area: data.destinationArea,
+          area: data.destinationArea || '',
         },
-        
-        // Ride details
         departureTime: Timestamp.fromDate(departureDateTime),
         arrivalTime: Timestamp.fromDate(arrivalDateTime),
         seatsTotal: parseInt(data.availableSeats || "1"),
         seatsLeft: parseInt(data.availableSeats || "1"),
         price: parseFloat(data.price || "0"),
         genderPreference: data.genderPreference,
-        carModel: data.carModel,
-        notes: data.notes,
+        carModel: data.carModel || '',
+        notes: data.notes || '',
         createdAt: Timestamp.now(),
         rideType: data.rideType,
       };
-
-      console.log("Processing ride data took:", performance.now() - startTime, "ms");
       
-      // Create a reference to the rides collection
+      console.log("Posting ride with data:", rideData);
+      
+      // Get reference to the rides collection
       const ridesCollection = collection(db, "rides");
-      
-      // Measure how long the Firestore write takes
-      const writeStartTime = performance.now();
       
       // Add document to Firestore
       const docRef = await addDoc(ridesCollection, rideData);
-      
-      const writeEndTime = performance.now();
-      console.log(`Firestore write completed in ${writeEndTime - writeStartTime}ms, document ID:`, docRef.id);
+      console.log("Ride posted successfully with ID:", docRef.id);
       
       // Show success message
       toast({
-        title: "Ride Posted!",
+        title: "Success!",
         description: "Your ride has been posted successfully.",
       });
 
-      // Navigate immediately without delay
+      // Navigate to find-rides page
       setLocation("/find-rides");
       
-      // Log total processing time
-      console.log(`Total form submission process took ${performance.now() - startTime}ms`);
     } catch (error: any) {
       console.error("Error posting ride:", error);
       
-      // More helpful error message with the specific error
+      // Show error message with details
       toast({
         title: "Posting Error",
-        description: `Error: ${error.message || "Failed to post ride. Please try again."}`,
+        description: error.message || "Failed to post ride. Please try again.",
         variant: "destructive",
       });
       
-      // Reset submitting state to allow retry
+      // Reset submission state
       setIsSubmitting(false);
     }
   };
@@ -181,64 +174,54 @@ export default function PostRide() {
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-6 dark:text-white">Post a Ride</h2>
-
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Ride Type */}
-            <FormField
-              control={form.control}
-              name="rideType"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>I am a...</FormLabel>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={`flex items-center justify-center p-4 border-2 ${
-                        isDriver
-                          ? "border-orange-600 bg-orange-50 text-orange-600"
-                          : "border-neutral-300 text-neutral-700"
-                      } rounded-lg font-medium`}
-                      onClick={() => handleRideTypeChange("driver")}
-                    >
-                      <Car className="mr-2 h-5 w-5" />
-                      Driver
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={`flex items-center justify-center p-4 border-2 ${
-                        !isDriver
-                          ? "border-orange-600 bg-orange-50 text-orange-600"
-                          : "border-neutral-300 text-neutral-700"
-                      } rounded-lg font-medium`}
-                      onClick={() => handleRideTypeChange("passenger")}
-                    >
-                      <User className="mr-2 h-5 w-5" />
-                      Passenger
-                    </Button>
-                  </div>
-                </FormItem>
-              )}
-            />
-
+            {/* Ride Type Selection */}
+            <div className="flex space-x-4 mb-6">
+              <Button
+                type="button"
+                onClick={() => handleRideTypeChange("driver")}
+                className={`flex-1 py-3 ${
+                  isDriver
+                    ? "bg-orange-600 text-white hover:bg-orange-700"
+                    : "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-100"
+                }`}
+              >
+                <Car className="mr-2 h-5 w-5" />
+                I'm a Driver
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={() => handleRideTypeChange("passenger")}
+                className={`flex-1 py-3 ${
+                  !isDriver
+                    ? "bg-orange-600 text-white hover:bg-orange-700"
+                    : "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-100"
+                }`}
+              >
+                <User className="mr-2 h-5 w-5" />
+                I'm a Passenger
+              </Button>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Origin */}
-              <div className="md:col-span-2">
+              <div>
                 <FormField
                   control={form.control}
                   name="origin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Origin</FormLabel>
+                      <FormLabel>Origin City</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500 h-4 w-4" />
                           <Input
-                            placeholder="Departure city"
+                            placeholder="e.g. Gainesville"
                             {...field}
-                            className="w-full pl-10 pr-3 py-2"
+                            className="pl-10"
                           />
                         </div>
                       </FormControl>
@@ -247,9 +230,8 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
-              {/* Origin Area */}
-              <div className="md:col-span-2">
+              
+              <div>
                 <FormField
                   control={form.control}
                   name="originArea"
@@ -258,7 +240,7 @@ export default function PostRide() {
                       <FormLabel>Origin Area</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Specific area (e.g., UF Campus, Midtown)"
+                          placeholder="e.g. Campus, Midtown"
                           {...field}
                           className="w-full"
                         />
@@ -268,22 +250,22 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
+              
               {/* Destination */}
-              <div className="md:col-span-2">
+              <div>
                 <FormField
                   control={form.control}
                   name="destination"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Destination</FormLabel>
+                      <FormLabel>Destination City</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500 h-4 w-4" />
                           <Input
-                            placeholder="Arrival city"
+                            placeholder="e.g. Orlando"
                             {...field}
-                            className="w-full pl-10 pr-3 py-2"
+                            className="pl-10"
                           />
                         </div>
                       </FormControl>
@@ -292,9 +274,8 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
-              {/* Destination Area */}
-              <div className="md:col-span-2">
+              
+              <div>
                 <FormField
                   control={form.control}
                   name="destinationArea"
@@ -303,7 +284,7 @@ export default function PostRide() {
                       <FormLabel>Destination Area</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Specific area (e.g., Downtown, UCF Area)"
+                          placeholder="e.g. Downtown, UCF"
                           {...field}
                           className="w-full"
                         />
@@ -313,8 +294,8 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
-              {/* Date and Time */}
+              
+              {/* Departure Date & Time */}
               <div>
                 <FormField
                   control={form.control}
@@ -328,7 +309,7 @@ export default function PostRide() {
                           <Input
                             type="date"
                             {...field}
-                            className="w-full pl-10 pr-3 py-2"
+                            className="pl-10"
                           />
                         </div>
                       </FormControl>
@@ -337,7 +318,7 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
+              
               <div>
                 <FormField
                   control={form.control}
@@ -351,7 +332,7 @@ export default function PostRide() {
                           <Input
                             type="time"
                             {...field}
-                            className="w-full pl-10 pr-3 py-2"
+                            className="pl-10"
                           />
                         </div>
                       </FormControl>
@@ -360,68 +341,63 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
-              {/* Available Seats (if driver) */}
-              {isDriver && (
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="availableSeats"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Available Seats</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-white dark:bg-neutral-700">
-                              <SelectValue placeholder="Select seats" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="1">1 seat</SelectItem>
-                              <SelectItem value="2">2 seats</SelectItem>
-                              <SelectItem value="3">3 seats</SelectItem>
-                              <SelectItem value="4">4+ seats</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
-              {/* Price per Seat (if driver) */}
-              {isDriver && (
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price per Seat</FormLabel>
+              
+              {/* Seats & Price */}
+              <div>
+                <FormField
+                  control={form.control}
+                  name="availableSeats"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Available Seats</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <div className="relative">
-                            <DollarSign className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500 h-4 w-4" />
-                            <Input
-                              type="number"
-                              placeholder="15"
-                              {...field}
-                              className="w-full pl-8 pr-3 py-2"
-                            />
-                          </div>
+                          <SelectTrigger className="bg-white dark:bg-neutral-700">
+                            <SelectValue placeholder="Select seats" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
+                        <SelectContent>
+                          <SelectItem value="1">1 seat</SelectItem>
+                          <SelectItem value="2">2 seats</SelectItem>
+                          <SelectItem value="3">3 seats</SelectItem>
+                          <SelectItem value="4">4 seats</SelectItem>
+                          <SelectItem value="5">5+ seats</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div>
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price per Seat</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute top-1/2 left-3 -translate-y-1/2 text-neutral-500 h-4 w-4" />
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               {/* Gender Preference */}
               <div>
                 <FormField
@@ -450,7 +426,7 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
+              
               {/* Car Details (if driver) */}
               {isDriver && (
                 <div>
@@ -473,7 +449,7 @@ export default function PostRide() {
                   />
                 </div>
               )}
-
+              
               {/* Additional Notes */}
               <div className="md:col-span-2">
                 <FormField
@@ -495,7 +471,7 @@ export default function PostRide() {
                   )}
                 />
               </div>
-
+              
               {/* Submit Button */}
               <div className="md:col-span-2 mt-4">
                 <Button

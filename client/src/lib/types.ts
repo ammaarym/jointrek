@@ -29,6 +29,7 @@ export interface UserProfile {
   rating: number;
   totalRides: number;
   contactInfo?: ContactInfo;
+  email?: string;
   phone?: string;
   instagram?: string;
   snapchat?: string;

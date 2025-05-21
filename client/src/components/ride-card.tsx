@@ -13,19 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Ride } from "@/lib/types";
 import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+// Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 
 interface RideCardProps {
   ride: Ride;
   onEdit?: (ride: Ride) => void;
+  isDriverUser?: boolean;
 }
 
-export default function RideCard({ ride, onEdit }: RideCardProps) {
+export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const { currentUser } = useAuth();
-  
-  // Check if the current user is the driver
-  const isDriverUser = currentUser && ride.driver.id === currentUser.uid;
   
   // Function to format the time from timestamp
   const formatDateTime = (timestamp: any) => {
@@ -340,7 +337,7 @@ export default function RideCard({ ride, onEdit }: RideCardProps) {
                 {/* Show email from contactInfo if available, otherwise from the user object */}
                 <div className="flex items-center gap-2">
                   <span className="text-neutral-500">Email:</span>
-                  <span className="font-medium">{ride.driver.contactInfo?.email || currentUser?.email || "No email available"}</span>
+                  <span className="font-medium">{ride.driver.contactInfo?.email || ride.driver.email || "No email available"}</span>
                 </div>
                 
                 {/* Show phone if available */}

@@ -10,7 +10,7 @@ import {
   type User,
   type InsertUser
 } from "@shared/schema";
-import { eq, and, or, desc } from "drizzle-orm";
+import { eq, and, or, desc, gte, sql } from "drizzle-orm";
 
 export class PostgresStorage {
   // User methods
@@ -78,7 +78,7 @@ export class PostgresStorage {
     return await db
       .select()
       .from(rides)
-      .where(rides.departureTime > now)
+      .where(gte(rides.departureTime, now))
       .orderBy(rides.departureTime);
   }
 

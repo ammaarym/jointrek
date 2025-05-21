@@ -85,15 +85,16 @@ export default function PostRidePostgres() {
       // Estimate arrival time (2 hours later for now)
       const arrivalTime = calculateArrivalTime(departureDateTime, 120);
       
-      // Create ride data object
+      // Create ride data object - Note: We need to convert dates to ISO strings 
+      // for proper transmission over API and then server will parse them
       const rideData = {
         driverId: currentUser.uid,
         origin,
         originArea,
         destination,
         destinationArea,
-        departureTime: departureDateTime,
-        arrivalTime,
+        departureTime: departureDateTime.toISOString(),
+        arrivalTime: arrivalTime.toISOString(),
         seatsTotal: parseInt(availableSeats),
         seatsLeft: parseInt(availableSeats),
         price: parseFloat(price),

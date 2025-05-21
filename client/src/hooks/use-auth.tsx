@@ -41,10 +41,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed:", user?.email);
       setCurrentUser(user);
       setLoading(false);
     });
+
+    // Check for redirect result on page load
+    console.log("Checking for redirect result...");
+    getRedirectResult(auth)
+      .then((result) => {
+        console.log("Redirect result received:", result ? result.user?.email : "no result");
+        if (!result) {
+          console.log("No redirect result found");
+          return;
+        }
+        
+        if (result.user?.email && !isUFEmail(result.user.email)) {
+          console.log("Non-UF email detected from redirect:", result.user.email);
+          firebaseSignOut(auth);
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting redirect result:", error);
+      });
 
     return () => unsubscribe();
   }, []);
@@ -132,14 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log("Auth provider configuration:", googleProvider);
       console.log("Current auth state:", auth.currentUser);
       
-      // Inform the user about requirements
-      toast({
-        title: "Google Sign-In",
-        description: "Please use your UF email address (@ufl.edu) to sign in.",
-        duration: 5000,
-      });
-      
-      // Try using popup method instead of redirect for debugging
+      // Try using popup method for sign-in
       console.log("Attempting Google sign-in with popup");
       const result = await signInWithPopup(auth, googleProvider);
       
@@ -148,14 +162,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Check if the email is from UF
       if (result.user.email && !isUFEmail(result.user.email)) {
         console.log("Non-UF email detected:", result.user.email);
-        
-        // Show a clear error message
-        toast({
-          title: "Access Denied",
-          description: "Only UF email addresses (@ufl.edu) are allowed. Please try again with your UF email.",
-          variant: "destructive",
-          duration: 7000
-        });
         
         // Sign out the user immediately
         console.log("Signing out non-UF user");

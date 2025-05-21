@@ -11,6 +11,7 @@ import Login from "@/pages/login";
 import FindRides from "@/pages/find-rides";
 import PostRide from "@/pages/post-ride";
 import FindRidesOriginalUI from "@/pages/find-rides-original-ui";
+import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 import PostRideEnhanced from "@/pages/post-ride-enhanced";
 import MyRidesPostgres from "@/pages/my-rides-postgres";

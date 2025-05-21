@@ -122,7 +122,7 @@ export default function FindRidesPostgres() {
                     <SelectValue placeholder="Select city (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any Destination</SelectItem>
+                    <SelectItem value="any">Any Destination</SelectItem>
                     {FLORIDA_CITIES.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}

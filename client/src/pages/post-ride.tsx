@@ -78,7 +78,15 @@ export default function PostRide() {
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
-      // Create simplified ride data to avoid serialization issues
+      // Create contact info object
+      const contactInfo = {
+        email: currentUser.email || '',
+        phone: data.phone || currentUser.phoneNumber || '',
+        instagram: data.instagram || '',
+        snapchat: data.snapchat || ''
+      };
+
+      // Create simplified ride data
       const rideData = {
         driver: {
           id: currentUser.uid,
@@ -86,10 +94,7 @@ export default function PostRide() {
           photoUrl: currentUser.photoURL || "",
           rating: 5.0, // Default for new users
           totalRides: 0,
-          contactInfo: {
-            email: currentUser.email || '',
-            phone: currentUser.phoneNumber || '',
-          },
+          contactInfo: contactInfo
         },
         origin: {
           city: data.origin,
@@ -116,63 +121,29 @@ export default function PostRide() {
       // Now try to save to Firestore
       const ridesCollection = collection(db, "rides");
       
-      try {
-        const docRef = await addDoc(ridesCollection, rideData);
-        console.log("Document written with ID: ", docRef.id);
-        
-        toast({
-          title: "Success!",
-          description: "Your ride has been posted successfully.",
-        });
-        
-        // Use setTimeout to allow the toast to show before redirecting
-        setTimeout(() => {
-          // This method should work consistently across all browsers
-          document.location.href = "/find-rides";
-        }, 1500);
-        
-      } catch (firestoreError) {
-        console.error("Firestore error:", firestoreError);
-        
-        // Save to local storage when Firestore fails
-        try {
-          localStorage.setItem('pendingRide', JSON.stringify({
-            ...rideData,
-            // Convert timestamps to simple objects for storage
-            departureTime: { seconds: rideData.departureTime.seconds, nanoseconds: rideData.departureTime.nanoseconds },
-            arrivalTime: { seconds: rideData.arrivalTime.seconds, nanoseconds: rideData.arrivalTime.nanoseconds },
-            createdAt: { seconds: rideData.createdAt.seconds, nanoseconds: rideData.createdAt.nanoseconds }
-          }));
-          
-          toast({
-            title: "Saved locally",
-            description: "Your ride was saved locally but not synced to the cloud yet. It will be available when you reconnect.",
-          });
-          
-          // Use setTimeout to allow the toast to show before redirecting
-          setTimeout(() => {
-            document.location.href = "/find-rides";
-          }, 1500);
-          
-        } catch (localError) {
-          console.error("Error saving locally:", localError);
-          
-          toast({
-            title: "Error",
-            description: "There was a problem posting your ride. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }
+      // Add the document to Firestore
+      const docRef = await addDoc(ridesCollection, rideData);
+      console.log("Document written with ID: ", docRef.id);
+      
+      toast({
+        title: "Success!",
+        description: "Your ride has been posted successfully.",
+      });
+      
+      // Wait briefly then redirect more reliably
+      setTimeout(() => {
+        window.location.replace("/find-rides");
+      }, 1000);
     } catch (error) {
       console.error("Error posting ride:", error);
+      
       toast({
         title: "Error",
         description: "There was a problem posting your ride. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      // Reset button state
+      
+      // Reset button state to allow retry
       if (submitButton) {
         submitButton.removeAttribute('disabled');
         submitButton.textContent = 'Post Ride';

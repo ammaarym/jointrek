@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth';
 import { useToast } from '../hooks/use-toast';
-import { combineDateTime } from '../lib/date-utils';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { createRide } from '../lib/postgres-api';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
+import { addHours, format } from 'date-fns';
 
 // List of Florida cities for dropdowns
 const FLORIDA_CITIES = [
@@ -25,31 +29,72 @@ const FLORIDA_CITIES = [
   "Sarasota"
 ];
 
+// Time periods for departure
+const TIME_PERIODS = [
+  { label: "Morning (8am-12pm)", value: "morning", hour: 9 },
+  { label: "Afternoon (12pm-5pm)", value: "afternoon", hour: 14 },
+  { label: "Evening (5pm-9pm)", value: "evening", hour: 18 }
+];
+
+// Gender preference options
+const GENDER_PREFERENCES = [
+  { label: "No Preference", value: "no-preference" },
+  { label: "Male Only", value: "male" },
+  { label: "Female Only", value: "female" }
+];
+
+// Validation schema
+const rideSchema = z.object({
+  rideType: z.string().default("driver"),
+  origin: z.string().min(1, { message: "Origin city is required" }),
+  originArea: z.string().min(1, { message: "Origin area is required" }),
+  destination: z.string().min(1, { message: "Destination city is required" }),
+  destinationArea: z.string().min(1, { message: "Destination area is required" }),
+  departureDate: z.string().min(1, { message: "Departure date is required" }),
+  departureTime: z.string().min(1, { message: "Departure time is required" }),
+  seatsTotal: z.string().min(1, { message: "Number of seats is required" }),
+  price: z.string().min(1, { message: "Price is required" }),
+  genderPreference: z.string().default("no-preference"),
+  carModel: z.string().optional(),
+  notes: z.string().optional()
+});
+
 export default function PostRidePostgres() {
   const [, setLocation] = useLocation();
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
-  // Form state
-  const [rideType, setRideType] = useState<'driver' | 'passenger'>('driver');
-  const [origin, setOrigin] = useState('Gainesville');
-  const [originArea, setOriginArea] = useState('');
-  const [destination, setDestination] = useState('');
-  const [destinationArea, setDestinationArea] = useState('');
-  const [departureDate, setDepartureDate] = useState('');
-  const [departureTime, setDepartureTime] = useState('');
-  const [availableSeats, setAvailableSeats] = useState('1');
-  const [price, setPrice] = useState('');
-  const [genderPreference, setGenderPreference] = useState('no-preference');
-  const [carModel, setCarModel] = useState('');
-  const [notes, setNotes] = useState('');
+  // State for ride type toggle (not part of form)
+  const [rideTypeDisplay, setRideTypeDisplay] = useState<'driver' | 'passenger'>('driver');
+  
+  // Form setup using React Hook Form with Zod validation
+  const form = useForm<z.infer<typeof rideSchema>>({
+    resolver: zodResolver(rideSchema),
+    defaultValues: {
+      rideType: "driver",
+      origin: "Gainesville",
+      originArea: "",
+      destination: "",
+      destinationArea: "",
+      departureDate: format(new Date(), 'yyyy-MM-dd'),
+      departureTime: "",
+      seatsTotal: "1",
+      price: "",
+      genderPreference: "no-preference",
+      carModel: "",
+      notes: ""
+    }
+  });
+  
+  // Update the hidden rideType field when toggle button changes
+  const handleRideTypeChange = (type: 'driver' | 'passenger') => {
+    setRideTypeDisplay(type);
+    form.setValue('rideType', type);
+  };
   
   // Form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate form
+  const onSubmit = async (data: z.infer<typeof rideSchema>) => {
     if (!currentUser) {
       toast({
         title: "Error",
@@ -59,37 +104,34 @@ export default function PostRidePostgres() {
       return;
     }
     
-    if (!origin || !destination || !departureDate || !departureTime || !price) {
-      toast({
-        title: "Missing required fields",
-        description: "Please fill out all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       setLoading(true);
       
       // Calculate departure time by combining date and time
-      const combinedDepartureTime = combineDateTime(departureDate, departureTime);
+      const departureDate = new Date(data.departureDate);
+      const [hours, minutes] = data.departureTime.split(':').map(Number);
+      
+      departureDate.setHours(hours, minutes);
+      
+      // Estimate arrival time (2 hours later)
+      const arrivalTime = addHours(departureDate, 2);
       
       // Create ride object
       const ride = {
         driverId: currentUser.uid,
-        origin,
-        originArea,
-        destination,
-        destinationArea,
-        departureTime: combinedDepartureTime,
-        arrivalTime: new Date(combinedDepartureTime.getTime() + 2 * 60 * 60 * 1000), // Estimate 2 hours later
-        seatsTotal: parseInt(availableSeats),
-        seatsLeft: parseInt(availableSeats),
-        price: price,
-        genderPreference,
-        carModel,
-        notes,
-        rideType
+        origin: data.origin,
+        originArea: data.originArea,
+        destination: data.destination,
+        destinationArea: data.destinationArea,
+        departureTime: departureDate,
+        arrivalTime: arrivalTime,
+        seatsTotal: parseInt(data.seatsTotal),
+        seatsLeft: parseInt(data.seatsTotal),
+        price: data.price,
+        genderPreference: data.genderPreference,
+        carModel: data.carModel || "",
+        notes: data.notes || "",
+        rideType: data.rideType
       };
       
       // Post ride using the postgres API directly
@@ -123,193 +165,307 @@ export default function PostRidePostgres() {
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Post a Ride</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">I am a...</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              type="button"
-              variant={rideType === 'driver' ? 'default' : 'outline'}
-              className={`h-14 ${rideType === 'driver' ? 'bg-primary text-white' : 'border-gray-200'}`}
-              onClick={() => setRideType('driver')}
-            >
-              <FaCarSide className="mr-2 text-xl" />
-              Driver
-            </Button>
-            <Button
-              type="button"
-              variant={rideType === 'passenger' ? 'default' : 'outline'}
-              className={`h-14 ${rideType === 'passenger' ? 'bg-primary text-white' : 'border-gray-200'}`}
-              onClick={() => setRideType('passenger')}
-            >
-              <FaUser className="mr-2 text-xl" />
-              Passenger
-            </Button>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">I am a...</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                type="button"
+                variant={rideTypeDisplay === 'driver' ? 'default' : 'outline'}
+                className={`h-14 ${rideTypeDisplay === 'driver' ? 'bg-primary text-white' : 'border-gray-200'}`}
+                onClick={() => handleRideTypeChange('driver')}
+              >
+                <FaCarSide className="mr-2 text-xl" />
+                Driver
+              </Button>
+              <Button
+                type="button"
+                variant={rideTypeDisplay === 'passenger' ? 'default' : 'outline'}
+                className={`h-14 ${rideTypeDisplay === 'passenger' ? 'bg-primary text-white' : 'border-gray-200'}`}
+                onClick={() => handleRideTypeChange('passenger')}
+              >
+                <FaUser className="mr-2 text-xl" />
+                Passenger
+              </Button>
+            </div>
+            
+            {/* Hidden ride type field */}
+            <FormField
+              control={form.control}
+              name="rideType"
+              render={({ field }) => (
+                <FormItem className="hidden">
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
-        </div>
-        
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-4">Origin</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <Label htmlFor="origin" className="block mb-2">From City (Required)</Label>
-                <Select value={origin} onValueChange={setOrigin}>
-                  <SelectTrigger id="origin" className="h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FLORIDA_CITIES.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="originArea" className="block mb-2">Area (e.g., UF Campus, Midtown)</Label>
-                <Input
-                  id="originArea"
-                  placeholder="Specific area (e.g., UF Campus, Midtown)"
-                  value={originArea}
-                  onChange={(e) => setOriginArea(e.target.value)}
-                  className="h-12 rounded-md border-gray-200"
+          
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-xl font-bold mb-4">Origin</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="origin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">From City (Required)</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select city" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {FLORIDA_CITIES.map(city => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="originArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Area (Required)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., UF Campus, Midtown" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            
-            <h2 className="text-xl font-bold mb-4">Destination</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <Label htmlFor="destination" className="block mb-2">To City (Required)</Label>
-                <Select value={destination} onValueChange={setDestination}>
-                  <SelectTrigger id="destination" className="h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FLORIDA_CITIES.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="destinationArea" className="block mb-2">Area (e.g., Downtown, UCF Area)</Label>
-                <Input
-                  id="destinationArea"
-                  placeholder="Specific area (e.g., Downtown, UCF Area)"
-                  value={destinationArea}
-                  onChange={(e) => setDestinationArea(e.target.value)}
-                  className="h-12 rounded-md border-gray-200"
+              
+              <h2 className="text-xl font-bold mb-4">Destination</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="destination"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">To City (Required)</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select city" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {FLORIDA_CITIES.map(city => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="destinationArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Area (Required)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., Downtown, UCF Area" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            
-            <h2 className="text-xl font-bold mb-4">Departure</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <Label htmlFor="departureDate" className="block mb-2">Departure Date (Required)</Label>
-                <Input
-                  id="departureDate"
-                  type="date"
-                  value={departureDate}
-                  onChange={(e) => setDepartureDate(e.target.value)}
-                  required
-                  className="h-12 rounded-md border-gray-200"
+              
+              <h2 className="text-xl font-bold mb-4">Departure</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="departureDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Departure Date (Required)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="date" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="departureTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Departure Time (Required)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="time" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div>
-                <Label htmlFor="departureTime" className="block mb-2">Departure Time (Required)</Label>
-                <Input
-                  id="departureTime"
-                  type="time"
-                  value={departureTime}
-                  onChange={(e) => setDepartureTime(e.target.value)}
-                  required
-                  className="h-12 rounded-md border-gray-200"
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="seatsTotal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select seats" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} seat{num > 1 ? 's' : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Price per Person ($) (Required)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="text"
+                          placeholder="e.g. 25" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <Label htmlFor="availableSeats" className="block mb-2">Available Seats (Required)</Label>
-                <Select value={availableSeats} onValueChange={setAvailableSeats}>
-                  <SelectTrigger id="availableSeats" className="h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Select seats" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} seat{num > 1 ? 's' : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="price" className="block mb-2">Price per Person ($) (Required)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="e.g. 25"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                  className="h-12 rounded-md border-gray-200"
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="genderPreference"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Gender Preference</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select preference" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {GENDER_PREFERENCES.map(pref => (
+                            <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="carModel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Car Model</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. Toyota Camry, Silver" 
+                          className="h-12 rounded-md border-gray-200"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <Label htmlFor="genderPreference" className="block mb-2">Gender Preference</Label>
-                <Select value={genderPreference} onValueChange={setGenderPreference}>
-                  <SelectTrigger id="genderPreference" className="h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Select preference" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no-preference">No Preference</SelectItem>
-                    <SelectItem value="male">Male Only</SelectItem>
-                    <SelectItem value="female">Female Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="carModel" className="block mb-2">Car Model</Label>
-                <Input
-                  id="carModel"
-                  placeholder="e.g. Toyota Camry, Silver"
-                  value={carModel}
-                  onChange={(e) => setCarModel(e.target.value)}
-                  className="h-12 rounded-md border-gray-200"
+              
+              <div className="mb-8">
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Additional Notes</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Any additional information about the ride..." 
+                          className="rounded-md border-gray-200"
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+              
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
+              >
+                {loading ? "Posting..." : "Post Ride"}
+              </Button>
             </div>
-            
-            <div className="mb-8">
-              <Label htmlFor="notes" className="block mb-2">Additional Notes</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any additional information about the ride..."
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="rounded-md border-gray-200"
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
-            >
-              {loading ? "Posting..." : "Post Ride"}
-            </Button>
           </div>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 }

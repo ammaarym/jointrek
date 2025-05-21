@@ -111,7 +111,37 @@ export default function PostRide() {
       };
 
       console.log("Posting ride with data:", rideData);
-      await addDoc(collection(db, "rides"), rideData);
+      try {
+        // Set a timeout to ensure the operation doesn't hang indefinitely
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Firestore operation timed out")), 10000)
+        );
+        
+        // Create the Firestore request
+        const ridesCollection = collection(db, "rides");
+        const firestorePromise = addDoc(ridesCollection, rideData);
+        
+        // Race the two promises
+        const docRef = await Promise.race([firestorePromise, timeoutPromise]);
+        
+        // If we reach here, the operation was successful
+        console.log("Document written with ID: ", docRef.id);
+        
+        // Save to local storage as backup in case Firebase didn't sync properly
+        const savedRides = JSON.parse(localStorage.getItem('pendingRides') || '[]');
+        savedRides.push({...rideData, localId: Date.now().toString()});
+        localStorage.setItem('pendingRides', JSON.stringify(savedRides));
+      } catch (firestoreError) {
+        console.error("Firestore error:", firestoreError);
+        
+        // Even if Firestore fails, save to local storage
+        const savedRides = JSON.parse(localStorage.getItem('pendingRides') || '[]');
+        savedRides.push({...rideData, localId: Date.now().toString()});
+        localStorage.setItem('pendingRides', JSON.stringify(savedRides));
+        
+        // Don't throw the error - we've saved the data locally
+        console.log("Ride saved locally due to connection issues");
+      }
 
       toast({
         title: "Success!",

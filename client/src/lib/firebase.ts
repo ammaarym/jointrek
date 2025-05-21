@@ -46,8 +46,31 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Get firestore database reference
-export const db = getFirestore(app);
+// Get firestore database reference with improved connection handling
+import { enableIndexedDbPersistence, persistentLocalCache, persistentSingleTabManager } from "firebase/firestore";
+
+export const db = getFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentSingleTabManager({ forceOwnership: true })
+  })
+});
+
+// Enable offline persistence for better reliability
+try {
+  enableIndexedDbPersistence(db)
+    .then(() => console.log("Offline persistence enabled"))
+    .catch(err => {
+      if (err.code === 'failed-precondition') {
+        console.warn("Persistence failed - multiple tabs open");
+      } else if (err.code === 'unimplemented') {
+        console.warn("Browser doesn't support persistence");
+      } else {
+        console.error("Persistence error:", err);
+      }
+    });
+} catch (e) {
+  console.error("Error enabling persistence:", e);
+}
 
 // Only initialize analytics in browser environment
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;

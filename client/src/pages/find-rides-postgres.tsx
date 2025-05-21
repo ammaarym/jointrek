@@ -7,11 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { FaCar, FaLocationArrow, FaMapMarkerAlt, FaArrowRight, FaCalendar, FaUserFriends, FaDollarSign, FaUser } from 'react-icons/fa';
+import { FaCar, FaLocationArrow, FaMapMarkerAlt, FaArrowRight, FaCalendar, FaCalendarAlt, FaUserFriends, FaDollarSign, FaUser } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
 
 // List of major Florida cities
 const FLORIDA_CITIES = [
@@ -216,9 +217,9 @@ export default function FindRidesPostgres() {
             const adaptedRide = adaptPostgresRideToCardFormat(ride);
             
             return (
-              <Dialog>
+              <Dialog key={ride.id}>
                 <DialogTrigger asChild>
-                  <Card key={ride.id} className="overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-md transition-shadow">
+                  <Card className="overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex-1 flex flex-col">
                       <div className="flex justify-between items-start mb-3">
                         <div>

@@ -67,18 +67,32 @@ export default function PostRide() {
     }
 
     try {
+      const [submitBtn] = document.getElementsByClassName('submit-btn') as HTMLCollectionOf<HTMLButtonElement>;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Posting...";
+      }
+
       // Calculate estimated arrival time (2 hours after departure for now)
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
+      // Contact information for the driver
+      const contactInfo = {
+        email: currentUser.email || '',
+        phone: currentUser.phoneNumber || '',
+        // If you have other contact methods stored in the user profile, add them here
+      };
+
       // User is definitely logged in here because of our earlier check
       const rideData = {
         driver: {
-          id: currentUser!.uid,
-          name: currentUser!.displayName || "Anonymous",
-          photoUrl: currentUser!.photoURL || "",
+          id: currentUser.uid,
+          name: currentUser.displayName || "Anonymous",
+          photoUrl: currentUser.photoURL || "",
           rating: 5.0, // Default for new users
           totalRides: 0,
+          contactInfo: contactInfo,
         },
         origin: {
           city: data.origin,
@@ -100,6 +114,7 @@ export default function PostRide() {
         rideType: data.rideType,
       };
 
+      console.log("Posting ride with data:", rideData);
       await addDoc(collection(db, "rides"), rideData);
 
       toast({
@@ -446,7 +461,7 @@ export default function PostRide() {
               <div className="md:col-span-2 mt-4">
                 <Button
                   type="submit"
-                  className="w-full bg-orange-600 text-white py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-lg"
+                  className="submit-btn w-full bg-orange-600 text-white py-6 h-auto rounded-md font-medium hover:bg-opacity-90 transition text-lg"
                   disabled={form.formState.isSubmitting}
                 >
                   {form.formState.isSubmitting ? "Posting..." : "Post Ride"}

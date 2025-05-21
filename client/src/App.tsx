@@ -12,6 +12,7 @@ import FindRides from "@/pages/find-rides";
 import PostRide from "@/pages/post-ride";
 import FindRidesOriginalUI from "@/pages/find-rides-original-ui";
 import PostRidePostgres from "@/pages/post-ride-postgres";
+import PostRideEnhanced from "@/pages/post-ride-enhanced";
 import Profile from "@/pages/profile";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -78,7 +79,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={FindRidesOriginalUI} path="/find-rides" />}
           </Route>
           <Route path="/post-ride">
-            {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" />}
+            {(params) => <ProtectedRoute component={PostRideEnhanced} path="/post-ride" />}
           </Route>
           <Route path="/my-rides">
             {(params) => (

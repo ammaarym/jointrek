@@ -31,7 +31,7 @@ export const rides = pgTable("rides", {
   arrivalTime: timestamp("arrival_time").notNull(),
   seatsTotal: integer("seats_total").notNull(),
   seatsLeft: integer("seats_left").notNull(),
-  price: integer("price").notNull(),
+  price: text("price").notNull(),
   genderPreference: text("gender_preference").notNull(),
   carModel: text("car_model"),
   notes: text("notes"),

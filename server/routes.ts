@@ -1,10 +1,11 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./postgres-storage"; // Use PostgreSQL storage
 import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema } from "@shared/schema";
 import * as admin from 'firebase-admin';
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import apiRoutes from "./api";
 
 // Extend Request type to include user
 declare global {
@@ -60,6 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   initFirebase();
   
   const httpServer = createServer(app);
+
+  // Mount the API routes
+  app.use("/api", apiRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

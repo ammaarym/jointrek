@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth';
-import { useRides } from '../hooks/use-rides';
 import { useToast } from '../hooks/use-toast';
 import { combineDateTime } from '../lib/date-utils';
+import { createRide } from '../lib/postgres-api';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,8 @@ const FLORIDA_CITIES = [
 export default function PostRidePostgres() {
   const [, setLocation] = useLocation();
   const { currentUser } = useAuth();
-  const { createRide, loading, error } = usePostgresRides();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   
   // Form state
   const [rideType, setRideType] = useState<'driver' | 'passenger'>('driver');

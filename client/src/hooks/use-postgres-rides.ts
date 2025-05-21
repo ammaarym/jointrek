@@ -1,48 +1,83 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Ride } from '@shared/schema';
-import { fetchMyRides, fetchRideById, updateRide, deleteRide } from '../lib/postgres-api';
+
+// Helper function to make API requests
+async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || 'Failed to fetch data');
+  }
+
+  return response.json();
+}
 
 export function usePostgresRides() {
   const [myRides, setMyRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadMyRides = async () => {
+  const createRide = async (rideData: Partial<Ride>) => {
     setLoading(true);
     setError(null);
     
     try {
-      const rides = await fetchMyRides();
-      setMyRides(rides);
-    } catch (err) {
-      console.error('Error loading my rides:', err);
-      setError('Failed to load your rides. Please try again.');
+      const newRide = await apiRequest<Ride>('/api/rides', {
+        method: 'POST',
+        body: JSON.stringify(rideData),
+      });
+      
+      return newRide;
+    } catch (err: any) {
+      console.error('Error creating ride:', err);
+      setError(err.message || 'Failed to create ride');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const editRide = async (id: number, rideData: Partial<Ride>) => {
+  const loadMyRides = async (userId: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const updatedRide = await updateRide(id, rideData);
+      const rides = await apiRequest<Ride[]>(`/api/user-rides?driverId=${userId}`);
+      setMyRides(rides);
+    } catch (err: any) {
+      console.error('Error loading my rides:', err);
+      setError(err.message || 'Failed to load rides');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateRide = async (id: number, rideData: Partial<Ride>) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const updatedRide = await apiRequest<Ride>(`/api/rides/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(rideData),
+      });
       
-      if (updatedRide) {
-        // Update the ride in the local state
-        setMyRides(prevRides => 
-          prevRides.map(ride => 
-            ride.id === id ? { ...ride, ...updatedRide } : ride
-          )
-        );
-        return true;
-      }
-      return false;
-    } catch (err) {
+      setMyRides(prev => 
+        prev.map(ride => ride.id === id ? updatedRide : ride)
+      );
+      
+      return updatedRide;
+    } catch (err: any) {
       console.error('Error updating ride:', err);
-      setError('Failed to update ride. Please try again.');
-      return false;
+      setError(err.message || 'Failed to update ride');
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -53,33 +88,28 @@ export function usePostgresRides() {
     setError(null);
     
     try {
-      const success = await deleteRide(id);
+      await apiRequest<void>(`/api/rides/${id}`, {
+        method: 'DELETE',
+      });
       
-      if (success) {
-        // Remove the ride from the local state
-        setMyRides(prevRides => prevRides.filter(ride => ride.id !== id));
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error('Error deleting ride:', err);
-      setError('Failed to delete ride. Please try again.');
-      return false;
+      setMyRides(prev => prev.filter(ride => ride.id !== id));
+      return true;
+    } catch (err: any) {
+      console.error('Error removing ride:', err);
+      setError(err.message || 'Failed to remove ride');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadMyRides();
-  }, []);
-
   return {
     myRides,
     loading,
     error,
+    createRide,
     loadMyRides,
-    editRide,
+    updateRide,
     removeRide
   };
 }

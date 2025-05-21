@@ -81,7 +81,10 @@ export default function FindRidesPostgres() {
       if (sortBy === 'date') {
         return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
       } else {
-        return a.price - b.price;
+        // Convert price strings to numbers for comparison
+        const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
+        const priceB = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
+        return priceA - priceB;
       }
     });
 

@@ -49,25 +49,16 @@ export function usePostgresRides() {
     setError(null);
     
     try {
-      // Get the current user from Firebase Auth
-      const auth = await import('firebase/auth').then(m => m.getAuth());
-      const currentUser = auth.currentUser;
-      
-      if (!currentUser) {
-        throw new Error('User not authenticated');
-      }
-      
-      const response = await fetch(`/api/user-rides`, {
+      // Use a simple GET request with no fetch API
+      const response = await fetch('/api/user-rides', {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': userId,
-          'X-User-Email': currentUser.email || '',
-          'X-User-Name': currentUser.displayName || ''
+          'X-User-ID': userId
         }
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch user rides: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to fetch user rides: ${response.status}`);
       }
       
       const rides = await response.json();

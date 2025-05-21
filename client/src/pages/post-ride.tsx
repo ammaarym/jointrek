@@ -67,11 +67,7 @@ export default function PostRide() {
     }
 
     try {
-      const [submitBtn] = document.getElementsByClassName('submit-btn') as HTMLCollectionOf<HTMLButtonElement>;
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Posting...";
-      }
+      // No need for manual button handling as we're using form.formState.isSubmitting
 
       // Calculate estimated arrival time (2 hours after departure for now)
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);

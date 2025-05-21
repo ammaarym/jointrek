@@ -15,12 +15,20 @@ export interface Location {
   area: string;
 }
 
+export interface ContactInfo {
+  email?: string;
+  phone?: string;
+  instagram?: string;
+  snapchat?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
   photoUrl: string;
   rating: number;
   totalRides: number;
+  contactInfo?: ContactInfo;
   phone?: string;
   instagram?: string;
   snapchat?: string;

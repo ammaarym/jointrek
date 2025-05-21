@@ -17,10 +17,10 @@ import { useAuth } from "@/hooks/use-auth";
 
 interface RideCardProps {
   ride: Ride;
-  onBook: (rideId: string) => void;
+  onEdit?: (ride: Ride) => void;
 }
 
-export default function RideCard({ ride, onBook }: RideCardProps) {
+export default function RideCard({ ride, onEdit }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { currentUser } = useAuth();
   
@@ -132,9 +132,16 @@ export default function RideCard({ ride, onBook }: RideCardProps) {
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button 
                     className="block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
-                    onClick={() => onBook(ride.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isDriverUser && onEdit) {
+                        onEdit(ride);
+                      } else {
+                        setDetailsOpen(true); // Show contact details dialog
+                      }
+                    }}
                   >
-                    {isDriverUser ? "Edit Ride" : "Book Ride"}
+                    {isDriverUser ? "Edit Ride" : "View Contact Info"}
                   </Button>
                 </div>
               </div>
@@ -319,22 +326,32 @@ export default function RideCard({ ride, onBook }: RideCardProps) {
               <Button variant="outline">Close</Button>
             </DialogClose>
             
-            {isDriverUser ? (
+            {isDriverUser && onEdit ? (
               <Button className="bg-orange-600 text-white" onClick={() => {
                 setDetailsOpen(false);
-                // Implement edit functionality
+                onEdit(ride);
               }}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Ride
               </Button>
-            ) : (
-              <Button className="bg-orange-600 text-white" onClick={() => {
-                setDetailsOpen(false);
-                onBook(ride.id);
-              }}>
-                Book This Ride
-              </Button>
-            )}
+            ) : !isDriverUser ? (
+              <div className="flex flex-col space-y-2 bg-gray-50 p-3 rounded border w-full">
+                <h3 className="font-medium text-md">Contact Information:</h3>
+                {/* Show email from contactInfo if available, otherwise from the user object */}
+                <div className="flex items-center gap-2">
+                  <span className="text-neutral-500">Email:</span>
+                  <span className="font-medium">{ride.driver.contactInfo?.email || currentUser?.email || "No email available"}</span>
+                </div>
+                
+                {/* Show phone if available */}
+                {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-neutral-500">Phone:</span>
+                    <span className="font-medium">{ride.driver.contactInfo?.phone || ride.driver.phone}</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </DialogFooter>
         </DialogContent>
       </Dialog>

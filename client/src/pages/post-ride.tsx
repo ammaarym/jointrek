@@ -66,21 +66,19 @@ export default function PostRide() {
       return;
     }
 
-    try {
-      // No need for manual button handling as we're using form.formState.isSubmitting
+    // Indicate submitting state in the UI
+    const submitButton = document.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.setAttribute('disabled', 'true');
+      submitButton.textContent = 'Posting...';
+    }
 
+    try {
       // Calculate estimated arrival time (2 hours after departure for now)
       const departureDateTime = new Date(`${data.departureDate}T${data.departureTime}`);
       const arrivalDateTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
 
-      // Contact information for the driver
-      const contactInfo = {
-        email: currentUser.email || '',
-        phone: currentUser.phoneNumber || '',
-        // If you have other contact methods stored in the user profile, add them here
-      };
-
-      // User is definitely logged in here because of our earlier check
+      // Create simplified ride data to avoid serialization issues
       const rideData = {
         driver: {
           id: currentUser.uid,
@@ -88,7 +86,10 @@ export default function PostRide() {
           photoUrl: currentUser.photoURL || "",
           rating: 5.0, // Default for new users
           totalRides: 0,
-          contactInfo: contactInfo,
+          contactInfo: {
+            email: currentUser.email || '',
+            phone: currentUser.phoneNumber || '',
+          },
         },
         origin: {
           city: data.origin,
@@ -98,43 +99,68 @@ export default function PostRide() {
           city: data.destination,
           area: data.destinationArea,
         },
-        departureTime: Timestamp.fromDate(departureDateTime),
-        arrivalTime: Timestamp.fromDate(arrivalDateTime),
+        departureTime: {
+          seconds: Math.floor(departureDateTime.getTime() / 1000),
+          nanoseconds: 0
+        },
+        arrivalTime: {
+          seconds: Math.floor(arrivalDateTime.getTime() / 1000),
+          nanoseconds: 0
+        },
         seatsTotal: parseInt(data.availableSeats || "1"),
         seatsLeft: parseInt(data.availableSeats || "1"),
         price: parseFloat(data.price || "0"),
         genderPreference: data.genderPreference,
         carModel: data.carModel,
         notes: data.notes,
-        createdAt: Timestamp.now(),
+        createdAt: {
+          seconds: Math.floor(Date.now() / 1000),
+          nanoseconds: 0
+        },
         rideType: data.rideType,
       };
 
       console.log("Posting ride with data:", rideData);
+      
+      // First save to local storage as a backup
+      localStorage.setItem('pendingRide', JSON.stringify(rideData));
+      
+      // Now try to save to Firestore
+      const ridesCollection = collection(db, "rides");
+      
+      // Convert timestamp objects back to Firestore Timestamps
+      const firestoreRideData = {
+        ...rideData,
+        departureTime: Timestamp.fromDate(departureDateTime),
+        arrivalTime: Timestamp.fromDate(arrivalDateTime),
+        createdAt: Timestamp.now()
+      };
+      
       try {
-        // Create the Firestore request
-        const ridesCollection = collection(db, "rides");
-        const docRef = await addDoc(ridesCollection, rideData);
-        
-        // If we reach here, the operation was successful
+        const docRef = await addDoc(ridesCollection, firestoreRideData);
         console.log("Document written with ID: ", docRef.id);
+        
+        // Clear the local backup on success
+        localStorage.removeItem('pendingRide');
+        
+        toast({
+          title: "Success!",
+          description: "Your ride has been posted successfully.",
+        });
+        
+        // Navigate to find-rides after successful submission
+        setLocation("/find-rides");
       } catch (firestoreError) {
         console.error("Firestore error:", firestoreError);
-        // Save to local storage when Firestore fails
-        try {
-          localStorage.setItem('pendingRide', JSON.stringify(rideData));
-          console.log("Ride saved locally");
-        } catch (localError) {
-          console.error("Error saving locally:", localError);
-        }
+        
+        toast({
+          title: "Partial Success",
+          description: "Your ride was saved locally but not synced to the cloud yet. It will be available when you reconnect.",
+        });
+        
+        // Still navigate away
+        setLocation("/find-rides");
       }
-
-      toast({
-        title: "Success!",
-        description: "Your ride has been posted successfully.",
-      });
-
-      setLocation("/find-rides");
     } catch (error) {
       console.error("Error posting ride:", error);
       toast({
@@ -142,6 +168,12 @@ export default function PostRide() {
         description: "There was a problem posting your ride. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      // Reset button state
+      if (submitButton) {
+        submitButton.removeAttribute('disabled');
+        submitButton.textContent = 'Post Ride';
+      }
     }
   };
 

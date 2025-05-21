@@ -59,7 +59,7 @@ export default function FindRidesPostgres() {
       }
       
       // Filter by destination (if selected)
-      if (to && to !== 'any' && ride.destination.toLowerCase() !== to.toLowerCase()) {
+      if (to && to !== 'Any destination' && ride.destination.toLowerCase() !== to.toLowerCase()) {
         return false;
       }
       
@@ -128,7 +128,7 @@ export default function FindRidesPostgres() {
                     <SelectValue placeholder="Any destination" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="any">Any destination</SelectItem>
+                    <SelectItem value="">Any destination</SelectItem>
                     {FLORIDA_CITIES.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}

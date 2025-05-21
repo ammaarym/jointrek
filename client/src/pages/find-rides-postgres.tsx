@@ -11,6 +11,7 @@ import { FaCar, FaLocationArrow, FaMapMarkerAlt, FaArrowRight, FaCalendar, FaUse
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 
 // List of major Florida cities
 const FLORIDA_CITIES = [
@@ -254,13 +255,50 @@ export default function FindRidesPostgres() {
                   </div>
                   
                   <div className="mt-4 pt-3 border-t">
-                    <Button 
-                      variant="outline" 
-                      className="w-full text-primary border-primary hover:bg-primary/10"
-                      onClick={() => window.open(`mailto:${adaptedRide.driver.contactInfo.email}`)}
-                    >
-                      Contact Driver
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full text-primary border-primary hover:bg-primary/10"
+                        >
+                          Contact Driver
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Driver Contact Information</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Driver</h4>
+                            <p>{adaptedRide.driver.name.split(' ')[0]}</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Email</h4>
+                            <p>{adaptedRide.driver.contactInfo.email}</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h4 className="font-medium">Ride Details</h4>
+                            <p>From: {ride.origin} ({ride.originArea})</p>
+                            <p>To: {ride.destination} ({ride.destinationArea})</p>
+                            <p>Departure: {formatDate(new Date(ride.departureTime))}</p>
+                            <p>Available Seats: {ride.seatsLeft}</p>
+                            <p>Price: ${ride.price}</p>
+                            {ride.carModel && <p>Car: {ride.carModel}</p>}
+                            {ride.notes && <p>Notes: {ride.notes}</p>}
+                          </div>
+                        </div>
+                        <DialogFooter className="sm:justify-start">
+                          <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                              Close
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>

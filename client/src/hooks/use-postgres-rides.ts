@@ -49,7 +49,29 @@ export function usePostgresRides() {
     setError(null);
     
     try {
-      const rides = await apiRequest<Ride[]>(`/api/user-rides?driverId=${userId}`);
+      // Get the current user from Firebase Auth
+      const auth = await import('firebase/auth').then(m => m.getAuth());
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch(`/api/user-rides`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userId,
+          'X-User-Email': currentUser.email || '',
+          'X-User-Name': currentUser.displayName || ''
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user rides: ${response.status} ${response.statusText}`);
+      }
+      
+      const rides = await response.json();
+      console.log('Loaded my rides:', rides);
       setMyRides(rides);
     } catch (err: any) {
       console.error('Error loading my rides:', err);
@@ -64,20 +86,40 @@ export function usePostgresRides() {
     setError(null);
     
     try {
-      const updatedRide = await apiRequest<Ride>(`/api/rides/${id}`, {
+      // Get the current user from Firebase Auth
+      const auth = await import('firebase/auth').then(m => m.getAuth());
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch(`/api/rides/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(rideData),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': currentUser.uid,
+          'X-User-Email': currentUser.email || '',
+          'X-User-Name': currentUser.displayName || ''
+        },
+        body: JSON.stringify(rideData)
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update ride: ${response.status} ${response.statusText}`);
+      }
+      
+      const updatedRide = await response.json();
       
       setMyRides(prev => 
         prev.map(ride => ride.id === id ? updatedRide : ride)
       );
       
-      return updatedRide;
+      return true;
     } catch (err: any) {
       console.error('Error updating ride:', err);
       setError(err.message || 'Failed to update ride');
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -88,16 +130,34 @@ export function usePostgresRides() {
     setError(null);
     
     try {
-      await apiRequest<void>(`/api/rides/${id}`, {
+      // Get the current user from Firebase Auth
+      const auth = await import('firebase/auth').then(m => m.getAuth());
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      
+      const response = await fetch(`/api/rides/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': currentUser.uid,
+          'X-User-Email': currentUser.email || '',
+          'X-User-Name': currentUser.displayName || ''
+        }
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete ride: ${response.status} ${response.statusText}`);
+      }
       
       setMyRides(prev => prev.filter(ride => ride.id !== id));
       return true;
     } catch (err: any) {
       console.error('Error removing ride:', err);
       setError(err.message || 'Failed to remove ride');
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -109,7 +169,7 @@ export function usePostgresRides() {
     error,
     createRide,
     loadMyRides,
-    updateRide,
+    updateRide: updateRide as any,
     removeRide
   };
 }

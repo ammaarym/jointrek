@@ -50,7 +50,7 @@ const FLORIDA_CITIES = [
 
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
-  const { myRides, loading, error, loadMyRides, editRide, removeRide } = usePostgresRides();
+  const { myRides, loading, error, loadMyRides, updateRide: editRide, removeRide } = usePostgresRides();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

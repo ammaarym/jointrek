@@ -99,67 +99,70 @@ export default function PostRide() {
           city: data.destination,
           area: data.destinationArea,
         },
-        departureTime: {
-          seconds: Math.floor(departureDateTime.getTime() / 1000),
-          nanoseconds: 0
-        },
-        arrivalTime: {
-          seconds: Math.floor(arrivalDateTime.getTime() / 1000),
-          nanoseconds: 0
-        },
+        departureTime: Timestamp.fromDate(departureDateTime),
+        arrivalTime: Timestamp.fromDate(arrivalDateTime),
         seatsTotal: parseInt(data.availableSeats || "1"),
         seatsLeft: parseInt(data.availableSeats || "1"),
         price: parseFloat(data.price || "0"),
         genderPreference: data.genderPreference,
         carModel: data.carModel,
         notes: data.notes,
-        createdAt: {
-          seconds: Math.floor(Date.now() / 1000),
-          nanoseconds: 0
-        },
+        createdAt: Timestamp.now(),
         rideType: data.rideType,
       };
 
       console.log("Posting ride with data:", rideData);
       
-      // First save to local storage as a backup
-      localStorage.setItem('pendingRide', JSON.stringify(rideData));
-      
       // Now try to save to Firestore
       const ridesCollection = collection(db, "rides");
       
-      // Convert timestamp objects back to Firestore Timestamps
-      const firestoreRideData = {
-        ...rideData,
-        departureTime: Timestamp.fromDate(departureDateTime),
-        arrivalTime: Timestamp.fromDate(arrivalDateTime),
-        createdAt: Timestamp.now()
-      };
-      
       try {
-        const docRef = await addDoc(ridesCollection, firestoreRideData);
+        const docRef = await addDoc(ridesCollection, rideData);
         console.log("Document written with ID: ", docRef.id);
-        
-        // Clear the local backup on success
-        localStorage.removeItem('pendingRide');
         
         toast({
           title: "Success!",
           description: "Your ride has been posted successfully.",
         });
         
-        // Navigate to find-rides after successful submission
-        window.location.href = "/find-rides";
+        // Use setTimeout to allow the toast to show before redirecting
+        setTimeout(() => {
+          // This method should work consistently across all browsers
+          document.location.href = "/find-rides";
+        }, 1500);
+        
       } catch (firestoreError) {
         console.error("Firestore error:", firestoreError);
         
-        toast({
-          title: "Partial Success",
-          description: "Your ride was saved locally but not synced to the cloud yet. It will be available when you reconnect.",
-        });
-        
-        // Still navigate away
-        window.location.href = "/find-rides";
+        // Save to local storage when Firestore fails
+        try {
+          localStorage.setItem('pendingRide', JSON.stringify({
+            ...rideData,
+            // Convert timestamps to simple objects for storage
+            departureTime: { seconds: rideData.departureTime.seconds, nanoseconds: rideData.departureTime.nanoseconds },
+            arrivalTime: { seconds: rideData.arrivalTime.seconds, nanoseconds: rideData.arrivalTime.nanoseconds },
+            createdAt: { seconds: rideData.createdAt.seconds, nanoseconds: rideData.createdAt.nanoseconds }
+          }));
+          
+          toast({
+            title: "Saved locally",
+            description: "Your ride was saved locally but not synced to the cloud yet. It will be available when you reconnect.",
+          });
+          
+          // Use setTimeout to allow the toast to show before redirecting
+          setTimeout(() => {
+            document.location.href = "/find-rides";
+          }, 1500);
+          
+        } catch (localError) {
+          console.error("Error saving locally:", localError);
+          
+          toast({
+            title: "Error",
+            description: "There was a problem posting your ride. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error posting ride:", error);

@@ -13,6 +13,7 @@ import PostRide from "@/pages/post-ride";
 import FindRidesOriginalUI from "@/pages/find-rides-original-ui";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 import PostRideEnhanced from "@/pages/post-ride-enhanced";
+import MyRidesPostgres from "@/pages/my-rides-postgres";
 import Profile from "@/pages/profile";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -82,13 +83,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={PostRideEnhanced} path="/post-ride" />}
           </Route>
           <Route path="/my-rides">
-            {(params) => (
-              <Suspense fallback={<div className="flex items-center justify-center h-screen">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
-              </div>}>
-                <ProtectedRoute component={React.lazy(() => import("@/pages/my-rides"))} path="/my-rides" />
-              </Suspense>
-            )}
+            {(params) => <ProtectedRoute component={MyRidesPostgres} path="/my-rides" />}
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}

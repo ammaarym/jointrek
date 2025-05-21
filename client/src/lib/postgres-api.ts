@@ -147,7 +147,7 @@ export async function deleteRide(id: number): Promise<boolean> {
  */
 export async function fetchMyRides(): Promise<Ride[]> {
   try {
-    const response = await fetch(`${API_URL}/users/me/rides`, {
+    const response = await fetch(`${API_URL}/user-rides`, {
       headers: {
         'Content-Type': 'application/json'
       }

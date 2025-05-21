@@ -1,201 +1,285 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { usePostgresRides } from '../hooks/use-postgres-rides';
-import RideCard from '../components/ride-card';
+import { useRides } from '../hooks/use-rides';
 import { adaptPostgresRideToCardFormat } from '../lib/ride-adapter';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { FaSearch } from 'react-icons/fa';
-import { RiFilterFill } from 'react-icons/ri';
-import { Ride } from '@shared/schema';
+import { formatDate } from '../lib/date-utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { FaCar, FaLocationArrow, FaMapMarkerAlt, FaArrowRight, FaCalendar, FaUserFriends, FaDollarSign, FaUser } from 'react-icons/fa';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { useLocation } from 'wouter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function FindRidesPage() {
+// List of major Florida cities
+const FLORIDA_CITIES = [
+  "Gainesville",
+  "Jacksonville",
+  "Miami",
+  "Orlando",
+  "Tampa",
+  "Tallahassee",
+  "Fort Lauderdale",
+  "St. Petersburg",
+  "Clearwater",
+  "Sarasota"
+];
+
+export default function FindRidesPostgres() {
   const { currentUser } = useAuth();
-  const { rides, loading, error, loadRides } = usePostgresRides();
-  const [origin, setOrigin] = useState('Gainesville');
-  const [destination, setDestination] = useState('');
+  const { rides, loading, error, loadRides } = useRides();
+  const [, setLocation] = useLocation();
+
+  // Form state
+  const [from, setFrom] = useState('Gainesville');
+  const [to, setTo] = useState('');
+  const [date, setDate] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
-  const [priceSort, setPriceSort] = useState('asc');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
-  // Load rides on component mount
-  useEffect(() => {
-    loadRides(origin, destination);
-  }, [origin, destination]);
-  
-  // Filter and sort rides based on user selections
+
+  // Filter rides
   const filteredRides = rides
     .filter(ride => {
-      // Filter by gender
+      if (!ride) return false;
+      
+      // Filter by gender if selected
       if (genderFilter !== 'all' && ride.genderPreference !== genderFilter && ride.genderPreference !== 'no-preference') {
         return false;
       }
       
-      // Filter by date
-      if (dateFilter !== 'all') {
-        const now = new Date();
+      // Filter by date if selected
+      if (date) {
+        const selectedDate = new Date(date);
         const rideDate = new Date(ride.departureTime);
         
-        if (dateFilter === 'today') {
-          return rideDate.toDateString() === now.toDateString();
-        } else if (dateFilter === 'tomorrow') {
-          const tomorrow = new Date(now);
-          tomorrow.setDate(now.getDate() + 1);
-          return rideDate.toDateString() === tomorrow.toDateString();
-        } else if (dateFilter === 'week') {
-          const weekFromNow = new Date(now);
-          weekFromNow.setDate(now.getDate() + 7);
-          return rideDate >= now && rideDate <= weekFromNow;
+        if (selectedDate.getFullYear() !== rideDate.getFullYear() ||
+            selectedDate.getMonth() !== rideDate.getMonth() ||
+            selectedDate.getDate() !== rideDate.getDate()) {
+          return false;
         }
       }
       
       return true;
     })
     .sort((a, b) => {
-      // Sort by price
-      if (priceSort === 'asc') {
-        return a.price - b.price;
-      } else {
-        return b.price - a.price;
-      }
+      // Sort by departure time, newest first
+      const dateA = new Date(a.departureTime);
+      const dateB = new Date(b.departureTime);
+      return dateA.getTime() - dateB.getTime();
     });
-  
+
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    loadRides(from, to);
+  };
+
+  const navigateToPostRide = () => {
+    setLocation('/post-ride');
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Find Rides</h1>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Find Rides</h1>
+        <Button 
+          onClick={navigateToPostRide} 
+          className="bg-primary text-white hover:bg-primary/90"
+        >
+          Post a Ride
+        </Button>
+      </div>
       
       {/* Search Form */}
-      <div className="bg-card rounded-lg shadow-md p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <Label htmlFor="origin">From</Label>
-            <Input
-              id="origin"
-              placeholder="City (e.g. Gainesville)"
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="destination">To</Label>
-            <Input
-              id="destination"
-              placeholder="City (e.g. Orlando)"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-            />
-          </div>
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <Button
-            onClick={() => loadRides(origin, destination)}
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
-            <FaSearch className="mr-2" /> Search Rides
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-2"
-          >
-            <RiFilterFill /> Filters
-          </Button>
-        </div>
-        
-        {/* Filters */}
-        {isFilterOpen && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="gender-filter">Gender Preference</Label>
-              <Select value={genderFilter} onValueChange={setGenderFilter}>
-                <SelectTrigger id="gender-filter">
-                  <SelectValue placeholder="Filter by gender preference" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="male">Male only</SelectItem>
-                  <SelectItem value="female">Female only</SelectItem>
-                  <SelectItem value="no-preference">No preference</SelectItem>
-                </SelectContent>
-              </Select>
+      <Card className="mb-8">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="from" className="flex items-center gap-2">
+                  <FaLocationArrow className="text-primary" />
+                  From
+                </Label>
+                <Select value={from} onValueChange={setFrom}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FLORIDA_CITIES.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="to" className="flex items-center gap-2">
+                  <FaMapMarkerAlt className="text-primary" />
+                  To
+                </Label>
+                <Select value={to} onValueChange={setTo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select city (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Any Destination</SelectItem>
+                    {FLORIDA_CITIES.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="date" className="flex items-center gap-2">
+                  <FaCalendar className="text-primary" />
+                  Date (Optional)
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="gender" className="flex items-center gap-2">
+                  <FaUser className="text-primary" />
+                  Gender Preference
+                </Label>
+                <Select value={genderFilter} onValueChange={setGenderFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="male">Male Only</SelectItem>
+                    <SelectItem value="female">Female Only</SelectItem>
+                    <SelectItem value="no-preference">No Preference</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div>
-              <Label htmlFor="date-filter">Date</Label>
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger id="date-filter">
-                  <SelectValue placeholder="Filter by date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All dates</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                  <SelectItem value="week">Next 7 days</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-end">
+              <Button 
+                type="submit" 
+                className="bg-primary text-white hover:bg-primary/90"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  'Search Rides'
+                )}
+              </Button>
             </div>
-            
-            <div>
-              <Label htmlFor="price-sort">Price</Label>
-              <Select value={priceSort} onValueChange={setPriceSort}>
-                <SelectTrigger id="price-sort">
-                  <SelectValue placeholder="Sort by price" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">Lowest to highest</SelectItem>
-                  <SelectItem value="desc">Highest to lowest</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-      </div>
+          </form>
+        </CardContent>
+      </Card>
       
       {/* Error message */}
       {error && (
-        <div className="bg-destructive/20 text-destructive p-4 rounded-lg mb-6">
+        <div className="bg-destructive/20 text-destructive p-4 rounded-lg mb-8">
           <p>{error}</p>
         </div>
       )}
       
       {/* Rides list */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          // Loading skeletons
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-card rounded-lg shadow-md p-4">
+          // Loading skeleton
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-card rounded-lg shadow-md p-6 animate-pulse">
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
-                  <Skeleton className="h-6 w-48" />
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-60" />
+                  <div className="h-6 w-48 bg-muted rounded"></div>
+                  <div className="h-4 w-32 bg-muted rounded"></div>
                 </div>
-                <Skeleton className="h-10 w-24" />
+                <div className="h-10 w-20 bg-muted rounded"></div>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
+              <div className="mt-4 space-y-2">
+                <div className="h-4 w-full bg-muted rounded"></div>
+                <div className="h-4 w-3/4 bg-muted rounded"></div>
+                <div className="h-4 w-1/2 bg-muted rounded"></div>
               </div>
+              <div className="mt-4 h-10 w-32 bg-muted rounded"></div>
             </div>
           ))
         ) : filteredRides.length > 0 ? (
-          filteredRides.map((ride) => (
-            <RideCard 
-              key={ride.id.toString()} 
-              ride={adaptPostgresRideToCardFormat(ride)}
-            />
-          ))
+          filteredRides.map((ride) => {
+            const adaptedRide = adaptPostgresRideToCardFormat(ride);
+            
+            return (
+              <Card key={ride.id} className="overflow-hidden h-full flex flex-col">
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        {ride.origin} → {ride.destination}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(new Date(ride.departureTime))}
+                      </p>
+                    </div>
+                    <div className="text-lg font-bold text-primary">
+                      ${ride.price}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 space-y-1 text-sm flex-1">
+                    <div className="flex items-center">
+                      <FaUser className="text-primary mr-2 flex-shrink-0" />
+                      <span className="truncate">Driver: {adaptedRide.driver.name}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <FaCar className="text-primary mr-2 flex-shrink-0" />
+                      <span className="truncate">{ride.carModel || 'Car not specified'}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
+                      <span>{ride.seatsLeft} seat(s) available</span>
+                    </div>
+                    <div className="flex items-start">
+                      <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="truncate">From: {ride.originArea}</div>
+                        <div className="truncate">To: {ride.destinationArea}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-3 border-t">
+                    <Button 
+                      variant="outline" 
+                      className="w-full text-primary border-primary hover:bg-primary/10"
+                      onClick={() => window.open(`mailto:${adaptedRide.driver.contactInfo.email}`)}
+                    >
+                      Contact Driver
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No rides found with your criteria.</p>
-            <p className="text-muted-foreground mt-2">Try adjusting your search filters.</p>
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 bg-card rounded-lg shadow-md">
+            <FaCar className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-medium">No rides found</h3>
+            <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+              We couldn't find any rides matching your criteria.
+              Try adjusting your search or post a ride!
+            </p>
+            <Button 
+              onClick={navigateToPostRide} 
+              className="mt-6 bg-primary text-white hover:bg-primary/90"
+            >
+              Post a Ride
+            </Button>
           </div>
         )}
       </div>

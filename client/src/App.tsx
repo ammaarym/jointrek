@@ -77,7 +77,7 @@ function AppRoutes() {
           <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/find-rides">
-            {(params) => <ProtectedRoute component={FindRidesOriginalUI} path="/find-rides" />}
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" />}
           </Route>
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRideEnhanced} path="/post-ride" />}

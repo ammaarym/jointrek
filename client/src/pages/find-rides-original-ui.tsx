@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { usePostgresRides } from '../hooks/use-postgres-rides';
+import { useRides } from '../hooks/use-rides';
 import { adaptPostgresRideToCardFormat } from '../lib/ride-adapter';
 import { formatDate } from '../lib/date-utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { useLocation } from 'wouter';
 
 export default function FindRidesOriginalUI() {
   const { currentUser } = useAuth();
-  const { rides, loading, error, loadRides } = usePostgresRides();
+  const { rides, loading, error, loadRides } = useRides();
   const [, setLocation] = useLocation();
 
   // Form state

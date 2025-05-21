@@ -42,8 +42,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log("Auth state changed:", user?.email);
+      
+      // If user is logged in, sync with PostgreSQL database
+      if (user) {
+        try {
+          // Import dynamically to avoid circular dependencies
+          const { syncUserToPostgres } = await import('../lib/sync-user');
+          await syncUserToPostgres(user);
+        } catch (error) {
+          console.error("Error syncing user to PostgreSQL:", error);
+        }
+      }
+      
       setCurrentUser(user);
       setLoading(false);
     });

@@ -13,6 +13,7 @@ import PostRide from "@/pages/post-ride";
 import FindRidesOriginalUI from "@/pages/find-rides-original-ui";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
+import PostRidePostgresNew from "@/pages/post-ride-postgres-new";
 import PostRideEnhanced from "@/pages/post-ride-enhanced";
 import MyRidesPostgres from "@/pages/my-rides-postgres";
 import Profile from "@/pages/profile";
@@ -81,7 +82,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" />}
           </Route>
           <Route path="/post-ride">
-            {(params) => <ProtectedRoute component={PostRideEnhanced} path="/post-ride" />}
+            {(params) => <ProtectedRoute component={PostRidePostgresNew} path="/post-ride" />}
           </Route>
           <Route path="/my-rides">
             {(params) => <ProtectedRoute component={MyRidesPostgres} path="/my-rides" />}

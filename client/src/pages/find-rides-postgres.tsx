@@ -101,6 +101,18 @@ export default function FindRidesPostgres() {
     .sort((a, b) => {
       if (sortBy === 'date') {
         return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
+      } else if (sortBy === 'earliest') {
+        // Sort by time closest to now (earliest from current time)
+        const now = new Date().getTime();
+        const timeA = Math.abs(new Date(a.departureTime).getTime() - now);
+        const timeB = Math.abs(new Date(b.departureTime).getTime() - now);
+        return timeA - timeB;
+      } else if (sortBy === 'latest') {
+        // Sort by time furthest from now (latest from current time)
+        const now = new Date().getTime();
+        const timeA = Math.abs(new Date(a.departureTime).getTime() - now);
+        const timeB = Math.abs(new Date(b.departureTime).getTime() - now);
+        return timeB - timeA;
       } else if (sortBy === 'price') {
         // Convert price strings to numbers for comparison (low to high)
         const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
@@ -200,6 +212,10 @@ export default function FindRidesPostgres() {
                   <SelectItem value="2">2 passengers</SelectItem>
                   <SelectItem value="3">3 passengers</SelectItem>
                   <SelectItem value="4">4 passengers</SelectItem>
+                  <SelectItem value="5">5 passengers</SelectItem>
+                  <SelectItem value="6">6 passengers</SelectItem>
+                  <SelectItem value="7">7 passengers</SelectItem>
+                  <SelectItem value="8">8+ passengers</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -270,6 +286,8 @@ export default function FindRidesPostgres() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="date">Departure Time</SelectItem>
+                  <SelectItem value="earliest">Earliest Time</SelectItem>
+                  <SelectItem value="latest">Latest Time</SelectItem>
                   <SelectItem value="price">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
                 </SelectContent>
@@ -457,14 +475,7 @@ export default function FindRidesPostgres() {
                           <p>{ride.notes}</p>
                         </div>
                       )}
-                      
-                      <DialogFooter className="gap-2 sm:gap-0">
-                        <DialogClose asChild>
-                          <Button type="button" className="bg-primary text-white hover:bg-primary/90">
-                            Book Ride
-                          </Button>
-                        </DialogClose>
-                      </DialogFooter>
+
                     </DialogContent>
                   </Dialog>
                 );

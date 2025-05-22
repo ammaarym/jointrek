@@ -13,10 +13,10 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 60 4.8% 95.9%;
-  --secondary-foreground: 24 9.8% 10%;
+  --primary: 23 76% 60%; /* Using the logo orange as primary */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 212 100% 33%; /* UF blue as secondary */
+  --secondary-foreground: 0 0% 100%;
   --accent: 60 4.8% 95.9%;
   --accent-foreground: 24 9.8% 10%;
   --destructive: 0 84.2% 60.2%;
@@ -24,8 +24,8 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
   
-  /* UF Colors */
-  --uf-orange: 19 100% 52%;
+  /* GatorLift Colors - updated to match logo */
+  --uf-orange: 23 76% 60%; /* Logo orange color */
   --uf-blue: 212 100% 33%;
   --chart-1: var(--uf-blue);
   --chart-2: var(--uf-orange);
@@ -55,10 +55,10 @@
   --card-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
+  --primary: 23 76% 60%; /* Using the logo orange as primary */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 212 100% 33%; /* UF blue as secondary */
+  --secondary-foreground: 0 0% 100%;
   --accent: 240 3.7% 15.9%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;

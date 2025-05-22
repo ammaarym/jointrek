@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CarTaxiFront, BellIcon, MenuIcon, User } from "lucide-react";
+import { MenuIcon } from "lucide-react";
+import gatorLiftLogo from "../assets/gator-lift-logo.png";
 
 interface HeaderProps {
   onLogin: () => void;
@@ -45,10 +46,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <CarTaxiFront className="text-orange-600 h-6 w-6" />
-            <span className="text-xl font-semibold text-black">
-              GatorLift
-            </span>
+            <img src={gatorLiftLogo} alt="GatorLift Logo" className="h-10 w-auto" />
           </div>
 
           <div className="hidden md:flex items-center space-x-6">

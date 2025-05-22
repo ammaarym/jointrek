@@ -467,12 +467,13 @@ export default function PostRidePostgres() {
               </div>
               
               {rideTypeDisplay === 'driver' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <FormField
-                    control={form.control}
-                    name="genderPreference"
-                    render={({ field }) => (
-                    <FormItem>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <FormField
+                      control={form.control}
+                      name="genderPreference"
+                      render={({ field }) => (
+                        <FormItem>
                       <FormLabel className="block mb-2">Gender Preference</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
@@ -513,9 +514,9 @@ export default function PostRidePostgres() {
                     )}
                   />
                 )}
-              </div>
-              
-
+                  </div>
+                </>
+              )}
               
               <div className="mb-8">
                 <FormField

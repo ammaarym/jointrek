@@ -188,7 +188,6 @@ export default function PostRidePostgres() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6">
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">I am a...</h2>
             <div className="grid grid-cols-2 gap-4">
               <Button
                 type="button"
@@ -197,7 +196,7 @@ export default function PostRidePostgres() {
                 onClick={() => handleRideTypeChange('driver')}
               >
                 <FaCarSide className="mr-2 text-xl" />
-                Driver
+                Offering a Ride
               </Button>
               <Button
                 type="button"
@@ -206,7 +205,7 @@ export default function PostRidePostgres() {
                 onClick={() => handleRideTypeChange('passenger')}
               >
                 <FaUser className="mr-2 text-xl" />
-                Passenger
+                Looking for a Ride
               </Button>
             </div>
             
@@ -370,40 +369,44 @@ export default function PostRidePostgres() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="seatsTotal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select seats" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} seat{num > 1 ? 's' : ''}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {rideTypeDisplay === 'driver' && (
+                  <FormField
+                    control={form.control}
+                    name="seatsTotal"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12 rounded-md border-gray-200">
+                              <SelectValue placeholder="Select seats" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} seat{num > 1 ? 's' : ''}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 
                 <FormField
                   control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block mb-2">Price per Person ($) (Required)</FormLabel>
+                      <FormLabel className="block mb-2">
+                        {rideTypeDisplay === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Required)'}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="text"
@@ -445,23 +448,25 @@ export default function PostRidePostgres() {
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="carModel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Car Model</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. Toyota Camry, Silver" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {rideTypeDisplay === 'driver' && (
+                  <FormField
+                    control={form.control}
+                    name="carModel"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="block mb-2">Car Model (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g. Toyota Camry, Silver" 
+                            className="h-12 rounded-md border-gray-200"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
               
 

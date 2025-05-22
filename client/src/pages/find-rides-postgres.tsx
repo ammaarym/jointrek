@@ -96,23 +96,19 @@ export default function FindRidesPostgres() {
         }
       }
       
+      // Filter by passenger count (if selected)
+      if (appliedFilters.passengers && appliedFilters.passengers !== '') {
+        const requiredSeats = parseInt(appliedFilters.passengers);
+        if (ride.seatsLeft < requiredSeats) {
+          return false;
+        }
+      }
+      
       return true;
     })
     .sort((a, b) => {
       if (sortBy === 'date') {
         return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
-      } else if (sortBy === 'earliest') {
-        // Sort by time closest to now (earliest from current time)
-        const now = new Date().getTime();
-        const timeA = Math.abs(new Date(a.departureTime).getTime() - now);
-        const timeB = Math.abs(new Date(b.departureTime).getTime() - now);
-        return timeA - timeB;
-      } else if (sortBy === 'latest') {
-        // Sort by time furthest from now (latest from current time)
-        const now = new Date().getTime();
-        const timeA = Math.abs(new Date(a.departureTime).getTime() - now);
-        const timeB = Math.abs(new Date(b.departureTime).getTime() - now);
-        return timeB - timeA;
       } else if (sortBy === 'price') {
         // Convert price strings to numbers for comparison (low to high)
         const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
@@ -205,9 +201,10 @@ export default function FindRidesPostgres() {
               <Label htmlFor="passengers" className="block mb-2">Passengers</Label>
               <Select value={passengers} onValueChange={setPassengers}>
                 <SelectTrigger className="h-12 rounded-md border-gray-200">
-                  <SelectValue placeholder="1 passenger" />
+                  <SelectValue placeholder="Any number" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Any number</SelectItem>
                   <SelectItem value="1">1 passenger</SelectItem>
                   <SelectItem value="2">2 passengers</SelectItem>
                   <SelectItem value="3">3 passengers</SelectItem>
@@ -286,8 +283,6 @@ export default function FindRidesPostgres() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="date">Departure Time</SelectItem>
-                  <SelectItem value="earliest">Earliest Time</SelectItem>
-                  <SelectItem value="latest">Latest Time</SelectItem>
                   <SelectItem value="price">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
                 </SelectContent>
@@ -366,6 +361,13 @@ export default function FindRidesPostgres() {
                               <div className="flex justify-between">
                                 <div>
                                   <h3 className="font-semibold">{adaptedRide.driver.name}</h3>
+                                  <div className="text-sm text-gray-500">
+                                    {new Date(ride.departureTime).toLocaleDateString('en-US', { 
+                                      weekday: 'short', 
+                                      month: 'short', 
+                                      day: 'numeric' 
+                                    })}
+                                  </div>
                                 </div>
                                 {ride.seatsLeft > 0 && (
                                   <div className="text-green-500 text-sm font-medium">

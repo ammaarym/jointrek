@@ -100,6 +100,9 @@ export class PostgresStorage implements IStorage {
         notes: rides.notes,
         createdAt: rides.createdAt,
         rideType: rides.rideType,
+        phone: rides.phone,
+        instagram: rides.instagram,
+        snapchat: rides.snapchat,
         driverName: users.displayName,
         driverEmail: users.email,
         driverPhoto: users.photoUrl

@@ -101,7 +101,10 @@ export default function PostRidePostgres() {
         genderPreference,
         carModel: carModel || null,
         notes: notes || null,
-        rideType
+        rideType,
+        phone: phone || null,
+        instagram: instagram || null,
+        snapchat: snapchat || null
       };
       
       console.log('Posting ride with data:', rideData);

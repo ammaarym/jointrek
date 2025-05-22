@@ -113,6 +113,11 @@ export function usePostgresRides() {
         prev.map(ride => ride.id === id ? updatedRide : ride)
       );
       
+      // Also update the main rides list if it's been loaded
+      setRides(prev => 
+        prev.map(ride => ride.id === id ? updatedRide : ride)
+      );
+      
       return true;
     } catch (err: any) {
       console.error('Error updating ride:', err);

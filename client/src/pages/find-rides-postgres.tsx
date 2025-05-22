@@ -402,9 +402,10 @@ export default function FindRidesPostgres() {
                             </h4>
                             <p className="text-lg">{adaptedRide.driver.name}</p>
                             <div className="mt-2 space-y-1">
-                              <p className="text-sm"><span className="font-medium">Email:</span> {adaptedRide.driver.contactInfo.email}</p>
-                              {adaptedRide.driver.contactInfo.phone && (
+                              {adaptedRide.driver.contactInfo.phone ? (
                                 <p className="text-sm"><span className="font-medium">Phone:</span> {adaptedRide.driver.contactInfo.phone}</p>
+                              ) : (
+                                <p className="text-sm"><span className="font-medium">Email:</span> {adaptedRide.driver.contactInfo.email}</p>
                               )}
                               {adaptedRide.driver.contactInfo.instagram && (
                                 <p className="text-sm"><span className="font-medium">Instagram:</span> @{adaptedRide.driver.contactInfo.instagram}</p>

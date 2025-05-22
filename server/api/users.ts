@@ -51,4 +51,23 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+// PUT /api/users/firebase/:firebaseUid - Update user profile
+router.put("/firebase/:firebaseUid", async (req: Request, res: Response) => {
+  try {
+    const { firebaseUid } = req.params;
+    
+    // Update user profile with contact information
+    const updatedUser = await storage.updateUser(firebaseUid, req.body);
+    
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 export default router;

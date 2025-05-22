@@ -39,9 +39,6 @@ export const rides = pgTable("rides", {
   carModel: text("car_model"),
   notes: text("notes"),
   rideType: text("ride_type").notNull(),
-  phone: text("phone"),
-  instagram: text("instagram"),
-  snapchat: text("snapchat"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

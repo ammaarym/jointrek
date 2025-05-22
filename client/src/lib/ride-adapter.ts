@@ -16,9 +16,9 @@ export function adaptPostgresRideToCardFormat(postgresRide: any) {
       totalRides: 0,
       contactInfo: {
         email: postgresRide.driverEmail || (postgresRide.driverId + '@ufl.edu'),
-        phone: postgresRide.phone || null,
-        instagram: postgresRide.instagram || null,
-        snapchat: postgresRide.snapchat || null
+        phone: postgresRide.driverPhone || null,
+        instagram: postgresRide.driverInstagram || null,
+        snapchat: postgresRide.driverSnapchat || null
       }
     },
     origin: {

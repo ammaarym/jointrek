@@ -358,7 +358,7 @@ export default function FindRidesPostgres() {
                               </div>
                             </div>
                             <div className="flex-1">
-                              <div className="flex justify-between">
+                              <div className="flex justify-between items-start">
                                 <div>
                                   <h3 className="font-semibold">{adaptedRide.driver.name}</h3>
                                   <div className="text-sm text-gray-500">
@@ -369,13 +369,16 @@ export default function FindRidesPostgres() {
                                     })}
                                   </div>
                                 </div>
-                                {ride.seatsLeft > 0 && (
-                                  <div className="text-green-500 text-sm font-medium">
-                                    ✓ {ride.seatsLeft} {ride.seatsLeft === 1 ? 'seat' : 'seats'} left
+                                <div className="text-right flex flex-col items-end">
+                                  {ride.seatsLeft > 0 && (
+                                    <div className="text-green-600 text-sm font-medium flex items-center mb-1">
+                                      <FaUserFriends className="mr-1 text-xs" />
+                                      {ride.seatsLeft} {ride.seatsLeft === 1 ? 'seat' : 'seats'} left
+                                    </div>
+                                  )}
+                                  <div className="text-xl font-bold">
+                                    ${ride.price}
                                   </div>
-                                )}
-                                <div className="text-xl font-bold text-right">
-                                  ${ride.price}
                                 </div>
                               </div>
                               

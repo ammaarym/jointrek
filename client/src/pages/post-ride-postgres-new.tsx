@@ -369,63 +369,109 @@ export default function PostRidePostgres() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {rideTypeDisplay === 'driver' && (
-                  <FormField
-                    control={form.control}
-                    name="seatsTotal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
+                {rideTypeDisplay === 'driver' ? (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="seatsTotal"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 rounded-md border-gray-200">
+                                <SelectValue placeholder="Select seats" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} seat{num > 1 ? 's' : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block mb-2">Price per Person ($) (Required)</FormLabel>
                           <FormControl>
-                            <SelectTrigger className="h-12 rounded-md border-gray-200">
-                              <SelectValue placeholder="Select seats" />
-                            </SelectTrigger>
+                            <Input 
+                              type="text"
+                              placeholder="e.g. 25" 
+                              className="h-12 rounded-md border-gray-200"
+                              {...field}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num} seat{num > 1 ? 's' : ''}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="genderPreference"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block mb-2">Gender Preference</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 rounded-md border-gray-200">
+                                <SelectValue placeholder="Select preference" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {GENDER_PREFERENCES.map(pref => (
+                                <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block mb-2">Amount Willing to Pay ($) (Required)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="text"
+                              placeholder="e.g. 25" 
+                              className="h-12 rounded-md border-gray-200"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
                 )}
-                
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">
-                        {rideTypeDisplay === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Required)'}
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="text"
-                          placeholder="e.g. 25" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="genderPreference"
-                  render={({ field }) => (
+              {rideTypeDisplay === 'driver' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <FormField
+                    control={form.control}
+                    name="genderPreference"
+                    render={({ field }) => (
                     <FormItem>
                       <FormLabel className="block mb-2">Gender Preference</FormLabel>
                       <Select 

@@ -150,25 +150,23 @@ export default function PostRidePostgres() {
         </Card>
       ) : (
         <form onSubmit={handleSubmit}>
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <Tabs 
-                defaultValue="driver" 
-                value={rideType}
-                onValueChange={(value) => setRideType(value as 'driver' | 'passenger')}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="driver" className="flex items-center gap-2">
-                    <FaCarSide /> Offering a Ride
-                  </TabsTrigger>
-                  <TabsTrigger value="passenger" className="flex items-center gap-2">
-                    <FaUser /> Looking for a Ride
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
+          <div className="mb-6">
+            <Tabs 
+              defaultValue="driver" 
+              value={rideType}
+              onValueChange={(value) => setRideType(value as 'driver' | 'passenger')}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="driver" className="flex items-center gap-2">
+                  <FaCarSide /> Offering a Ride
+                </TabsTrigger>
+                <TabsTrigger value="passenger" className="flex items-center gap-2">
+                  <FaUser /> Looking for a Ride
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           
           <Card className="mb-6">
             <CardHeader>

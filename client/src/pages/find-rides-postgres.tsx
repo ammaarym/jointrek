@@ -40,16 +40,25 @@ export default function FindRidesPostgres() {
   const [passengers, setPassengers] = useState('1');
   const [genderFilter, setGenderFilter] = useState('no preference');
   const [sortBy, setSortBy] = useState('date');
+  
+  // Applied filter state (only updated when Apply Filter is clicked)
+  const [appliedFilters, setAppliedFilters] = useState({
+    from: 'Gainesville',
+    to: '',
+    date: '',
+    passengers: '1',
+    genderFilter: 'no preference'
+  });
 
-  // Filter rides
+  // Filter rides using applied filters
   const filteredRides = rides
     .filter(ride => {
       if (!ride) return false;
       
       // Filter by gender if selected
-      if (genderFilter !== 'no preference') {
+      if (appliedFilters.genderFilter !== 'no preference') {
         // When filtering by specific gender, only show rides with that preference or no preference
-        if (ride.genderPreference !== genderFilter && 
+        if (ride.genderPreference !== appliedFilters.genderFilter && 
             ride.genderPreference !== 'no-preference' && 
             ride.genderPreference !== 'no preference') {
           return false;
@@ -57,18 +66,18 @@ export default function FindRidesPostgres() {
       }
       
       // Filter by origin (if selected)
-      if (from && ride.origin.toLowerCase() !== from.toLowerCase()) {
+      if (appliedFilters.from && ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase()) {
         return false;
       }
       
       // Filter by destination (if selected)
-      if (to && to !== 'any' && ride.destination.toLowerCase() !== to.toLowerCase()) {
+      if (appliedFilters.to && appliedFilters.to !== 'any' && ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
         return false;
       }
       
       // Filter by date (if selected)
-      if (date) {
-        const selectedDate = new Date(date);
+      if (appliedFilters.date) {
+        const selectedDate = new Date(appliedFilters.date);
         const rideDate = new Date(ride.departureTime);
         
         if (selectedDate.getFullYear() !== rideDate.getFullYear() ||
@@ -83,17 +92,29 @@ export default function FindRidesPostgres() {
     .sort((a, b) => {
       if (sortBy === 'date') {
         return new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime();
-      } else {
-        // Convert price strings to numbers for comparison
+      } else if (sortBy === 'price') {
+        // Convert price strings to numbers for comparison (low to high)
         const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
         const priceB = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
         return priceA - priceB;
+      } else if (sortBy === 'price-high') {
+        // Convert price strings to numbers for comparison (high to low)
+        const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
+        const priceB = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
+        return priceB - priceA;
       }
+      return 0;
     });
 
   // Handle filter application
   const applyFilters = () => {
-    loadRides();
+    setAppliedFilters({
+      from,
+      to,
+      date,
+      passengers,
+      genderFilter
+    });
   };
 
   return (
@@ -291,12 +312,8 @@ export default function FindRidesPostgres() {
                             <div className="flex-1">
                               <div className="flex justify-between">
                                 <div>
-                                  <h3 className="font-semibold">{adaptedRide.driver.name.split(' ')[0]}</h3>
-                                  <div className="flex items-center text-sm text-yellow-500">
-                                    <span>★</span>
-                                    <span className="ml-1">{adaptedRide.driver.rating?.toFixed(1) || '4.8'}</span>
-                                    <span className="text-gray-400 ml-1">({adaptedRide.driver.totalRides || '42'} rides)</span>
-                                  </div>
+                                  <h3 className="font-semibold">{adaptedRide.driver.name}</h3>
+                                  <p className="text-sm text-gray-500">{adaptedRide.driver.contactInfo.email}</p>
                                 </div>
                                 {ride.seatsLeft > 0 && (
                                   <div className="text-green-500 text-sm font-medium">
@@ -317,7 +334,7 @@ export default function FindRidesPostgres() {
                                 <div className="flex-1">
                                   <div className="mb-4">
                                     <div className="font-medium">{ride.origin} <span className="text-sm text-gray-500 font-normal">{ride.originArea}</span></div>
-                                    <div className="text-sm text-gray-500">{new Date(ride.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                    <div className="text-sm text-gray-500">{new Date(ride.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})}</div>
                                   </div>
                                   <div>
                                     <div className="font-medium">{ride.destination} <span className="text-sm text-gray-500 font-normal">{ride.destinationArea}</span></div>

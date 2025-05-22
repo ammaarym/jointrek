@@ -97,7 +97,7 @@ export default function FindRidesPostgres() {
       }
       
       // Filter by passenger count (if selected)
-      if (appliedFilters.passengers && appliedFilters.passengers !== '') {
+      if (appliedFilters.passengers && appliedFilters.passengers !== 'any' && appliedFilters.passengers !== '') {
         const requiredSeats = parseInt(appliedFilters.passengers);
         if (ride.seatsLeft < requiredSeats) {
           return false;
@@ -204,7 +204,7 @@ export default function FindRidesPostgres() {
                   <SelectValue placeholder="Any number" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any number</SelectItem>
+                  <SelectItem value="any">Any number</SelectItem>
                   <SelectItem value="1">1 passenger</SelectItem>
                   <SelectItem value="2">2 passengers</SelectItem>
                   <SelectItem value="3">3 passengers</SelectItem>

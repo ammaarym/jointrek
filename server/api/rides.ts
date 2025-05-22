@@ -97,16 +97,11 @@ router.put("/:id", async (req: Request, res: Response) => {
       });
     }
     
-    // If seatsTotal is being updated, we need to adjust seatsLeft accordingly
+    // If seatsTotal is being updated, update seatsLeft to match (since we don't have bookings yet)
     let updateData = validationResult.data;
     if (updateData.seatsTotal !== undefined) {
-      const currentRide = await storage.getRide(id);
-      if (currentRide) {
-        // Calculate how many seats have been taken
-        const seatsTaken = currentRide.seatsTotal - currentRide.seatsLeft;
-        // Update seatsLeft to reflect the new total minus already taken seats
-        updateData.seatsLeft = Math.max(0, updateData.seatsTotal - seatsTaken);
-      }
+      // For simplicity, set seatsLeft equal to seatsTotal (no booking system yet)
+      updateData.seatsLeft = updateData.seatsTotal;
     }
     
     // Update the ride in the database

@@ -460,7 +460,7 @@ export default function MyRidesPostgres() {
                   </div>
                   <div className="flex items-center">
                     <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
-                    <span>{ride.seatsLeft} of {ride.seatsTotal} seats available</span>
+                    <span>{ride.seatsLeft} available</span>
                   </div>
                   <div className="flex items-start">
                     <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />

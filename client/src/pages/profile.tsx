@@ -99,7 +99,7 @@ export default function Profile() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Contact Information</CardTitle>
+            <CardTitle>Profile</CardTitle>
             {!isEditing && (
               <Button 
                 variant="outline" 
@@ -116,6 +116,39 @@ export default function Profile() {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Profile Picture and Email Section */}
+          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              {currentUser.photoURL ? (
+                <img src={currentUser.photoURL} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-gray-500 text-lg font-semibold">
+                  {currentUser.displayName?.charAt(0) || currentUser.email?.charAt(0)}
+                </span>
+              )}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900">{currentUser.displayName || 'User'}</h3>
+              <p className="text-sm text-gray-600">{currentUser.email}</p>
+              <p className="text-xs text-gray-500">University of Florida Email</p>
+            </div>
+            {isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // TODO: Add photo upload functionality
+                  toast({
+                    title: "Coming Soon",
+                    description: "Profile picture upload will be available soon!",
+                  });
+                }}
+              >
+                Change Photo
+              </Button>
+            )}
+          </div>
+
           {isEditing ? (
             // Edit Mode
             <div className="space-y-4">

@@ -97,8 +97,20 @@ router.put("/:id", async (req: Request, res: Response) => {
       });
     }
     
+    // If seatsTotal is being updated, we need to adjust seatsLeft accordingly
+    let updateData = validationResult.data;
+    if (updateData.seatsTotal !== undefined) {
+      const currentRide = await storage.getRide(id);
+      if (currentRide) {
+        // Calculate how many seats have been taken
+        const seatsTaken = currentRide.seatsTotal - currentRide.seatsLeft;
+        // Update seatsLeft to reflect the new total minus already taken seats
+        updateData.seatsLeft = Math.max(0, updateData.seatsTotal - seatsTaken);
+      }
+    }
+    
     // Update the ride in the database
-    const updatedRide = await storage.updateRide(id, validationResult.data);
+    const updatedRide = await storage.updateRide(id, updateData);
     
     res.json(updatedRide);
   } catch (error) {

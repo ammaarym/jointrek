@@ -151,11 +151,7 @@ export default function PostRidePostgres() {
       ) : (
         <form onSubmit={handleSubmit}>
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Ride Type</CardTitle>
-              <CardDescription>Are you offering a ride or looking for one?</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <Tabs 
                 defaultValue="driver" 
                 value={rideType}
@@ -164,10 +160,10 @@ export default function PostRidePostgres() {
               >
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="driver" className="flex items-center gap-2">
-                    <FaCarSide /> I'm a Driver
+                    <FaCarSide /> Offering a Ride
                   </TabsTrigger>
                   <TabsTrigger value="passenger" className="flex items-center gap-2">
-                    <FaUser /> I'm a Passenger
+                    <FaUser /> Looking for a Ride
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -306,7 +302,7 @@ export default function PostRidePostgres() {
                 <div className="space-y-2">
                   <Label htmlFor="price">
                     <FaMoneyBillWave className="inline mr-2" />
-                    Price per Person ($) (Required)
+                    {rideType === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Required)'}
                   </Label>
                   <Input
                     id="price"

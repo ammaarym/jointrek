@@ -21,6 +21,7 @@ async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T>
 
 export function usePostgresRides() {
   const [myRides, setMyRides] = useState<Ride[]>([]);
+  const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,8 +115,8 @@ export function usePostgresRides() {
       );
       
       // Also update the main rides list if it's been loaded
-      setRides(prev => 
-        prev.map(ride => ride.id === id ? updatedRide : ride)
+      setRides((prev: Ride[]) => 
+        prev.map((ride: Ride) => ride.id === id ? updatedRide : ride)
       );
       
       return true;

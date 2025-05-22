@@ -151,7 +151,10 @@ export default function PostRidePostgres() {
         genderPreference: data.genderPreference,
         carModel: data.carModel || "",
         notes: data.notes || "",
-        rideType: data.rideType
+        rideType: data.rideType,
+        phone: data.phone || null,
+        instagram: data.instagram || null,
+        snapchat: data.snapchat || null
       };
       
       // Post ride using the postgres API directly

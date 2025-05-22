@@ -4,18 +4,21 @@ import { Ride } from '@shared/schema';
  * This adapter converts a PostgreSQL ride format to the format expected by the RideCard component
  * which was originally designed for Firebase data
  */
-export function adaptPostgresRideToCardFormat(postgresRide: Ride) {
+export function adaptPostgresRideToCardFormat(postgresRide: any) {
   return {
     ...postgresRide,
     id: postgresRide.id.toString(), // Convert ID to string for compatibility
     driver: {
       id: postgresRide.driverId,
-      name: 'UF Driver', // This would ideally come from a user lookup
-      photoUrl: 'https://ui-avatars.com/api/?name=UF+Driver&background=orange&color=fff',
+      name: postgresRide.driverName || 'Unknown Driver',
+      photoUrl: postgresRide.driverPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(postgresRide.driverName || 'User')}&background=orange&color=fff`,
       rating: 5,
       totalRides: 0,
       contactInfo: {
-        email: postgresRide.driverId + '@ufl.edu',
+        email: postgresRide.driverEmail || (postgresRide.driverId + '@ufl.edu'),
+        phone: postgresRide.phone,
+        instagram: postgresRide.instagram,
+        snapchat: postgresRide.snapchat
       }
     },
     origin: {

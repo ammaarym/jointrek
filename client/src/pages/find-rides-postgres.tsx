@@ -47,10 +47,13 @@ export default function FindRidesPostgres() {
       if (!ride) return false;
       
       // Filter by gender if selected
-      if (genderFilter !== 'no preference' && 
-          ride.genderPreference !== genderFilter && 
-          ride.genderPreference !== 'no-preference') {
-        return false;
+      if (genderFilter !== 'no preference') {
+        // When filtering by specific gender, only show rides with that preference or no preference
+        if (ride.genderPreference !== genderFilter && 
+            ride.genderPreference !== 'no-preference' && 
+            ride.genderPreference !== 'no preference') {
+          return false;
+        }
       }
       
       // Filter by origin (if selected)
@@ -212,6 +215,7 @@ export default function FindRidesPostgres() {
                 <SelectContent>
                   <SelectItem value="date">Departure Time</SelectItem>
                   <SelectItem value="price">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>

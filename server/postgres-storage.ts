@@ -83,8 +83,29 @@ export class PostgresStorage implements IStorage {
   async getRidesInFuture(): Promise<Ride[]> {
     // For now, return all rides without filtering by date
     return await db
-      .select()
+      .select({
+        id: rides.id,
+        driverId: rides.driverId,
+        origin: rides.origin,
+        destination: rides.destination,
+        originArea: rides.originArea,
+        destinationArea: rides.destinationArea,
+        departureTime: rides.departureTime,
+        arrivalTime: rides.arrivalTime,
+        seatsTotal: rides.seatsTotal,
+        seatsLeft: rides.seatsLeft,
+        price: rides.price,
+        genderPreference: rides.genderPreference,
+        carModel: rides.carModel,
+        notes: rides.notes,
+        createdAt: rides.createdAt,
+        rideType: rides.rideType,
+        driverName: users.displayName,
+        driverEmail: users.email,
+        driverPhoto: users.photoUrl
+      })
       .from(rides)
+      .leftJoin(users, eq(rides.driverId, users.firebaseUid))
       .orderBy(desc(rides.departureTime));
   }
 

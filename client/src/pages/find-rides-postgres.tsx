@@ -40,6 +40,7 @@ export default function FindRidesPostgres() {
   const [passengers, setPassengers] = useState('1');
   const [genderFilter, setGenderFilter] = useState('no preference');
   const [sortBy, setSortBy] = useState('date');
+  const [feedType, setFeedType] = useState('drivers'); // 'drivers' or 'passengers'
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -54,6 +55,14 @@ export default function FindRidesPostgres() {
   const filteredRides = rides
     .filter(ride => {
       if (!ride) return false;
+      
+      // Filter by feed type (drivers vs passengers)
+      if (feedType === 'drivers' && ride.rideType !== 'driver') {
+        return false;
+      }
+      if (feedType === 'passengers' && ride.rideType !== 'passenger') {
+        return false;
+      }
       
       // Filter by gender if selected
       if (appliedFilters.genderFilter !== 'no preference') {
@@ -225,7 +234,33 @@ export default function FindRidesPostgres() {
         {/* Main content with rides */}
         <div className="lg:col-span-3">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Available Rides</h1>
+            <div>
+              <div className="flex items-center space-x-4 mb-2">
+                <button
+                  onClick={() => setFeedType('drivers')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    feedType === 'drivers'
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Available Rides
+                </button>
+                <button
+                  onClick={() => setFeedType('passengers')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    feedType === 'passengers'
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Available Passengers
+                </button>
+              </div>
+              <h1 className="text-2xl font-bold">
+                {feedType === 'drivers' ? 'Available Rides' : 'Available Passengers'}
+              </h1>
+            </div>
             
             <div className="flex items-center">
               <span className="text-sm mr-2">Sort by:</span>
@@ -313,7 +348,6 @@ export default function FindRidesPostgres() {
                               <div className="flex justify-between">
                                 <div>
                                   <h3 className="font-semibold">{adaptedRide.driver.name}</h3>
-                                  <p className="text-sm text-gray-500">{adaptedRide.driver.contactInfo.email}</p>
                                 </div>
                                 {ride.seatsLeft > 0 && (
                                   <div className="text-green-500 text-sm font-medium">
@@ -364,10 +398,21 @@ export default function FindRidesPostgres() {
                         <div className="space-y-4">
                           <div className="bg-muted/50 p-4 rounded-lg">
                             <h4 className="font-medium flex items-center text-primary mb-2">
-                              <FaUser className="mr-2" /> Driver
+                              <FaUser className="mr-2" /> {feedType === 'drivers' ? 'Driver' : 'Passenger'}
                             </h4>
-                            <p className="text-lg">{adaptedRide.driver.name.split(' ')[0]}</p>
-                            <p className="text-sm break-all mt-1">{adaptedRide.driver.contactInfo.email}</p>
+                            <p className="text-lg">{adaptedRide.driver.name}</p>
+                            <div className="mt-2 space-y-1">
+                              <p className="text-sm"><span className="font-medium">Email:</span> {adaptedRide.driver.contactInfo.email}</p>
+                              {adaptedRide.driver.contactInfo.phone && (
+                                <p className="text-sm"><span className="font-medium">Phone:</span> {adaptedRide.driver.contactInfo.phone}</p>
+                              )}
+                              {adaptedRide.driver.contactInfo.instagram && (
+                                <p className="text-sm"><span className="font-medium">Instagram:</span> @{adaptedRide.driver.contactInfo.instagram}</p>
+                              )}
+                              {adaptedRide.driver.contactInfo.snapchat && (
+                                <p className="text-sm"><span className="font-medium">Snapchat:</span> {adaptedRide.driver.contactInfo.snapchat}</p>
+                              )}
+                            </div>
                           </div>
                           
                           <div className="bg-muted/50 p-4 rounded-lg">
@@ -394,6 +439,11 @@ export default function FindRidesPostgres() {
                             <p><span className="font-medium">Seats:</span> {ride.seatsLeft} available</p>
                             <p><span className="font-medium">Price:</span> ${ride.price}</p>
                             {ride.carModel && <p><span className="font-medium">Car:</span> {ride.carModel}</p>}
+                            <p><span className="font-medium">Gender Preference:</span> {
+                              ride.genderPreference === 'male' ? 'Male riders only' :
+                              ride.genderPreference === 'female' ? 'Female riders only' :
+                              'No preference'
+                            }</p>
                           </div>
                         </div>
                       </div>

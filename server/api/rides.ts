@@ -99,19 +99,10 @@ router.put("/:id", async (req: Request, res: Response) => {
     
     // If seatsTotal is being updated, update seatsLeft to match (since we don't have bookings yet)
     let updateData = validationResult.data;
-    console.log('=== SEATS DEBUG ===');
-    console.log('Raw request body:', req.body);
-    console.log('Validated update data:', updateData);
-    console.log('seatsTotal in updateData:', updateData.seatsTotal);
-    
     if (updateData.seatsTotal !== undefined) {
-      console.log('FOUND seatsTotal, updating seatsLeft to match');
+      // For simplicity, set seatsLeft equal to seatsTotal (no booking system yet)
       updateData.seatsLeft = updateData.seatsTotal;
-      console.log('New seatsLeft value:', updateData.seatsLeft);
-    } else {
-      console.log('NO seatsTotal found in update data');
     }
-    console.log('Final updateData:', updateData);
     
     // Update the ride in the database
     const updatedRide = await storage.updateRide(id, updateData);

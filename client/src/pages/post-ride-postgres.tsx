@@ -268,7 +268,7 @@ export default function PostRidePostgres() {
                   <div className="space-y-2">
                     <Label htmlFor="availableSeats">
                       <FaUser className="inline mr-2" />
-                      Available Seats
+                      Available Seats (Required)
                     </Label>
                     <Select 
                       value={availableSeats} 
@@ -287,7 +287,7 @@ export default function PostRidePostgres() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="carModel">Car Model</Label>
+                    <Label htmlFor="carModel">Car Model (Optional)</Label>
                     <Input
                       id="carModel"
                       placeholder="e.g. Toyota Camry"

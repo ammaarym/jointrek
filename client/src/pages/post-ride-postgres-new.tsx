@@ -151,10 +151,7 @@ export default function PostRidePostgres() {
         genderPreference: data.genderPreference,
         carModel: data.carModel || "",
         notes: data.notes || "",
-        rideType: data.rideType,
-        phone: data.phone || null,
-        instagram: data.instagram || null,
-        snapchat: data.snapchat || null
+        rideType: data.rideType
       };
       
       // Post ride using the postgres API directly
@@ -467,62 +464,7 @@ export default function PostRidePostgres() {
                 />
               </div>
               
-              <h2 className="text-xl font-bold mb-4">Contact Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Phone Number</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. 352-123-4567" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="instagram"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Instagram</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. @yourusername" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="snapchat"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Snapchat</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. yourusername" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+
               
               <div className="mb-8">
                 <FormField

@@ -10,6 +10,9 @@ export const users = pgTable("users", {
   displayName: text("display_name").notNull(),
   photoUrl: text("photo_url"),
   emailVerified: boolean("email_verified").default(false),
+  phone: text("phone"),
+  instagram: text("instagram"),
+  snapchat: text("snapchat"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

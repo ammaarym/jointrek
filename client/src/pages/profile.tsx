@@ -1,305 +1,166 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/use-auth";
-import { toast } from "@/hooks/use-toast";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
-import { Ride } from "@/lib/types";
-import RideCard from "@/components/ride-card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Pencil, User } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { FaPhone, FaInstagram } from 'react-icons/fa';
+import { RiSnapchatFill } from 'react-icons/ri';
 
 export default function Profile() {
-  const [, setLocation] = useLocation();
-  const { currentUser, signOut } = useAuth();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [rides, setRides] = useState<Ride[]>([]);
-  const [bookings, setBookings] = useState<Ride[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [snapchat, setSnapchat] = useState('');
 
+  // Load user profile data on mount
   useEffect(() => {
     if (currentUser) {
-      const names = currentUser.displayName?.split(" ") || ["", ""];
-      setFirstName(names[0]);
-      setLastName(names.slice(1).join(" "));
-
-      // Fetch user rides
-      const fetchUserRides = async () => {
-        setLoading(true);
-        try {
-          const ridesQuery = query(
-            collection(db, "rides"),
-            where("driver.id", "==", currentUser.uid)
-          );
-          const ridesSnapshot = await getDocs(ridesQuery);
-          const ridesList: Ride[] = [];
-          
-          ridesSnapshot.forEach((doc) => {
-            ridesList.push({ id: doc.id, ...doc.data() } as Ride);
-          });
-          
-          setRides(ridesList);
-
-          // Get bookings (rides where the user is a passenger)
-          const bookingsQuery = query(
-            collection(db, "rides"),
-            where("passengers", "array-contains", currentUser.uid)
-          );
-          const bookingsSnapshot = await getDocs(bookingsQuery);
-          const bookingsList: Ride[] = [];
-          
-          bookingsSnapshot.forEach((doc) => {
-            bookingsList.push({ id: doc.id, ...doc.data() } as Ride);
-          });
-          
-          setBookings(bookingsList);
-        } catch (error) {
-          console.error("Error fetching user rides:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load your rides",
-            variant: "destructive",
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchUserRides();
+      loadUserProfile();
     }
   }, [currentUser]);
 
-  const handleUpdateProfile = async () => {
+  const loadUserProfile = async () => {
+    try {
+      const response = await fetch(`/api/users/firebase/${currentUser.uid}`);
+      if (response.ok) {
+        const userData = await response.json();
+        setPhone(userData.phone || '');
+        setInstagram(userData.instagram || '');
+        setSnapchat(userData.snapchat || '');
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const handleSave = async () => {
     if (!currentUser) return;
 
+    setLoading(true);
     try {
-      await updateProfile(currentUser, {
-        displayName: `${firstName} ${lastName}`,
+      const response = await fetch(`/api/users/firebase/${currentUser.uid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: phone || null,
+          instagram: instagram || null,
+          snapchat: snapchat || null,
+        }),
       });
-      
-      setIsEditing(false);
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
-      });
+
+      if (response.ok) {
+        toast({
+          title: "Profile Updated",
+          description: "Your contact information has been saved successfully",
+        });
+      } else {
+        throw new Error('Failed to update profile');
+      }
     } catch (error) {
-      console.error("Error updating profile:", error);
       toast({
-        title: "Update failed",
-        description: "There was a problem updating your profile.",
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      setLocation("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
   };
 
   if (!currentUser) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="pt-6">
-            <h2 className="text-2xl font-bold mb-4">Login Required</h2>
-            <p className="mb-4">Please log in to view your profile.</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
+          <p className="text-gray-600">You need to be signed in to view your profile.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Profile Info Card */}
-          <div className="md:w-1/3">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-24 w-24 mb-4">
-                    <AvatarImage src={currentUser.photoURL || ""} alt={currentUser.displayName || ""} />
-                    <AvatarFallback className="bg-primary-blue text-white text-xl">
-                      {currentUser.displayName ? getInitials(currentUser.displayName) : <User />}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  {isEditing ? (
-                    <div className="space-y-4 w-full">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                          id="firstName"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={handleUpdateProfile}
-                          className="flex-1 bg-primary-blue text-white"
-                        >
-                          Save
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setIsEditing(false)}
-                          className="flex-1"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <h2 className="text-xl font-bold dark:text-white">
-                        {currentUser.displayName || "User"}
-                      </h2>
-                      <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                        {currentUser.email}
-                      </p>
-                      <div className="flex gap-2 w-full">
-                        <Button 
-                          onClick={() => setIsEditing(true)}
-                          variant="outline"
-                          className="flex-1"
-                        >
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Edit Profile
-                        </Button>
-                        <Button 
-                          onClick={handleLogout}
-                          variant="destructive"
-                          className="flex-1"
-                        >
-                          Log Out
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Profile</h1>
+        
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Account Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Name</Label>
+              <Input value={currentUser.displayName || ''} disabled />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input value={currentUser.email || ''} disabled />
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600 dark:text-neutral-400">Email Verified</span>
-                      <span className={currentUser.emailVerified ? "text-green-500" : "text-red-500"}>
-                        {currentUser.emailVerified ? "Yes" : "No"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600 dark:text-neutral-400">Member Since</span>
-                      <span className="dark:text-white">
-                        {currentUser.metadata.creationTime ? 
-                          new Date(currentUser.metadata.creationTime).toLocaleDateString() : 
-                          "Unknown"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Tabs for Rides & Bookings */}
-          <div className="md:w-2/3">
-            <Tabs defaultValue="rides">
-              <TabsList className="w-full">
-                <TabsTrigger value="rides" className="flex-1">My Rides</TabsTrigger>
-                <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>
-              </TabsList>
-              
-              {/* My Rides Tab */}
-              <TabsContent value="rides" className="mt-4 space-y-4">
-                {!currentUser.emailVerified && (
-                  <Alert className="mb-4">
-                    <AlertTitle>Email verification required</AlertTitle>
-                    <AlertDescription>
-                      Please verify your email to post rides. Check your inbox for a verification link.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {loading ? (
-                  <div className="text-center py-8">Loading rides...</div>
-                ) : rides.length > 0 ? (
-                  rides.map(ride => (
-                    <RideCard key={ride.id} ride={ride} onBook={() => {}} />
-                  ))
-                ) : (
-                  <div className="text-center py-8 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                    <h3 className="text-lg font-medium mb-2 dark:text-white">No rides posted</h3>
-                    <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                      You haven't posted any rides yet.
-                    </p>
-                    <Button 
-                      asChild
-                      className="bg-primary-orange text-white"
-                    >
-                      <a href="/post-ride">Post a Ride</a>
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-              
-              {/* My Bookings Tab */}
-              <TabsContent value="bookings" className="mt-4 space-y-4">
-                {loading ? (
-                  <div className="text-center py-8">Loading bookings...</div>
-                ) : bookings.length > 0 ? (
-                  bookings.map(ride => (
-                    <RideCard key={ride.id} ride={ride} onBook={() => {}} />
-                  ))
-                ) : (
-                  <div className="text-center py-8 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
-                    <h3 className="text-lg font-medium mb-2 dark:text-white">No bookings found</h3>
-                    <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                      You haven't booked any rides yet.
-                    </p>
-                    <Button 
-                      asChild
-                      className="bg-primary-orange text-white"
-                    >
-                      <a href="/find-rides">Find Rides</a>
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+            <p className="text-sm text-gray-600">
+              This information will be shown to other users when they view your rides
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center">
+                <FaPhone className="mr-2 text-primary" />
+                Phone Number
+              </Label>
+              <Input
+                id="phone"
+                placeholder="e.g. 352-123-4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="instagram" className="flex items-center">
+                <FaInstagram className="mr-2 text-primary" />
+                Instagram Username
+              </Label>
+              <Input
+                id="instagram"
+                placeholder="e.g. yourusername (without @)"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="snapchat" className="flex items-center">
+                <RiSnapchatFill className="mr-2 text-primary" />
+                Snapchat Username
+              </Label>
+              <Input
+                id="snapchat"
+                placeholder="e.g. yourusername"
+                value={snapchat}
+                onChange={(e) => setSnapchat(e.target.value)}
+              />
+            </div>
+            
+            <Button 
+              onClick={handleSave} 
+              disabled={loading}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              {loading ? "Saving..." : "Save Contact Information"}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

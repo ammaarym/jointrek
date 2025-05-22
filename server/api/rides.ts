@@ -99,9 +99,11 @@ router.put("/:id", async (req: Request, res: Response) => {
     
     // If seatsTotal is being updated, update seatsLeft to match (since we don't have bookings yet)
     let updateData = validationResult.data;
+    console.log('Update data received:', updateData);
     if (updateData.seatsTotal !== undefined) {
       // For simplicity, set seatsLeft equal to seatsTotal (no booking system yet)
       updateData.seatsLeft = updateData.seatsTotal;
+      console.log('Updated seatsLeft to match seatsTotal:', updateData.seatsTotal);
     }
     
     // Update the ride in the database

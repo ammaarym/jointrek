@@ -38,19 +38,24 @@ router.post('/verify', async (req: Request, res: Response) => {
       });
     }
 
-    const formData = new FormData();
-    formData.append('document', documentImage);
-    formData.append('type', documentType);
-    formData.append('accuracy', 'high');
-    formData.append('authenticate', 'true');
-    formData.append('vault', 'false'); // Don't store in vault for privacy
+    // Remove data:image/jpeg;base64, prefix if present
+    const base64Data = documentImage.replace(/^data:image\/[a-z]+;base64,/, '');
+
+    const requestBody = {
+      document: base64Data,
+      type: documentType,
+      accuracy: 'high',
+      authenticate: true,
+      vault: false // Don't store in vault for privacy
+    };
 
     const response = await fetch(`${ID_ANALYZER_BASE_URL}/scan`, {
       method: 'POST',
       headers: {
         'X-API-KEY': process.env.ID_ANALYZER_API_KEY!,
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify(requestBody),
     });
 
     const data: IDAnalyzerResponse = await response.json();

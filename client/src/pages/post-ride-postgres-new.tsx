@@ -57,6 +57,14 @@ const GENDER_PREFERENCES = [
   { label: "Female Only", value: "female" }
 ];
 
+// Car type options with MPG values
+const CAR_TYPES = [
+  { label: "Sedan", value: "sedan", mpg: 32 },
+  { label: "SUV", value: "suv", mpg: 25 },
+  { label: "Truck", value: "truck", mpg: 22 },
+  { label: "Minivan", value: "minivan", mpg: 28 }
+];
+
 // Validation schema
 const rideSchema = z.object({
   rideType: z.string().default("driver"),
@@ -67,7 +75,7 @@ const rideSchema = z.object({
   departureDate: z.string().min(1, { message: "Departure date is required" }),
   departureTime: z.string().min(1, { message: "Departure time is required" }),
   seatsTotal: z.string().min(1, { message: "Number of seats is required" }),
-  price: z.string().min(1, { message: "Price is required" }),
+  carType: z.string().min(1, { message: "Car type is required" }),
   genderPreference: z.string().default("no-preference"),
   carModel: z.string().optional(),
   phoneNumber: z.string().optional(),
@@ -97,7 +105,7 @@ export default function PostRidePostgres() {
       departureDate: format(new Date(), 'yyyy-MM-dd'),
       departureTime: "",
       seatsTotal: "1",
-      price: "",
+      carType: "",
       genderPreference: "no-preference",
       carModel: "",
       phoneNumber: "",
@@ -136,6 +144,32 @@ export default function PostRidePostgres() {
       // Estimate arrival time (2 hours later)
       const arrivalTime = addHours(departureDate, 2);
       
+      // Calculate automatic price based on car type and destination
+      let calculatedPrice = "25"; // fallback price
+      
+      if (rideTypeDisplay === 'driver' && data.carType && data.destination) {
+        try {
+          const carType = CAR_TYPES.find(car => car.value === data.carType);
+          if (carType) {
+            const response = await fetch('/api/gas-price/estimate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                destination: data.destination,
+                mpg: carType.mpg
+              })
+            });
+            
+            if (response.ok) {
+              const estimate = await response.json();
+              calculatedPrice = estimate.estimatedCost.toString();
+            }
+          }
+        } catch (error) {
+          console.log('Using fallback pricing due to estimation error');
+        }
+      }
+      
       // Create ride object
       const ride = {
         driverId: currentUser.uid,
@@ -147,7 +181,7 @@ export default function PostRidePostgres() {
         arrivalTime: arrivalTime,
         seatsTotal: parseInt(data.seatsTotal),
         seatsLeft: parseInt(data.seatsTotal),
-        price: data.price,
+        price: calculatedPrice,
         genderPreference: data.genderPreference,
         carModel: data.carModel || "",
         notes: data.notes || "",
@@ -371,6 +405,34 @@ export default function PostRidePostgres() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {rideTypeDisplay === 'driver' ? (
                   <>
+                    <FormField
+                      control={form.control}
+                      name="carType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block mb-2">Car Type (Required)</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 rounded-md border-gray-200">
+                                <SelectValue placeholder="Select car type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {CAR_TYPES.map(car => (
+                                <SelectItem key={car.value} value={car.value}>
+                                  {car.label} (~{car.mpg} mpg)
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
                     <FormField
                       control={form.control}
                       name="seatsTotal"

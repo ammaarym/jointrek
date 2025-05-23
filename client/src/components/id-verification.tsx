@@ -55,8 +55,9 @@ export default function IDVerification() {
     setVerificationResult(null);
 
     try {
-      // Convert file to base64
-      const base64 = await fileToBase64(file);
+      // Compress and convert file to base64
+      const compressedFile = await compressImage(file);
+      const base64 = await fileToBase64(compressedFile);
 
       const response = await fetch('/api/id-verification/verify', {
         method: 'POST',
@@ -95,6 +96,39 @@ export default function IDVerification() {
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions (max 1200px width, maintain aspect ratio)
+        const maxWidth = 1200;
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file); // Fallback to original if compression fails
+          }
+        }, 'image/jpeg', 0.8); // 80% quality
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
   };
 
   const fileToBase64 = (file: File): Promise<string> => {

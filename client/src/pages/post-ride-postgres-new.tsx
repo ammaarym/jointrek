@@ -65,6 +65,52 @@ const CAR_TYPES = [
   { label: "Minivan", value: "minivan", mpg: 28 }
 ];
 
+// Distance data from Gainesville to major Florida cities
+const CITY_DISTANCES = {
+  "Orlando": { miles: 113, hours: 2 },
+  "Tampa": { miles: 125, hours: 2.5 },
+  "Miami": { miles: 350, hours: 5.5 },
+  "Jacksonville": { miles: 73, hours: 1.5 },
+  "Tallahassee": { miles: 140, hours: 2.5 },
+  "Fort Lauderdale": { miles: 340, hours: 5 },
+  "St. Petersburg": { miles: 135, hours: 2.5 },
+  "Pensacola": { miles: 340, hours: 5 },
+  "Daytona Beach": { miles: 125, hours: 2 },
+  "Fort Myers": { miles: 200, hours: 3.5 }
+};
+
+// Enhanced pricing calculation
+function calculateRidePrice(params: {
+  distance: number;
+  mpg: number;
+  gasPrice: number;
+  destination: string;
+  date?: Date;
+}): number {
+  const { distance, mpg, gasPrice, destination, date } = params;
+  const buffer = 0.2; // 20% markup
+  const tollCities = ["Miami", "Tampa"];
+  const tollFee = tollCities.includes(destination) ? 2.5 : 0;
+
+  // Raw cost calculation
+  let baseCost = (distance / mpg) * gasPrice;
+  let total = baseCost * (1 + buffer) + tollFee;
+
+  // Weekend check (Friday = 5, Saturday = 6)
+  if (date) {
+    const day = date.getDay();
+    if (day === 5 || day === 6) {
+      total *= 1.1; // 10% increase on weekends
+    }
+  }
+
+  // Apply floor and ceiling
+  total = Math.max(8, Math.min(total, 60));
+
+  // Round to nearest dollar
+  return Math.round(total);
+}
+
 // Validation schema
 const rideSchema = z.object({
   rideType: z.string().default("driver"),
@@ -141,32 +187,31 @@ export default function PostRidePostgres() {
       
       departureDate.setHours(hours, minutes);
       
-      // Estimate arrival time (2 hours later)
-      const arrivalTime = addHours(departureDate, 2);
+      // Calculate realistic arrival time based on destination
+      const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
+      const travelHours = cityData ? cityData.hours : 2; // fallback to 2 hours
+      const arrivalTime = addHours(departureDate, travelHours);
       
-      // Calculate automatic price based on car type and destination
+      // Calculate automatic price using new enhanced formula
       let calculatedPrice = "25"; // fallback price
       
       if (rideTypeDisplay === 'driver' && data.carType && data.destination) {
         try {
           const carType = CAR_TYPES.find(car => car.value === data.carType);
-          if (carType) {
-            const response = await fetch('/api/gas-price/estimate', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                destination: data.destination,
-                mpg: carType.mpg
-              })
+          const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
+          
+          if (carType && cityData) {
+            const price = calculateRidePrice({
+              distance: cityData.miles,
+              mpg: carType.mpg,
+              gasPrice: 3.45, // fallback gas price
+              destination: data.destination,
+              date: departureDate
             });
-            
-            if (response.ok) {
-              const estimate = await response.json();
-              calculatedPrice = estimate.estimatedCost.toString();
-            }
+            calculatedPrice = price.toString();
           }
         } catch (error) {
-          console.log('Using fallback pricing due to estimation error');
+          console.log('Using fallback pricing due to calculation error');
         }
       }
       
@@ -524,6 +569,10 @@ export default function PostRidePostgres() {
                 />
                 
                 {rideTypeDisplay === 'driver' && (
+                  <div></div> // Removed car model field
+                )}
+                
+                {false && ( // Hidden car model field
                   <FormField
                     control={form.control}
                     name="carModel"

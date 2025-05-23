@@ -460,24 +460,7 @@ export default function PostRidePostgres() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="block mb-2">Price per Person ($) (Required)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="text"
-                              placeholder="e.g. 25" 
-                              className="h-12 rounded-md border-gray-200"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
                   </>
                 ) : (
                   <>
@@ -506,24 +489,7 @@ export default function PostRidePostgres() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="block mb-2">Amount Willing to Pay ($) (Required)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="text"
-                              placeholder="e.g. 25" 
-                              className="h-12 rounded-md border-gray-200"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
                   </>
                 )}
               </div>

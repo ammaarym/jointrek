@@ -86,12 +86,18 @@ export default function FindRidesPostgres() {
       
       // Filter by date (if selected)
       if (appliedFilters.date) {
-        const selectedDate = new Date(appliedFilters.date);
+        const selectedDate = new Date(appliedFilters.date + 'T00:00:00');
         const rideDate = new Date(ride.departureTime);
         
-        if (selectedDate.getFullYear() !== rideDate.getFullYear() ||
-            selectedDate.getMonth() !== rideDate.getMonth() ||
-            selectedDate.getDate() !== rideDate.getDate()) {
+        // Compare dates in local timezone
+        const selectedDay = selectedDate.getFullYear() + '-' + 
+                           String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(selectedDate.getDate()).padStart(2, '0');
+        const rideDay = rideDate.getFullYear() + '-' + 
+                       String(rideDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(rideDate.getDate()).padStart(2, '0');
+        
+        if (selectedDay !== rideDay) {
           return false;
         }
       }
@@ -100,6 +106,13 @@ export default function FindRidesPostgres() {
       if (appliedFilters.passengers && appliedFilters.passengers !== 'any' && appliedFilters.passengers !== '') {
         const requiredSeats = parseInt(appliedFilters.passengers);
         if (ride.seatsLeft < requiredSeats) {
+          return false;
+        }
+      }
+      
+      // Filter by gender preference (if selected)
+      if (appliedFilters.genderFilter && appliedFilters.genderFilter !== 'no preference') {
+        if (ride.genderPreference !== appliedFilters.genderFilter) {
           return false;
         }
       }
@@ -197,25 +210,27 @@ export default function FindRidesPostgres() {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="passengers" className="block mb-2">Passengers</Label>
-              <Select value={passengers} onValueChange={setPassengers}>
-                <SelectTrigger className="h-12 rounded-md border-gray-200">
-                  <SelectValue placeholder="Any number" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any number</SelectItem>
-                  <SelectItem value="1">1 passenger</SelectItem>
-                  <SelectItem value="2">2 passengers</SelectItem>
-                  <SelectItem value="3">3 passengers</SelectItem>
-                  <SelectItem value="4">4 passengers</SelectItem>
-                  <SelectItem value="5">5 passengers</SelectItem>
-                  <SelectItem value="6">6 passengers</SelectItem>
-                  <SelectItem value="7">7 passengers</SelectItem>
-                  <SelectItem value="8">8+ passengers</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {feedType === 'drivers' && (
+              <div>
+                <Label htmlFor="passengers" className="block mb-2">Seats Needed</Label>
+                <Select value={passengers} onValueChange={setPassengers}>
+                  <SelectTrigger className="h-12 rounded-md border-gray-200">
+                    <SelectValue placeholder="Any number" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any number</SelectItem>
+                    <SelectItem value="1">1 seat</SelectItem>
+                    <SelectItem value="2">2 seats</SelectItem>
+                    <SelectItem value="3">3 seats</SelectItem>
+                    <SelectItem value="4">4 seats</SelectItem>
+                    <SelectItem value="5">5 seats</SelectItem>
+                    <SelectItem value="6">6 seats</SelectItem>
+                    <SelectItem value="7">7 seats</SelectItem>
+                    <SelectItem value="8">8+ seats</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             
             <div>
               <Label htmlFor="gender" className="block mb-2">Gender Preference</Label>

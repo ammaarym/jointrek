@@ -13,6 +13,7 @@ import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
+import GasPriceEstimate from '@/components/gas-price-estimate';
 
 // List of major Florida cities
 const FLORIDA_CITIES = [
@@ -391,8 +392,11 @@ export default function FindRidesPostgres() {
                                       {ride.seatsLeft} {ride.seatsLeft === 1 ? 'seat' : 'seats'} left
                                     </div>
                                   )}
-                                  <div className="text-xl font-bold">
-                                    ${ride.price}
+                                  <div className="text-right">
+                                    <div className="text-xl font-bold">
+                                      ${ride.price}
+                                    </div>
+                                    <GasPriceEstimate destination={ride.destination} />
                                   </div>
                                 </div>
                               </div>

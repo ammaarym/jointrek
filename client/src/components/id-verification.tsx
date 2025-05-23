@@ -58,7 +58,7 @@ export default function IDVerification() {
       // Convert file to base64
       const base64 = await fileToBase64(file);
 
-      const response = await apiRequest('/api/id-verification/verify', {
+      const response = await fetch('/api/id-verification/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,19 +69,21 @@ export default function IDVerification() {
         }),
       });
 
-      if (response.success) {
-        setVerificationResult(response.verification);
-        setIsVerified(response.verification.passed);
+      const data = await response.json();
+
+      if (data.success) {
+        setVerificationResult(data.verification);
+        setIsVerified(data.verification.passed);
         
         toast({
-          title: response.verification.passed ? "ID Verified Successfully!" : "Verification Failed",
-          description: response.verification.passed 
+          title: data.verification.passed ? "ID Verified Successfully!" : "Verification Failed",
+          description: data.verification.passed 
             ? "Your identity has been verified. You now have enhanced trust on GatorLift!"
             : "We couldn't verify your ID. Please try with a clearer image.",
-          variant: response.verification.passed ? "default" : "destructive",
+          variant: data.verification.passed ? "default" : "destructive",
         });
       } else {
-        throw new Error(response.error || 'Verification failed');
+        throw new Error(data.error || 'Verification failed');
       }
     } catch (error) {
       console.error('ID verification error:', error);

@@ -96,7 +96,11 @@ export default function Profile() {
   }
 
   return (
-    <div className="container px-4 py-6 mx-auto max-w-2xl">
+    <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">
+      {/* ID Verification Section */}
+      <IDVerification />
+      
+      {/* Contact Information Section */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

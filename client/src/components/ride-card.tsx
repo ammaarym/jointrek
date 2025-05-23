@@ -107,8 +107,13 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
             {/* Price and booking */}
             <div className="md:w-1/4 flex flex-col items-end">
               <div className="flex flex-col items-end w-full mb-2">
-                {/* Moved status badges to the top */}
-                <div className="mb-1">
+                {/* Price moved to the very right */}
+                <span className="text-2xl font-bold text-neutral-900 text-right">
+                  ${ride.price}
+                </span>
+                
+                {/* Gender preference badges moved under price */}
+                <div className="mt-1">
                   {ride.genderPreference === "female" ? (
                     <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800 border-pink-200">
                       <Users className="w-3 h-3 mr-1" />
@@ -119,18 +124,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       <Users className="w-3 h-3 mr-1" />
                       Male riders only
                     </Badge>
-                  ) : (
-                    <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border-green-200">
-                      <User className="w-3 h-3 mr-1" />
-                      {ride.seatsLeft} {ride.seatsLeft === 1 ? "seat" : "seats"} left
-                    </Badge>
-                  )}
+                  ) : null}
                 </div>
-                
-                {/* Price moved to the very right */}
-                <span className="text-2xl font-bold text-neutral-900 text-right">
-                  ${ride.price}
-                </span>
               </div>
               
               <div onClick={(e) => e.stopPropagation()}>

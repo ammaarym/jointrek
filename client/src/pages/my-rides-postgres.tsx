@@ -9,13 +9,7 @@ import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTr
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import EditRideModal from '@/components/edit-ride-modal';
 
 // Define the schema for the edit form
 const editRideSchema = z.object({
@@ -86,24 +80,10 @@ export default function MyRidesPostgres() {
     setLocation('/post-ride');
   };
 
-  // Open the edit dialog
+  // Open the edit modal with automatic pricing
   const handleEditRide = (ride: any) => {
     setRideToEdit(ride);
-    
-    // Set the form values
-    form.reset({
-      origin: ride.origin,
-      originArea: ride.originArea,
-      destination: ride.destination,
-      destinationArea: ride.destinationArea,
-      price: ride.price.toString(),
-      seatsTotal: ride.seatsTotal,
-      carModel: ride.carModel || "",
-      notes: ride.notes || "",
-      genderPreference: ride.genderPreference || "no-preference"
-    });
-    
-    setEditDialogOpen(true);
+    setEditModalOpen(true);
   };
 
   // Submit edit form
@@ -198,15 +178,17 @@ export default function MyRidesPostgres() {
         </DialogContent>
       </Dialog>
       
-      {/* Edit ride dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle>Edit Ride</DialogTitle>
-            <DialogDescription>
-              Update the details of your ride. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
+      {/* Edit ride modal with automatic pricing */}
+      <EditRideModal 
+        ride={rideToEdit}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onRideUpdated={() => {
+          if (currentUser) {
+            loadMyRides(currentUser.uid);
+          }
+        }}
+      />
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmitEdit)} className="space-y-4 py-4">

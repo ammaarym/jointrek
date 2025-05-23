@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { FaPhone, FaInstagram, FaEdit } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
+import IDVerification from '@/components/id-verification';
 
 export default function Profile() {
   const { currentUser } = useAuth();

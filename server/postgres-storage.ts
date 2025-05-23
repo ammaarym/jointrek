@@ -61,7 +61,11 @@ export class PostgresStorage implements IStorage {
   }
 
   async getRidesByDriver(driverId: string): Promise<Ride[]> {
-    return await db.select().from(rides).where(eq(rides.driverId, driverId));
+    return await db
+      .select()
+      .from(rides)
+      .where(eq(rides.driverId, driverId))
+      .orderBy(desc(rides.departureTime));
   }
 
   async getRidesByOrigin(origin: string): Promise<Ride[]> {

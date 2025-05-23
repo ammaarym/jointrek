@@ -406,7 +406,7 @@ export default function FindRidesPostgres() {
                                 <div className="flex-1">
                                   <div className="mb-4">
                                     <div className="font-medium">{ride.origin} <span className="text-sm text-gray-500 font-normal">{ride.originArea}</span></div>
-                                    <div className="text-sm text-gray-500">{new Date(ride.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})}</div>
+                                    <div className="text-sm text-gray-500">{new Date(ride.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}</div>
                                   </div>
                                   <div>
                                     <div className="font-medium">{ride.destination} <span className="text-sm text-gray-500 font-normal">{ride.destinationArea}</span></div>

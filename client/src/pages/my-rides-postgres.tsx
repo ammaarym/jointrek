@@ -189,16 +189,116 @@ export default function MyRidesPostgres() {
           }
         }}
       />
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitEdit)} className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Origin City */}
-                <FormField
-                  control={form.control}
-                  name="origin"
-                  render={({ field }) => (
-                    <FormItem>
+
+      {/* Rides list */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          // Loading skeleton
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-8 w-16" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-24" />
+              </CardFooter>
+            </Card>
+          ))
+        ) : myRides.length > 0 ? (
+          myRides.map((ride) => (
+            <Card key={ride.id} className="overflow-hidden h-full flex flex-col">
+              <CardContent className="p-4 flex-1">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {ride.origin} → {ride.destination}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(new Date(ride.departureTime))}
+                    </p>
+                  </div>
+                  <div className="text-lg font-bold text-primary">
+                    ${ride.price}
+                  </div>
+                </div>
+                
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <FaCalendarAlt className="text-primary mr-2 flex-shrink-0" />
+                    <span>Departure: {formatDate(new Date(ride.departureTime))}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FaCar className="text-primary mr-2 flex-shrink-0" />
+                    <span>{ride.carModel || 'Car not specified'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
+                    <span>{ride.seatsLeft} available</span>
+                  </div>
+                  <div className="flex items-start">
+                    <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
+                    <div>
+                      <div>From: {ride.originArea || ride.origin}</div>
+                      <div>To: {ride.destinationArea || ride.destination}</div>
+                    </div>
+                  </div>
+                  {ride.notes && (
+                    <div className="text-muted-foreground">
+                      <strong>Notes:</strong> {ride.notes}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              
+              <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditRide(ride)}
+                  className="flex items-center gap-1"
+                >
+                  <FaEdit className="w-4 h-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setRideToDelete(ride);
+                    setDeleteDialogOpen(true);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <FaTrash className="w-4 h-4" />
+                  Delete
+                </Button>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-12">
+            <p className="text-muted-foreground mb-4">You haven't posted any rides yet.</p>
+            <Button onClick={navigateToPostRide} className="bg-primary hover:bg-primary/90">
+              Post Your First Ride
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
                       <FormLabel>From City</FormLabel>
                       <Select 
                         value={field.value} 

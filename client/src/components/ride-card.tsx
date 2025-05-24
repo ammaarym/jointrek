@@ -349,6 +349,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                     <div>
                       <div className="text-neutral-500 text-sm">Departure</div>
                       <div className="font-medium">{formatDateTime(ride.departureTime)}</div>
+                      <div className="text-neutral-500 text-xs">{formatTime(ride.departureTime)}</div>
                     </div>
                   </div>
                   
@@ -356,22 +357,25 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                     <Clock className="w-4 h-4 mr-2 text-neutral-500 mt-0.5" />
                     <div>
                       <div className="text-neutral-500 text-sm">Arrival (estimated)</div>
-                      <div className="font-medium">{getEstimatedArrival() || formatDateTime(ride.arrivalTime)}</div>
+                      <div className="font-medium">{formatDateTime(ride.arrivalTime)}</div>
+                      <div className="text-neutral-500 text-xs">{getEstimatedArrival() || formatTime(ride.arrivalTime)}</div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <div className={`grid grid-cols-1 ${ride.rideType === 'driver' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4 mt-2`}>
                 <div>
                   <div className="text-neutral-500 text-sm">Price</div>
                   <div className="font-bold text-xl text-orange-600">${ride.price}</div>
                 </div>
                 
-                <div>
-                  <div className="text-neutral-500 text-sm">Seats Available</div>
-                  <div className="font-medium">{ride.seatsLeft} seats available</div>
-                </div>
+                {ride.rideType === 'driver' && (
+                  <div>
+                    <div className="text-neutral-500 text-sm">Seats Available</div>
+                    <div className="font-medium">{ride.seatsLeft} seats available</div>
+                  </div>
+                )}
                 
                 <div>
                   <div className="text-neutral-500 text-sm">Gender Preference</div>
@@ -385,7 +389,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                 </div>
               </div>
               
-              {ride.carModel && (
+              {ride.carModel && ride.rideType === 'driver' && (
                 <div className="mt-3">
                   <div className="text-neutral-500 text-sm">Car Model</div>
                   <div className="font-medium">{ride.carModel?.charAt(0).toUpperCase() + ride.carModel?.slice(1)}</div>

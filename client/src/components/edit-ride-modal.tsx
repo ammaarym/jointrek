@@ -146,12 +146,12 @@ export default function EditRideModal({ ride, isOpen, onClose, onRideUpdated }: 
       const timeString = `${departureDate.getHours().toString().padStart(2, '0')}:${departureDate.getMinutes().toString().padStart(2, '0')}`;
       
       form.reset({
-        destination: ride.destination.city,
-        destinationArea: ride.destination.area,
+        destination: ride.destination,
+        destinationArea: ride.destinationArea,
         departureDate: format(departureDate, 'yyyy-MM-dd'),
         departureTime: timeString,
         seatsTotal: ride.seatsTotal.toString(),
-        carType: "sedan", // Default since we don't store car type in old rides
+        carType: ride.carModel?.split(' - ')[0] || ride.carModel || "sedan", // Extract car type from carModel
         genderPreference: ride.genderPreference,
         notes: ride.notes || ""
       });
@@ -413,14 +413,7 @@ export default function EditRideModal({ ride, isOpen, onClose, onRideUpdated }: 
               )}
             />
             
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">💰 Automatic Pricing</h4>
-              <p className="text-sm text-blue-700">
-                The ride price will be automatically calculated based on:
-                • Distance to destination • Car fuel efficiency • Current gas prices
-                • Toll fees for Miami/Tampa • Weekend surcharge (if applicable)
-              </p>
-            </div>
+
             
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

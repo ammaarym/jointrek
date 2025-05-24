@@ -13,8 +13,8 @@ export default function GasPriceEstimate({ destination }: GasPriceEstimateProps)
     const fetchEstimate = async () => {
       setLoading(true);
       try {
-        // Use average MPG for typical student car (around 25-30 mpg)
-        const averageMpg = 27;
+        // Use sedan MPG (most common car type)
+        const averageMpg = 32;
         
         const response = await fetch('/api/gas-price/estimate', {
           method: 'POST',

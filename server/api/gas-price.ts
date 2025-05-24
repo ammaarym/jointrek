@@ -83,13 +83,13 @@ async function fetchGasPrice(): Promise<number> {
   } catch (error) {
     console.error('Error fetching gas price:', error);
     // Fallback to a reasonable default if API fails
-    const fallbackPrice = 3.45; // Current average Florida gas price
+    const fallbackPrice = 3.20; // Gainesville gas price
     console.log('Using fallback gas price:', fallbackPrice);
     return fallbackPrice;
   }
 }
 
-// Function to calculate ride estimate
+// Function to calculate ride estimate (simplified gas cost only)
 export async function getRideEstimate(destination: string, mpg: number): Promise<number> {
   try {
     const distance = CITY_DISTANCES[destination];
@@ -99,12 +99,12 @@ export async function getRideEstimate(destination: string, mpg: number): Promise
 
     const gasPrice = await fetchGasPrice();
     
-    // Calculate total cost: ((distance / mpg) × gasPrice) × 1.2
-    // The 1.2 multiplier accounts for tolls, wear & tear, etc.
-    const totalCost = ((distance / mpg) * gasPrice) * 1.2;
+    // Calculate just the gas cost: (distance / mpg) × gasPrice
+    // This should be lower than the actual ride price
+    const gasCost = (distance / mpg) * gasPrice;
     
     // Round to nearest dollar
-    return Math.round(totalCost);
+    return Math.round(gasCost);
   } catch (error) {
     console.error('Error calculating ride estimate:', error);
     throw error;

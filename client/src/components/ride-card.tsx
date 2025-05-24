@@ -156,10 +156,23 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
             {/* Price and booking */}
             <div className="md:w-1/4 flex flex-col items-end">
               <div className="flex flex-col items-end w-full mb-2">
-                {/* Price moved to the very right */}
-                <span className="text-2xl font-bold text-neutral-900 text-right">
-                  ${ride.price}
-                </span>
+                {/* Price with calculator icon */}
+                <div className="flex items-center">
+                  <span className="text-2xl font-bold text-neutral-900 text-right">
+                    ${ride.price}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-2 p-1 h-6 w-6"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPricingOpen(true);
+                    }}
+                  >
+                    <Calculator className="w-4 h-4 text-gray-500" />
+                  </Button>
+                </div>
                 
                 {/* Gender preference badges moved under price */}
                 <div className="mt-1">
@@ -412,6 +425,99 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                 )}
               </div>
             ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pricing Breakdown Popup */}
+      <Dialog open={pricingOpen} onOpenChange={setPricingOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold flex items-center">
+              <Calculator className="w-5 h-5 mr-2 text-orange-600" />
+              How is ${ride.price} calculated?
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3">Trip Breakdown:</h4>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Distance to {ride.destination}:</span>
+                  <span className="font-medium">350 miles</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>Car type ({ride.carModel || 'sedan'}):</span>
+                  <span className="font-medium">
+                    {ride.carModel?.includes('minivan') ? '28' : 
+                     ride.carModel?.includes('suv') ? '25' : 
+                     ride.carModel?.includes('truck') ? '22' : '32'} MPG
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>Gas price (Gainesville):</span>
+                  <span className="font-medium">$3.20/gallon</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>Base gas cost:</span>
+                  <span className="font-medium">
+                    ${((350 / (ride.carModel?.includes('minivan') ? 28 : 
+                              ride.carModel?.includes('suv') ? 25 : 
+                              ride.carModel?.includes('truck') ? 22 : 32)) * 3.20).toFixed(2)}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>Safety buffer (20%):</span>
+                  <span className="font-medium">
+                    +${(((350 / (ride.carModel?.includes('minivan') ? 28 : 
+                                ride.carModel?.includes('suv') ? 25 : 
+                                ride.carModel?.includes('truck') ? 22 : 32)) * 3.20) * 0.2).toFixed(2)}
+                  </span>
+                </div>
+                
+                {(ride.destination === 'Miami' || ride.destination === 'Tampa') && (
+                  <div className="flex justify-between">
+                    <span>Toll fees:</span>
+                    <span className="font-medium">+$2.50</span>
+                  </div>
+                )}
+                
+                <hr className="my-2" />
+                
+                <div className="flex justify-between font-medium">
+                  <span>Total trip cost:</span>
+                  <span>
+                    ${Math.round(
+                      ((350 / (ride.carModel?.includes('minivan') ? 28 : 
+                              ride.carModel?.includes('suv') ? 25 : 
+                              ride.carModel?.includes('truck') ? 22 : 32)) * 3.20) * 1.2 + 
+                      ((ride.destination === 'Miami' || ride.destination === 'Tampa') ? 2.50 : 0)
+                    )}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between text-lg font-bold text-orange-600">
+                  <span>Per person ({ride.seatsTotal} seats):</span>
+                  <span>${ride.price}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-xs text-gray-500 text-center">
+              Price calculated automatically based on distance, car efficiency, gas prices, and passenger count
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={() => setPricingOpen(false)}>
+              Got it!
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

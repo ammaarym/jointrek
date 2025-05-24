@@ -43,10 +43,7 @@ router.post('/verify', async (req: Request, res: Response) => {
 
     const requestBody = {
       document: base64Data,
-      type: documentType,
-      accuracy: 'high',
-      authenticate: true,
-      vault: false // Don't store in vault for privacy
+      profile: 'security_medium' // Required parameter for ID verification
     };
 
     const response = await fetch(`${ID_ANALYZER_BASE_URL}/scan`, {

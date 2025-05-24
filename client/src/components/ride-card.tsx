@@ -12,7 +12,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { Ride } from "@/lib/types";
-import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit, Calculator } from "lucide-react";
+import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit, Calculator, Mail } from "lucide-react";
 import { CAR_TYPE_MPG, CITY_DISTANCES } from "@shared/pricing";
 // Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 
@@ -272,21 +272,32 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
               <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
                 <h5 className="font-medium text-neutral-900 mb-3">Contact Information</h5>
                 <div className="grid grid-cols-1 gap-3">
-                  {ride.driver.phone && (
+                  {/* Show phone first if available */}
+                  {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
                     <div className="flex items-center text-neutral-700">
                       <Phone className="w-5 h-5 mr-3 text-orange-600" />
-                      <span className="font-medium">{ride.driver.phone}</span>
+                      <span className="font-medium">{ride.driver.contactInfo?.phone || ride.driver.phone}</span>
                     </div>
                   )}
                   
-                  {ride.driver.instagram && (
+                  {/* Show email if no phone available */}
+                  {!(ride.driver.contactInfo?.phone || ride.driver.phone) && (ride.driver.contactInfo?.email || ride.driver.email) && (
+                    <div className="flex items-center text-neutral-700">
+                      <Mail className="w-5 h-5 mr-3 text-orange-600" />
+                      <span className="font-medium">{ride.driver.contactInfo?.email || ride.driver.email}</span>
+                    </div>
+                  )}
+                  
+                  {/* Show Instagram */}
+                  {(ride.driver.contactInfo?.instagram || ride.driver.instagram) && (
                     <div className="flex items-center text-neutral-700">
                       <Instagram className="w-5 h-5 mr-3 text-orange-600" />
-                      <span className="font-medium">@{ride.driver.instagram}</span>
+                      <span className="font-medium">@{ride.driver.contactInfo?.instagram || ride.driver.instagram}</span>
                     </div>
                   )}
                   
-                  {ride.driver.snapchat && (
+                  {/* Show Snapchat */}
+                  {(ride.driver.contactInfo?.snapchat || ride.driver.snapchat) && (
                     <div className="flex items-center text-neutral-700">
                       <svg 
                         className="w-5 h-5 mr-3 text-orange-600" 
@@ -299,7 +310,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                           fill="currentColor"
                         />
                       </svg>
-                      <span className="font-medium">{ride.driver.snapchat}</span>
+                      <span className="font-medium">{ride.driver.contactInfo?.snapchat || ride.driver.snapchat}</span>
                     </div>
                   )}
                 </div>

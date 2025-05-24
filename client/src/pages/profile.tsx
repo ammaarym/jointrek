@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { FaPhone, FaInstagram, FaEdit } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
-import IDVerification from '@/components/id-verification';
+
 
 export default function Profile() {
   const { currentUser } = useAuth();
@@ -97,9 +97,6 @@ export default function Profile() {
 
   return (
     <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">
-      {/* ID Verification Section */}
-      <IDVerification />
-      
       {/* Contact Information Section */}
       <Card>
         <CardHeader>

@@ -14,6 +14,7 @@ import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import GasPriceEstimate from '@/components/gas-price-estimate';
+import RideCard from '@/components/ride-card';
 
 // List of major Florida cities
 const FLORIDA_CITIES = [
@@ -359,125 +360,16 @@ export default function FindRidesPostgres() {
                 const adaptedRide = adaptPostgresRideToCardFormat(ride);
                 
                 return (
-                  <Dialog key={ride.id}>
-                    <DialogTrigger asChild>
-                      <Card className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                        <CardContent className="p-0">
-                          <div className="flex p-5">
-                            <div className="mr-4">
-                              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                                {adaptedRide.driver.photoUrl ? (
-                                  <img src={adaptedRide.driver.photoUrl} alt={adaptedRide.driver.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <FaUser className="text-gray-400 text-xl" />
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-semibold">{adaptedRide.driver.name}</h3>
-                                  <div className="text-sm text-gray-500">
-                                    {new Date(ride.departureTime).toLocaleDateString('en-US', { 
-                                      weekday: 'short', 
-                                      month: 'short', 
-                                      day: 'numeric' 
-                                    })}
-                                  </div>
-                                </div>
-                                <div className="text-right flex flex-col items-end">
-                                  {ride.seatsLeft > 0 && (
-                                    <div className="text-green-600 text-sm font-medium flex items-center mb-1">
-                                      <FaUserFriends className="mr-1 text-xs" />
-                                      {ride.seatsLeft} {ride.seatsLeft === 1 ? 'seat' : 'seats'} left
-                                    </div>
-                                  )}
-                                  <div className="text-right">
-                                    <div className="text-xl font-bold">
-                                      ${ride.price}
-                                    </div>
-                                    <GasPriceEstimate destination={ride.destination} />
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-4 flex">
-                                <div className="relative w-10 mr-2">
-                                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                                  <div className="absolute top-0 left-2.5 w-3 h-3 rounded-full bg-blue-500"></div>
-                                  <div className="absolute bottom-0 left-2.5 w-3 h-3 rounded-full bg-orange-500"></div>
-                                </div>
-                                <div className="flex-1">
-                                  <div className="mb-4">
-                                    <div className="font-medium">{ride.origin} <span className="text-sm text-gray-500 font-normal">{ride.originArea}</span></div>
-                                    <div className="text-sm text-gray-500">{new Date(ride.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}</div>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium">{ride.destination} <span className="text-sm text-gray-500 font-normal">{ride.destinationArea}</span></div>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {ride.genderPreference === 'female' && (
-                                <div className="mt-3 text-sm text-pink-600 flex items-center">
-                                  <span className="inline-block px-2 py-0.5 rounded-full bg-pink-50 text-xs">Female riders only</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl text-primary">Ride Details</DialogTitle>
-                        <DialogDescription>
-                          Connect with the driver to coordinate your ride
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
-                        <div className="space-y-4">
-                          <div className="bg-muted/50 p-4 rounded-lg">
-                            <h4 className="font-medium flex items-center text-primary mb-2">
-                              <FaUser className="mr-2" /> {feedType === 'drivers' ? 'Driver' : 'Passenger'}
-                            </h4>
-                            <p className="text-lg">{adaptedRide.driver.name}</p>
-                            <div className="mt-2 space-y-1">
-                              {adaptedRide.driver.contactInfo.phone ? (
-                                <p className="text-sm"><span className="font-medium">Phone:</span> {adaptedRide.driver.contactInfo.phone}</p>
-                              ) : (
-                                <p className="text-sm"><span className="font-medium">Email:</span> {adaptedRide.driver.contactInfo.email}</p>
-                              )}
-                              {adaptedRide.driver.contactInfo.instagram && (
-                                <p className="text-sm"><span className="font-medium">Instagram:</span> @{adaptedRide.driver.contactInfo.instagram}</p>
-                              )}
-                              {adaptedRide.driver.contactInfo.snapchat && (
-                                <p className="text-sm"><span className="font-medium">Snapchat:</span> {adaptedRide.driver.contactInfo.snapchat}</p>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="bg-muted/50 p-4 rounded-lg">
-                            <h4 className="font-medium flex items-center text-primary mb-2">
-                              <FaCalendarAlt className="mr-2" /> Schedule
-                            </h4>
-                            <p>{formatDate(new Date(ride.departureTime))}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div className="bg-muted/50 p-4 rounded-lg">
-                            <h4 className="font-medium flex items-center text-primary mb-2">
-                              <FaMapMarkerAlt className="mr-2" /> Route
-                            </h4>
-                            <p><span className="font-medium">From:</span> {ride.origin} ({ride.originArea})</p>
-                            <p><span className="font-medium">To:</span> {ride.destination} ({ride.destinationArea})</p>
-                          </div>
-                          
-                          <div className="bg-muted/50 p-4 rounded-lg">
-                            <h4 className="font-medium flex items-center text-primary mb-2">
-                              <FaCar className="mr-2" /> Ride Info
+                  <RideCard key={ride.id} ride={adaptedRide} />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
                             </h4>
                             <p><span className="font-medium">Seats:</span> {ride.seatsLeft} available</p>
                             <p><span className="font-medium">Price:</span> ${ride.price}</p>

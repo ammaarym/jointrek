@@ -169,13 +169,15 @@ export default function PostRidePostgres() {
       
       if (rideTypeDisplay === 'driver' && data.carType && data.destination) {
         try {
-          const carType = CAR_TYPES.find(car => car.value === data.carType);
           const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
           
-          if (carType && cityData) {
+          if (cityData) {
+            // Get MPG from car type
+            const mpg = CAR_TYPE_MPG[data.carType as keyof typeof CAR_TYPE_MPG] || 32;
+            
             const price = calculatePriceShared({
               distance: cityData.miles,
-              mpg: carType.mpg,
+              mpg: mpg,
               gasPrice: 3.20, // Gainesville gas price
               destination: data.destination,
               seatsTotal: parseInt(data.seatsTotal),
@@ -201,7 +203,7 @@ export default function PostRidePostgres() {
         seatsLeft: parseInt(data.seatsTotal),
         price: calculatedPrice,
         genderPreference: data.genderPreference,
-        carModel: data.carModel || "",
+        carModel: `${data.carType}${data.carModel ? ` - ${data.carModel}` : ''}`,
         notes: data.notes || "",
         rideType: data.rideType
       };

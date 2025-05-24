@@ -6,7 +6,7 @@ interface GasPriceEstimateProps {
   carType?: string;
 }
 
-export default function GasPriceEstimate({ destination }: GasPriceEstimateProps) {
+export default function GasPriceEstimate({ destination, carType }: GasPriceEstimateProps) {
   const [estimate, setEstimate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -14,8 +14,14 @@ export default function GasPriceEstimate({ destination }: GasPriceEstimateProps)
     const fetchEstimate = async () => {
       setLoading(true);
       try {
-        // Use sedan MPG (most common car type)
-        const averageMpg = 32;
+        // Use car-specific MPG or default to sedan
+        const CAR_TYPE_MPG = {
+          "sedan": 32,
+          "suv": 25, 
+          "truck": 22,
+          "minivan": 28
+        };
+        const averageMpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
         
         const response = await fetch('/api/gas-price/estimate', {
           method: 'POST',

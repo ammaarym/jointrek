@@ -193,27 +193,27 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                 </div>
               </div>
               
-              <div onClick={(e) => e.stopPropagation()}>
-                <Button 
-                  className="block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isDriverUser && onEdit) {
-                      onEdit(ride);
-                    } else {
-                      setDetailsOpen(true); // Show contact details dialog
-                    }
-                  }}
-                >
-                  {isDriverUser ? "Edit Ride" : "View Contact Info"}
-                </Button>
-              </div>
+              {isDriverUser && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button 
+                    className="block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onEdit) {
+                        onEdit(ride);
+                      }
+                    }}
+                  >
+                    Edit Ride
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-3 flex justify-center">
             <Button 
-              variant="ghost" 
-              className="text-neutral-500 text-sm flex items-center"
+              variant="outline" 
+              className="bg-white hover:bg-orange-50 border-2 border-orange-200 text-orange-700 hover:border-orange-300 px-6 py-2 rounded-lg"
               onClick={(e) => {
                 e.stopPropagation();
                 setDetailsOpen(true);
@@ -221,7 +221,6 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
             >
               <Info className="w-4 h-4 mr-1" />
               View details
-              <ChevronDown className="w-4 h-4 ml-1" />
             </Button>
           </div>
         </div>
@@ -302,13 +301,10 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       <svg 
                         className="w-5 h-5 mr-3 text-orange-600" 
                         viewBox="0 0 24 24" 
-                        fill="none" 
+                        fill="currentColor" 
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM18.5 12.75C18.5 12.75 16.5 12.5 16 12.5C15.5 12.5 15.25 12.75 15 13C14.75 13.25 14 14.1383 13.5 14C13 13.8617 11.8 13 10.5 11.5C9.2 10 8.75 9 8.75 9C8.75 9 8.5 8.75 8 9.5C7.5 10.25 7 10.5 6.5 10.5C6 10.5 5 10.5 5 10.5C5 8.25 6.5 6.25 8.75 6.25C11 6.25 12.25 7.75 13.5 7.75C14.75 7.75 16.25 6.25 18.5 6.25C18.5 7.75 18.5 10.625 18.5 12.75Z"
-                          fill="currentColor"
-                        />
+                        <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.624 5.367 11.99 11.988 11.99s11.99-5.366 11.99-11.99C24.007 5.367 18.641.001 12.017.001zM8.484 7.521c.401 0 .727.326.727.727 0 .401-.326.727-.727.727-.401 0-.727-.326-.727-.727 0-.401.326-.727.727-.727zm7.032 0c.401 0 .727.326.727.727 0 .401-.326.727-.727.727-.401 0-.727-.326-.727-.727 0-.401.326-.727.727-.727zM12 16.512c-2.494 0-4.51-2.016-4.51-4.51s2.016-4.51 4.51-4.51 4.51 2.016 4.51 4.51-2.016 4.51-4.51 4.51z"/>
                       </svg>
                       <span className="font-medium">{ride.driver.contactInfo?.snapchat || ride.driver.snapchat}</span>
                     </div>
@@ -364,7 +360,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                 
                 <div>
                   <div className="text-neutral-500 text-sm">Seats Available</div>
-                  <div className="font-medium">{ride.seatsLeft} of {ride.seatsTotal}</div>
+                  <div className="font-medium">{ride.seatsLeft} seats available</div>
                 </div>
                 
                 <div>

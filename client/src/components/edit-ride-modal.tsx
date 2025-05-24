@@ -142,19 +142,23 @@ export default function EditRideModal({ ride, isOpen, onClose, onRideUpdated }: 
   // Update form when ride changes
   useEffect(() => {
     if (ride) {
-      const departureDate = new Date(ride.departureTime);
-      const timeString = `${departureDate.getHours().toString().padStart(2, '0')}:${departureDate.getMinutes().toString().padStart(2, '0')}`;
-      
-      form.reset({
-        destination: ride.destination,
-        destinationArea: ride.destinationArea,
-        departureDate: format(departureDate, 'yyyy-MM-dd'),
-        departureTime: timeString,
-        seatsTotal: ride.seatsTotal.toString(),
-        carType: ride.carModel?.split(' - ')[0] || ride.carModel || "sedan", // Extract car type from carModel
-        genderPreference: ride.genderPreference,
-        notes: ride.notes || ""
-      });
+      try {
+        const departureDate = new Date(ride.departureTime as any);
+        const timeString = `${departureDate.getHours().toString().padStart(2, '0')}:${departureDate.getMinutes().toString().padStart(2, '0')}`;
+        
+        form.reset({
+          destination: ride.destination || "",
+          destinationArea: ride.destinationArea || "",
+          departureDate: format(departureDate, 'yyyy-MM-dd'),
+          departureTime: timeString,
+          seatsTotal: ride.seatsTotal.toString(),
+          carType: ride.carModel?.split(' - ')[0] || ride.carModel || "sedan",
+          genderPreference: ride.genderPreference || "no-preference",
+          notes: ride.notes || ""
+        });
+      } catch (error) {
+        console.log("Error updating form:", error);
+      }
     }
   }, [ride, form]);
 
@@ -202,7 +206,7 @@ export default function EditRideModal({ ride, isOpen, onClose, onRideUpdated }: 
       };
       
       // Update ride via API
-      const result = await updateRide(ride.id, updatedRide);
+      const result = await updateRide(parseInt(ride.id.toString()), updatedRide);
       
       if (result) {
         toast({

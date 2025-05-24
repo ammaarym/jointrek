@@ -213,13 +213,13 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
           <div className="mt-3 flex justify-center">
             <Button 
               variant="outline" 
-              className="bg-white hover:bg-orange-50 border-2 border-orange-200 text-orange-700 hover:border-orange-300 px-6 py-2 rounded-lg"
+              className="bg-white hover:bg-orange-50 border-2 border-orange-300 text-orange-600 hover:border-orange-400 hover:text-orange-700 px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 setDetailsOpen(true);
               }}
             >
-              <Info className="w-4 h-4 mr-1" />
+              <Info className="w-4 h-4 mr-2" />
               View details
             </Button>
           </div>
@@ -304,7 +304,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                         fill="currentColor" 
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.624 5.367 11.99 11.988 11.99s11.99-5.366 11.99-11.99C24.007 5.367 18.641.001 12.017.001zM8.484 7.521c.401 0 .727.326.727.727 0 .401-.326.727-.727.727-.401 0-.727-.326-.727-.727 0-.401.326-.727.727-.727zm7.032 0c.401 0 .727.326.727.727 0 .401-.326.727-.727.727-.401 0-.727-.326-.727-.727 0-.401.326-.727.727-.727zM12 16.512c-2.494 0-4.51-2.016-4.51-4.51s2.016-4.51 4.51-4.51 4.51 2.016 4.51 4.51-2.016 4.51-4.51 4.51z"/>
+                        <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z"/>
                       </svg>
                       <span className="font-medium">{ride.driver.contactInfo?.snapchat || ride.driver.snapchat}</span>
                     </div>

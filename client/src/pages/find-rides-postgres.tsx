@@ -370,36 +370,3 @@ export default function FindRidesPostgres() {
     </div>
   );
 }
-                            </h4>
-                            <p><span className="font-medium">Seats:</span> {ride.seatsLeft} available</p>
-                            <p><span className="font-medium">Price:</span> ${ride.price}</p>
-                            {ride.carModel && <p><span className="font-medium">Car:</span> {ride.carModel}</p>}
-                            <p><span className="font-medium">Gender Preference:</span> {
-                              ride.genderPreference === 'male' ? 'Male riders only' :
-                              ride.genderPreference === 'female' ? 'Female riders only' :
-                              'No preference'
-                            }</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {ride.notes && (
-                        <div className="bg-muted/50 p-4 rounded-lg mb-6">
-                          <h4 className="font-medium flex items-center text-primary mb-2">
-                            <BiMessageDetail className="mr-2" /> Notes
-                          </h4>
-                          <p>{ride.notes}</p>
-                        </div>
-                      )}
-
-                    </DialogContent>
-                  </Dialog>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}

@@ -397,36 +397,6 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Ride
               </Button>
-            ) : !isDriverUser ? (
-              <div className="flex flex-col space-y-2 bg-gray-50 p-3 rounded border w-full">
-                <h3 className="font-medium text-md">Contact Information:</h3>
-                {/* Show phone first if available, otherwise show email */}
-                {(ride.driver.contactInfo?.phone || ride.driver.phone) ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Phone:</span>
-                    <span className="font-medium">{ride.driver.contactInfo?.phone || ride.driver.phone}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Email:</span>
-                    <span className="font-medium">{ride.driver.contactInfo?.email || ride.driver.email || "No email available"}</span>
-                  </div>
-                )}
-                
-                {/* Show additional contact methods */}
-                {ride.driver.contactInfo?.instagram && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Instagram:</span>
-                    <span className="font-medium">@{ride.driver.contactInfo.instagram}</span>
-                  </div>
-                )}
-                {ride.driver.contactInfo?.snapchat && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-neutral-500">Snapchat:</span>
-                    <span className="font-medium">{ride.driver.contactInfo.snapchat}</span>
-                  </div>
-                )}
-              </div>
             ) : null}
           </DialogFooter>
         </DialogContent>

@@ -49,7 +49,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
   const getPricingBreakdown = () => {
     const carType = ride.carModel?.split(' - ')[0] || ride.carModel || 'sedan';
     const mpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
-    const cityData = CITY_DISTANCES[ride.destination as keyof typeof CITY_DISTANCES];
+    const destinationCity = typeof ride.destination === 'string' ? ride.destination : ride.destination?.city || 'destination';
+    const cityData = CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
     const gasPrice = 3.20;
     
     if (!cityData) return null;
@@ -57,7 +58,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
     const baseCost = (cityData.miles / mpg) * gasPrice;
     const withBuffer = baseCost * 1.2;
     const tollCities = ["Miami", "Tampa"];
-    const tollFee = tollCities.includes(ride.destination) ? 2.50 : 0;
+    const tollFee = tollCities.includes(destinationCity) ? 2.50 : 0;
     const totalCost = withBuffer + tollFee;
     const perPersonCost = totalCost / ride.seatsTotal;
     
@@ -70,13 +71,15 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
       tollFee,
       totalCost,
       perPersonCost,
-      carType
+      carType,
+      destinationCity
     };
   };
 
   // Calculate estimated arrival time
   const getEstimatedArrival = () => {
-    const cityData = CITY_DISTANCES[ride.destination as keyof typeof CITY_DISTANCES];
+    const destinationCity = typeof ride.destination === 'string' ? ride.destination : ride.destination?.city || 'destination';
+    const cityData = CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
     if (!cityData) return null;
     
     const departureDate = new Date(ride.departureTime as any);
@@ -445,8 +448,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Distance to {ride.destination}:</span>
-                  <span className="font-medium">350 miles</span>
+                  <span>Distance to {getPricingBreakdown()?.destinationCity || 'destination'}:</span>
+                  <span className="font-medium">{getPricingBreakdown()?.distance || 350} miles</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -481,7 +484,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                   </span>
                 </div>
                 
-                {(ride.destination === 'Miami' || ride.destination === 'Tampa') && (
+                {((typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Miami' || 
+                  (typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Tampa') && (
                   <div className="flex justify-between">
                     <span>Toll fees:</span>
                     <span className="font-medium">+$2.50</span>
@@ -497,7 +501,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       ((350 / (ride.carModel?.includes('minivan') ? 28 : 
                               ride.carModel?.includes('suv') ? 25 : 
                               ride.carModel?.includes('truck') ? 22 : 32)) * 3.20) * 1.2 + 
-                      ((ride.destination === 'Miami' || ride.destination === 'Tampa') ? 2.50 : 0)
+                      (((typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Miami' || 
+                        (typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Tampa') ? 2.50 : 0)
                     )}
                   </span>
                 </div>

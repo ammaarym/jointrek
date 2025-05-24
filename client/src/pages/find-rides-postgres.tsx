@@ -262,7 +262,7 @@ export default function FindRidesPostgres() {
         </div>
         
         {/* Main content with rides */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 mt-6">
           <div className="flex justify-between items-center mb-6">
             <div>
               <div className="flex items-center space-x-4 mb-2">

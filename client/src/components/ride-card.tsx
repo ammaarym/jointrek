@@ -99,14 +99,16 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
             {/* Driver info */}
             <div className="md:w-1/4">
               <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={ride.driver.photoUrl} alt={ride.driver.name} />
-                    <AvatarFallback className="bg-orange-600 text-white">
-                      {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+                <Avatar className="w-12 h-12 mr-3">
+                  <AvatarImage 
+                    src={ride.driver.photoUrl} 
+                    alt={ride.driver.name}
+                    className="object-cover w-full h-full" 
+                  />
+                  <AvatarFallback className="bg-orange-600 text-white">
+                    {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <h4 className="font-semibold text-black">{ride.driver.name}</h4>
                   <div className="flex items-center">
@@ -149,7 +151,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       {ride.destination.area}
                     </span>
                     <div className="text-neutral-500 text-sm">
-                      {formatDateTime(ride.arrivalTime)}
+                      {getEstimatedArrival() || formatDateTime(ride.arrivalTime)}
                     </div>
                   </div>
                 </div>
@@ -346,7 +348,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                     <Clock className="w-4 h-4 mr-2 text-neutral-500 mt-0.5" />
                     <div>
                       <div className="text-neutral-500 text-sm">Arrival (estimated)</div>
-                      <div className="font-medium">{formatDateTime(ride.arrivalTime)}</div>
+                      <div className="font-medium">{getEstimatedArrival() || formatDateTime(ride.arrivalTime)}</div>
                     </div>
                   </div>
                 </div>

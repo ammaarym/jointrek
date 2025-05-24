@@ -56,6 +56,7 @@ router.post('/verify', async (req: Request, res: Response) => {
     });
 
     const data: IDAnalyzerResponse = await response.json();
+    console.log('ID Analyzer full response:', JSON.stringify(data, null, 2));
 
     if (!data.success) {
       return res.status(400).json({

@@ -150,8 +150,8 @@ export default function FindRidesPostgres() {
   };
 
   return (
-    <div className="container px-4 py-6 mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="container px-4 py-8 mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar with filters */}
         <div className="lg:col-span-1 bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-6">Find Your Ride</h2>

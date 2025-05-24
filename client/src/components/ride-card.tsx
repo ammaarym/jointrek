@@ -12,7 +12,8 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { Ride } from "@/lib/types";
-import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit } from "lucide-react";
+import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit, Calculator } from "lucide-react";
+import { CAR_TYPE_MPG, CITY_DISTANCES } from "@shared/pricing";
 // Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 
 interface RideCardProps {
@@ -23,17 +24,65 @@ interface RideCardProps {
 
 export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [pricingOpen, setPricingOpen] = useState(false);
   
   // Function to format the time from timestamp
   const formatDateTime = (timestamp: any) => {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-US', { 
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
     });
+  };
+
+  const formatTime = (timestamp: any) => {
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  // Calculate pricing breakdown
+  const getPricingBreakdown = () => {
+    const carType = ride.carModel?.split(' - ')[0] || ride.carModel || 'sedan';
+    const mpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
+    const cityData = CITY_DISTANCES[ride.destination as keyof typeof CITY_DISTANCES];
+    const gasPrice = 3.20;
+    
+    if (!cityData) return null;
+    
+    const baseCost = (cityData.miles / mpg) * gasPrice;
+    const withBuffer = baseCost * 1.2;
+    const tollCities = ["Miami", "Tampa"];
+    const tollFee = tollCities.includes(ride.destination) ? 2.50 : 0;
+    const totalCost = withBuffer + tollFee;
+    const perPersonCost = totalCost / ride.seatsTotal;
+    
+    return {
+      distance: cityData.miles,
+      mpg,
+      gasPrice,
+      baseCost,
+      buffer: baseCost * 0.2,
+      tollFee,
+      totalCost,
+      perPersonCost,
+      carType
+    };
+  };
+
+  // Calculate estimated arrival time
+  const getEstimatedArrival = () => {
+    const cityData = CITY_DISTANCES[ride.destination as keyof typeof CITY_DISTANCES];
+    if (!cityData) return null;
+    
+    const departureDate = new Date(ride.departureTime as any);
+    const arrivalDate = new Date(departureDate.getTime() + (cityData.hours * 60 * 60 * 1000));
+    
+    return formatTime(arrivalDate);
   };
   
   return (
@@ -86,7 +135,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       {ride.origin.area}
                     </span>
                     <div className="text-neutral-500 text-sm">
-                      {formatDateTime(ride.departureTime)}
+                      {formatDateTime(ride.departureTime)} at {formatTime(ride.departureTime)}
                     </div>
                   </div>
                   <div>

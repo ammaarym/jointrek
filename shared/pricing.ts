@@ -3,6 +3,7 @@ export interface RidePricingParams {
   mpg: number;              // vehicle fuel efficiency
   gasPrice: number;         // price per gallon
   destination: string;
+  seatsTotal: number;       // number of total seats to split cost
   date?: Date;              // optional, for weekend adjustment
 }
 
@@ -11,6 +12,7 @@ export function calculateRidePrice({
   mpg,
   gasPrice,
   destination,
+  seatsTotal,
   date
 }: RidePricingParams): number {
   const buffer = 0.2; // 20% markup
@@ -29,12 +31,24 @@ export function calculateRidePrice({
     }
   }
 
-  // Apply floor and ceiling
-  total = Math.max(8, Math.min(total, 60));
+  // Divide total cost by number of seats (each passenger pays their share)
+  let pricePerSeat = total / seatsTotal;
+
+  // Apply floor and ceiling to per-seat price
+  pricePerSeat = Math.max(8, Math.min(pricePerSeat, 60));
 
   // Round to nearest dollar
-  return Math.round(total);
+  return Math.round(pricePerSeat);
 }
+
+// Car type MPG mappings
+export const CAR_TYPE_MPG = {
+  "sedan": 32,
+  "suv": 25,
+  "truck": 22,
+  "minivan": 28,
+  "": 32 // Default to sedan MPG
+};
 
 // Distance data from Gainesville to major Florida cities
 export const CITY_DISTANCES = {

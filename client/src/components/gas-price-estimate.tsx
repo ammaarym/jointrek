@@ -3,6 +3,7 @@ import { FaGasPump } from 'react-icons/fa';
 
 interface GasPriceEstimateProps {
   destination: string;
+  carType?: string;
 }
 
 export default function GasPriceEstimate({ destination }: GasPriceEstimateProps) {

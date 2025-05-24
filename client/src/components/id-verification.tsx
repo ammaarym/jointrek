@@ -71,10 +71,11 @@ export default function IDVerification() {
       });
 
       const data = await response.json();
+      console.log('Verification response:', data);
 
       if (data.success) {
         setVerificationResult(data.verification);
-        setIsVerified(data.verification.passed);
+        setIsVerified(data.verification?.passed || false);
         
         toast({
           title: data.verification.passed ? "ID Verified Successfully!" : "Verification Failed",

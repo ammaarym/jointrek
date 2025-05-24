@@ -140,7 +140,10 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       {ride.origin.area}
                     </span>
                     <div className="text-neutral-500 text-sm">
-                      {formatDateTime(ride.departureTime)} at {formatTime(ride.departureTime)}
+                      {formatDateTime(ride.departureTime)}
+                    </div>
+                    <div className="text-neutral-500 text-xs">
+                      {formatTime(ride.departureTime)}
                     </div>
                   </div>
                   <div>
@@ -151,7 +154,10 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       {ride.destination.area}
                     </span>
                     <div className="text-neutral-500 text-sm">
-                      {getEstimatedArrival() || formatDateTime(ride.arrivalTime)}
+                      {formatDateTime(ride.arrivalTime)}
+                    </div>
+                    <div className="text-neutral-500 text-xs">
+                      {getEstimatedArrival() || formatTime(ride.arrivalTime)}
                     </div>
                   </div>
                 </div>
@@ -303,7 +309,9 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                       <svg 
                         className="w-5 h-5 mr-3 text-orange-600" 
                         viewBox="0 0 24 24" 
-                        fill="currentColor" 
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z"/>
@@ -380,7 +388,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
               {ride.carModel && (
                 <div className="mt-3">
                   <div className="text-neutral-500 text-sm">Car Model</div>
-                  <div className="font-medium">{ride.carModel}</div>
+                  <div className="font-medium">{ride.carModel?.charAt(0).toUpperCase() + ride.carModel?.slice(1)}</div>
                 </div>
               )}
               

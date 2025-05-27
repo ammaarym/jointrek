@@ -1,0 +1,25 @@
+<svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Alligator body -->
+  <path d="M60 45 C 70 35, 85 32, 105 38 C 125 44, 145 48, 165 52 C 175 54, 180 58, 175 62 C 165 58, 145 54, 125 50 C 105 46, 85 42, 70 52 C 60 56, 58 50, 60 45 Z" fill="#CD7F53"/>
+  
+  <!-- Alligator head -->
+  <ellipse cx="175" cy="57" rx="22" ry="12" fill="#CD7F53"/>
+  
+  <!-- Alligator spikes -->
+  <polygon points="75,35 82,25 89,35" fill="#CD7F53"/>
+  <polygon points="95,33 102,23 109,33" fill="#CD7F53"/>
+  <polygon points="115,34 122,24 129,34" fill="#CD7F53"/>
+  <polygon points="135,36 142,26 149,36" fill="#CD7F53"/>
+  
+  <!-- Alligator legs -->
+  <ellipse cx="80" cy="65" rx="8" ry="15" fill="#CD7F53"/>
+  <ellipse cx="110" cy="68" rx="8" ry="15" fill="#CD7F53"/>
+  <ellipse cx="140" cy="70" rx="8" ry="15" fill="#CD7F53"/>
+  <ellipse cx="165" cy="72" rx="7" ry="12" fill="#CD7F53"/>
+  
+  <!-- Alligator tail -->
+  <path d="M60 45 C 50 40, 40 45, 45 52 C 52 48, 58 47, 60 45 Z" fill="#CD7F53"/>
+  
+  <!-- Text "GatorLift" -->
+  <text x="100" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#4A5D6B">GatorLift</text>
+</svg>

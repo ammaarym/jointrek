@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon } from "lucide-react";
-// Updated GatorLift logo as inline SVG
+import gatorLiftLogo from "../assets/gatorlift-logo.svg";
 
 interface HeaderProps {
   onLogin: () => void;
@@ -46,27 +46,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <svg className="h-8 w-auto mr-3" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-                {/* Alligator body */}
-                <path d="M15 45 C 20 35, 35 32, 50 35 C 65 38, 80 40, 95 45 C 100 47, 102 50, 100 53 C 95 50, 80 48, 65 45 C 50 42, 35 40, 20 48 C 15 50, 13 47, 15 45 Z" fill="#CD853F"/>
-                {/* Alligator head/snout */}
-                <ellipse cx="100" cy="49" rx="18" ry="8" fill="#CD853F"/>
-                {/* Alligator spikes on back */}
-                <polygon points="25,35 30,28 35,35" fill="#CD853F"/>
-                <polygon points="40,33 45,26 50,33" fill="#CD853F"/>
-                <polygon points="55,34 60,27 65,34" fill="#CD853F"/>
-                <polygon points="70,36 75,29 80,36" fill="#CD853F"/>
-                {/* Alligator legs */}
-                <ellipse cx="30" cy="55" rx="6" ry="12" fill="#CD853F"/>
-                <ellipse cx="50" cy="55" rx="6" ry="12" fill="#CD853F"/>
-                <ellipse cx="70" cy="55" rx="6" ry="12" fill="#CD853F"/>
-                <ellipse cx="85" cy="55" rx="5" ry="10" fill="#CD853F"/>
-                {/* Alligator tail */}
-                <path d="M15 45 C 10 42, 5 45, 8 50 C 12 48, 15 47, 15 45 Z" fill="#CD853F"/>
-              </svg>
-              <span className="text-2xl font-bold text-slate-600">GatorLift</span>
-            </div>
+            <img src={gatorLiftLogo} alt="GatorLift Logo" className="h-12 w-auto" />
           </div>
 
           <div className="hidden md:flex items-center space-x-6">

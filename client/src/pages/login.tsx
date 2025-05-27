@@ -77,25 +77,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="mt-8 border-t border-gray-200 pt-6">
-          <h3 className="mb-4 text-center text-sm font-medium text-gray-500">
-            Why Sign In With Google?
-          </h3>
-          <ul className="space-y-3 text-sm text-gray-600">
-            <li className="flex items-start">
-              <span className="mr-2 text-green-500">✓</span>
-              <span>Secure authentication for UF students only</span>
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2 text-green-500">✓</span>
-              <span>No need to remember another password</span>
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2 text-green-500">✓</span>
-              <span>Helps ensure you're riding with verified students</span>
-            </li>
-          </ul>
-        </div>
+
       </div>
     </div>
   );

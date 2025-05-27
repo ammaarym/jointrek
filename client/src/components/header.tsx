@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon } from "lucide-react";
-import gatorLiftLogo from "../assets/gator-lift-logo.png";
+// Updated GatorLift logo as inline SVG
 
 interface HeaderProps {
   onLogin: () => void;
@@ -114,14 +114,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               </>
             ) : (
               <div className="hidden md:flex items-center space-x-3">
-                <Button variant="ghost" onClick={onLogin} className="text-black">
-                  Log In
-                </Button>
                 <Button
-                  onClick={onSignup}
+                  onClick={onLogin}
                   className="bg-orange-600 text-white hover:bg-orange-700"
                 >
-                  Sign Up
+                  Log In
                 </Button>
               </div>
             )}

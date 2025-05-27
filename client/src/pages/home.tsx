@@ -150,20 +150,11 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Testimonial 1 */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80"
-                    alt="Sarah Johnson"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Sarah Johnson</h4>
-                  <p className="text-sm text-neutral-500">
-                    Senior, Biology
-                  </p>
-                </div>
+              <div className="mb-4">
+                <h4 className="font-semibold">Sarah Johnson</h4>
+                <p className="text-sm text-neutral-500">
+                  Senior, Biology
+                </p>
               </div>
               <p className="text-neutral-700 italic">
                 "GatorLift has saved me so much money on trips home to Orlando.
@@ -173,20 +164,11 @@ export default function Home() {
 
             {/* Testimonial 2 */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80"
-                    alt="Michael Torres"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Michael Torres</h4>
-                  <p className="text-sm text-neutral-500">
-                    Junior, Engineering
-                  </p>
-                </div>
+              <div className="mb-4">
+                <h4 className="font-semibold">Michael Torres</h4>
+                <p className="text-sm text-neutral-500">
+                  Junior, Engineering
+                </p>
               </div>
               <p className="text-neutral-700 italic">
                 "As a driver, I like that I can offset my gas costs while
@@ -196,20 +178,11 @@ export default function Home() {
 
             {/* Testimonial 3 */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                  <img
-                    src="https://pixabay.com/get/gb1a721f4c24c045d7ea82ec3de057369635faa8ff108d86c20ff63649a2385d4fc2861199f23e2a7d024ca1b0076ca2669a019e23860027a9972798250ce5212_1280.jpg"
-                    alt="Jamie Chen"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-semibold">Jamie Chen</h4>
-                  <p className="text-sm text-neutral-500">
-                    Sophomore, Business
-                  </p>
-                </div>
+              <div className="mb-4">
+                <h4 className="font-semibold">Jamie Chen</h4>
+                <p className="text-sm text-neutral-500">
+                  Sophomore, Business
+                </p>
               </div>
               <p className="text-neutral-700 italic">
                 "I feel so much safer knowing I'm riding with verified UF

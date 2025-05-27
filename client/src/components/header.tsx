@@ -46,7 +46,21 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <img src={gatorLiftLogo} alt="GatorLift Logo" className="h-14 w-auto" />
+            <div className="flex items-center">
+              <svg className="h-10 w-auto mr-2" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+                {/* Alligator shape */}
+                <path d="M10 35 C 15 30, 25 28, 35 30 L 60 32 C 70 33, 80 35, 90 40 L 85 45 C 80 42, 70 40, 60 39 L 35 37 C 25 36, 15 38, 10 42 Z" fill="#D2691E"/>
+                {/* Alligator spikes */}
+                <polygon points="20,30 25,25 30,30" fill="#D2691E"/>
+                <polygon points="35,29 40,24 45,29" fill="#D2691E"/>
+                <polygon points="50,30 55,25 60,30" fill="#D2691E"/>
+                {/* Alligator legs */}
+                <rect x="25" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
+                <rect x="45" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
+                <rect x="65" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
+              </svg>
+              <span className="text-2xl font-bold" style={{color: '#2F4858'}}>GatorLift</span>
+            </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-6">

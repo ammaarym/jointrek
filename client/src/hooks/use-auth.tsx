@@ -187,23 +187,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       console.log("UF email verification successful!");
       
-      // Create user profile if needed
-      console.log("Creating/updating user profile");
-      const userRef = doc(db, 'users', result.user.uid);
-      const userSnapshot = await getDoc(userRef);
-      
-      if (!userSnapshot.exists()) {
-        const userData = {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName || result.user.email?.split('@')[0] || "UF Student",
-          photoURL: result.user.photoURL || "",
-          createdAt: serverTimestamp(),
-          rides: 0,
-          rating: 5.0
-        };
+      // Try to create user profile in Firestore, but don't fail auth if it doesn't work
+      try {
+        console.log("Creating/updating user profile");
+        const userRef = doc(db, 'users', result.user.uid);
+        const userSnapshot = await getDoc(userRef);
         
-        await setDoc(userRef, userData);
+        if (!userSnapshot.exists()) {
+          const userData = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName || result.user.email?.split('@')[0] || "UF Student",
+            photoURL: result.user.photoURL || "",
+            createdAt: serverTimestamp(),
+            rides: 0,
+            rating: 5.0
+          };
+          
+          await setDoc(userRef, userData);
+        }
+      } catch (firestoreError: any) {
+        console.log("Firestore operation failed, but authentication succeeded:", firestoreError);
+        // Don't show an error to the user - the auth still worked
       }
       
       toast({

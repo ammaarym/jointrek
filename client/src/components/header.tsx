@@ -47,19 +47,25 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <svg className="h-10 w-auto mr-2" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
-                {/* Alligator shape */}
-                <path d="M10 35 C 15 30, 25 28, 35 30 L 60 32 C 70 33, 80 35, 90 40 L 85 45 C 80 42, 70 40, 60 39 L 35 37 C 25 36, 15 38, 10 42 Z" fill="#D2691E"/>
-                {/* Alligator spikes */}
-                <polygon points="20,30 25,25 30,30" fill="#D2691E"/>
-                <polygon points="35,29 40,24 45,29" fill="#D2691E"/>
-                <polygon points="50,30 55,25 60,30" fill="#D2691E"/>
+              <svg className="h-8 w-auto mr-3" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                {/* Alligator body */}
+                <path d="M15 45 C 20 35, 35 32, 50 35 C 65 38, 80 40, 95 45 C 100 47, 102 50, 100 53 C 95 50, 80 48, 65 45 C 50 42, 35 40, 20 48 C 15 50, 13 47, 15 45 Z" fill="#CD853F"/>
+                {/* Alligator head/snout */}
+                <ellipse cx="100" cy="49" rx="18" ry="8" fill="#CD853F"/>
+                {/* Alligator spikes on back */}
+                <polygon points="25,35 30,28 35,35" fill="#CD853F"/>
+                <polygon points="40,33 45,26 50,33" fill="#CD853F"/>
+                <polygon points="55,34 60,27 65,34" fill="#CD853F"/>
+                <polygon points="70,36 75,29 80,36" fill="#CD853F"/>
                 {/* Alligator legs */}
-                <rect x="25" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
-                <rect x="45" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
-                <rect x="65" y="42" width="8" height="12" rx="4" fill="#D2691E"/>
+                <ellipse cx="30" cy="55" rx="6" ry="12" fill="#CD853F"/>
+                <ellipse cx="50" cy="55" rx="6" ry="12" fill="#CD853F"/>
+                <ellipse cx="70" cy="55" rx="6" ry="12" fill="#CD853F"/>
+                <ellipse cx="85" cy="55" rx="5" ry="10" fill="#CD853F"/>
+                {/* Alligator tail */}
+                <path d="M15 45 C 10 42, 5 45, 8 50 C 12 48, 15 47, 15 45 Z" fill="#CD853F"/>
               </svg>
-              <span className="text-2xl font-bold" style={{color: '#2F4858'}}>GatorLift</span>
+              <span className="text-2xl font-bold text-slate-600">GatorLift</span>
             </div>
           </div>
 

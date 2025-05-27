@@ -57,21 +57,12 @@ export default function Home() {
                     <p className="text-orange-700 mb-3">
                       GatorLift is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                    <div className="flex justify-center mt-4">
                       <Button 
-                        className="bg-orange-600 text-white flex items-center justify-center"
+                        className="bg-orange-600 text-white flex items-center justify-center px-8 py-3 text-lg"
                         onClick={handleLogin}
                       >
-                        <LogIn className="w-4 h-4 mr-2" />
-                        Log In
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="border-orange-600 text-orange-600 flex items-center justify-center"
-                        onClick={handleSignup}
-                      >
-                        <UserPlus className="w-4 h-4 mr-2" />
-                        Sign Up
+                        Get Started
                       </Button>
                     </div>
                   </div>
@@ -144,90 +135,6 @@ export default function Home() {
               <p className="text-neutral-600">
                 Connect with drivers or passengers and share your journey.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Destinations */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4 text-black">
-            Popular Destinations
-          </h2>
-          <p className="text-center text-neutral-600 mb-12 max-w-2xl mx-auto">
-            Looking for a ride home or back to campus? These are the most
-            popular routes among fellow Gators.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Orlando Card */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
-              <img
-                src="https://pixabay.com/get/g3bfb66ca8a8104738527eb98058e58516275f820f2e7c5e0cb23ee86f69b1f5dbe2829921279c3f87562f20d7dd07feea3151f29988a71a4efa5830f4c86e6fa_1280.jpg"
-                alt="Orlando skyline"
-                className="w-full h-40 object-cover"
-              />
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-xl font-semibold">Orlando</h3>
-                  <span className="text-sm text-neutral-500">
-                    2.5 hours
-                  </span>
-                </div>
-                <p className="text-neutral-600 mb-4">
-                  Most rides on Friday afternoons and Sunday evenings.
-                </p>
-                <Link href="/find-rides?destination=Orlando" className="text-orange-600 hover:underline text-sm font-medium inline-block">
-                  Find 28 rides available →
-                </Link>
-              </div>
-            </div>
-
-            {/* Miami Card */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
-              <img
-                src="https://images.unsplash.com/photo-1535498730771-e735b998cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=300&q=80"
-                alt="Miami skyline"
-                className="w-full h-40 object-cover"
-              />
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-xl font-semibold">Miami</h3>
-                  <span className="text-sm text-neutral-500">
-                    5 hours
-                  </span>
-                </div>
-                <p className="text-neutral-600 mb-4">
-                  Popular for long weekends and holiday breaks.
-                </p>
-                <Link href="/find-rides?destination=Miami" className="text-orange-600 hover:underline text-sm font-medium inline-block">
-                  Find 15 rides available →
-                </Link>
-              </div>
-            </div>
-
-            {/* Tampa Card */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
-              <img
-                src="https://pixabay.com/get/g381677b8944d6166607522341f68f78e2cf0de35a10ae7604ab5bad3b5d7665576f08176482515ecb33afae4d8e20d94832b821653793d008ad833631f266322_1280.jpg"
-                alt="Tampa skyline"
-                className="w-full h-40 object-cover"
-              />
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-xl font-semibold">Tampa</h3>
-                  <span className="text-sm text-neutral-500">
-                    2 hours
-                  </span>
-                </div>
-                <p className="text-neutral-600 mb-4">
-                  Frequent rides throughout the week and weekends.
-                </p>
-                <Link href="/find-rides?destination=Tampa" className="text-orange-600 hover:underline text-sm font-medium inline-block">
-                  Find 22 rides available →
-                </Link>
-              </div>
             </div>
           </div>
         </div>

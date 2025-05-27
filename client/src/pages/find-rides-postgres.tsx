@@ -24,10 +24,7 @@ const FLORIDA_CITIES = [
   "Orlando",
   "Tampa",
   "Tallahassee",
-  "Fort Lauderdale",
-  "St. Petersburg",
-  "Clearwater",
-  "Sarasota"
+  "Fort Lauderdale"
 ];
 
 export default function FindRidesPostgres() {

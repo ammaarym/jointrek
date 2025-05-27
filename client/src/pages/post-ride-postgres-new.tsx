@@ -23,10 +23,7 @@ const FLORIDA_CITIES = [
   "Orlando",
   "Tampa",
   "Tallahassee",
-  "Fort Lauderdale",
-  "St. Petersburg",
-  "Clearwater",
-  "Sarasota"
+  "Fort Lauderdale"
 ];
 
 // Specific time options for departure

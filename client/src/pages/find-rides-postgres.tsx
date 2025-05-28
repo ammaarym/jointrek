@@ -33,7 +33,7 @@ export default function FindRidesPostgres() {
   const [, setLocation] = useLocation();
 
   // Form state
-  const [from, setFrom] = useState('');
+  const [from, setFrom] = useState('any');
   const [to, setTo] = useState('Gainesville');
   const [date, setDate] = useState('');
   const [passengers, setPassengers] = useState('1');
@@ -44,7 +44,7 @@ export default function FindRidesPostgres() {
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
-    from: '',
+    from: 'any',
     to: 'Gainesville',
     date: '',
     passengers: '1',
@@ -77,13 +77,13 @@ export default function FindRidesPostgres() {
       // Filter by location - if both from and to are selected, match exact route
       // If only from is selected, show rides starting from that city
       // If only to is selected, show rides going to that city
-      if (appliedFilters.from && appliedFilters.to && appliedFilters.to !== 'any') {
+      if (appliedFilters.from && appliedFilters.from !== 'any' && appliedFilters.to && appliedFilters.to !== 'any') {
         // Both from and to selected - exact route match
         if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase() || 
             ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
           return false;
         }
-      } else if (appliedFilters.from && (!appliedFilters.to || appliedFilters.to === 'any')) {
+      } else if (appliedFilters.from && appliedFilters.from !== 'any' && (!appliedFilters.to || appliedFilters.to === 'any')) {
         // Only from selected - show rides starting from that city
         if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase()) {
           return false;
@@ -171,7 +171,7 @@ export default function FindRidesPostgres() {
               <button
                 onClick={() => {
                   setQuickFilter('arrivals');
-                  setFrom('');
+                  setFrom('any');
                   setTo('Gainesville');
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
@@ -186,7 +186,7 @@ export default function FindRidesPostgres() {
                 onClick={() => {
                   setQuickFilter('departures');
                   setFrom('Gainesville');
-                  setTo('');
+                  setTo('any');
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'departures'
@@ -211,7 +211,7 @@ export default function FindRidesPostgres() {
                     <SelectValue placeholder={quickFilter === 'arrivals' ? "Any city" : "Select city"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any city</SelectItem>
+                    <SelectItem value="any">Any city</SelectItem>
                     {FLORIDA_CITIES.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}

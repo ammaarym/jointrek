@@ -33,18 +33,19 @@ export default function FindRidesPostgres() {
   const [, setLocation] = useLocation();
 
   // Form state
-  const [from, setFrom] = useState('Gainesville');
-  const [to, setTo] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('Gainesville');
   const [date, setDate] = useState('');
   const [passengers, setPassengers] = useState('1');
   const [genderFilter, setGenderFilter] = useState('no preference');
   const [sortBy, setSortBy] = useState('date');
   const [feedType, setFeedType] = useState('drivers'); // 'drivers' or 'passengers'
+  const [quickFilter, setQuickFilter] = useState('arrivals'); // 'departures' or 'arrivals'
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
-    from: 'Gainesville',
-    to: '',
+    from: '',
+    to: 'Gainesville',
     date: '',
     passengers: '1',
     genderFilter: 'no preference'
@@ -162,7 +163,41 @@ export default function FindRidesPostgres() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar with filters */}
         <div className="lg:col-span-1 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-6">Find Your Ride</h2>
+          <h2 className="text-xl font-bold mb-4">Find Your Ride</h2>
+          
+          {/* Quick Filter Toggle */}
+          <div className="mb-6">
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => {
+                  setQuickFilter('arrivals');
+                  setFrom('');
+                  setTo('Gainesville');
+                }}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                  quickFilter === 'arrivals'
+                    ? 'bg-white shadow text-orange-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                To Gainesville
+              </button>
+              <button
+                onClick={() => {
+                  setQuickFilter('departures');
+                  setFrom('Gainesville');
+                  setTo('');
+                }}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                  quickFilter === 'departures'
+                    ? 'bg-white shadow text-orange-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                From Gainesville
+              </button>
+            </div>
+          </div>
           
           <div className="space-y-6">
             <div>
@@ -173,9 +208,10 @@ export default function FindRidesPostgres() {
                 </div>
                 <Select value={from} onValueChange={setFrom}>
                   <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Select city" />
+                    <SelectValue placeholder={quickFilter === 'arrivals' ? "Any city" : "Select city"} />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Any city</SelectItem>
                     {FLORIDA_CITIES.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}

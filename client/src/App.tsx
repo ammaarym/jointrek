@@ -36,7 +36,7 @@ function AppRoutes() {
     useEffect(() => {
       if (currentUser && requiresContactInfo) {
         loadUserContactInfo();
-      } else {
+      } else if (!requiresContactInfo) {
         setContactInfoLoading(false);
       }
     }, [currentUser, requiresContactInfo]);
@@ -55,7 +55,7 @@ function AppRoutes() {
       }
     };
 
-    if (loading || (requiresContactInfo && contactInfoLoading)) {
+    if (loading || (requiresContactInfo && (contactInfoLoading || !userContactInfo))) {
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
       </div>;
@@ -97,6 +97,7 @@ function AppRoutes() {
     }
     
     if (requiresContactInfo && userContactInfo && !hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
+      console.log('REDIRECTING TO PROFILE - Contact info missing');
       setTimeout(() => {
         setLocation("/profile");
       }, 100);
@@ -108,6 +109,8 @@ function AppRoutes() {
         </div>
       </div>;
     }
+
+    console.log('ALLOWING ACCESS - Contact info validated successfully');
 
     return <Component {...rest} />;
   };

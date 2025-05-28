@@ -81,20 +81,7 @@ function AppRoutes() {
     const hasValidInstagram = userContactInfo?.instagram && userContactInfo.instagram.trim().length > 0;
     const hasValidSnapchat = userContactInfo?.snapchat && userContactInfo.snapchat.trim().length > 0;
     
-    // Debug logging
-    if (requiresContactInfo && userContactInfo) {
-      console.log('Contact info validation check:', {
-        userContactInfo,
-        phone: userContactInfo.phone,
-        phoneLength: userContactInfo.phone?.length,
-        phoneTrimmed: userContactInfo.phone?.trim(),
-        phoneTrimmedLength: userContactInfo.phone?.trim().length,
-        hasValidPhone,
-        hasValidInstagram,
-        hasValidSnapchat,
-        shouldRedirect: !hasValidPhone && !hasValidInstagram && !hasValidSnapchat
-      });
-    }
+
     
     if (requiresContactInfo && userContactInfo && !hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
       console.log('REDIRECTING TO PROFILE - Contact info missing');

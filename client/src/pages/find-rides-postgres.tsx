@@ -73,14 +73,25 @@ export default function FindRidesPostgres() {
         }
       }
       
-      // Filter by origin (if selected)
-      if (appliedFilters.from && ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase()) {
-        return false;
-      }
-      
-      // Filter by destination (if selected)
-      if (appliedFilters.to && appliedFilters.to !== 'any' && ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
-        return false;
+      // Filter by location - if both from and to are selected, match exact route
+      // If only from is selected, show rides starting from that city
+      // If only to is selected, show rides going to that city
+      if (appliedFilters.from && appliedFilters.to && appliedFilters.to !== 'any') {
+        // Both from and to selected - exact route match
+        if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase() || 
+            ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
+          return false;
+        }
+      } else if (appliedFilters.from && (!appliedFilters.to || appliedFilters.to === 'any')) {
+        // Only from selected - show rides starting from that city
+        if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase()) {
+          return false;
+        }
+      } else if (appliedFilters.to && appliedFilters.to !== 'any') {
+        // Only to selected - show rides going to that city
+        if (ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
+          return false;
+        }
       }
       
       // Filter by date (if selected)

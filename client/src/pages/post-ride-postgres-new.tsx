@@ -146,6 +146,17 @@ export default function PostRidePostgres() {
       });
       return;
     }
+
+    // Check if user has at least one form of contact info
+    const hasContactInfo = data.phoneNumber || data.instagram || data.snapchat;
+    if (!hasContactInfo) {
+      toast({
+        title: "Contact Information Required",
+        description: "Please add at least one form of contact (phone, Instagram, or Snapchat) before posting a ride.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       setLoading(true);

@@ -27,10 +27,35 @@ function AppRoutes() {
   const { currentUser, loading } = useAuth();
   
   // Protected route component that redirects to login page if not authenticated
-  const ProtectedRoute = ({ component: Component, ...rest }: { component: React.ComponentType<any>, path: string }) => {
+  const ProtectedRoute = ({ component: Component, requiresContactInfo = false, ...rest }: { component: React.ComponentType<any>, path: string, requiresContactInfo?: boolean }) => {
     const [, setLocation] = useLocation();
+    const [userContactInfo, setUserContactInfo] = useState<any>(null);
+    const [contactInfoLoading, setContactInfoLoading] = useState(true);
 
-    if (loading) {
+    // Load user contact info when component mounts and user is available
+    useEffect(() => {
+      if (currentUser && requiresContactInfo) {
+        loadUserContactInfo();
+      } else {
+        setContactInfoLoading(false);
+      }
+    }, [currentUser, requiresContactInfo]);
+
+    const loadUserContactInfo = async () => {
+      try {
+        const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
+        if (response.ok) {
+          const userData = await response.json();
+          setUserContactInfo(userData);
+        }
+      } catch (error) {
+        console.error('Error loading user contact info:', error);
+      } finally {
+        setContactInfoLoading(false);
+      }
+    };
+
+    if (loading || (requiresContactInfo && contactInfoLoading)) {
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
       </div>;
@@ -51,6 +76,20 @@ function AppRoutes() {
       </div>;
     }
 
+    // If route requires contact info and user doesn't have any, redirect to profile
+    if (requiresContactInfo && userContactInfo && !userContactInfo.phone && !userContactInfo.instagram && !userContactInfo.snapchat) {
+      setTimeout(() => {
+        setLocation("/profile");
+      }, 100);
+      
+      return <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="mb-4 text-orange-600 font-semibold">Profile completion required</p>
+          <p>Please add contact information to access ride features...</p>
+        </div>
+      </div>;
+    }
+
     return <Component {...rest} />;
   };
 
@@ -63,10 +102,10 @@ function AppRoutes() {
     window.location.href = '/login';
   };
 
-  // This renders after successful login - redirect to app's main page
+  // This renders after successful login - redirect to profile page
   useEffect(() => {
     if (currentUser && window.location.pathname === '/') {
-      window.location.href = '/find-rides';
+      window.location.href = '/profile';
     }
   }, [currentUser]);
 
@@ -79,13 +118,13 @@ function AppRoutes() {
           <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/find-rides">
-            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" />}
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" requiresContactInfo={true} />}
           </Route>
           <Route path="/post-ride">
-            {(params) => <ProtectedRoute component={PostRidePostgresNew} path="/post-ride" />}
+            {(params) => <ProtectedRoute component={PostRidePostgresNew} path="/post-ride" requiresContactInfo={true} />}
           </Route>
           <Route path="/my-rides">
-            {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" />}
+            {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}

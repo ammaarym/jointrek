@@ -146,6 +146,28 @@ export default function PostRidePostgres() {
       });
       return;
     }
+
+    // Check if user has contact info in their profile
+    try {
+      const response = await fetch(`/api/users/firebase/${currentUser.uid}`);
+      if (response.ok) {
+        const userData = await response.json();
+        const hasValidPhone = userData.phone && userData.phone.trim().length > 0;
+        const hasValidInstagram = userData.instagram && userData.instagram.trim().length > 0;
+        const hasValidSnapchat = userData.snapchat && userData.snapchat.trim().length > 0;
+        
+        if (!hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
+          toast({
+            title: "Contact Information Required",
+            description: "Please add at least one form of contact (phone, Instagram, or Snapchat) in your profile before posting a ride.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error checking user contact info:', error);
+    }
     
     try {
       setLoading(true);

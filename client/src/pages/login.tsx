@@ -8,10 +8,10 @@ export default function Login() {
   const { currentUser, signInWithGoogle } = useAuth();
   const [, navigate] = useLocation();
 
-  // If user is already logged in, redirect to find-rides
+  // If user is already logged in, redirect to profile
   useEffect(() => {
     if (currentUser) {
-      navigate("/find-rides");
+      navigate("/profile");
     }
   }, [currentUser, navigate]);
 

@@ -77,7 +77,11 @@ function AppRoutes() {
     }
 
     // If route requires contact info and user doesn't have any, redirect to profile
-    if (requiresContactInfo && userContactInfo && !userContactInfo.phone && !userContactInfo.instagram && !userContactInfo.snapchat) {
+    const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
+    const hasValidInstagram = userContactInfo?.instagram && userContactInfo.instagram.trim().length > 0;
+    const hasValidSnapchat = userContactInfo?.snapchat && userContactInfo.snapchat.trim().length > 0;
+    
+    if (requiresContactInfo && userContactInfo && !hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
       setTimeout(() => {
         setLocation("/profile");
       }, 100);

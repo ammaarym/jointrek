@@ -185,12 +185,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCar
                   </Button>
                 </div>
                 
-                {/* Seats available information */}
-                <div className="mt-1 text-sm text-gray-600">
-                  {ride.seatsLeft} of {ride.seatsTotal} seats available
-                </div>
-
-                {/* Gender preference badges moved under seats info */}
+                {/* Gender preference badges moved under price */}
                 <div className="mt-1">
                   {ride.genderPreference === "female" ? (
                     <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800 border-pink-200">

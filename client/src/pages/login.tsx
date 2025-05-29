@@ -48,7 +48,7 @@ export default function Login() {
         <div className="space-y-3">
           <Button
             onClick={handleGoogleSignIn}
-            className="flex w-full items-center justify-center gap-3 bg-orange-600 hover:bg-orange-700 text-white py-6"
+            className="flex w-full items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white py-6"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +70,7 @@ export default function Login() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            <span className="block font-medium text-orange-600">
+            <span className="block font-medium text-primary">
               Note: You must use your @ufl.edu email
             </span>
             Only University of Florida students can use Trek.

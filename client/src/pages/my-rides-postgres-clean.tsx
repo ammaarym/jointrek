@@ -331,7 +331,7 @@ export default function MyRidesPostgres() {
                   <Star
                     className={`w-8 h-8 ${
                       star <= (hoveredRating || rating)
-                        ? 'fill-orange-400 text-orange-400'
+                        ? 'fill-primary text-primary'
                         : 'text-gray-300'
                     }`}
                   />
@@ -382,7 +382,7 @@ export default function MyRidesPostgres() {
             <Button
               onClick={handleSubmitReview}
               disabled={rating === 0}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-primary hover:bg-primary/90"
             >
               Submit Review
             </Button>

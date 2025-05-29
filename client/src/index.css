@@ -13,7 +13,7 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 30 25% 45%; /* Darker beige for Trek branding */
+  --primary: 30 35% 55%; /* Lighter beige for Trek branding */
   --primary-foreground: 0 0% 100%;
   --secondary: 212 100% 33%; /* UF blue as secondary */
   --secondary-foreground: 0 0% 100%;
@@ -25,7 +25,7 @@
   --radius: 0.5rem;
   
   /* Trek Colors - updated to match new branding */
-  --trek-beige: 30 25% 45%; /* Darker beige color */
+  --trek-beige: 30 35% 55%; /* Lighter beige color */
   --uf-blue: 212 100% 33%;
   --chart-1: var(--uf-blue);
   --chart-2: var(--trek-beige);
@@ -55,7 +55,7 @@
   --card-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --primary: 30 25% 45%; /* Darker beige for Trek branding */
+  --primary: 30 35% 55%; /* Lighter beige for Trek branding */
   --primary-foreground: 0 0% 100%;
   --secondary: 212 100% 33%; /* UF blue as secondary */
   --secondary-foreground: 0 0% 100%;

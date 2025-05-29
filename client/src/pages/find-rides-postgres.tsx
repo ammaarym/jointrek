@@ -33,8 +33,8 @@ export default function FindRidesPostgres() {
   const [, setLocation] = useLocation();
 
   // Form state
-  const [from, setFrom] = useState('any');
-  const [to, setTo] = useState('Gainesville');
+  const [from, setFrom] = useState('Gainesville');
+  const [to, setTo] = useState('any');
   const [date, setDate] = useState('');
   const [passengers, setPassengers] = useState('1');
   const [genderFilter, setGenderFilter] = useState('no preference');
@@ -44,8 +44,8 @@ export default function FindRidesPostgres() {
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
-    from: 'any',
-    to: 'Gainesville',
+    from: 'Gainesville',
+    to: 'any',
     date: '',
     passengers: '1',
     genderFilter: 'no preference'
@@ -199,9 +199,9 @@ export default function FindRidesPostgres() {
             </div>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <Label htmlFor="from" className="block mb-2">From</Label>
+              <Label htmlFor="from" className="block mb-3 text-sm font-medium">From</Label>
               <div className="relative">
                 <div className="absolute left-3 top-3 text-gray-400">
                   <FaLocationArrow />

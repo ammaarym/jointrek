@@ -50,7 +50,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               <img 
                 src={trekLogo} 
                 alt="Trek" 
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
             </Link>
           </div>

@@ -182,7 +182,7 @@ export default function Profile() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
-                  <FaPhone className="text-orange-600" />
+                  <FaPhone className="text-primary" />
                   Phone Number
                 </Label>
                 <Input
@@ -197,7 +197,7 @@ export default function Profile() {
 
               <div>
                 <Label htmlFor="instagram" className="flex items-center gap-2 mb-2">
-                  <FaInstagram className="text-orange-600" />
+                  <FaInstagram className="text-primary" />
                   Instagram Username
                 </Label>
                 <Input
@@ -211,7 +211,7 @@ export default function Profile() {
 
               <div>
                 <Label htmlFor="snapchat" className="flex items-center gap-2 mb-2">
-                  <RiSnapchatFill className="text-orange-600" />
+                  <RiSnapchatFill className="text-primary" />
                   Snapchat Username
                 </Label>
                 <Input
@@ -227,7 +227,7 @@ export default function Profile() {
                 <Button 
                   onClick={handleSave} 
                   disabled={loading}
-                  className="bg-orange-600 hover:bg-orange-700 text-white flex-1"
+                  className="bg-primary hover:bg-orange-600 text-white flex-1"
                 >
                   {loading ? 'Saving...' : 'Save Contact Information'}
                 </Button>
@@ -266,7 +266,7 @@ export default function Profile() {
 
               {snapchat && (
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <RiSnapchatFill className="text-orange-600 w-5 h-5" />
+                  <RiSnapchatFill className="text-primary w-5 h-5" />
                   <div>
                     <p className="font-medium text-gray-900">Snapchat</p>
                     <p className="text-gray-600">{snapchat}</p>
@@ -279,7 +279,7 @@ export default function Profile() {
                   <p className="text-gray-500 mb-4">No contact information added yet</p>
                   <Button 
                     onClick={() => setIsEditing(true)}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    className="bg-primary hover:bg-orange-600 text-white"
                   >
                     Add Contact Information
                   </Button>

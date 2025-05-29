@@ -423,7 +423,7 @@ export default function EditRideModal({ ride, isOpen, onClose, onRideUpdated }: 
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-orange-600 hover:bg-orange-700">
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
                 {isSubmitting ? "Updating..." : "Update Ride"}
               </Button>
             </DialogFooter>

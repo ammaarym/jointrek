@@ -221,7 +221,7 @@ export default function FindRidesPostgres() {
             </div>
             
             <div>
-              <Label htmlFor="to" className="block mb-2">To</Label>
+              <Label htmlFor="to" className="block mb-3 text-sm font-medium">To</Label>
               <div className="relative">
                 <div className="absolute left-3 top-3 text-gray-400">
                   <FaMapMarkerAlt />
@@ -241,7 +241,7 @@ export default function FindRidesPostgres() {
             </div>
             
             <div>
-              <Label htmlFor="date" className="block mb-2">Date</Label>
+              <Label htmlFor="date" className="block mb-3 text-sm font-medium">Date</Label>
               <div className="relative">
                 <div className="absolute left-3 top-3 text-gray-400">
                   <FaCalendar />
@@ -258,7 +258,7 @@ export default function FindRidesPostgres() {
 
             {feedType === 'drivers' && (
               <div>
-                <Label htmlFor="passengers" className="block mb-2">Seats Needed</Label>
+                <Label htmlFor="passengers" className="block mb-3 text-sm font-medium">Seats Needed</Label>
                 <Select value={passengers} onValueChange={setPassengers}>
                   <SelectTrigger className="h-12 rounded-md border-gray-200">
                     <SelectValue placeholder="Any number" />
@@ -279,7 +279,7 @@ export default function FindRidesPostgres() {
             )}
             
             <div>
-              <Label htmlFor="gender" className="block mb-2">Gender Preference</Label>
+              <Label htmlFor="gender" className="block mb-3 text-sm font-medium">Gender Preference</Label>
               <Select value={genderFilter} onValueChange={setGenderFilter}>
                 <SelectTrigger className="h-12 rounded-md border-gray-200">
                   <SelectValue placeholder="No preference" />

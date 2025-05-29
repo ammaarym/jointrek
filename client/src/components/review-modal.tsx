@@ -149,7 +149,7 @@ export default function ReviewModal({ isOpen, onClose, rideData, onSubmit }: Rev
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || rating === 0}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </Button>

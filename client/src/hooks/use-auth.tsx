@@ -45,8 +45,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log("Auth state changed:", user?.email);
       
-      // If user is logged in, sync with PostgreSQL database
+      // If user is logged in, validate email domain
       if (user) {
+        const email = user.email || "";
+        if (!email.endsWith("@ufl.edu")) {
+          console.log("Non-UF email detected in auth state change:", email);
+          await firebaseSignOut(auth);
+          toast({
+            title: "Access Denied",
+            description: "Please use your UF email address (@ufl.edu) to sign in.",
+            variant: "destructive",
+            duration: 5000
+          });
+          setCurrentUser(null);
+          setLoading(false);
+          return;
+        }
+        
         try {
           // Import dynamically to avoid circular dependencies
           const { syncUserToPostgres } = await import('../lib/sync-user');
@@ -182,7 +197,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Make sure the state is updated to reflect signed out status
         setCurrentUser(null);
         
-        throw new Error("Non-UF email used for sign-in");
+        toast({
+          title: "Access Denied",
+          description: "Please use your UF email address (@ufl.edu) to sign in.",
+          variant: "destructive",
+          duration: 5000
+        });
+        
+        throw new Error("Please use a valid UF email address");
       }
       
       console.log("UF email verification successful!");

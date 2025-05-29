@@ -76,7 +76,7 @@ export default function AuthModal({
           <div className="mb-6 text-center">
             <CarTaxiFront className="text-primary text-4xl mx-auto" />
             <h2 className="text-2xl font-bold mt-4 dark:text-white">
-              Welcome to GatorLift
+              Welcome to Trek
             </h2>
             <p className="text-neutral-600 dark:text-neutral-400 mt-2">
               UF Student Ride Sharing Platform

@@ -129,11 +129,7 @@ export default function PostRidePostgres() {
     }
   });
   
-  // Update the hidden rideType field when toggle button changes
-  const handleRideTypeChange = (type: 'driver' | 'passenger') => {
-    setRideTypeDisplay(type);
-    form.setValue('rideType', type);
-  };
+  // This page is fixed to driver mode only
   
   // Form submission
   const onSubmit = async (data: z.infer<typeof rideSchema>) => {
@@ -185,7 +181,7 @@ export default function PostRidePostgres() {
       // Calculate automatic price using new enhanced formula
       let calculatedPrice = "25"; // fallback price
       
-      if (rideTypeDisplay === 'driver' && data.carType && data.destination) {
+      if (data.carType && data.destination) {
         try {
           const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
           
@@ -260,28 +256,12 @@ export default function PostRidePostgres() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6">
           <div className="mb-8">
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                type="button"
-                variant={rideTypeDisplay === 'driver' ? 'default' : 'outline'}
-                className={`h-14 ${rideTypeDisplay === 'driver' ? 'bg-primary text-white' : 'border-gray-200'}`}
-                onClick={() => handleRideTypeChange('driver')}
-              >
-                <FaCarSide className="mr-2 text-xl" />
-                Offering a Ride
-              </Button>
-              <Button
-                type="button"
-                variant={rideTypeDisplay === 'passenger' ? 'default' : 'outline'}
-                className={`h-14 ${rideTypeDisplay === 'passenger' ? 'bg-primary text-white' : 'border-gray-200'}`}
-                onClick={() => handleRideTypeChange('passenger')}
-              >
-                <FaUser className="mr-2 text-xl" />
-                Looking for a Ride
-              </Button>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Post a Ride</h2>
+              <p className="text-gray-600">Offering a ride? Share your trip details below</p>
             </div>
             
-            {/* Hidden ride type field */}
+            {/* Hidden ride type field - always driver */}
             <FormField
               control={form.control}
               name="rideType"
@@ -441,9 +421,7 @@ export default function PostRidePostgres() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {rideTypeDisplay === 'driver' ? (
-                  <>
-                    <FormField
+                <FormField
                       control={form.control}
                       name="carType"
                       render={({ field }) => (
@@ -499,47 +477,15 @@ export default function PostRidePostgres() {
                       )}
                     />
 
-                  </>
-                ) : (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="genderPreference"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="block mb-2">Gender Preference</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-12 rounded-md border-gray-200">
-                                <SelectValue placeholder="Select preference" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {GENDER_PREFERENCES.map(pref => (
-                                <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                  </>
-                )}
               </div>
               
-              {rideTypeDisplay === 'driver' && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <FormField
-                      control={form.control}
-                      name="genderPreference"
-                      render={({ field }) => (
-                        <FormItem>
+              {/* Driver-specific fields */}
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="genderPreference"
+                  render={({ field }) => (
+                    <FormItem>
                       <FormLabel className="block mb-2">Gender Preference</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
@@ -560,33 +506,37 @@ export default function PostRidePostgres() {
                     </FormItem>
                   )}
                 />
-                
-                {rideTypeDisplay === 'driver' && (
-                  <div></div> // Removed car model field
-                )}
-                
-                {false && ( // Hidden car model field
-                  <FormField
-                    control={form.control}
-                    name="carModel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="block mb-2">Car Model (Optional)</FormLabel>
+              </div>
+              
+              {/* Additional driver fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <FormField
+                  control={form.control}
+                  name="carModel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block mb-2">Car Model (Optional)</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Input 
-                            placeholder="e.g. Toyota Camry, Silver" 
-                            className="h-12 rounded-md border-gray-200"
-                            {...field}
-                          />
+                          <SelectTrigger className="h-12 rounded-md border-gray-200">
+                            <SelectValue placeholder="Select preference" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                  </div>
-                </>
-              )}
+                        <SelectContent>
+                          {GENDER_PREFERENCES.map(pref => (
+                            <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+              </div>
               
               <div className="mb-8">
                 <FormField

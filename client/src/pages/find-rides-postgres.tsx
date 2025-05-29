@@ -40,7 +40,7 @@ export default function FindRidesPostgres() {
   const [genderFilter, setGenderFilter] = useState('no preference');
   const [sortBy, setSortBy] = useState('date');
   const [feedType, setFeedType] = useState('drivers'); // 'drivers' or 'passengers'
-  const [quickFilter, setQuickFilter] = useState('arrivals'); // 'departures' or 'arrivals'
+  const [quickFilter, setQuickFilter] = useState('departures'); // 'departures' or 'arrivals'
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -170,20 +170,6 @@ export default function FindRidesPostgres() {
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => {
-                  setQuickFilter('arrivals');
-                  setFrom('any');
-                  setTo('Gainesville');
-                }}
-                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
-                  quickFilter === 'arrivals'
-                    ? 'bg-white shadow text-primary'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                To Gainesville
-              </button>
-              <button
-                onClick={() => {
                   setQuickFilter('departures');
                   setFrom('Gainesville');
                   setTo('any');
@@ -195,6 +181,20 @@ export default function FindRidesPostgres() {
                 }`}
               >
                 From Gainesville
+              </button>
+              <button
+                onClick={() => {
+                  setQuickFilter('arrivals');
+                  setFrom('any');
+                  setTo('Gainesville');
+                }}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                  quickFilter === 'arrivals'
+                    ? 'bg-white shadow text-primary'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                To Gainesville
               </button>
             </div>
           </div>

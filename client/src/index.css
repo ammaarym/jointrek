@@ -13,7 +13,7 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 23 76% 60%; /* Using the logo orange as primary */
+  --primary: 30 25% 45%; /* Darker beige for Trek branding */
   --primary-foreground: 0 0% 100%;
   --secondary: 212 100% 33%; /* UF blue as secondary */
   --secondary-foreground: 0 0% 100%;
@@ -24,11 +24,11 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
   
-  /* GatorLift Colors - updated to match logo */
-  --uf-orange: 23 76% 60%; /* Logo orange color */
+  /* Trek Colors - updated to match new branding */
+  --trek-beige: 30 25% 45%; /* Darker beige color */
   --uf-blue: 212 100% 33%;
   --chart-1: var(--uf-blue);
-  --chart-2: var(--uf-orange);
+  --chart-2: var(--trek-beige);
   --chart-3: 190 95% 39%;
   --chart-4: 324 70% 45%;
   --chart-5: 139 75% 39%;
@@ -55,7 +55,7 @@
   --card-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --primary: 23 76% 60%; /* Using the logo orange as primary */
+  --primary: 30 25% 45%; /* Darker beige for Trek branding */
   --primary-foreground: 0 0% 100%;
   --secondary: 212 100% 33%; /* UF blue as secondary */
   --secondary-foreground: 0 0% 100%;
@@ -91,24 +91,24 @@
     @apply bg-gradient-to-r from-[hsl(212,100%,33%)] to-blue-700;
   }
   
-  .uf-orange {
-    @apply text-[hsl(19,100%,52%)];
+  .trek-beige {
+    @apply text-[hsl(30,25%,45%)];
   }
   
   .uf-blue {
     @apply text-[hsl(212,100%,33%)];
   }
   
-  .bg-uf-orange {
-    @apply bg-[hsl(19,100%,52%)];
+  .bg-trek-beige {
+    @apply bg-[hsl(30,25%,45%)];
   }
   
   .bg-uf-blue {
     @apply bg-[hsl(212,100%,33%)];
   }
   
-  .border-uf-orange {
-    @apply border-[hsl(19,100%,52%)];
+  .border-trek-beige {
+    @apply border-[hsl(30,25%,45%)];
   }
   
   .border-uf-blue {

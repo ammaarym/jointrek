@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon } from "lucide-react";
-// Using text-based logo
+import trekLogo from "@assets/image_1748552578928.png";
 
 interface HeaderProps {
   onLogin: () => void;
@@ -48,7 +48,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           <div className="flex items-center space-x-2">
             <Link href="/" className="flex items-center">
               <img 
-                src="/attached_assets/image_1748552578928.png" 
+                src={trekLogo} 
                 alt="Trek" 
                 className="h-8 w-auto"
               />

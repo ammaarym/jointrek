@@ -48,6 +48,38 @@ export const insertRideSchema = createInsertSchema(rides).omit({
   createdAt: true
 });
 
+// Completed rides table schema
+export const completedRides = pgTable("completed_rides", {
+  id: serial("id").primaryKey(),
+  rideId: integer("ride_id").notNull().references(() => rides.id),
+  participantId: text("participant_id").notNull().references(() => users.firebaseUid),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});
+
+// Reviews table schema
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  reviewerId: text("reviewer_id").notNull().references(() => users.firebaseUid),
+  revieweeId: text("reviewee_id").notNull().references(() => users.firebaseUid),
+  rideId: integer("ride_id").notNull().references(() => rides.id),
+  rating: integer("rating").notNull(), // 1-5 stars
+  description: text("description"), // max 200 chars (enforced in frontend)
+  reviewType: text("review_type").notNull(), // "driver" or "passenger"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Completed rides insert schema
+export const insertCompletedRideSchema = createInsertSchema(completedRides).omit({
+  id: true,
+  completedAt: true
+});
+
+// Reviews insert schema
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true
+});
+
 // Booking table schema
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
@@ -109,3 +141,9 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertConversation = z.infer<typeof insertConversationSchema>;
+
+export type CompletedRide = typeof completedRides.$inferSelect;
+export type InsertCompletedRide = z.infer<typeof insertCompletedRideSchema>;
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;

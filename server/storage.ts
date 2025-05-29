@@ -1,10 +1,12 @@
-import { users, rides, bookings, messages, conversations } from "@shared/schema";
+import { users, rides, bookings, messages, conversations, completedRides, reviews } from "@shared/schema";
 import type { 
   User, InsertUser, 
   Ride, InsertRide, 
   Booking, InsertBooking, 
   Message, InsertMessage, 
-  Conversation, InsertConversation 
+  Conversation, InsertConversation,
+  CompletedRide, InsertCompletedRide,
+  Review, InsertReview
 } from "@shared/schema";
 
 // Define the storage interface
@@ -43,6 +45,17 @@ export interface IStorage {
   getConversationsByUser(userId: string): Promise<Conversation[]>;
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   updateConversationLastMessage(id: number, message: string): Promise<Conversation | undefined>;
+
+  // Completed rides methods
+  markRideComplete(rideId: number, participantId: string): Promise<CompletedRide>;
+  getCompletedRidesByUser(userId: string): Promise<CompletedRide[]>;
+  isRideCompletedByUser(rideId: number, userId: string): Promise<boolean>;
+
+  // Reviews methods
+  createReview(review: InsertReview): Promise<Review>;
+  getReviewsByReviewee(revieweeId: string): Promise<Review[]>;
+  getReviewsByRide(rideId: number): Promise<Review[]>;
+  hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean>;
 }
 
 // In-memory storage implementation

@@ -20,9 +20,11 @@ interface RideCardProps {
   ride: Ride;
   onEdit?: (ride: Ride) => void;
   isDriverUser?: boolean;
+  onMarkComplete?: (rideId: number) => void;
+  showCompleteButton?: boolean;
 }
 
-export default function RideCard({ ride, onEdit, isDriverUser = false }: RideCardProps) {
+export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkComplete, showCompleteButton = false }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
   

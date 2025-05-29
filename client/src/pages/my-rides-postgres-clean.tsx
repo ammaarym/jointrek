@@ -5,11 +5,13 @@ import { formatDate } from '../lib/date-utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit } from 'react-icons/fa';
+import { Textarea } from '@/components/ui/textarea';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck } from 'react-icons/fa';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
+import { Star } from 'lucide-react';
 
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
@@ -18,6 +20,12 @@ export default function MyRidesPostgres() {
   const [rideToDelete, setRideToDelete] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [rideToEdit, setRideToEdit] = useState<any>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [rideToReview, setRideToReview] = useState<any>(null);
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   const { 
@@ -38,6 +46,53 @@ export default function MyRidesPostgres() {
   // Handle posting a new ride
   const handlePostRide = () => {
     setLocation('/post-ride');
+  };
+
+  // Handle marking ride as complete
+  const handleMarkComplete = (ride: any) => {
+    setCompletedRides(prev => new Set([...prev, ride.id]));
+    setRideToReview(ride);
+    setReviewModalOpen(true);
+  };
+
+  // Handle submitting review
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      toast({
+        title: "Rating Required",
+        description: "Please select a star rating before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (reviewText.length > 200) {
+      toast({
+        title: "Description Too Long",
+        description: "Please keep your review under 200 characters.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // For now, just show success - you can connect to backend later
+      toast({
+        title: "Review Submitted",
+        description: "Thank you for your feedback!",
+      });
+      
+      setReviewModalOpen(false);
+      setRating(0);
+      setReviewText('');
+      setRideToReview(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Open the edit modal with automatic pricing
@@ -196,6 +251,22 @@ export default function MyRidesPostgres() {
               </CardContent>
               
               <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+                {completedRides.has(ride.id) ? (
+                  <div className="flex items-center gap-1 text-green-600 font-medium">
+                    <FaCheck className="w-4 h-4" />
+                    Completed
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMarkComplete(ride)}
+                    className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+                  >
+                    <FaCheck className="w-4 h-4" />
+                    Mark Complete
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -229,6 +300,95 @@ export default function MyRidesPostgres() {
           </div>
         )}
       </div>
+
+      {/* Review Modal */}
+      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rate Your Experience</DialogTitle>
+            <DialogDescription>
+              How was your ride with {rideToReview?.rideType === 'driver' ? 'your passengers' : 'the driver'}?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Route Info */}
+            <div className="text-center text-sm text-muted-foreground">
+              {rideToReview?.origin} → {rideToReview?.destination}
+            </div>
+            
+            {/* Star Rating */}
+            <div className="flex justify-center space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="p-1 transition-colors"
+                >
+                  <Star
+                    className={`w-8 h-8 ${
+                      star <= (hoveredRating || rating)
+                        ? 'fill-orange-400 text-orange-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            
+            {/* Rating Text */}
+            <div className="text-center text-sm">
+              {rating === 0 && 'Select a rating'}
+              {rating === 1 && 'Poor'}
+              {rating === 2 && 'Fair'}
+              {rating === 3 && 'Good'}
+              {rating === 4 && 'Very Good'}
+              {rating === 5 && 'Excellent'}
+            </div>
+            
+            {/* Review Text */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Description (optional)
+              </label>
+              <Textarea
+                placeholder="Share your experience..."
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                maxLength={200}
+                className="resize-none"
+              />
+              <div className="text-xs text-muted-foreground text-right">
+                {reviewText.length}/200 characters
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setReviewModalOpen(false);
+                setRating(0);
+                setReviewText('');
+                setRideToReview(null);
+              }}
+            >
+              Skip
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              disabled={rating === 0}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Submit Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

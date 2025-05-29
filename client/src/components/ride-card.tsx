@@ -107,7 +107,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                     alt={ride.driver.name}
                     className="object-cover w-full h-full" 
                   />
-                  <AvatarFallback className="bg-orange-600 text-white">
+                  <AvatarFallback className="bg-primary text-white">
                     {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -131,7 +131,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                 <div className="flex flex-col items-center mr-3">
                   <div className="w-3 h-3 rounded-full bg-blue-600"></div>
                   <div className="w-0.5 h-10 bg-neutral-300"></div>
-                  <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+                  <div className="w-3 h-3 rounded-full bg-primary"></div>
                 </div>
                 <div>
                   <div className="mb-2">
@@ -211,7 +211,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button 
-                    className="block mt-2 bg-orange-600 text-white px-4 py-2 rounded-md font-medium hover:bg-opacity-90 transition"
+                    className="block mt-2 bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (onEdit) {
@@ -228,7 +228,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
           <div className="mt-3 flex justify-center">
             <Button 
               variant="outline" 
-              className="bg-white hover:bg-orange-50 border-2 border-orange-300 text-orange-600 hover:border-orange-400 hover:text-orange-700 px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
+              className="bg-white hover:bg-primary/5 border-2 border-primary/30 text-primary hover:border-primary/50 hover:text-primary/80 px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 setDetailsOpen(true);
@@ -246,7 +246,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold flex items-center">
-              <MapPin className="w-5 h-5 mr-2 text-orange-600" />
+              <MapPin className="w-5 h-5 mr-2 text-primary" />
               {ride.origin.city} to {ride.destination.city}
             </DialogTitle>
             <DialogDescription>
@@ -258,14 +258,14 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
             {/* Driver Info Section */}
             <div className="bg-neutral-50 p-4 rounded-lg">
               <h3 className="text-md font-semibold mb-3 flex items-center">
-                <User className="w-4 h-4 mr-2 text-orange-600" />
+                <User className="w-4 h-4 mr-2 text-primary" />
                 Driver Information
               </h3>
               
               <div className="flex items-center mb-4">
                 <Avatar className="w-16 h-16 mr-4">
                   <AvatarImage src={ride.driver.photoUrl} alt={ride.driver.name} />
-                  <AvatarFallback className="bg-orange-600 text-white text-xl">
+                  <AvatarFallback className="bg-primary text-white text-xl">
                     {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
                   </AvatarFallback>
                 </Avatar>

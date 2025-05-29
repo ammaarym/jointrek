@@ -176,7 +176,7 @@ export default function FindRidesPostgres() {
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'arrivals'
-                    ? 'bg-white shadow text-orange-600'
+                    ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -190,7 +190,7 @@ export default function FindRidesPostgres() {
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'departures'
-                    ? 'bg-white shadow text-orange-600'
+                    ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >

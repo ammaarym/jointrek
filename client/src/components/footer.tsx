@@ -2,8 +2,15 @@ import React from "react";
 import { Link } from "wouter";
 import { CarTaxiFront, Mail, MapPin } from "lucide-react";
 import { FaInstagram, FaTwitter, FaFacebookSquare } from "react-icons/fa";
+import { useAuth } from "../hooks/use-auth";
 
 export default function Footer() {
+  const { currentUser } = useAuth();
+  
+  // Don't show footer if user is logged in
+  if (currentUser) {
+    return null;
+  }
   return (
     <footer className="bg-white dark:bg-dark-background border-t border-neutral-200 dark:border-neutral-800 py-8">
       <div className="container mx-auto px-4">

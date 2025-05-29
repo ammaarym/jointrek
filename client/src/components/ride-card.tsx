@@ -289,7 +289,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                   {/* Show phone first if available */}
                   {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
                     <div className="flex items-center text-neutral-700">
-                      <Phone className="w-5 h-5 mr-3 text-orange-600" />
+                      <Phone className="w-5 h-5 mr-3 text-primary" />
                       <span className="font-medium">{ride.driver.contactInfo?.phone || ride.driver.phone}</span>
                     </div>
                   )}
@@ -297,7 +297,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                   {/* Show email if no phone available */}
                   {!(ride.driver.contactInfo?.phone || ride.driver.phone) && (ride.driver.contactInfo?.email || ride.driver.email) && (
                     <div className="flex items-center text-neutral-700">
-                      <Mail className="w-5 h-5 mr-3 text-orange-600" />
+                      <Mail className="w-5 h-5 mr-3 text-primary" />
                       <span className="font-medium">{ride.driver.contactInfo?.email || ride.driver.email}</span>
                     </div>
                   )}
@@ -305,7 +305,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                   {/* Show Instagram */}
                   {(ride.driver.contactInfo?.instagram || ride.driver.instagram) && (
                     <div className="flex items-center text-neutral-700">
-                      <Instagram className="w-5 h-5 mr-3 text-orange-600" />
+                      <Instagram className="w-5 h-5 mr-3 text-primary" />
                       <span className="font-medium">@{ride.driver.contactInfo?.instagram || ride.driver.instagram}</span>
                     </div>
                   )}
@@ -314,7 +314,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                   {(ride.driver.contactInfo?.snapchat || ride.driver.snapchat) && (
                     <div className="flex items-center text-neutral-700">
                       <svg 
-                        className="w-5 h-5 mr-3 text-orange-600" 
+                        className="w-5 h-5 mr-3 text-primary" 
                         viewBox="0 0 24 24" 
                         fill="none"
                         stroke="currentColor"

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Star, Calendar, MapPin, Users, DollarSign } from 'lucide-react';
-import { formatDate } from '../lib/date-utils';
-import ReviewModal from './review-modal';
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Star, Calendar, MapPin, Users, DollarSign } from "lucide-react";
+import { formatDate } from "../lib/date-utils";
+import ReviewModal from "./review-modal";
 
 interface CompletedRideCardProps {
   ride: {
@@ -16,7 +16,7 @@ interface CompletedRideCardProps {
     price: string;
     seatsTotal: number;
     carModel: string;
-    rideType: 'driver' | 'passenger';
+    rideType: "driver" | "passenger";
     driverId: string;
     driver?: {
       displayName: string;
@@ -25,23 +25,31 @@ interface CompletedRideCardProps {
   };
   currentUserId: string;
   hasReviewed?: boolean;
-  onReviewSubmit: (rideId: number, review: { rating: number; description: string }) => void;
+  onReviewSubmit: (
+    rideId: number,
+    review: { rating: number; description: string },
+  ) => void;
 }
 
-export default function CompletedRideCard({ 
-  ride, 
-  currentUserId, 
+export default function CompletedRideCard({
+  ride,
+  currentUserId,
   hasReviewed = false,
-  onReviewSubmit 
+  onReviewSubmit,
 }: CompletedRideCardProps) {
   const [showReviewModal, setShowReviewModal] = useState(false);
 
-  const isDriver = ride.rideType === 'driver';
-  const revieweeId = isDriver ? 'passenger-placeholder' : ride.driverId;
-  const revieweeName = isDriver ? 'Passenger' : ride.driver?.displayName || 'Driver';
-  const reviewType = isDriver ? 'passenger' : 'driver';
+  const isDriver = ride.rideType === "driver";
+  const revieweeId = isDriver ? "passenger-placeholder" : ride.driverId;
+  const revieweeName = isDriver
+    ? "Passenger"
+    : ride.driver?.displayName || "Driver";
+  const reviewType = isDriver ? "passenger" : "driver";
 
-  const handleReviewSubmit = async (review: { rating: number; description: string }) => {
+  const handleReviewSubmit = async (review: {
+    rating: number;
+    description: string;
+  }) => {
     await onReviewSubmit(ride.id, review);
     setShowReviewModal(false);
   };
@@ -53,7 +61,7 @@ export default function CompletedRideCard({
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <div className="flex items-center text-lg font-semibold text-gray-900 mb-2">
-                <MapPin className="w-5 h-5 mr-2 text-orange-600" />
+                <MapPin className="w-5 h-5 mr-2 text-primary" />
                 {ride.origin} → {ride.destination}
               </div>
               <div className="text-sm text-gray-600 mb-2">
@@ -61,7 +69,9 @@ export default function CompletedRideCard({
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-orange-600">${ride.price}</div>
+              <div className="text-2xl font-bold text-primary">
+                ${ride.price}
+              </div>
               <div className="text-sm text-gray-500">per person</div>
             </div>
           </div>
@@ -80,7 +90,9 @@ export default function CompletedRideCard({
               <span className="text-sm capitalize">{ride.carModel}</span>
             </div>
             <div className="flex items-center text-gray-600">
-              <span className="text-sm font-medium text-green-600">✓ Completed</span>
+              <span className="text-sm font-medium text-green-600">
+                ✓ Completed
+              </span>
             </div>
           </div>
 
@@ -88,11 +100,11 @@ export default function CompletedRideCard({
             <div className="text-sm text-gray-600">
               You were the <span className="font-medium">{ride.rideType}</span>
             </div>
-            
+
             {!hasReviewed ? (
               <Button
                 onClick={() => setShowReviewModal(true)}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
+                className="bg-primary hover:bg-orange-700 text-white"
                 size="sm"
               >
                 <Star className="w-4 h-4 mr-2" />
@@ -115,9 +127,9 @@ export default function CompletedRideCard({
           id: ride.id,
           revieweeId,
           revieweeName,
-          reviewType: reviewType as 'driver' | 'passenger',
+          reviewType: reviewType as "driver" | "passenger",
           origin: ride.origin,
-          destination: ride.destination
+          destination: ride.destination,
         }}
         onSubmit={handleReviewSubmit}
       />

@@ -2,17 +2,32 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Ride } from "@/lib/types";
-import { User, Users, MapPin, Phone, Instagram, Calendar, Clock, Car, ChevronDown, ChevronUp, Info, Edit, Calculator, Mail } from "lucide-react";
+import {
+  User,
+  Users,
+  MapPin,
+  Phone,
+  Instagram,
+  Calendar,
+  Clock,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Edit,
+  Calculator,
+  Mail,
+} from "lucide-react";
 import { CAR_TYPE_MPG, CITY_DISTANCES } from "@shared/pricing";
 // Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 
@@ -24,46 +39,56 @@ interface RideCardProps {
   showCompleteButton?: boolean;
 }
 
-export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkComplete, showCompleteButton = false }: RideCardProps) {
+export default function RideCard({
+  ride,
+  onEdit,
+  isDriverUser = false,
+  onMarkComplete,
+  showCompleteButton = false,
+}: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
-  
+
   // Function to format the time from timestamp
   const formatDateTime = (timestamp: any) => {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatTime = (timestamp: any) => {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
   // Calculate pricing breakdown
   const getPricingBreakdown = () => {
-    const carType = ride.carModel?.split(' - ')[0] || ride.carModel || 'sedan';
+    const carType = ride.carModel?.split(" - ")[0] || ride.carModel || "sedan";
     const mpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
-    const destinationCity = typeof ride.destination === 'string' ? ride.destination : ride.destination?.city || 'destination';
-    const cityData = CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
-    const gasPrice = 3.20;
-    
+    const destinationCity =
+      typeof ride.destination === "string"
+        ? ride.destination
+        : ride.destination?.city || "destination";
+    const cityData =
+      CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
+    const gasPrice = 3.2;
+
     if (!cityData) return null;
-    
+
     const baseCost = (cityData.miles / mpg) * gasPrice;
     const withBuffer = baseCost * 1.2;
     const tollCities = ["Miami", "Tampa"];
-    const tollFee = tollCities.includes(destinationCity) ? 2.50 : 0;
+    const tollFee = tollCities.includes(destinationCity) ? 2.5 : 0;
     const totalCost = withBuffer + tollFee;
     const perPersonCost = totalCost / ride.seatsTotal;
-    
+
     return {
       distance: cityData.miles,
       mpg,
@@ -74,25 +99,31 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
       totalCost,
       perPersonCost,
       carType,
-      destinationCity
+      destinationCity,
     };
   };
 
   // Calculate estimated arrival time
   const getEstimatedArrival = () => {
-    const destinationCity = typeof ride.destination === 'string' ? ride.destination : ride.destination?.city || 'destination';
-    const cityData = CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
+    const destinationCity =
+      typeof ride.destination === "string"
+        ? ride.destination
+        : ride.destination?.city || "destination";
+    const cityData =
+      CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
     if (!cityData) return null;
-    
+
     const departureDate = new Date(ride.departureTime as any);
-    const arrivalDate = new Date(departureDate.getTime() + (cityData.hours * 60 * 60 * 1000));
-    
+    const arrivalDate = new Date(
+      departureDate.getTime() + cityData.hours * 60 * 60 * 1000,
+    );
+
     return formatTime(arrivalDate);
   };
-  
+
   return (
     <>
-      <div 
+      <div
         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
         onClick={() => setDetailsOpen(true)}
       >
@@ -102,19 +133,29 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
             <div className="md:w-1/4">
               <div className="flex items-center">
                 <Avatar className="w-12 h-12 mr-3">
-                  <AvatarImage 
-                    src={ride.driver.photoUrl} 
+                  <AvatarImage
+                    src={ride.driver.photoUrl}
                     alt={ride.driver.name}
-                    className="object-cover w-full h-full" 
+                    className="object-cover w-full h-full"
                   />
                   <AvatarFallback className="bg-primary text-white">
-                    {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                    {ride.driver.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="font-semibold text-black">{ride.driver.name}</h4>
+                  <h4 className="font-semibold text-black">
+                    {ride.driver.name}
+                  </h4>
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-4 h-4 text-yellow-400 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                     <span className="text-sm text-neutral-500">
@@ -129,7 +170,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
             <div className="md:w-2/4">
               <div className="flex items-center mb-3">
                 <div className="flex flex-col items-center mr-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                  <div className="w-3 h-3 rounded-full bg-black"></div>
                   <div className="w-0.5 h-10 bg-neutral-300"></div>
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
                 </div>
@@ -186,7 +227,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                     <Calculator className="w-4 h-4 text-gray-500" />
                   </Button>
                 </div>
-                
+
                 {/* Seats available information */}
                 <div className="mt-1 text-sm text-gray-600">
                   {ride.seatsLeft} of {ride.seatsTotal} seats available
@@ -200,17 +241,17 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                       Female riders only
                     </Badge>
                   ) : ride.genderPreference === "male" ? (
-                    <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border-blue-200">
+                    <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-black border-black">
                       <Users className="w-3 h-3 mr-1" />
                       Male riders only
                     </Badge>
                   ) : null}
                 </div>
               </div>
-              
+
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
-                  <Button 
+                  <Button
                     className="block mt-2 bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -226,8 +267,8 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
             </div>
           </div>
           <div className="mt-3 flex justify-center">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="bg-white hover:bg-primary/5 border-2 border-primary/30 text-primary hover:border-primary/50 hover:text-primary/80 px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
@@ -253,7 +294,7 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
               Ride details and driver information
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-6 py-4">
             {/* Driver Info Section */}
             <div className="bg-neutral-50 p-4 rounded-lg">
@@ -261,19 +302,30 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                 <User className="w-4 h-4 mr-2 text-primary" />
                 Driver Information
               </h3>
-              
+
               <div className="flex items-center mb-4">
                 <Avatar className="w-16 h-16 mr-4">
-                  <AvatarImage src={ride.driver.photoUrl} alt={ride.driver.name} />
+                  <AvatarImage
+                    src={ride.driver.photoUrl}
+                    alt={ride.driver.name}
+                  />
                   <AvatarFallback className="bg-primary text-white text-xl">
-                    {ride.driver.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                    {ride.driver.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div>
                   <h4 className="font-semibold text-lg">{ride.driver.name}</h4>
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-4 h-4 text-yellow-400 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
                     <span className="text-neutral-500">
@@ -282,146 +334,194 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
-                <h5 className="font-medium text-neutral-900 mb-3">Contact Information</h5>
+                <h5 className="font-medium text-neutral-900 mb-3">
+                  Contact Information
+                </h5>
                 <div className="grid grid-cols-1 gap-3">
                   {/* Show phone first if available */}
                   {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
                     <div className="flex items-center text-neutral-700">
                       <Phone className="w-5 h-5 mr-3 text-primary" />
-                      <span className="font-medium">{ride.driver.contactInfo?.phone || ride.driver.phone}</span>
+                      <span className="font-medium">
+                        {ride.driver.contactInfo?.phone || ride.driver.phone}
+                      </span>
                     </div>
                   )}
-                  
+
                   {/* Show email if no phone available */}
-                  {!(ride.driver.contactInfo?.phone || ride.driver.phone) && (ride.driver.contactInfo?.email || ride.driver.email) && (
-                    <div className="flex items-center text-neutral-700">
-                      <Mail className="w-5 h-5 mr-3 text-primary" />
-                      <span className="font-medium">{ride.driver.contactInfo?.email || ride.driver.email}</span>
-                    </div>
-                  )}
-                  
+                  {!(ride.driver.contactInfo?.phone || ride.driver.phone) &&
+                    (ride.driver.contactInfo?.email || ride.driver.email) && (
+                      <div className="flex items-center text-neutral-700">
+                        <Mail className="w-5 h-5 mr-3 text-primary" />
+                        <span className="font-medium">
+                          {ride.driver.contactInfo?.email || ride.driver.email}
+                        </span>
+                      </div>
+                    )}
+
                   {/* Show Instagram */}
-                  {(ride.driver.contactInfo?.instagram || ride.driver.instagram) && (
+                  {(ride.driver.contactInfo?.instagram ||
+                    ride.driver.instagram) && (
                     <div className="flex items-center text-neutral-700">
                       <Instagram className="w-5 h-5 mr-3 text-primary" />
-                      <span className="font-medium">@{ride.driver.contactInfo?.instagram || ride.driver.instagram}</span>
+                      <span className="font-medium">
+                        @
+                        {ride.driver.contactInfo?.instagram ||
+                          ride.driver.instagram}
+                      </span>
                     </div>
                   )}
-                  
+
                   {/* Show Snapchat */}
-                  {(ride.driver.contactInfo?.snapchat || ride.driver.snapchat) && (
+                  {(ride.driver.contactInfo?.snapchat ||
+                    ride.driver.snapchat) && (
                     <div className="flex items-center text-neutral-700">
-                      <svg 
-                        className="w-5 h-5 mr-3 text-primary" 
-                        viewBox="0 0 24 24" 
+                      <svg
+                        className="w-5 h-5 mr-3 text-primary"
+                        viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z"/>
+                        <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z" />
                       </svg>
-                      <span className="font-medium">{ride.driver.contactInfo?.snapchat || ride.driver.snapchat}</span>
+                      <span className="font-medium">
+                        {ride.driver.contactInfo?.snapchat ||
+                          ride.driver.snapchat}
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
-            
+
             {/* Ride Details Section */}
             <div className="bg-neutral-50 p-4 rounded-lg">
               <h3 className="text-md font-semibold mb-3 flex items-center">
-                <Car className="w-4 h-4 mr-2 text-orange-600" />
+                <Car className="w-4 h-4 mr-2 text-primary" />
                 Ride Details
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">From</div>
-                    <div className="font-medium">{ride.origin.city}, {ride.origin.area}</div>
+                    <div className="font-medium">
+                      {ride.origin.city}, {ride.origin.area}
+                    </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">To</div>
-                    <div className="font-medium">{ride.destination.city}, {ride.destination.area}</div>
+                    <div className="font-medium">
+                      {ride.destination.city}, {ride.destination.area}
+                    </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="mb-3 flex items-start">
                     <Calendar className="w-4 h-4 mr-2 text-neutral-500 mt-0.5" />
                     <div>
                       <div className="text-neutral-500 text-sm">Departure</div>
-                      <div className="font-medium">{formatDateTime(ride.departureTime)}</div>
-                      <div className="text-neutral-500 text-xs">{formatTime(ride.departureTime)}</div>
+                      <div className="font-medium">
+                        {formatDateTime(ride.departureTime)}
+                      </div>
+                      <div className="text-neutral-500 text-xs">
+                        {formatTime(ride.departureTime)}
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="mb-3 flex items-start">
                     <Clock className="w-4 h-4 mr-2 text-neutral-500 mt-0.5" />
                     <div>
-                      <div className="text-neutral-500 text-sm">Arrival (estimated)</div>
-                      <div className="font-medium">{formatDateTime(ride.arrivalTime)}</div>
-                      <div className="text-neutral-500 text-xs">{getEstimatedArrival() || formatTime(ride.arrivalTime)}</div>
+                      <div className="text-neutral-500 text-sm">
+                        Arrival (estimated)
+                      </div>
+                      <div className="font-medium">
+                        {formatDateTime(ride.arrivalTime)}
+                      </div>
+                      <div className="text-neutral-500 text-xs">
+                        {getEstimatedArrival() || formatTime(ride.arrivalTime)}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div className={`grid grid-cols-1 ${ride.rideType === 'driver' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4 mt-2`}>
+
+              <div
+                className={`grid grid-cols-1 ${ride.rideType === "driver" ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4 mt-2`}
+              >
                 <div>
                   <div className="text-neutral-500 text-sm">Price</div>
-                  <div className="font-bold text-xl text-orange-600">${ride.price}</div>
+                  <div className="font-bold text-xl text-primary">
+                    ${ride.price}
+                  </div>
                 </div>
-                
-                {ride.rideType === 'driver' && (
+
+                {ride.rideType === "driver" && (
                   <div>
-                    <div className="text-neutral-500 text-sm">Seats Available</div>
-                    <div className="font-medium">{ride.seatsLeft} seats available</div>
+                    <div className="text-neutral-500 text-sm">
+                      Seats Available
+                    </div>
+                    <div className="font-medium">
+                      {ride.seatsLeft} seats available
+                    </div>
                   </div>
                 )}
-                
+
                 <div>
-                  <div className="text-neutral-500 text-sm">Gender Preference</div>
+                  <div className="text-neutral-500 text-sm">
+                    Gender Preference
+                  </div>
                   <div className="font-medium">
-                    {ride.genderPreference === "female" 
-                      ? "Female riders only" 
-                      : ride.genderPreference === "male" 
-                        ? "Male riders only" 
+                    {ride.genderPreference === "female"
+                      ? "Female riders only"
+                      : ride.genderPreference === "male"
+                        ? "Male riders only"
                         : "No preference"}
                   </div>
                 </div>
               </div>
-              
-              {ride.carModel && ride.rideType === 'driver' && (
+
+              {ride.carModel && ride.rideType === "driver" && (
                 <div className="mt-3">
                   <div className="text-neutral-500 text-sm">Car Model</div>
-                  <div className="font-medium">{ride.carModel?.charAt(0).toUpperCase() + ride.carModel?.slice(1)}</div>
+                  <div className="font-medium">
+                    {ride.carModel?.charAt(0).toUpperCase() +
+                      ride.carModel?.slice(1)}
+                  </div>
                 </div>
               )}
-              
+
               {ride.notes && (
                 <div className="mt-3">
                   <div className="text-neutral-500 text-sm">Notes</div>
-                  <div className="bg-white p-3 rounded border mt-1">{ride.notes}</div>
+                  <div className="bg-white p-3 rounded border mt-1">
+                    {ride.notes}
+                  </div>
                 </div>
               )}
             </div>
           </div>
-          
+
           <DialogFooter className="flex-col sm:flex-row gap-3">
             <DialogClose asChild>
               <Button variant="outline">Close</Button>
             </DialogClose>
-            
+
             {isDriverUser && onEdit ? (
-              <Button className="bg-orange-600 text-white" onClick={() => {
-                setDetailsOpen(false);
-                onEdit(ride);
-              }}>
+              <Button
+                className="bg-primary text-white"
+                onClick={() => {
+                  setDetailsOpen(false);
+                  onEdit(ride);
+                }}
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Ride
               </Button>
@@ -435,92 +535,138 @@ export default function RideCard({ ride, onEdit, isDriverUser = false, onMarkCom
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold flex items-center">
-              <Calculator className="w-5 h-5 mr-2 text-orange-600" />
+              <Calculator className="w-5 h-5 mr-2 text-primary" />
               How is ${ride.price} calculated?
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium mb-3">Trip Breakdown:</h4>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Distance to {getPricingBreakdown()?.destinationCity || 'destination'}:</span>
-                  <span className="font-medium">{getPricingBreakdown()?.distance || 350} miles</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span>Car type ({ride.carModel || 'sedan'}):</span>
+                  <span>
+                    Distance to{" "}
+                    {getPricingBreakdown()?.destinationCity || "destination"}:
+                  </span>
                   <span className="font-medium">
-                    {ride.carModel?.includes('minivan') ? '28' : 
-                     ride.carModel?.includes('suv') ? '25' : 
-                     ride.carModel?.includes('truck') ? '22' : '32'} MPG
+                    {getPricingBreakdown()?.distance || 350} miles
                   </span>
                 </div>
-                
+
+                <div className="flex justify-between">
+                  <span>Car type ({ride.carModel || "sedan"}):</span>
+                  <span className="font-medium">
+                    {ride.carModel?.includes("minivan")
+                      ? "28"
+                      : ride.carModel?.includes("suv")
+                        ? "25"
+                        : ride.carModel?.includes("truck")
+                          ? "22"
+                          : "32"}{" "}
+                    MPG
+                  </span>
+                </div>
+
                 <div className="flex justify-between">
                   <span>Gas price (Gainesville):</span>
                   <span className="font-medium">$3.20/gallon</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span>Base gas cost:</span>
                   <span className="font-medium">
-                    ${((350 / (ride.carModel?.includes('minivan') ? 28 : 
-                              ride.carModel?.includes('suv') ? 25 : 
-                              ride.carModel?.includes('truck') ? 22 : 32)) * 3.20).toFixed(2)}
+                    $
+                    {(
+                      (350 /
+                        (ride.carModel?.includes("minivan")
+                          ? 28
+                          : ride.carModel?.includes("suv")
+                            ? 25
+                            : ride.carModel?.includes("truck")
+                              ? 22
+                              : 32)) *
+                      3.2
+                    ).toFixed(2)}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span>Safety buffer (20%):</span>
                   <span className="font-medium">
-                    +${(((350 / (ride.carModel?.includes('minivan') ? 28 : 
-                                ride.carModel?.includes('suv') ? 25 : 
-                                ride.carModel?.includes('truck') ? 22 : 32)) * 3.20) * 0.2).toFixed(2)}
+                    +$
+                    {(
+                      (350 /
+                        (ride.carModel?.includes("minivan")
+                          ? 28
+                          : ride.carModel?.includes("suv")
+                            ? 25
+                            : ride.carModel?.includes("truck")
+                              ? 22
+                              : 32)) *
+                      3.2 *
+                      0.2
+                    ).toFixed(2)}
                   </span>
                 </div>
-                
-                {((typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Miami' || 
-                  (typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Tampa') && (
+
+                {((typeof ride.destination === "string"
+                  ? ride.destination
+                  : ride.destination?.city) === "Miami" ||
+                  (typeof ride.destination === "string"
+                    ? ride.destination
+                    : ride.destination?.city) === "Tampa") && (
                   <div className="flex justify-between">
                     <span>Toll fees:</span>
                     <span className="font-medium">+$2.50</span>
                   </div>
                 )}
-                
+
                 <hr className="my-2" />
-                
+
                 <div className="flex justify-between font-medium">
                   <span>Total trip cost:</span>
                   <span>
-                    ${Math.round(
-                      ((350 / (ride.carModel?.includes('minivan') ? 28 : 
-                              ride.carModel?.includes('suv') ? 25 : 
-                              ride.carModel?.includes('truck') ? 22 : 32)) * 3.20) * 1.2 + 
-                      (((typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Miami' || 
-                        (typeof ride.destination === 'string' ? ride.destination : ride.destination?.city) === 'Tampa') ? 2.50 : 0)
+                    $
+                    {Math.round(
+                      (350 /
+                        (ride.carModel?.includes("minivan")
+                          ? 28
+                          : ride.carModel?.includes("suv")
+                            ? 25
+                            : ride.carModel?.includes("truck")
+                              ? 22
+                              : 32)) *
+                        3.2 *
+                        1.2 +
+                        ((typeof ride.destination === "string"
+                          ? ride.destination
+                          : ride.destination?.city) === "Miami" ||
+                        (typeof ride.destination === "string"
+                          ? ride.destination
+                          : ride.destination?.city) === "Tampa"
+                          ? 2.5
+                          : 0),
                     )}
                   </span>
                 </div>
-                
-                <div className="flex justify-between text-lg font-bold text-orange-600">
+
+                <div className="flex justify-between text-lg font-bold text-primary">
                   <span>Per person ({ride.seatsTotal} seats):</span>
                   <span>${ride.price}</span>
                 </div>
               </div>
             </div>
-            
+
             <div className="text-xs text-gray-500 text-center">
-              Price calculated automatically based on distance, car efficiency, gas prices, and passenger count
+              Price calculated automatically based on distance, car efficiency,
+              gas prices, and passenger count
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button onClick={() => setPricingOpen(false)}>
-              Got it!
-            </Button>
+            <Button onClick={() => setPricingOpen(false)}>Got it!</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

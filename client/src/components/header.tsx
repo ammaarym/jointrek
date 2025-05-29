@@ -66,17 +66,17 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
             {currentUser && (
               <>
                 <Link href="/find-rides">
-                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/find-rides" ? "text-orange-600" : ""}`}>
+                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/find-rides" ? "text-primary" : ""}`}>
                     Find Rides
                   </span>
                 </Link>
                 <Link href="/post-ride">
-                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/post-ride" ? "text-orange-600" : ""}`}>
+                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/post-ride" ? "text-primary" : ""}`}>
                     Post a Ride
                   </span>
                 </Link>
                 <Link href="/my-rides">
-                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/my-rides" ? "text-orange-600" : ""}`}>
+                  <span className={`text-neutral-700 hover:text-orange-600 cursor-pointer ${location === "/my-rides" ? "text-primary" : ""}`}>
                     My Rides
                   </span>
                 </Link>
@@ -156,22 +156,22 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               {currentUser ? (
                 <>
                   <Link href="/find-rides" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className={`block py-2 px-3 rounded-md ${location === "/find-rides" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                    <span className={`block py-2 px-3 rounded-md ${location === "/find-rides" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}>
                       Find Rides
                     </span>
                   </Link>
                   <Link href="/post-ride" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className={`block py-2 px-3 rounded-md ${location === "/post-ride" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                    <span className={`block py-2 px-3 rounded-md ${location === "/post-ride" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}>
                       Post a Ride
                     </span>
                   </Link>
                   <Link href="/my-rides" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className={`block py-2 px-3 rounded-md ${location === "/my-rides" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                    <span className={`block py-2 px-3 rounded-md ${location === "/my-rides" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}>
                       My Rides
                     </span>
                   </Link>
                   <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
-                    <span className={`block py-2 px-3 rounded-md ${location === "/profile" ? "bg-orange-50 text-orange-600" : "text-neutral-700"}`}>
+                    <span className={`block py-2 px-3 rounded-md ${location === "/profile" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}>
                       Profile
                     </span>
                   </Link>

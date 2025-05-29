@@ -246,7 +246,7 @@ export default function Profile() {
             <div className="space-y-6">
               {phone && (
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <FaPhone className="text-orange-600 w-5 h-5" />
+                  <FaPhone className="text-primary w-5 h-5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone Number</p>
                     <p className="text-gray-600">{phone}</p>
@@ -256,7 +256,7 @@ export default function Profile() {
 
               {instagram && (
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <FaInstagram className="text-orange-600 w-5 h-5" />
+                  <FaInstagram className="text-primary w-5 h-5" />
                   <div>
                     <p className="font-medium text-gray-900">Instagram</p>
                     <p className="text-gray-600">@{instagram}</p>

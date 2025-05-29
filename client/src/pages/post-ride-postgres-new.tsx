@@ -105,8 +105,7 @@ export default function PostRidePostgres() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
-  // State for ride type toggle (not part of form)
-  const [rideTypeDisplay, setRideTypeDisplay] = useState<'driver' | 'passenger'>('driver');
+  // This page is only for drivers offering rides
   
   // Form setup using React Hook Form with Zod validation
   const form = useForm<z.infer<typeof rideSchema>>({

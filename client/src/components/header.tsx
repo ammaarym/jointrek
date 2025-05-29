@@ -77,6 +77,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     Post a Ride
                   </span>
                 </Link>
+                <Link href="/request-ride">
+                  <span
+                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/request-ride" ? "text-primary" : ""}`}
+                  >
+                    Request a Ride
+                  </span>
+                </Link>
                 <Link href="/my-rides">
                   <span
                     className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/my-rides" ? "text-primary" : ""}`}
@@ -196,6 +203,16 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                       className={`block py-2 px-3 rounded-md ${location === "/post-ride" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
                     >
                       Post a Ride
+                    </span>
+                  </Link>
+                  <Link
+                    href="/request-ride"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span
+                      className={`block py-2 px-3 rounded-md ${location === "/request-ride" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
+                    >
+                      Request a Ride
                     </span>
                   </Link>
                   <Link

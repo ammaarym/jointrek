@@ -29,7 +29,7 @@ try {
 } catch (error) {
   console.error("Firebase initialization error", error);
   // If already initialized, use the existing app
-  app = initializeApp(firebaseConfig, "GatorLift");
+  app = initializeApp(firebaseConfig, "Trek");
 }
 
 // Initialize Firebase services

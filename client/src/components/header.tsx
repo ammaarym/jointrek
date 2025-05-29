@@ -47,7 +47,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-orange-600">GatorLift</span>
+              <img 
+                src="/attached_assets/image_1748552578928.png" 
+                alt="Trek" 
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 

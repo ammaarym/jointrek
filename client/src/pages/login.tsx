@@ -73,7 +73,7 @@ export default function Login() {
             <span className="block font-medium text-orange-600">
               Note: You must use your @ufl.edu email
             </span>
-            Only University of Florida students can use GatorLift.
+            Only University of Florida students can use Trek.
           </p>
         </div>
 

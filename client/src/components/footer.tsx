@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="flex items-center space-x-2 mb-4">
               <CarTaxiFront className="text-primary-orange h-6 w-6" />
               <span className="text-xl font-semibold text-primary-blue dark:text-white">
-                GatorLift
+                Trek
               </span>
             </div>
             <p className="text-neutral-600 dark:text-neutral-400 mb-4">
@@ -126,7 +126,7 @@ export default function Footer() {
               <li className="flex items-center">
                 <Mail className="mr-2 h-4 w-4 text-primary-orange" />
                 <span className="text-neutral-600 dark:text-neutral-400">
-                  support@gatorlift.com
+                  support@trek.com
                 </span>
               </li>
               <li className="flex items-center">
@@ -141,7 +141,7 @@ export default function Footer() {
 
         <div className="border-t border-neutral-200 dark:border-neutral-800 mt-8 pt-8 text-center text-neutral-600 dark:text-neutral-400 text-sm">
           <p>
-            © {new Date().getFullYear()} GatorLift. All rights reserved. Not affiliated with the University of Florida.
+            © {new Date().getFullYear()} Trek. All rights reserved. Not affiliated with the University of Florida.
           </p>
         </div>
       </div>

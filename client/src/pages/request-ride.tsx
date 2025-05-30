@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
@@ -49,24 +49,22 @@ export default function RequestRide() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Get today's date in YYYY-MM-DD format for min date
-  const today = new Date().toISOString().split('T')[0];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!currentUser) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to request a ride.",
+        title: "Authentication Required",
+        description: "Please sign in to request a ride.",
         variant: "destructive"
       });
       return;
     }
 
-    if (!fromCity || !toCity || !departureDate || !departureTime) {
+    // Validate required fields
+    if (!fromCity || !fromArea || !toCity || !toArea || !departureDate || !departureTime) {
       toast({
-        title: "Missing information",
+        title: "Missing Information",
         description: "Please fill in all required fields.",
         variant: "destructive"
       });
@@ -76,50 +74,47 @@ export default function RequestRide() {
     setSubmitting(true);
 
     try {
-      // Convert time to 24-hour format and create proper datetime
-      const [time, period] = departureTime.split(' ');
-      const [hours, minutes] = time.split(':');
-      let hour24 = parseInt(hours);
-      
-      if (period === 'PM' && hour24 !== 12) {
-        hour24 += 12;
-      } else if (period === 'AM' && hour24 === 12) {
-        hour24 = 0;
-      }
-
-      const departureDateTime = new Date(`${departureDate}T${hour24.toString().padStart(2, '0')}:${minutes}:00`);
-      const arrivalDateTime = new Date(departureDateTime.getTime() + (2 * 60 * 60 * 1000)); // Add 2 hours
+      // Create departure datetime string
+      const departureDateTime = `${departureDate}T${convertTo24Hour(departureTime)}:00`;
 
       const rideData = {
-        driverId: currentUser.uid,
-        origin: fromArea ? `${fromCity}, ${fromArea}` : fromCity,
-        destination: toArea ? `${toCity}, ${toArea}` : toCity,
-        departureTime: departureDateTime.toISOString(),
-        arrivalTime: arrivalDateTime.toISOString(),
-        seatsTotal: 1, // Default for passenger requests
+        origin: `${fromCity}, ${fromArea}`,
+        destination: `${toCity}, ${toArea}`,
+        departureTime: departureDateTime,
+        arrivalTime: departureDateTime, // Same as departure for requests
+        seatsTotal: 1,
         seatsLeft: 1,
-        price: 0, // Passengers don't set price
-        genderPreference: genderPreference,
-        notes: notes,
-        rideType: 'passenger' as const
+        price: 0, // Requests don't have set prices
+        genderPreference: genderPreference === 'no-preference' ? null : genderPreference,
+        notes: notes || null,
+        rideType: 'passenger',
+        driverId: currentUser.uid
       };
 
-      await apiRequest('/api/rides', 'POST', rideData);
-
-      toast({
-        title: "Ride request posted!",
-        description: "Your ride request has been posted successfully. Drivers can now see your request.",
-        duration: 5000
+      const response = await fetch('/api/rides', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rideData)
       });
 
-      // Redirect to My Rides page
-      setLocation('/my-rides');
+      if (!response.ok) {
+        throw new Error('Failed to post ride request');
+      }
 
+      toast({
+        title: "Ride Request Posted!",
+        description: "Your ride request has been posted successfully.",
+      });
+
+      // Redirect to find rides page
+      setLocation('/find-rides');
     } catch (error: any) {
       console.error('Error posting ride request:', error);
       toast({
-        title: "Error posting ride request",
-        description: error.message || "There was a problem posting your ride request. Please try again.",
+        title: "Error",
+        description: "Failed to post ride request. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -127,183 +122,177 @@ export default function RequestRide() {
     }
   };
 
+  // Helper function to convert 12-hour time to 24-hour time
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    
+    if (period === 'AM' && hours === '12') {
+      hours = '00';
+    } else if (period === 'PM' && hours !== '12') {
+      hours = (parseInt(hours) + 12).toString();
+    }
+    
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Request a Ride</CardTitle>
-            <p className="text-center text-gray-600 mt-2">
-              Looking for a ride? Post your request and let drivers find you!
-            </p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Origin Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Origin</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="fromCity" className="text-sm font-medium">
-                      From City (Required)
-                    </Label>
-                    <div className="relative mt-1">
-                      <FaLocationArrow className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Select value={fromCity} onValueChange={setFromCity}>
-                        <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Select city" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FLORIDA_CITIES.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="fromArea" className="text-sm font-medium">
-                      Area (Required)
-                    </Label>
-                    <Input
-                      id="fromArea"
-                      value={fromArea}
-                      onChange={(e) => setFromArea(e.target.value)}
-                      placeholder="e.g., UF Campus, Midtown"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Destination Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Destination</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="toCity" className="text-sm font-medium">
-                      To City (Required)
-                    </Label>
-                    <div className="relative mt-1">
-                      <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Select value={toCity} onValueChange={setToCity}>
-                        <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Select city" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FLORIDA_CITIES.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="toArea" className="text-sm font-medium">
-                      Area (Required)
-                    </Label>
-                    <Input
-                      id="toArea"
-                      value={toArea}
-                      onChange={(e) => setToArea(e.target.value)}
-                      placeholder="e.g., Downtown, UCF Area"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Departure Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Departure</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="departureDate" className="text-sm font-medium">
-                      Departure Date (Required)
-                    </Label>
-                    <div className="relative mt-1">
-                      <FaCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Input
-                        id="departureDate"
-                        type="date"
-                        value={departureDate}
-                        onChange={(e) => setDepartureDate(e.target.value)}
-                        min={today}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="departureTime" className="text-sm font-medium">
-                      Departure Time (Required)
-                    </Label>
-                    <div className="relative mt-1">
-                      <FaClock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <Select value={departureTime} onValueChange={setDepartureTime}>
-                        <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_OPTIONS.map(time => (
-                            <SelectItem key={time} value={time}>{time}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Gender Preference */}
-              <div>
-                <Label htmlFor="genderPreference" className="text-sm font-medium">
-                  Gender Preference
-                </Label>
-                <div className="relative mt-1">
-                  <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Select value={genderPreference} onValueChange={setGenderPreference}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue />
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="mb-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Request a Ride</h1>
+              <p className="text-gray-600">Looking for a ride? Post your request and let drivers find you!</p>
+            </div>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Origin Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaLocationArrow className="mr-2 text-primary" />
+                Origin
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="fromCity" className="block mb-2">From City (Required)</Label>
+                  <Select value={fromCity} onValueChange={setFromCity}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select city" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="no-preference">No preference</SelectItem>
-                      <SelectItem value="male">Male drivers only</SelectItem>
-                      <SelectItem value="female">Female drivers only</SelectItem>
+                      {FLORIDA_CITIES.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="fromArea" className="block mb-2">Area (Required)</Label>
+                  <Input
+                    id="fromArea"
+                    value={fromArea}
+                    onChange={(e) => setFromArea(e.target.value)}
+                    placeholder="e.g., UF Campus, Midtown"
+                    className="h-12"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Destination Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-primary" />
+                Destination
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="toCity" className="block mb-2">To City (Required)</Label>
+                  <Select value={toCity} onValueChange={setToCity}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLORIDA_CITIES.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="toArea" className="block mb-2">Area (Required)</Label>
+                  <Input
+                    id="toArea"
+                    value={toArea}
+                    onChange={(e) => setToArea(e.target.value)}
+                    placeholder="e.g., Downtown, UCF Area"
+                    className="h-12"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Departure Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaCalendar className="mr-2 text-primary" />
+                Departure
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="departureDate" className="block mb-2">Departure Date (Required)</Label>
+                  <Input
+                    id="departureDate"
+                    type="date"
+                    value={departureDate}
+                    onChange={(e) => setDepartureDate(e.target.value)}
+                    className="h-12"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="departureTime" className="block mb-2">Departure Time (Required)</Label>
+                  <Select value={departureTime} onValueChange={setDepartureTime}>
+                    <SelectTrigger className="h-12">
+                      <FaClock className="mr-2" />
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_OPTIONS.map((time) => (
+                        <SelectItem key={time} value={time}>{time}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+            </div>
 
-              {/* Notes */}
-              <div>
-                <Label htmlFor="notes" className="text-sm font-medium">
-                  Additional Notes (Optional)
-                </Label>
-                <textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Any additional information for drivers..."
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  rows={3}
-                  maxLength={200}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  {notes.length}/200 characters
-                </p>
-              </div>
+            {/* Gender Preference */}
+            <div>
+              <Label htmlFor="genderPreference" className="block mb-2 flex items-center">
+                <FaUser className="mr-2 text-primary" />
+                Gender Preference
+              </Label>
+              <Select value={genderPreference} onValueChange={setGenderPreference}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="No preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no-preference">No preference</SelectItem>
+                  <SelectItem value="male">Male only</SelectItem>
+                  <SelectItem value="female">Female only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-primary hover:bg-primary/90 text-white py-3"
-              >
-                {submitting ? 'Posting Request...' : 'Post Ride Request'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            {/* Additional Notes */}
+            <div>
+              <Label htmlFor="notes" className="block mb-2">Additional Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any additional information for drivers..."
+                rows={3}
+                className="resize-none"
+                maxLength={200}
+              />
+              <p className="text-sm text-gray-500 mt-1">{notes.length}/200 characters</p>
+            </div>
+
+            <Button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
+            >
+              {submitting ? "Posting..." : "Post Ride Request"}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

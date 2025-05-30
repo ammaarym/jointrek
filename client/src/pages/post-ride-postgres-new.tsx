@@ -208,10 +208,17 @@ export default function PostRide() {
         driverId: currentUser.uid
       };
 
-      await apiRequest('/api/rides', {
+      const response = await fetch('/api/rides', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(rideData)
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to post ride');
+      }
 
       toast({
         title: "Ride Posted!",
@@ -248,7 +255,7 @@ export default function PostRide() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="mb-8">
             <div className="text-center">

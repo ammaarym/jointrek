@@ -308,32 +308,27 @@ export default function FindRidesPostgres() {
         {/* Main content with rides */}
         <div className="lg:col-span-3 mt-6">
           <div className="flex justify-between items-center mb-6">
-            <div>
-              <div className="flex items-center space-x-4 mb-2">
-                <button
-                  onClick={() => setFeedType('drivers')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    feedType === 'drivers'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Available Rides
-                </button>
-                <button
-                  onClick={() => setFeedType('passengers')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    feedType === 'passengers'
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Available Passengers
-                </button>
-              </div>
-              <h1 className="text-2xl font-bold">
-                {feedType === 'drivers' ? 'Available Rides' : 'Available Passengers'}
-              </h1>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setFeedType('drivers')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  feedType === 'drivers'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Available Rides
+              </button>
+              <button
+                onClick={() => setFeedType('passengers')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  feedType === 'passengers'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Available Passengers
+              </button>
             </div>
             
             <div className="flex items-center">

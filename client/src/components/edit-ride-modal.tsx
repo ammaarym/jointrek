@@ -241,6 +241,7 @@ export default function EditRideModal({
         seatsLeft: parseInt(data.seatsTotal), // Reset available seats
         price: calculatedPrice,
         genderPreference: data.genderPreference,
+        carModel: data.carType,
         notes: data.notes || "",
       };
 

@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { FaGasPump } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { FaGasPump } from "react-icons/fa";
 
 interface GasPriceEstimateProps {
   destination: string;
   carType?: string;
 }
 
-export default function GasPriceEstimate({ destination, carType }: GasPriceEstimateProps) {
+export default function GasPriceEstimate({
+  destination,
+  carType,
+}: GasPriceEstimateProps) {
   const [estimate, setEstimate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -16,22 +19,23 @@ export default function GasPriceEstimate({ destination, carType }: GasPriceEstim
       try {
         // Use car-specific MPG or default to sedan
         const CAR_TYPE_MPG = {
-          "sedan": 32,
-          "suv": 25, 
-          "truck": 22,
-          "minivan": 28
+          Sedan: 32,
+          SUV: 25,
+          Truck: 22,
+          Minivan: 28,
         };
-        const averageMpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
-        
-        const response = await fetch('/api/gas-price/estimate', {
-          method: 'POST',
+        const averageMpg =
+          CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
+
+        const response = await fetch("/api/gas-price/estimate", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             destination: destination,
-            mpg: averageMpg
-          })
+            mpg: averageMpg,
+          }),
         });
 
         if (response.ok) {
@@ -39,7 +43,7 @@ export default function GasPriceEstimate({ destination, carType }: GasPriceEstim
           setEstimate(data.estimatedCost);
         }
       } catch (error) {
-        console.error('Error fetching gas price estimate:', error);
+        console.error("Error fetching gas price estimate:", error);
         // Don't show anything if there's an error
       } finally {
         setLoading(false);

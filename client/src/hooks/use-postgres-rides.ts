@@ -122,6 +122,12 @@ export function usePostgresRides() {
       return true;
     } catch (err: any) {
       console.error('Error updating ride:', err);
+      console.error('Error details:', {
+        message: err.message,
+        status: err.status,
+        rideData: rideData,
+        rideId: id
+      });
       setError(err.message || 'Failed to update ride');
       return false;
     } finally {

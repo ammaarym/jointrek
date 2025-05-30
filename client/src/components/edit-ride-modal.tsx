@@ -245,6 +245,7 @@ export default function EditRideModal({
       };
 
       // Update ride via hook
+      console.log('Updating ride with data:', updatedRide);
       const success = await updateRide(
         parseInt(ride.id.toString()),
         updatedRide,

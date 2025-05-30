@@ -31,12 +31,12 @@ import {
 } from "@/components/ui/dialog";
 import { addHours, format } from "date-fns";
 import { Ride } from "@/lib/types";
-// Car type options with MPG values
+// Car type options with MPG values and seat limits
 const CAR_TYPES = [
-  { label: "Sedan", value: "sedan", mpg: 32 },
-  { label: "SUV", value: "suv", mpg: 25 },
-  { label: "Truck", value: "truck", mpg: 22 },
-  { label: "Minivan", value: "minivan", mpg: 28 },
+  { label: "Sedan", value: "sedan", mpg: 32, maxSeats: 4 },
+  { label: "SUV", value: "suv", mpg: 25, maxSeats: 7 },
+  { label: "Truck", value: "truck", mpg: 22, maxSeats: 4 },
+  { label: "Minivan", value: "minivan", mpg: 28, maxSeats: 8 },
 ];
 
 // Distance data from Gainesville to major Florida cities
@@ -137,7 +137,13 @@ const editRideSchema = z.object({
   destinationArea: z
     .string()
     .min(1, { message: "Destination area is required" }),
-  departureDate: z.string().min(1, { message: "Departure date is required" }),
+  departureDate: z.string().min(1, { message: "Departure date is required" })
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selectedDate >= today;
+    }, { message: "Departure date cannot be in the past" }),
   departureTime: z.string().min(1, { message: "Departure time is required" }),
   seatsTotal: z.string().min(1, { message: "Number of seats is required" }),
   carType: z.string().min(1, { message: "Car type is required" }),
@@ -162,6 +168,7 @@ export default function EditRideModal({
 }: EditRideModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCarType, setSelectedCarType] = useState("");
 
   const form = useForm<z.infer<typeof editRideSchema>>({
     resolver: zodResolver(editRideSchema),
@@ -184,13 +191,15 @@ export default function EditRideModal({
         const departureDate = new Date(ride.departureTime as any);
         const timeString = `${departureDate.getHours().toString().padStart(2, "0")}:${departureDate.getMinutes().toString().padStart(2, "0")}`;
 
+        const carType = ride.carModel || "sedan";
+        setSelectedCarType(carType);
         form.reset({
           destination: ride.destination || "",
           destinationArea: ride.destinationArea || "",
           departureDate: format(departureDate, "yyyy-MM-dd"),
           departureTime: timeString,
           seatsTotal: ride.seatsTotal.toString(),
-          carType: ride.carModel || "sedan",
+          carType: carType,
           genderPreference: ride.genderPreference || "no-preference",
           notes: ride.notes || "",
         });
@@ -199,6 +208,27 @@ export default function EditRideModal({
       }
     }
   }, [ride, form]);
+
+  // Get maximum seats for selected car type
+  const getMaxSeats = (carType: string) => {
+    const car = CAR_TYPES.find(c => c.value === carType);
+    return car ? car.maxSeats : 4; // Default to 4 if not found
+  };
+
+  // Watch car type changes to limit seats
+  const watchedCarType = form.watch("carType");
+  useEffect(() => {
+    if (watchedCarType) {
+      setSelectedCarType(watchedCarType);
+      const maxSeats = getMaxSeats(watchedCarType);
+      const currentSeats = parseInt(form.getValues("seatsTotal") || "1");
+      
+      // If current seats exceed max for new car type, reset to max
+      if (currentSeats > maxSeats) {
+        form.setValue("seatsTotal", maxSeats.toString());
+      }
+    }
+  }, [watchedCarType, form]);
 
   const onSubmit = async (data: z.infer<typeof editRideSchema>) => {
     if (!ride) return;
@@ -422,7 +452,7 @@ export default function EditRideModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        {Array.from({ length: getMaxSeats(selectedCarType || "sedan") }, (_, i) => i + 1).map((num) => (
                           <SelectItem key={num} value={num.toString()}>
                             {num}
                           </SelectItem>

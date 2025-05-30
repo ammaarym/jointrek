@@ -33,7 +33,8 @@ export default function MyRidesPostgres() {
     loading, 
     error, 
     loadMyRides, 
-    removeRide 
+    removeRide,
+    updateRide 
   } = usePostgresRides();
 
   // Load rides only once when component mounts

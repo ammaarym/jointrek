@@ -242,7 +242,7 @@ export default function MyRidesPostgres() {
                   </div>
                   <div className="flex items-center">
                     <FaCar className="text-primary mr-2 flex-shrink-0" />
-                    <span>{ride.carModel || 'Car not specified'}</span>
+                    <span>{capitalizeCarType(ride.carModel)}</span>
                   </div>
                   <div className="flex items-center">
                     <FaUserFriends className="text-primary mr-2 flex-shrink-0" />

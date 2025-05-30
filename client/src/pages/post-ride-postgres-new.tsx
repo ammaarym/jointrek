@@ -1,24 +1,20 @@
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { useToast } from '../hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createRide } from '../lib/postgres-api';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
-import { addHours, format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
+import { FaLocationArrow, FaMapMarkerAlt, FaCalendar, FaClock, FaUser, FaCar } from 'react-icons/fa';
 
-// List of Florida cities for dropdowns
+// List of major Florida cities
 const FLORIDA_CITIES = [
   "Gainesville",
-  "Jacksonville",
+  "Jacksonville", 
   "Miami",
   "Orlando",
   "Tampa",
@@ -26,229 +22,230 @@ const FLORIDA_CITIES = [
   "Fort Lauderdale"
 ];
 
-// Specific time options for departure
+// Time options for departure
 const TIME_OPTIONS = [
-  { label: "6:00 AM", value: "06:00" },
-  { label: "7:00 AM", value: "07:00" },
-  { label: "8:00 AM", value: "08:00" },
-  { label: "9:00 AM", value: "09:00" },
-  { label: "10:00 AM", value: "10:00" },
-  { label: "11:00 AM", value: "11:00" },
-  { label: "12:00 PM", value: "12:00" },
-  { label: "1:00 PM", value: "13:00" },
-  { label: "2:00 PM", value: "14:00" },
-  { label: "3:00 PM", value: "15:00" },
-  { label: "4:00 PM", value: "16:00" },
-  { label: "5:00 PM", value: "17:00" },
-  { label: "6:00 PM", value: "18:00" },
-  { label: "7:00 PM", value: "19:00" },
-  { label: "8:00 PM", value: "20:00" },
-  { label: "9:00 PM", value: "21:00" },
-  { label: "10:00 PM", value: "22:00" }
+  "12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM",
+  "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM",
+  "6:00 AM", "6:30 AM", "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM",
+  "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+  "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+  "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM",
+  "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM",
+  "9:00 PM", "9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM"
 ];
 
-// Gender preference options
-const GENDER_PREFERENCES = [
-  { label: "No Preference", value: "no-preference" },
-  { label: "Male Only", value: "male" },
-  { label: "Female Only", value: "female" }
-];
-
-// Car type options with MPG values
-const CAR_TYPES = [
-  { label: "Sedan", value: "sedan", mpg: 32 },
-  { label: "SUV", value: "suv", mpg: 25 },
-  { label: "Truck", value: "truck", mpg: 22 },
-  { label: "Minivan", value: "minivan", mpg: 28 }
-];
-
-// Distance data from Gainesville to major Florida cities
-const CITY_DISTANCES = {
-  "Orlando": { miles: 113, hours: 2 },
-  "Tampa": { miles: 125, hours: 2.5 },
-  "Miami": { miles: 350, hours: 5.5 },
-  "Jacksonville": { miles: 73, hours: 1.5 },
-  "Tallahassee": { miles: 140, hours: 2.5 },
-  "Fort Lauderdale": { miles: 340, hours: 5 },
-  "St. Petersburg": { miles: 135, hours: 2.5 },
-  "Pensacola": { miles: 340, hours: 5 },
-  "Daytona Beach": { miles: 125, hours: 2 },
-  "Fort Myers": { miles: 200, hours: 3.5 }
-};
-
-// Enhanced pricing calculation
-// Import pricing from shared module
-import { calculateRidePrice as calculatePriceShared, CAR_TYPE_MPG } from '@shared/pricing';
-
-// Validation schema
-const rideSchema = z.object({
-  rideType: z.string().default("driver"),
-  origin: z.string().min(1, { message: "Origin city is required" }),
-  originArea: z.string().min(1, { message: "Origin area is required" }),
-  destination: z.string().min(1, { message: "Destination city is required" }),
-  destinationArea: z.string().min(1, { message: "Destination area is required" }),
-  departureDate: z.string().min(1, { message: "Departure date is required" }),
-  departureTime: z.string().min(1, { message: "Departure time is required" }),
-  seatsTotal: z.string().min(1, { message: "Number of seats is required" }),
-  carType: z.string().min(1, { message: "Car type is required" }),
-  genderPreference: z.string().default("no-preference"),
-  carModel: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  instagram: z.string().optional(),
-  snapchat: z.string().optional(),
-  notes: z.string().optional()
-});
-
-export default function PostRidePostgres() {
-  const [, setLocation] = useLocation();
+export default function PostRide() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  
-  // This page is only for drivers offering rides
-  
-  // Form setup using React Hook Form with Zod validation
-  const form = useForm<z.infer<typeof rideSchema>>({
-    resolver: zodResolver(rideSchema),
-    defaultValues: {
-      rideType: "driver",
-      origin: "Gainesville",
-      originArea: "",
-      destination: "",
-      destinationArea: "",
-      departureDate: format(new Date(), 'yyyy-MM-dd'),
-      departureTime: "",
-      seatsTotal: "1",
-      carType: "",
-      genderPreference: "no-preference",
-      carModel: "",
-      phoneNumber: "",
-      instagram: "",
-      snapchat: "",
-      notes: ""
+  const [, setLocation] = useLocation();
+
+  // Form state
+  const [fromCity, setFromCity] = useState('Gainesville');
+  const [fromArea, setFromArea] = useState('');
+  const [toCity, setToCity] = useState('');
+  const [toArea, setToArea] = useState('');
+  const [departureDate, setDepartureDate] = useState('');
+  const [departureTime, setDepartureTime] = useState('');
+  const [arrivalDate, setArrivalDate] = useState('');
+  const [arrivalTime, setArrivalTime] = useState('');
+  const [seatsAvailable, setSeatsAvailable] = useState('1');
+  const [price, setPrice] = useState('');
+  const [genderPreference, setGenderPreference] = useState('no-preference');
+  const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // Auto-calculate pricing based on distance and other factors
+  useEffect(() => {
+    if (fromCity && toCity) {
+      const distance = calculateDistance(fromCity, toCity);
+      const calculatedPrice = calculatePrice(distance, departureDate);
+      setPrice(calculatedPrice.toString());
     }
-  });
-  
-  // This page is fixed to driver mode only
-  
-  // Form submission
-  const onSubmit = async (data: z.infer<typeof rideSchema>) => {
+  }, [fromCity, toCity, departureDate]);
+
+  // Calculate distance between cities (simplified)
+  const calculateDistance = (from: string, to: string): number => {
+    const distances: { [key: string]: { [key: string]: number } } = {
+      "Gainesville": {
+        "Jacksonville": 70,
+        "Miami": 330,
+        "Orlando": 115,
+        "Tampa": 125,
+        "Tallahassee": 150,
+        "Fort Lauderdale": 310
+      },
+      "Jacksonville": {
+        "Gainesville": 70,
+        "Miami": 350,
+        "Orlando": 140,
+        "Tampa": 170,
+        "Tallahassee": 165,
+        "Fort Lauderdale": 330
+      },
+      "Miami": {
+        "Gainesville": 330,
+        "Jacksonville": 350,
+        "Orlando": 235,
+        "Tampa": 280,
+        "Tallahassee": 470,
+        "Fort Lauderdale": 30
+      },
+      "Orlando": {
+        "Gainesville": 115,
+        "Jacksonville": 140,
+        "Miami": 235,
+        "Tampa": 85,
+        "Tallahassee": 250,
+        "Fort Lauderdale": 210
+      },
+      "Tampa": {
+        "Gainesville": 125,
+        "Jacksonville": 170,
+        "Miami": 280,
+        "Orlando": 85,
+        "Tallahassee": 290,
+        "Fort Lauderdale": 250
+      },
+      "Tallahassee": {
+        "Gainesville": 150,
+        "Jacksonville": 165,
+        "Miami": 470,
+        "Orlando": 250,
+        "Tampa": 290,
+        "Fort Lauderdale": 450
+      },
+      "Fort Lauderdale": {
+        "Gainesville": 310,
+        "Jacksonville": 330,
+        "Miami": 30,
+        "Orlando": 210,
+        "Tampa": 250,
+        "Tallahassee": 450
+      }
+    };
+
+    return distances[from]?.[to] || 100;
+  };
+
+  // Calculate price based on distance and other factors
+  const calculatePrice = (distance: number, date: string): number => {
+    const baseRate = 0.15; // per mile
+    const gasPrice = 3.50; // per gallon
+    const mpg = 30; // miles per gallon
+    
+    // Calculate gas cost
+    const gasCost = (distance / mpg) * gasPrice;
+    
+    // Add toll fees for certain routes
+    let tollFees = 0;
+    if ((fromCity === "Miami" || toCity === "Miami") || 
+        (fromCity === "Tampa" || toCity === "Tampa")) {
+      tollFees = 2.50;
+    }
+    
+    // Weekend surcharge (Friday/Saturday)
+    let weekendMultiplier = 1.0;
+    if (date) {
+      const dayOfWeek = new Date(date).getDay();
+      if (dayOfWeek === 5 || dayOfWeek === 6) { // Friday or Saturday
+        weekendMultiplier = 1.1;
+      }
+    }
+    
+    // Calculate total
+    const totalCost = ((gasCost * 1.2) + tollFees) * weekendMultiplier;
+    
+    // Per seat price
+    const seats = parseInt(seatsAvailable) || 1;
+    const pricePerSeat = totalCost / seats;
+    
+    // Ensure minimum of $8 and maximum of $60
+    return Math.max(8, Math.min(60, Math.round(pricePerSeat)));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!currentUser) {
       toast({
-        title: "Error",
-        description: "You must be logged in to post a ride",
+        title: "Authentication Required",
+        description: "Please sign in to post a ride.",
         variant: "destructive"
       });
       return;
     }
 
-    // Check if user has contact info in their profile
-    try {
-      const response = await fetch(`/api/users/firebase/${currentUser.uid}`);
-      if (response.ok) {
-        const userData = await response.json();
-        const hasValidPhone = userData.phone && userData.phone.trim().length > 0;
-        const hasValidInstagram = userData.instagram && userData.instagram.trim().length > 0;
-        const hasValidSnapchat = userData.snapchat && userData.snapchat.trim().length > 0;
-        
-        if (!hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
-          toast({
-            title: "Contact Information Required",
-            description: "Please add at least one form of contact (phone, Instagram, or Snapchat) in your profile before posting a ride.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Error checking user contact info:', error);
-    }
-    
-    try {
-      setLoading(true);
-      
-      // Calculate departure time by combining date and time
-      const departureDate = new Date(data.departureDate);
-      const [hours, minutes] = data.departureTime.split(':').map(Number);
-      
-      departureDate.setHours(hours, minutes);
-      
-      // Calculate realistic arrival time based on destination
-      const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
-      const travelHours = cityData ? cityData.hours : 2; // fallback to 2 hours
-      const arrivalTime = addHours(departureDate, travelHours);
-      
-      // Calculate automatic price using new enhanced formula
-      let calculatedPrice = "25"; // fallback price
-      
-      if (data.carType && data.destination) {
-        try {
-          const cityData = CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
-          
-          if (cityData) {
-            // Get MPG from car type
-            const mpg = CAR_TYPE_MPG[data.carType as keyof typeof CAR_TYPE_MPG] || 32;
-            
-            const price = calculatePriceShared({
-              distance: cityData.miles,
-              mpg: mpg,
-              gasPrice: 3.20, // Gainesville gas price
-              destination: data.destination,
-              seatsTotal: parseInt(data.seatsTotal),
-              date: departureDate
-            });
-            calculatedPrice = price.toString();
-          }
-        } catch (error) {
-          console.log('Using fallback pricing due to calculation error');
-        }
-      }
-      
-      // Create ride object
-      const ride = {
-        driverId: currentUser.uid,
-        origin: data.origin,
-        originArea: data.originArea,
-        destination: data.destination,
-        destinationArea: data.destinationArea,
-        departureTime: departureDate,
-        arrivalTime: arrivalTime,
-        seatsTotal: parseInt(data.seatsTotal),
-        seatsLeft: parseInt(data.seatsTotal),
-        price: calculatedPrice,
-        genderPreference: data.genderPreference,
-        carModel: `${data.carType}${data.carModel ? ` - ${data.carModel}` : ''}`,
-        notes: data.notes || "",
-        rideType: data.rideType
-      };
-      
-      // Post ride using the postgres API directly
-      const newRide = await createRide(ride);
-      
-      if (!newRide) {
-        throw new Error("Failed to create ride");
-      }
-      
-      // Show success message
+    // Validate required fields
+    if (!fromCity || !fromArea || !toCity || !toArea || !departureDate || !departureTime) {
       toast({
-        title: "Ride posted!",
-        description: "Your ride has been successfully posted",
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
       });
-      
-      // Redirect to My Rides page
-      setLocation('/my-rides');
-    } catch (err: any) {
-      console.error("Error posting ride:", err);
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // Create departure and arrival datetime strings
+      const departureDateTime = `${departureDate}T${convertTo24Hour(departureTime)}:00`;
+      const arrivalDateTime = arrivalDate && arrivalTime 
+        ? `${arrivalDate}T${convertTo24Hour(arrivalTime)}:00`
+        : departureDateTime; // Default to same as departure if not specified
+
+      const rideData = {
+        origin: `${fromCity}, ${fromArea}`,
+        destination: `${toCity}, ${toArea}`,
+        departureTime: departureDateTime,
+        arrivalTime: arrivalDateTime,
+        seatsTotal: parseInt(seatsAvailable),
+        seatsLeft: parseInt(seatsAvailable),
+        price: parseFloat(price),
+        genderPreference: genderPreference === 'no-preference' ? null : genderPreference,
+        notes: notes || null,
+        rideType: 'driver',
+        driverId: currentUser.uid
+      };
+
+      await apiRequest('/api/rides', {
+        method: 'POST',
+        body: JSON.stringify(rideData)
+      });
+
+      toast({
+        title: "Ride Posted!",
+        description: "Your ride has been posted successfully.",
+      });
+
+      // Redirect to find rides page
+      setLocation('/find-rides');
+    } catch (error) {
+      console.error('Error posting ride:', error);
       toast({
         title: "Error",
-        description: err.message || "Failed to post ride",
+        description: "Failed to post ride. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
-  
+
+  // Helper function to convert 12-hour time to 24-hour time
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, period] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    
+    if (period === 'AM' && hours === '12') {
+      hours = '00';
+    } else if (period === 'PM' && hours !== '12') {
+      hours = (parseInt(hours) + 12).toString();
+    }
+    
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="max-w-2xl mx-auto">
@@ -260,314 +257,186 @@ export default function PostRidePostgres() {
             </div>
           </div>
           
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Hidden ride type field - always driver */}
-              <FormField
-                control={form.control}
-                name="rideType"
-                render={({ field }) => (
-                  <FormItem className="hidden">
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <div>
-                <h2 className="text-xl font-bold mb-4">Origin</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="origin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">From City (Required)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select city" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {FLORIDA_CITIES.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="originArea"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Area (Required)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g., UF Campus, Midtown" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Origin Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaLocationArrow className="mr-2 text-primary" />
+                Origin
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="fromCity" className="block mb-2">From City (Required)</Label>
+                  <Select value={fromCity} onValueChange={setFromCity}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLORIDA_CITIES.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="fromArea" className="block mb-2">Area (Required)</Label>
+                  <Input
+                    id="fromArea"
+                    value={fromArea}
+                    onChange={(e) => setFromArea(e.target.value)}
+                    placeholder="e.g., UF Campus, Midtown"
+                    className="h-12"
+                    required
+                  />
+                </div>
               </div>
-              
-              <h2 className="text-xl font-bold mb-4">Destination</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="destination"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">To City (Required)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select city" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {FLORIDA_CITIES.map(city => (
-                            <SelectItem key={city} value={city}>{city}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="destinationArea"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Area (Required)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g., Downtown, UCF Area" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <h2 className="text-xl font-bold mb-4">Departure</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="departureDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Departure Date (Required)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="date" 
-                          className="h-12 rounded-md border-gray-200"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="departureTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Departure Time (Required)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {TIME_OPTIONS.map(time => (
-                            <SelectItem key={time.value} value={time.value}>
-                              {time.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                      control={form.control}
-                      name="carType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="block mb-2">Car Type (Required)</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-12 rounded-md border-gray-200">
-                                <SelectValue placeholder="Select car type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {CAR_TYPES.map(car => (
-                                <SelectItem key={car.value} value={car.value}>
-                                  {car.label} (~{car.mpg} mpg)
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="seatsTotal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="block mb-2">Available Seats (Required)</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-12 rounded-md border-gray-200">
-                                <SelectValue placeholder="Select seats" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                                <SelectItem key={num} value={num.toString()}>
-                                  {num} seat{num > 1 ? 's' : ''}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+            </div>
 
+            {/* Destination Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-primary" />
+                Destination
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="toCity" className="block mb-2">To City (Required)</Label>
+                  <Select value={toCity} onValueChange={setToCity}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLORIDA_CITIES.map((city) => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="toArea" className="block mb-2">Area (Required)</Label>
+                  <Input
+                    id="toArea"
+                    value={toArea}
+                    onChange={(e) => setToArea(e.target.value)}
+                    placeholder="e.g., Downtown, UCF Area"
+                    className="h-12"
+                    required
+                  />
+                </div>
               </div>
-              
-              {/* Driver-specific fields */}
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="genderPreference"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Gender Preference</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select preference" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {GENDER_PREFERENCES.map(pref => (
-                            <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            </div>
+
+            {/* Departure Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaCalendar className="mr-2 text-primary" />
+                Departure
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="departureDate" className="block mb-2">Departure Date (Required)</Label>
+                  <Input
+                    id="departureDate"
+                    type="date"
+                    value={departureDate}
+                    onChange={(e) => setDepartureDate(e.target.value)}
+                    className="h-12"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="departureTime" className="block mb-2">Departure Time (Required)</Label>
+                  <Select value={departureTime} onValueChange={setDepartureTime}>
+                    <SelectTrigger className="h-12">
+                      <FaClock className="mr-2" />
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_OPTIONS.map((time) => (
+                        <SelectItem key={time} value={time}>{time}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              
-              {/* Additional driver fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <FormField
-                  control={form.control}
-                  name="carModel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Car Model (Optional)</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-md border-gray-200">
-                            <SelectValue placeholder="Select preference" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {GENDER_PREFERENCES.map(pref => (
-                            <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
+            </div>
+
+            {/* Seats and Price Section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4 flex items-center">
+                <FaCar className="mr-2 text-primary" />
+                Ride Details
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="seatsAvailable" className="block mb-2">Seats Available (Required)</Label>
+                  <Select value={seatsAvailable} onValueChange={setSeatsAvailable}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select seats" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                        <SelectItem key={num} value={num.toString()}>{num} seat{num > 1 ? 's' : ''}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="price" className="block mb-2">Price per Seat ($)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Auto-calculated"
+                    className="h-12"
+                    min="1"
+                    step="0.01"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Based on distance and gas costs</p>
+                </div>
               </div>
-              </div>
-              
-              <div className="mb-8">
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block mb-2">Additional Notes</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Any additional information about the ride..." 
-                          className="rounded-md border-gray-200"
-                          rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
-              >
-                {loading ? "Posting..." : "Post Ride"}
-              </Button>
-            </form>
-          </Form>
+            </div>
+
+            {/* Gender Preference */}
+            <div>
+              <Label htmlFor="genderPreference" className="block mb-2 flex items-center">
+                <FaUser className="mr-2 text-primary" />
+                Gender Preference
+              </Label>
+              <Select value={genderPreference} onValueChange={setGenderPreference}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="No preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no-preference">No preference</SelectItem>
+                  <SelectItem value="male">Male only</SelectItem>
+                  <SelectItem value="female">Female only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Additional Notes */}
+            <div>
+              <Label htmlFor="notes" className="block mb-2">Additional Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any additional information about the ride..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
+            >
+              {submitting ? "Posting..." : "Post Ride"}
+            </Button>
+          </form>
         </div>
       </div>
     </div>

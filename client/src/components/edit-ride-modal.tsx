@@ -255,7 +255,6 @@ export default function EditRideModal({
       if (success) {
         toast({
           title: "Ride updated successfully!",
-          description: `Price automatically calculated as $${calculatedPrice} based on current gas costs.`,
         });
         onRideUpdated();
         onClose();
@@ -423,7 +422,7 @@ export default function EditRideModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
                             {num}
                           </SelectItem>

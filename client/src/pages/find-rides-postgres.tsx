@@ -272,7 +272,7 @@ export default function FindRidesPostgres() {
                     <SelectItem value="5">5 seats</SelectItem>
                     <SelectItem value="6">6 seats</SelectItem>
                     <SelectItem value="7">7 seats</SelectItem>
-                    <SelectItem value="8">8+ seats</SelectItem>
+                    <SelectItem value="8">8 seats</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -190,7 +190,7 @@ export default function EditRideModal({
           departureDate: format(departureDate, "yyyy-MM-dd"),
           departureTime: timeString,
           seatsTotal: ride.seatsTotal.toString(),
-          carType: ride.carModel?.split(" - ")[0] || ride.carModel || "sedan",
+          carType: ride.carModel || "sedan",
           genderPreference: ride.genderPreference || "no-preference",
           notes: ride.notes || "",
         });

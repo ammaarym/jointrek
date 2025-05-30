@@ -179,7 +179,7 @@ export function usePostgresRides() {
     error,
     createRide,
     loadMyRides,
-    updateRide: updateRide as any,
+    updateRide,
     removeRide
   };
 }

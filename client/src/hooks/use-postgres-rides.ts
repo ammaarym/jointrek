@@ -46,9 +46,9 @@ export function usePostgresRides() {
   };
 
   // Define a memoized version of loadMyRides that won't cause repeated calls
-  const loadMyRides = async (userId: string) => {
-    // If we already have rides and are not in an error state, don't reload
-    if (myRides.length > 0 && !error) {
+  const loadMyRides = async (userId: string, forceReload = false) => {
+    // If we already have rides and are not in an error state, don't reload unless forced
+    if (myRides.length > 0 && !error && !forceReload) {
       return;
     }
     

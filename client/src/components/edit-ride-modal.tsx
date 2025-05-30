@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "../hooks/use-toast";
-import { updateRide } from "../lib/postgres-api";
+import { usePostgresRides } from "../hooks/use-postgres-rides";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -159,6 +159,7 @@ export default function EditRideModal({
   onRideUpdated,
 }: EditRideModalProps) {
   const { toast } = useToast();
+  const { updateRide } = usePostgresRides();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof editRideSchema>>({
@@ -242,13 +243,13 @@ export default function EditRideModal({
         notes: data.notes || "",
       };
 
-      // Update ride via API
-      const result = await updateRide(
+      // Update ride via hook
+      const success = await updateRide(
         parseInt(ride.id.toString()),
         updatedRide,
       );
 
-      if (result) {
+      if (success) {
         toast({
           title: "Ride updated successfully!",
           description: `Price automatically calculated as $${calculatedPrice} based on current gas costs.`,

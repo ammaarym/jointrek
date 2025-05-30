@@ -124,7 +124,7 @@ export default function MyRidesPostgres() {
         onClose={() => setEditModalOpen(false)}
         onRideUpdated={() => {
           if (currentUser) {
-            loadMyRides(currentUser.uid);
+            loadMyRides(currentUser.uid, true);
           }
         }}
       />

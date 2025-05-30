@@ -13,6 +13,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
 import { Star } from 'lucide-react';
 
+// Helper function to capitalize car types
+const capitalizeCarType = (carType: string) => {
+  if (!carType) return 'Car not specified';
+  
+  // Handle special cases
+  if (carType.toLowerCase() === 'suv') return 'SUV';
+  
+  // Capitalize first letter for other types
+  return carType.charAt(0).toUpperCase() + carType.slice(1).toLowerCase();
+};
+
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
   const [, setLocation] = useLocation();

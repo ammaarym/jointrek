@@ -251,34 +251,33 @@ export default function PostRidePostgres() {
   
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Post a Ride</h1>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="mb-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Post a Ride</h2>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Post a Ride</h1>
               <p className="text-gray-600">Offering a ride? Share your trip details below</p>
             </div>
-            
-            {/* Hidden ride type field - always driver */}
-            <FormField
-              control={form.control}
-              name="rideType"
-              render={({ field }) => (
-                <FormItem className="hidden">
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
           </div>
           
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-bold mb-4">Origin</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Hidden ride type field - always driver */}
+              <FormField
+                control={form.control}
+                name="rideType"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <div>
+                <h2 className="text-xl font-bold mb-4">Origin</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <FormField
                   control={form.control}
                   name="origin"
@@ -537,6 +536,7 @@ export default function PostRidePostgres() {
                 />
                 
               </div>
+              </div>
               
               <div className="mb-8">
                 <FormField
@@ -566,10 +566,10 @@ export default function PostRidePostgres() {
               >
                 {loading ? "Posting..." : "Post Ride"}
               </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }

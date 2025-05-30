@@ -150,6 +150,7 @@ interface EditRideModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRideUpdated: () => void;
+  updateRide: (id: number, data: any) => Promise<boolean>;
 }
 
 export default function EditRideModal({
@@ -157,9 +158,9 @@ export default function EditRideModal({
   isOpen,
   onClose,
   onRideUpdated,
+  updateRide,
 }: EditRideModalProps) {
   const { toast } = useToast();
-  const { updateRide } = usePostgresRides();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof editRideSchema>>({

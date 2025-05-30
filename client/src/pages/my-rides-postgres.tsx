@@ -19,7 +19,7 @@ const capitalizeCarType = (carType: string) => {
 
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
-  const { myRides, loading, error, loadMyRides, removeRide } = usePostgresRides();
+  const { myRides, loading, error, loadMyRides, updateRide, removeRide } = usePostgresRides();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -122,6 +122,7 @@ export default function MyRidesPostgres() {
         ride={rideToEdit}
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
+        updateRide={updateRide}
         onRideUpdated={() => {
           if (currentUser) {
             loadMyRides(currentUser.uid, true);

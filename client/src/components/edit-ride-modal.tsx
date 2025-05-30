@@ -397,7 +397,7 @@ export default function EditRideModal({
                       <SelectContent>
                         {CAR_TYPES.map((car) => (
                           <SelectItem key={car.value} value={car.value}>
-                            {car.label} (~{car.mpg} mpg)
+                            {car.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

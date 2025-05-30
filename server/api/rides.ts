@@ -74,10 +74,21 @@ router.put("/:id", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid ride ID" });
     }
     
+    // Get user info from headers (since we're using client-side auth)
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+    
     // Ensure the ride exists
     const existingRide = await storage.getRide(id);
     if (!existingRide) {
       return res.status(404).json({ error: "Ride not found" });
+    }
+    
+    // Ensure the user owns the ride
+    if (existingRide.driverId !== userId) {
+      return res.status(403).json({ error: "You can only update your own rides" });
     }
     
     // Convert string dates to Date objects if present

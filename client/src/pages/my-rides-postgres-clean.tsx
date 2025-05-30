@@ -238,7 +238,7 @@ export default function MyRidesPostgres() {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center">
                     <FaCalendarAlt className="text-primary mr-2 flex-shrink-0" />
-                    <span>Departure: {formatDate(new Date(ride.departureTime))}</span>
+                    <span>Departure: {formatDate(new Date(ride.departureTime))} at {new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                   </div>
                   <div className="flex items-center">
                     <FaCar className="text-primary mr-2 flex-shrink-0" />

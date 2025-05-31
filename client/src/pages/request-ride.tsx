@@ -84,6 +84,16 @@ export default function RequestRide() {
       return;
     }
 
+    // Prevent rides from same city to same city
+    if (fromCity === toCity) {
+      toast({
+        title: "Invalid Route",
+        description: "Origin and destination cities cannot be the same.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -91,14 +101,16 @@ export default function RequestRide() {
       const departureDateTime = `${departureDate}T${convertTo24Hour(departureTime)}:00`;
 
       const rideData = {
-        origin: `${fromCity}, ${fromArea}`,
-        destination: `${toCity}, ${toArea}`,
+        origin: fromCity,
+        originArea: fromArea,
+        destination: toCity,
+        destinationArea: toArea,
         departureTime: departureDateTime,
         arrivalTime: departureDateTime, // Same as departure for requests
         seatsTotal: 1,
         seatsLeft: 1,
-        price: 0, // Requests don't have set prices
-        genderPreference: genderPreference === 'no-preference' ? null : genderPreference,
+        price: '0', // Requests don't have set prices
+        genderPreference: genderPreference === 'no-preference' ? 'no-preference' : genderPreference,
         notes: notes || null,
         rideType: 'passenger',
         driverId: currentUser.uid
@@ -117,12 +129,11 @@ export default function RequestRide() {
       }
 
       toast({
-        title: "Ride Request Posted!",
-        description: "Your ride request has been posted successfully.",
+        title: "Ride request posted successfully!"
       });
 
-      // Redirect to find rides page
-      setLocation('/find-rides');
+      // Redirect to My Rides page
+      setLocation('/my-rides');
     } catch (error: any) {
       console.error('Error posting ride request:', error);
       toast({

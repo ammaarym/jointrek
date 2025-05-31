@@ -298,7 +298,10 @@ export default function PostRide() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="fromCity" className="block mb-2">From City (Required)</Label>
-                  <Select value={fromCity} onValueChange={setFromCity}>
+                  <Select value={fromCity} onValueChange={(value) => {
+                    setFromCity(value);
+                    setFromArea(''); // Clear area when city changes
+                  }}>
                     <SelectTrigger className="h-12">
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>
@@ -332,7 +335,10 @@ export default function PostRide() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="toCity" className="block mb-2">To City (Required)</Label>
-                  <Select value={toCity} onValueChange={setToCity}>
+                  <Select value={toCity} onValueChange={(value) => {
+                    setToCity(value);
+                    setToArea(''); // Clear area when city changes
+                  }}>
                     <SelectTrigger className="h-12">
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>

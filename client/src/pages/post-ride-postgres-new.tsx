@@ -208,6 +208,16 @@ export default function PostRide() {
       return;
     }
 
+    // Only allow rides from/to Gainesville
+    if (fromCity !== 'Gainesville' && toCity !== 'Gainesville') {
+      toast({
+        title: "Invalid Route",
+        description: "All rides must start from or end in Gainesville.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -306,7 +316,7 @@ export default function PostRide() {
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FLORIDA_CITIES.map((city) => (
+                      {FLORIDA_CITIES.filter(city => city !== toCity).map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
                     </SelectContent>
@@ -343,7 +353,7 @@ export default function PostRide() {
                       <SelectValue placeholder="Select city" />
                     </SelectTrigger>
                     <SelectContent>
-                      {FLORIDA_CITIES.map((city) => (
+                      {FLORIDA_CITIES.filter(city => city !== fromCity).map((city) => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
                     </SelectContent>

@@ -70,8 +70,10 @@ export default function MyRidesPostgres() {
       });
 
       if (response.ok) {
-        // Refetch rides to get updated data
-        refetch();
+        // Reload rides to get updated data
+        if (currentUser) {
+          loadMyRides(currentUser.uid);
+        }
         setRideToReview(ride);
         setReviewModalOpen(true);
         toast({
@@ -278,7 +280,7 @@ export default function MyRidesPostgres() {
               </CardContent>
               
               <CardFooter className="flex justify-end gap-2 p-4 pt-0">
-                {completedRides.has(ride.id) ? (
+                {ride.isCompleted ? (
                   <div className="flex items-center gap-1 text-green-600 font-medium">
                     <FaCheck className="w-4 h-4" />
                     Completed

@@ -40,21 +40,48 @@ export default function PostRidePostgres() {
   
   // Auto-calculate price for passenger requests
   useEffect(() => {
-    if (rideType === 'passenger' && destination && departureDate) {
-      const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
-      if (cityData) {
+    if (rideType === 'passenger' && origin && destination && departureDate) {
+      let distance = 0;
+      
+      // Calculate distance based on origin and destination
+      if (origin === 'Gainesville' && destination !== 'Gainesville') {
+        // From Gainesville to other cities
+        const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+        if (cityData) {
+          distance = cityData.miles;
+        }
+      } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
+        // From other cities to Gainesville
+        const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
+        if (cityData) {
+          distance = cityData.miles;
+        }
+      } else if (origin !== 'Gainesville' && destination !== 'Gainesville') {
+        // Between two non-Gainesville cities (estimate using both distances)
+        const originData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
+        const destData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+        if (originData && destData) {
+          // Simple estimation: average of both distances
+          distance = Math.abs(originData.miles - destData.miles);
+        }
+      }
+      
+      if (distance > 0) {
         const calculatedPrice = calculateRidePrice({
-          distance: cityData.miles,
+          distance: distance,
           mpg: 30, // Default car efficiency
           gasPrice: 3.50, // Current gas price
           destination: destination,
           seatsTotal: parseInt(availableSeats) || 1,
           date: departureDate ? new Date(departureDate) : undefined
         });
+        console.log('Price calculation:', { origin, destination, distance, calculatedPrice });
         setPrice(calculatedPrice.toString());
+      } else {
+        console.log('No distance found for route:', { origin, destination });
       }
     }
-  }, [rideType, destination, departureDate, availableSeats]);
+  }, [rideType, origin, destination, departureDate, availableSeats]);
   
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {

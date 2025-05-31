@@ -60,10 +60,35 @@ export default function MyRidesPostgres() {
   };
 
   // Handle marking ride as complete
-  const handleMarkComplete = (ride: any) => {
-    setCompletedRides(prev => new Set(Array.from(prev).concat(ride.id)));
-    setRideToReview(ride);
-    setReviewModalOpen(true);
+  const handleMarkComplete = async (ride: any) => {
+    try {
+      const response = await fetch(`/api/rides/${ride.id}/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refetch rides to get updated data
+        refetch();
+        setRideToReview(ride);
+        setReviewModalOpen(true);
+        toast({
+          title: "Ride Completed",
+          description: "Ride has been marked as completed.",
+        });
+      } else {
+        throw new Error('Failed to mark ride as complete');
+      }
+    } catch (error) {
+      console.error('Error marking ride complete:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark ride as complete. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle submitting review

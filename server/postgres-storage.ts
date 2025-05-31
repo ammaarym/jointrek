@@ -104,6 +104,7 @@ export class PostgresStorage implements IStorage {
         notes: rides.notes,
         createdAt: rides.createdAt,
         rideType: rides.rideType,
+        isCompleted: rides.isCompleted,
         driverName: users.displayName,
         driverEmail: users.email,
         driverPhoto: users.photoUrl,
@@ -133,6 +134,15 @@ export class PostgresStorage implements IStorage {
   async deleteRide(id: number): Promise<boolean> {
     await db.delete(rides).where(eq(rides.id, id));
     return true;
+  }
+
+  async markRideComplete(id: number): Promise<Ride | undefined> {
+    const [updatedRide] = await db
+      .update(rides)
+      .set({ isCompleted: true })
+      .where(eq(rides.id, id))
+      .returning();
+    return updatedRide;
   }
 
   // Implement getRidesByLocation method

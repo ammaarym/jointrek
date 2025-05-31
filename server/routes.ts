@@ -245,6 +245,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Mark ride as complete
+  app.patch("/api/rides/:id/complete", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+      
+      const ride = await storage.getRide(id);
+      
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+      
+      // Ensure the user owns the ride
+      if (ride.driverId !== req.user.uid) {
+        return res.status(403).json({ message: "You can only complete your own rides" });
+      }
+      
+      const updatedRide = await storage.markRideComplete(id);
+      res.json(updatedRide);
+    } catch (error) {
+      console.error("Error marking ride complete:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
   
   // Get rides by driver
   app.get("/api/users/me/rides", authenticate, async (req, res) => {

@@ -46,8 +46,8 @@ export interface IStorage {
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   updateConversationLastMessage(id: number, message: string): Promise<Conversation | undefined>;
 
-  // Completed rides methods
-  markRideComplete(rideId: number, participantId: string): Promise<CompletedRide>;
+  // Ride completion methods
+  markRideComplete(id: number): Promise<Ride | undefined>;
   getCompletedRidesByUser(userId: string): Promise<CompletedRide[]>;
   isRideCompletedByUser(rideId: number, userId: string): Promise<boolean>;
 

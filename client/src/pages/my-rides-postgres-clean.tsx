@@ -149,11 +149,6 @@ export default function MyRidesPostgres() {
       
       // Update the ride status immediately in the state
       if (rideToReview) {
-        setMyRides(prev => prev.map(ride => 
-          ride.id === rideToReview.id 
-            ? { ...ride, isCompleted: true }
-            : ride
-        ));
         setCompletedRides(prev => new Set(Array.from(prev).concat(rideToReview.id)));
       }
       

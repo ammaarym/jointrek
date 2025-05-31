@@ -208,14 +208,16 @@ export default function PostRide() {
         : departureDateTime; // Default to same as departure if not specified
 
       const rideData = {
-        origin: `${fromCity}, ${fromArea}`,
-        destination: `${toCity}, ${toArea}`,
+        origin: fromCity,
+        originArea: fromArea,
+        destination: toCity,
+        destinationArea: toArea,
         departureTime: departureDateTime,
         arrivalTime: arrivalDateTime,
         seatsTotal: parseInt(seatsAvailable),
         seatsLeft: parseInt(seatsAvailable),
-        price: parseFloat(price),
-        genderPreference: genderPreference === 'no-preference' ? null : genderPreference,
+        price: price,
+        genderPreference: genderPreference === 'no-preference' ? 'no-preference' : genderPreference,
         notes: notes || null,
         rideType: 'driver',
         driverId: currentUser.uid

@@ -336,28 +336,7 @@ export default function PostRide() {
               </div>
             </div>
 
-            {/* Swap Button */}
-            <div className="flex justify-center -my-2 relative">
-              <div className="bg-white px-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const tempCity = fromCity;
-                    const tempArea = fromArea;
-                    setFromCity(toCity);
-                    setFromArea(toArea);
-                    setToCity(tempCity);
-                    setToArea(tempArea);
-                  }}
-                  className="text-gray-400 hover:text-primary transition-colors p-2"
-                  title="Swap origin and destination"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+
 
             {/* Destination Section */}
             <div>
@@ -499,13 +478,36 @@ export default function PostRide() {
               />
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={submitting}
-              className="w-full h-12 bg-primary hover:bg-primary/90 font-medium"
-            >
-              {submitting ? "Posting..." : "Post Ride"}
-            </Button>
+            <div className="flex gap-4">
+              <Button 
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setFromCity('Gainesville');
+                  setFromArea('');
+                  setToCity('');
+                  setToArea('');
+                  setDepartureDate('');
+                  setDepartureTime('');
+                  setArrivalDate('');
+                  setArrivalTime('');
+                  setSeatsAvailable('');
+                  setPrice('');
+                  setGenderPreference('no-preference');
+                  setNotes('');
+                }}
+                className="h-12 px-8"
+              >
+                Reset Form
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={submitting}
+                className="flex-1 h-12 bg-primary hover:bg-primary/90 font-medium"
+              >
+                {submitting ? "Posting..." : "Post Ride"}
+              </Button>
+            </div>
           </form>
         </div>
       </div>

@@ -12,7 +12,8 @@ import { RiSnapchatFill } from 'react-icons/ri';
 export default function Profile() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
@@ -27,6 +28,7 @@ export default function Profile() {
 
   const loadUserProfile = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
       if (response.ok) {
         const userData = await response.json();
@@ -37,9 +39,12 @@ export default function Profile() {
         if (!userData.phone && !userData.instagram && !userData.snapchat) {
           setIsEditing(true);
         }
+        setDataLoaded(true);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,6 +102,18 @@ export default function Profile() {
 
   // Check if user has any contact information
   const hasContactInfo = phone || instagram || snapchat;
+
+  // Show loading spinner while data is being loaded
+  if (loading && !dataLoaded) {
+    return (
+      <div className="container px-4 py-6 mx-auto max-w-2xl">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">

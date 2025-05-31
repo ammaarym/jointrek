@@ -71,6 +71,19 @@ export default function RequestRide() {
       return;
     }
 
+    // Validate departure date is not in the past
+    const selectedDate = new Date(departureDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      toast({
+        title: "Invalid Date",
+        description: "Departure date cannot be in the past.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {

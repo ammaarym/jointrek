@@ -22,7 +22,13 @@ const postRideSchema = z.object({
   originArea: z.string().min(1, "Origin area is required"),
   destination: z.string().min(1, "Destination is required"),
   destinationArea: z.string().min(1, "Destination area is required"),
-  departureDate: z.string().min(1, "Departure date is required"),
+  departureDate: z.string().min(1, "Departure date is required")
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selectedDate >= today;
+    }, { message: "Departure date cannot be in the past" }),
   departureTime: z.string().min(1, "Departure time is required"),
   availableSeats: z.string().optional(),
   price: z.string().optional(),

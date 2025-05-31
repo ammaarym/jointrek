@@ -46,7 +46,13 @@ const rideSchema = z.object({
   originArea: z.string().min(1, { message: "Origin area is required" }),
   destination: z.string().min(1, { message: "Destination city is required" }),
   destinationArea: z.string().min(1, { message: "Destination area is required" }),
-  departureDate: z.string().min(1, { message: "Departure date is required" }),
+  departureDate: z.string().min(1, { message: "Departure date is required" })
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selectedDate >= today;
+    }, { message: "Departure date cannot be in the past" }),
   departureTime: z.string().min(1, { message: "Departure time is required" }),
   availableSeats: z.string().min(1, { message: "Available seats is required" }),
   price: z.string().min(1, { message: "Price is required" }),

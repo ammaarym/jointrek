@@ -142,31 +142,7 @@ export class PostgresStorage implements IStorage {
     return true;
   }
 
-  async markRideComplete(id: number): Promise<Ride | undefined> {
-    const [updatedRide] = await db
-      .update(rides)
-      .set({ isCompleted: true })
-      .where(eq(rides.id, id))
-      .returning();
-    return updatedRide;
-  }
 
-  // Implement getRidesByLocation method
-  async getRidesByLocation(origin: string, destination?: string): Promise<Ride[]> {
-    if (destination) {
-      return await db
-        .select()
-        .from(rides)
-        .where(and(eq(rides.origin, origin), eq(rides.destination, destination)))
-        .orderBy(desc(rides.departureTime));
-    } else {
-      return await db
-        .select()
-        .from(rides)
-        .where(eq(rides.origin, origin))
-        .orderBy(desc(rides.departureTime));
-    }
-  }
 
   // Booking methods
   async getBooking(id: number): Promise<Booking | undefined> {

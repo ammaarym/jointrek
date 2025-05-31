@@ -563,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mark ride as complete
-  app.patch('/api/rides/:id/complete', requireAuth, async (req: Request, res: Response) => {
+  app.patch('/api/rides/:id/complete', authenticate, async (req: Request, res: Response) => {
     try {
       const rideId = parseInt(req.params.id);
       
@@ -591,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a review
-  app.post('/api/reviews', requireAuth, async (req: Request, res: Response) => {
+  app.post('/api/reviews', authenticate, async (req: Request, res: Response) => {
     try {
       const { revieweeId, rideId, rating } = req.body;
       

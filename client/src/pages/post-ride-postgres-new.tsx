@@ -186,7 +186,7 @@ export default function PostRide() {
     }
 
     // Validate departure date is not in the past
-    const selectedDate = new Date(departureDate);
+    const selectedDate = new Date(departureDate + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,7 +21,6 @@ interface ReviewModalProps {
 export default function ReviewModal({ isOpen, onClose, rideData, onSubmit }: ReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -36,25 +34,15 @@ export default function ReviewModal({ isOpen, onClose, rideData, onSubmit }: Rev
       return;
     }
 
-    if (description.length > 200) {
-      toast({
-        title: "Description Too Long",
-        description: "Please keep your review under 200 characters.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
-      await onSubmit({ rating, description });
+      await onSubmit({ rating, description: '' });
       toast({
         title: "Review Submitted",
         description: "Thank you for your feedback!",
       });
       onClose();
       setRating(0);
-      setDescription('');
     } catch (error) {
       toast({
         title: "Error",
@@ -69,7 +57,6 @@ export default function ReviewModal({ isOpen, onClose, rideData, onSubmit }: Rev
   const handleClose = () => {
     setRating(0);
     setHoveredRating(0);
-    setDescription('');
     onClose();
   };
 
@@ -118,22 +105,7 @@ export default function ReviewModal({ isOpen, onClose, rideData, onSubmit }: Rev
             </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Review (Optional)
-            </label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Share your experience..."
-              className="h-24 resize-none"
-              maxLength={200}
-            />
-            <div className="text-right text-xs text-gray-500 mt-1">
-              {description.length}/200
-            </div>
-          </div>
+
         </div>
 
         <DialogFooter className="flex space-x-2">

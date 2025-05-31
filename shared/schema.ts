@@ -39,6 +39,7 @@ export const rides = pgTable("rides", {
   carModel: text("car_model"),
   notes: text("notes"),
   rideType: text("ride_type").notNull(),
+  isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

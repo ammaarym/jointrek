@@ -118,15 +118,39 @@ export default function MyRidesPostgres() {
     }
 
     try {
-      // For now, just show success - you can connect to backend later
-      toast({
-        title: "Review Submitted",
-        description: "Thank you for your feedback!",
+      // Submit review to backend
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || '',
+        },
+        body: JSON.stringify({
+          rideId: rideToReview?.id,
+          rating,
+          revieweeId: rideToReview?.driverId,
+        }),
       });
+
+      if (response.ok) {
+        toast({
+          title: "Review Submitted",
+          description: "Thank you for your feedback!",
+        });
+      } else {
+        throw new Error('Failed to submit review');
+      }
       
       setReviewModalOpen(false);
       setRating(0);
       setRideToReview(null);
+      
+      // Reload rides to update the UI with completed status
+      if (currentUser) {
+        loadMyRides(currentUser.uid);
+      }
     } catch (error) {
       toast({
         title: "Error",

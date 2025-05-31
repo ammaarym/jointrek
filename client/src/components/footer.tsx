@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { CarTaxiFront, Mail, MapPin } from "lucide-react";
 import { FaInstagram, FaTwitter, FaFacebookSquare } from "react-icons/fa";
-import { useAuth } from "../hooks/use-auth";
+import { useAuth } from "../hooks/use-auth-new";
 
 export default function Footer() {
   const { currentUser } = useAuth();

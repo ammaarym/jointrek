@@ -146,16 +146,22 @@ export default function MyRidesPostgres() {
       
       setReviewModalOpen(false);
       setRating(0);
-      setRideToReview(null);
       
-      // Update the completed rides set immediately
+      // Update the ride status immediately in the state
       if (rideToReview) {
-        setCompletedRides(prev => new Set([...prev, rideToReview.id]));
+        setMyRides(prev => prev.map(ride => 
+          ride.id === rideToReview.id 
+            ? { ...ride, isCompleted: true }
+            : ride
+        ));
+        setCompletedRides(prev => new Set(Array.from(prev).concat(rideToReview.id)));
       }
       
-      // Reload rides to update the UI with completed status
+      setRideToReview(null);
+      
+      // Reload rides to sync with server
       if (currentUser) {
-        loadMyRides(currentUser.uid);
+        loadMyRides(currentUser.uid, true); // Force reload
       }
     } catch (error) {
       toast({

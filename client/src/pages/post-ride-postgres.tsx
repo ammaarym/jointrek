@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateAndTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
+import { calculateRidePrice, CITY_DISTANCES } from '../../../shared/pricing';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,24 @@ export default function PostRidePostgres() {
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
   const [snapchat, setSnapchat] = useState('');
+  
+  // Auto-calculate price for passenger requests
+  useEffect(() => {
+    if (rideType === 'passenger' && destination && departureDate) {
+      const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+      if (cityData) {
+        const calculatedPrice = calculateRidePrice({
+          distance: cityData.miles,
+          mpg: 30, // Default car efficiency
+          gasPrice: 3.50, // Current gas price
+          destination: destination,
+          seatsTotal: parseInt(availableSeats) || 1,
+          date: departureDate ? new Date(departureDate) : undefined
+        });
+        setPrice(calculatedPrice.toString());
+      }
+    }
+  }, [rideType, destination, departureDate, availableSeats]);
   
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -300,18 +319,26 @@ export default function PostRidePostgres() {
                 <div className="space-y-2">
                   <Label htmlFor="price">
                     <FaMoneyBillWave className="inline mr-2" />
-                    {rideType === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Required)'}
+                    {rideType === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Auto-calculated)'}
                   </Label>
                   <Input
                     id="price"
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="e.g. 15.00"
+                    placeholder={rideType === 'driver' ? "e.g. 15.00" : "Calculated automatically"}
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
+                    readOnly={rideType === 'passenger'}
+                    disabled={rideType === 'passenger'}
+                    className={rideType === 'passenger' ? 'bg-gray-100 cursor-not-allowed' : ''}
                     required
                   />
+                  {rideType === 'passenger' && (
+                    <p className="text-sm text-gray-600">
+                      Price calculated based on distance, gas costs, and passenger count
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="genderPreference">

@@ -39,6 +39,8 @@ router.get("/:id", async (req: Request, res: Response) => {
 // POST /api/rides - Create a new ride
 router.post("/", async (req: Request, res: Response) => {
   try {
+    console.log("Received ride data:", req.body);
+    
     // Convert string dates to Date objects
     const rideData = {
       ...req.body,
@@ -46,10 +48,13 @@ router.post("/", async (req: Request, res: Response) => {
       arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
     };
     
+    console.log("Processed ride data:", rideData);
+    
     // Validate the request body against our schema
     const validationResult = insertRideSchema.safeParse(rideData);
     
     if (!validationResult.success) {
+      console.log("Validation errors:", validationResult.error.format());
       return res.status(400).json({ 
         error: "Invalid ride data", 
         details: validationResult.error.format() 

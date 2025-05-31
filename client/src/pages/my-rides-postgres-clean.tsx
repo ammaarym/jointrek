@@ -5,7 +5,6 @@ import { formatDate } from '../lib/date-utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck } from 'react-icons/fa';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +34,7 @@ export default function MyRidesPostgres() {
   const [rideToReview, setRideToReview] = useState<any>(null);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
+
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
@@ -62,7 +61,7 @@ export default function MyRidesPostgres() {
 
   // Handle marking ride as complete
   const handleMarkComplete = (ride: any) => {
-    setCompletedRides(prev => new Set([...prev, ride.id]));
+    setCompletedRides(prev => new Set(Array.from(prev).concat(ride.id)));
     setRideToReview(ride);
     setReviewModalOpen(true);
   };
@@ -78,15 +77,6 @@ export default function MyRidesPostgres() {
       return;
     }
 
-    if (reviewText.length > 200) {
-      toast({
-        title: "Description Too Long",
-        description: "Please keep your review under 200 characters.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       // For now, just show success - you can connect to backend later
       toast({
@@ -96,7 +86,6 @@ export default function MyRidesPostgres() {
       
       setReviewModalOpen(false);
       setRating(0);
-      setReviewText('');
       setRideToReview(null);
     } catch (error) {
       toast({
@@ -362,22 +351,7 @@ export default function MyRidesPostgres() {
               {rating === 5 && 'Excellent'}
             </div>
             
-            {/* Review Text */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Description (optional)
-              </label>
-              <Textarea
-                placeholder="Share your experience..."
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                maxLength={200}
-                className="resize-none"
-              />
-              <div className="text-xs text-muted-foreground text-right">
-                {reviewText.length}/200 characters
-              </div>
-            </div>
+
           </div>
           
           <DialogFooter className="gap-2">
@@ -386,7 +360,6 @@ export default function MyRidesPostgres() {
               onClick={() => {
                 setReviewModalOpen(false);
                 setRating(0);
-                setReviewText('');
                 setRideToReview(null);
               }}
             >

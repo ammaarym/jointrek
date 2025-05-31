@@ -5,6 +5,8 @@ import {
   bookings, 
   messages, 
   conversations,
+  completedRides,
+  reviews,
   type Ride,
   type InsertRide,
   type User,
@@ -14,7 +16,11 @@ import {
   type Conversation,
   type InsertConversation,
   type Message,
-  type InsertMessage
+  type InsertMessage,
+  type CompletedRide,
+  type InsertCompletedRide,
+  type Review,
+  type InsertReview
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql } from "drizzle-orm";
 import { IStorage } from "./storage";
@@ -277,6 +283,59 @@ export class PostgresStorage implements IStorage {
         .from(rides)
         .where(sql`${rides.id} IN (${rideIds.join(',')})`);
     }
+  }
+
+  // Ride completion methods
+  async markRideComplete(id: number): Promise<Ride | undefined> {
+    const [updatedRide] = await db
+      .update(rides)
+      .set({ isCompleted: true })
+      .where(eq(rides.id, id))
+      .returning();
+    return updatedRide;
+  }
+
+  async getRideById(id: number): Promise<Ride | undefined> {
+    const [ride] = await db.select().from(rides).where(eq(rides.id, id));
+    return ride;
+  }
+
+  async getCompletedRidesByUser(userId: string): Promise<CompletedRide[]> {
+    return await db.select().from(completedRides).where(eq(completedRides.participantId, userId));
+  }
+
+  async isRideCompletedByUser(rideId: number, userId: string): Promise<boolean> {
+    const [completed] = await db
+      .select()
+      .from(completedRides)
+      .where(and(eq(completedRides.rideId, rideId), eq(completedRides.participantId, userId)));
+    return !!completed;
+  }
+
+  // Review methods
+  async createReview(reviewData: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values(reviewData).returning();
+    return review;
+  }
+
+  async getReviewsByReviewee(revieweeId: string): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.revieweeId, revieweeId));
+  }
+
+  async getReviewsByRide(rideId: number): Promise<Review[]> {
+    return await db.select().from(reviews).where(eq(reviews.rideId, rideId));
+  }
+
+  async hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(and(
+        eq(reviews.reviewerId, reviewerId),
+        eq(reviews.rideId, rideId),
+        eq(reviews.revieweeId, revieweeId)
+      ));
+    return !!review;
   }
 }
 

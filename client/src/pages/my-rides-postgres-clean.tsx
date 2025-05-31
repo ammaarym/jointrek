@@ -66,6 +66,9 @@ export default function MyRidesPostgres() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || '',
         },
       });
 

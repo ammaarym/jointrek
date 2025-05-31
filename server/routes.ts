@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./postgres-storage"; // Use PostgreSQL storage
-import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema } from "@shared/schema";
+import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema, insertReviewSchema } from "@shared/schema";
 import * as admin from 'firebase-admin';
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -559,6 +559,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.error("Error sending message:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Mark ride as complete
+  app.patch('/api/rides/:id/complete', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      // Get the ride to verify ownership
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if user is the driver
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "You can only complete your own rides" });
+      }
+
+      const updatedRide = await storage.markRideComplete(rideId);
+      res.json(updatedRide);
+    } catch (error) {
+      console.error("Error marking ride complete:", error);
+      res.status(500).json({ message: "Failed to mark ride complete" });
+    }
+  });
+
+  // Create a review
+  app.post('/api/reviews', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { revieweeId, rideId, rating } = req.body;
+      
+      const reviewData = insertReviewSchema.parse({
+        reviewerId: req.user!.uid,
+        revieweeId,
+        rideId,
+        rating
+      });
+      
+      const review = await storage.createReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: "Invalid review data", errors: error.errors });
+      }
+      
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Get reviews for a user
+  app.get('/api/users/:userId/reviews', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const reviews = await storage.getReviewsByReviewee(userId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
     }
   });
 

@@ -40,19 +40,26 @@ export default function PostRidePostgres() {
   
   // Auto-calculate price for passenger requests
   useEffect(() => {
+    console.log('useEffect triggered:', { rideType, origin, destination, departureDate, availableSeats });
+    
     if (rideType === 'passenger' && origin && destination && departureDate) {
       let distance = 0;
+      
+      console.log('Calculating price for passenger request');
+      console.log('Available cities in CITY_DISTANCES:', Object.keys(CITY_DISTANCES));
       
       // Calculate distance based on origin and destination
       if (origin === 'Gainesville' && destination !== 'Gainesville') {
         // From Gainesville to other cities
         const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+        console.log('Route: Gainesville to', destination, 'City data:', cityData);
         if (cityData) {
           distance = cityData.miles;
         }
       } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
         // From other cities to Gainesville
         const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
+        console.log('Route:', origin, 'to Gainesville. City data:', cityData);
         if (cityData) {
           distance = cityData.miles;
         }
@@ -60,11 +67,14 @@ export default function PostRidePostgres() {
         // Between two non-Gainesville cities (estimate using both distances)
         const originData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
         const destData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+        console.log('Route between two cities:', { origin, destination, originData, destData });
         if (originData && destData) {
           // Simple estimation: average of both distances
           distance = Math.abs(originData.miles - destData.miles);
         }
       }
+      
+      console.log('Calculated distance:', distance);
       
       if (distance > 0) {
         const calculatedPrice = calculateRidePrice({
@@ -75,11 +85,15 @@ export default function PostRidePostgres() {
           seatsTotal: parseInt(availableSeats) || 1,
           date: departureDate ? new Date(departureDate) : undefined
         });
-        console.log('Price calculation:', { origin, destination, distance, calculatedPrice });
+        console.log('Price calculation result:', { origin, destination, distance, calculatedPrice });
         setPrice(calculatedPrice.toString());
       } else {
         console.log('No distance found for route:', { origin, destination });
+        // Set a default price if no distance found
+        setPrice('15'); // Default $15
       }
+    } else {
+      console.log('Conditions not met for price calculation:', { rideType, origin, destination, departureDate });
     }
   }, [rideType, origin, destination, departureDate, availableSeats]);
   

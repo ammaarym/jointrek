@@ -148,6 +148,11 @@ export default function MyRidesPostgres() {
       setRating(0);
       setRideToReview(null);
       
+      // Update the completed rides set immediately
+      if (rideToReview) {
+        setCompletedRides(prev => new Set([...prev, rideToReview.id]));
+      }
+      
       // Reload rides to update the UI with completed status
       if (currentUser) {
         loadMyRides(currentUser.uid);

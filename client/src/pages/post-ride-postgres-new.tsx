@@ -198,6 +198,16 @@ export default function PostRide() {
       return;
     }
 
+    // Prevent rides from same city to same city
+    if (fromCity === toCity) {
+      toast({
+        title: "Invalid Route",
+        description: "Origin and destination cities cannot be the same.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -236,12 +246,11 @@ export default function PostRide() {
       }
 
       toast({
-        title: "Ride Posted!",
-        description: "Your ride has been posted successfully.",
+        title: "Ride posted successfully!"
       });
 
-      // Redirect to find rides page
-      setLocation('/find-rides');
+      // Redirect to My Rides page
+      setLocation('/my-rides');
     } catch (error) {
       console.error('Error posting ride:', error);
       toast({

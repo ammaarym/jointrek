@@ -19,7 +19,7 @@ import RequestRide from "@/pages/request-ride";
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
 import React, { useEffect, useState, Suspense } from "react";
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
@@ -35,9 +35,13 @@ function AppRoutes() {
 
     // Load user contact info when component mounts and user is available
     useEffect(() => {
-      if (currentUser && requiresContactInfo) {
-        loadUserContactInfo();
-      } else if (!requiresContactInfo) {
+      if (currentUser) {
+        if (requiresContactInfo) {
+          loadUserContactInfo();
+        } else {
+          setContactInfoLoading(false);
+        }
+      } else {
         setContactInfoLoading(false);
       }
     }, [currentUser, requiresContactInfo]);

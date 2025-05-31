@@ -54,7 +54,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
-            <Link href="/" className="flex items-center">
+            <Link href={currentUser ? "/find-rides" : "/"} className="flex items-center">
               <img src={trekLogo} alt="Trek" className="h-12 w-auto" />
             </Link>
           </div>
@@ -123,6 +123,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     How to Use Trek
                   </DialogTitle>
                   <DialogDescription className="text-left space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900 mb-2">📱 Contact Method Required</h4>
+                      <p className="text-sm text-gray-600">You must add a contact method (phone number or social media) in your profile to access the Find Rides section and view other users' rides.</p>
+                    </div>
+                    
                     <div>
                       <h4 className="font-semibold text-sm text-gray-900 mb-2">🚗 Post a Ride (As Driver)</h4>
                       <p className="text-sm text-gray-600">Share your trip from/to Gainesville. Set your price, departure time, and available seats. Other students can find and contact you.</p>
@@ -257,6 +262,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                       How to Use Trek
                     </DialogTitle>
                     <DialogDescription className="text-left space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-900 mb-2">📱 Contact Method Required</h4>
+                        <p className="text-sm text-gray-600">You must add a contact method (phone number or social media) in your profile to access the Find Rides section and view other users' rides.</p>
+                      </div>
+                      
                       <div>
                         <h4 className="font-semibold text-sm text-gray-900 mb-2">🚗 Post a Ride (As Driver)</h4>
                         <p className="text-sm text-gray-600">Share your trip from/to Gainesville. Set your price, departure time, and available seats. Other students can find and contact you.</p>

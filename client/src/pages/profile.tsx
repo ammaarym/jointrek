@@ -139,7 +139,7 @@ export default function Profile() {
               </Button>
             )}
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mt-4">
             This information will be shown to other users when they view your rides
           </p>
         </CardHeader>

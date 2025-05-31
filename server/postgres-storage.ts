@@ -142,6 +142,21 @@ export class PostgresStorage implements IStorage {
     return true;
   }
 
+  async getRidesByLocation(origin: string, destination?: string): Promise<Ride[]> {
+    if (destination) {
+      return await db
+        .select()
+        .from(rides)
+        .where(and(eq(rides.origin, origin), eq(rides.destination, destination)))
+        .orderBy(desc(rides.departureTime));
+    } else {
+      return await db
+        .select()
+        .from(rides)
+        .where(eq(rides.origin, origin))
+        .orderBy(desc(rides.departureTime));
+    }
+  }
 
 
   // Booking methods

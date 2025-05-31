@@ -5,7 +5,8 @@ import { formatDate } from '../lib/date-utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck } from 'react-icons/fa';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,6 +35,8 @@ export default function MyRidesPostgres() {
   const [rideToReview, setRideToReview] = useState<any>(null);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [rideToComplete, setRideToComplete] = useState<any>(null);
 
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
@@ -59,10 +62,18 @@ export default function MyRidesPostgres() {
     setLocation('/post-ride');
   };
 
-  // Handle marking ride as complete
-  const handleMarkComplete = async (ride: any) => {
+  // Handle marking ride as complete - show confirmation dialog
+  const handleMarkComplete = (ride: any) => {
+    setRideToComplete(ride);
+    setCompleteDialogOpen(true);
+  };
+
+  // Confirm and actually mark ride as complete
+  const confirmMarkComplete = async () => {
+    if (!rideToComplete) return;
+
     try {
-      const response = await fetch(`/api/rides/${ride.id}/complete`, {
+      const response = await fetch(`/api/rides/${rideToComplete.id}/complete`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -77,12 +88,11 @@ export default function MyRidesPostgres() {
         if (currentUser) {
           loadMyRides(currentUser.uid);
         }
-        setRideToReview(ride);
+        setCompleteDialogOpen(false);
+        setRideToReview(rideToComplete);
         setReviewModalOpen(true);
-        toast({
-          title: "Ride Completed",
-          description: "Ride has been marked as completed.",
-        });
+        setRideToComplete(null);
+        // Removed the toast notification popup
       } else {
         throw new Error('Failed to mark ride as complete');
       }
@@ -405,6 +415,35 @@ export default function MyRidesPostgres() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation dialog for marking ride complete */}
+      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <FaExclamationTriangle className="text-yellow-500 text-xl" />
+              <AlertDialogTitle>Confirm Ride Completion</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base mt-4">
+              Are you sure your ride is completed? <strong>You cannot undo this action.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setCompleteDialogOpen(false);
+              setRideToComplete(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmMarkComplete}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Mark Complete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

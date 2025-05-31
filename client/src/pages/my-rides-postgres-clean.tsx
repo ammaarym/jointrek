@@ -167,6 +167,23 @@ export default function MyRidesPostgres() {
     }
   };
 
+  // Handle skipping the review
+  const handleSkipReview = () => {
+    // Update the ride status immediately in the state since ride is already completed in DB
+    if (rideToReview) {
+      setCompletedRides(prev => new Set(Array.from(prev).concat(rideToReview.id)));
+    }
+    
+    setReviewModalOpen(false);
+    setRating(0);
+    setRideToReview(null);
+    
+    // Reload rides to sync with server
+    if (currentUser) {
+      loadMyRides(currentUser.uid, true); // Force reload
+    }
+  };
+
   // Open the edit modal with automatic pricing
   const handleEditRide = (ride: any) => {
     setRideToEdit(ride);
@@ -428,11 +445,7 @@ export default function MyRidesPostgres() {
           <DialogFooter className="gap-2">
             <Button
               variant="outline"
-              onClick={() => {
-                setReviewModalOpen(false);
-                setRating(0);
-                setRideToReview(null);
-              }}
+              onClick={handleSkipReview}
             >
               Skip
             </Button>

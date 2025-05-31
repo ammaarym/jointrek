@@ -118,7 +118,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
+                  <DialogTitle className="flex items-center gap-2 mb-4">
                     <HelpCircle className="h-5 w-5 text-blue-500" />
                     How to Use Trek
                   </DialogTitle>
@@ -257,7 +257,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
+                    <DialogTitle className="flex items-center gap-2 mb-4">
                       <HelpCircle className="h-5 w-5 text-blue-500" />
                       How to Use Trek
                     </DialogTitle>

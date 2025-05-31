@@ -131,6 +131,7 @@ export default function MyRidesPostgres() {
           rideId: rideToReview?.id,
           rating,
           revieweeId: rideToReview?.driverId,
+          reviewType: rideToReview?.rideType === 'driver' ? 'driver' : 'passenger',
         }),
       });
 

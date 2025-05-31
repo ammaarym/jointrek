@@ -593,13 +593,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a review
   app.post('/api/reviews', authenticate, async (req: Request, res: Response) => {
     try {
-      const { revieweeId, rideId, rating } = req.body;
+      const { revieweeId, rideId, rating, reviewType } = req.body;
       
       const reviewData = insertReviewSchema.parse({
         reviewerId: req.user!.uid,
         revieweeId,
         rideId,
-        rating
+        rating,
+        reviewType
       });
       
       const review = await storage.createReview(reviewData);

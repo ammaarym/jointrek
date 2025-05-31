@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/use-auth';
+import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { formatDate } from '../lib/date-utils';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';

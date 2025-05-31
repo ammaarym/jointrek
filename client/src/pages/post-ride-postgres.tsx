@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useAuth } from '../hooks/use-auth';
+import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateAndTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 
@@ -29,7 +29,7 @@ const FLORIDA_CITIES = [
 
 export default function FindRidesPostgres() {
   const { currentUser } = useAuth();
-  const { myRides: rides, loading, error, loadMyRides: loadRides } = usePostgresRides();
+  const { rides, loading, error, loadAllRides } = usePostgresRides();
   const [, setLocation] = useLocation();
 
   // Form state
@@ -50,6 +50,35 @@ export default function FindRidesPostgres() {
     passengers: '1',
     genderFilter: 'no preference'
   });
+
+  // Load all rides when component mounts
+  useEffect(() => {
+    if (currentUser) {
+      loadAllRides();
+    }
+  }, [currentUser]);
+
+  // Adapter function to convert PostgreSQL ride format to card format
+  const adaptPostgresRideToCardFormat = (ride: any) => {
+    return {
+      id: ride.id,
+      origin: ride.origin,
+      originArea: ride.originArea,
+      destination: ride.destination,
+      destinationArea: ride.destinationArea,
+      departureTime: new Date(ride.departureTime),
+      arrivalTime: new Date(ride.arrivalTime),
+      seatsTotal: ride.seatsTotal,
+      seatsLeft: ride.seatsLeft,
+      price: ride.price,
+      genderPreference: ride.genderPreference,
+      carModel: ride.carModel,
+      notes: ride.notes,
+      rideType: ride.rideType,
+      driverId: ride.driverId,
+      isCompleted: ride.isCompleted
+    };
+  };
 
   // Filter rides using applied filters
   const filteredRides = rides

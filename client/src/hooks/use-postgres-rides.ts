@@ -173,12 +173,52 @@ export function usePostgresRides() {
     }
   };
 
+  const loadAllRides = async (forceReload = false, origin = 'Gainesville', destination?: string) => {
+    // If we already have rides and are not in an error state, don't reload unless forced
+    if (rides.length > 0 && !error && !forceReload) {
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Build query parameters
+      const params = new URLSearchParams({ origin });
+      if (destination && destination !== 'any') {
+        params.append('destination', destination);
+      }
+      
+      const response = await fetch(`/api/rides?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch all rides: ${response.status}`);
+      }
+      
+      const allRides = await response.json();
+      console.log('Loaded all rides:', allRides);
+      setRides(allRides);
+    } catch (err: any) {
+      console.error('Error loading all rides:', err);
+      setError(err.message || 'Failed to load rides');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     myRides,
+    rides,
     loading,
     error,
     createRide,
     loadMyRides,
+    loadAllRides,
     updateRide,
     removeRide
   };

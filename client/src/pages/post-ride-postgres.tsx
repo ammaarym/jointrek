@@ -17,12 +17,14 @@ import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 
 
 export default function PostRidePostgres() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { currentUser } = useAuth();
   const { createRide, loading, error } = usePostgresRides();
   
-  // Form state
-  const [rideType, setRideType] = useState<'driver' | 'passenger'>('driver');
+  // Form state - auto-select passenger tab if on request-ride route
+  const [rideType, setRideType] = useState<'driver' | 'passenger'>(
+    location === '/request-ride' ? 'passenger' : 'driver'
+  );
   const [origin, setOrigin] = useState('Gainesville');
   const [originArea, setOriginArea] = useState('');
   const [destination, setDestination] = useState('');
@@ -142,8 +144,8 @@ export default function PostRidePostgres() {
         originArea,
         destination,
         destinationArea,
-        departureTime: departureDateTime.toISOString(),
-        arrivalTime: arrivalTime.toISOString(),
+        departureTime: departureDateTime,
+        arrivalTime: arrivalTime,
         seatsTotal: parseInt(availableSeats),
         seatsLeft: parseInt(availableSeats),
         price: parseFloat(price),

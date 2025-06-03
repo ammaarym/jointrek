@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
-import { combineDateAndTime, calculateArrivalTime } from '../lib/date-utils';
+import { combineDateTime, formatTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
 import { calculateRidePrice, CITY_DISTANCES } from '../../../shared/pricing';
 import { Button } from "@/components/ui/button";

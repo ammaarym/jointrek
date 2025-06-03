@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-new";
 import { LogIn, ArrowLeft } from "lucide-react";
 
 export default function Login() {

@@ -39,7 +39,7 @@ export default function FindRidesPostgres() {
   const [passengers, setPassengers] = useState('1');
   const [genderFilter, setGenderFilter] = useState('no preference');
   const [sortBy, setSortBy] = useState('date');
-  const [feedType, setFeedType] = useState('drivers'); // 'drivers' or 'passengers'
+
   const [quickFilter, setQuickFilter] = useState('departures'); // 'departures' or 'arrivals'
   
   // Applied filter state (only updated when Apply Filter is clicked)
@@ -94,13 +94,7 @@ export default function FindRidesPostgres() {
     .filter(ride => {
       if (!ride) return false;
       
-      // Filter by feed type (drivers vs passengers)
-      if (feedType === 'drivers' && ride.rideType !== 'driver') {
-        return false;
-      }
-      if (feedType === 'passengers' && ride.rideType !== 'passenger') {
-        return false;
-      }
+      // Show all available rides (both drivers and passengers)
       
       // Filter by gender if selected
       if (appliedFilters.genderFilter !== 'no preference') {
@@ -346,28 +340,7 @@ export default function FindRidesPostgres() {
         {/* Main content with rides */}
         <div className="lg:col-span-3 mt-6">
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setFeedType('drivers')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  feedType === 'drivers'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Available Rides
-              </button>
-              <button
-                onClick={() => setFeedType('passengers')}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  feedType === 'passengers'
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Available Passengers
-              </button>
-            </div>
+            <h3 className="text-xl font-semibold">Available Rides</h3>
             
             <div className="flex items-center">
               <span className="text-sm mr-2">Sort by:</span>

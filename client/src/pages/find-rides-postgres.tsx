@@ -76,7 +76,16 @@ export default function FindRidesPostgres() {
       notes: ride.notes,
       rideType: ride.rideType,
       driverId: ride.driverId,
-      isCompleted: ride.isCompleted
+      isCompleted: ride.isCompleted,
+      driver: {
+        name: ride.driverName || 'Unknown Driver',
+        email: ride.driverEmail || '',
+        photoUrl: ride.driverPhoto || '',
+        phone: ride.driverPhone || '',
+        instagram: ride.driverInstagram || '',
+        snapchat: ride.driverSnapchat || ''
+      },
+      createdAt: new Date(ride.createdAt)
     };
   };
 

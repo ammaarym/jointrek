@@ -62,10 +62,14 @@ export default function FindRidesPostgres() {
   const adaptPostgresRideToCardFormat = (ride: any) => {
     return {
       id: ride.id,
-      origin: ride.origin,
-      originArea: ride.originArea,
-      destination: ride.destination,
-      destinationArea: ride.destinationArea,
+      origin: {
+        city: ride.origin,
+        area: ride.originArea || ''
+      },
+      destination: {
+        city: ride.destination,
+        area: ride.destinationArea || ''
+      },
       departureTime: new Date(ride.departureTime),
       arrivalTime: new Date(ride.arrivalTime),
       seatsTotal: ride.seatsTotal,
@@ -83,7 +87,10 @@ export default function FindRidesPostgres() {
         photoUrl: ride.driverPhoto || '',
         phone: ride.driverPhone || '',
         instagram: ride.driverInstagram || '',
-        snapchat: ride.driverSnapchat || ''
+        snapchat: ride.driverSnapchat || '',
+        id: ride.driverId,
+        rating: 4.8,
+        totalRides: 15
       },
       createdAt: new Date(ride.createdAt)
     };

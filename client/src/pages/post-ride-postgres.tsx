@@ -33,10 +33,7 @@ export default function PostRidePostgres() {
   const [price, setPrice] = useState('');
   const [genderPreference, setGenderPreference] = useState('no-preference');
   const [carModel, setCarModel] = useState('');
-  const [notes, setNotes] = useState('');
-  const [phone, setPhone] = useState('');
-  const [instagram, setInstagram] = useState('');
-  const [snapchat, setSnapchat] = useState('');
+
   
   // Auto-calculate price for passenger requests
   useEffect(() => {
@@ -127,16 +124,12 @@ export default function PostRidePostgres() {
       availableSeats,
       price,
       genderPreference,
-      carModel,
-      notes,
-      phone,
-      instagram,
-      snapchat
+      carModel
     });
     
     try {
       // Convert form data to ride object
-      const departureDateTime = combineDateAndTime(departureDate, departureTime);
+      const departureDateTime = combineDateTime(departureDate, departureTime);
       
       // Estimate arrival time (2 hours later for now)
       const arrivalTime = calculateArrivalTime(departureDateTime, 120);
@@ -401,65 +394,9 @@ export default function PostRidePostgres() {
             </CardContent>
           </Card>
           
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Additional Information</CardTitle>
-              <CardDescription>Any other details about your trip</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="notes">
-                  <BiMessageDetail className="inline mr-2" />
-                  Notes
-                </Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Add any additional details about your trip..."
-                  rows={3}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+
           
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-              <CardDescription>Add optional contact methods (will be visible to others)</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="e.g. 352-123-4567"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <Input
-                    id="instagram"
-                    placeholder="Your Instagram username"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="snapchat">Snapchat</Label>
-                  <Input
-                    id="snapchat"
-                    placeholder="Your Snapchat username"
-                    value={snapchat}
-                    onChange={(e) => setSnapchat(e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
           
           {error && (
             <div className="bg-destructive/20 text-destructive p-4 rounded-lg mb-6">

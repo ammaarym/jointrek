@@ -55,3 +55,15 @@ export function combineDateTime(dateStr: string, timeStr: string): Date {
   
   return date;
 }
+
+/**
+ * Calculates arrival time by adding minutes to departure time
+ * @param departureTime The departure date/time
+ * @param durationMinutes Duration in minutes to add
+ * @returns The calculated arrival time
+ */
+export function calculateArrivalTime(departureTime: Date, durationMinutes: number): Date {
+  const arrivalTime = new Date(departureTime);
+  arrivalTime.setMinutes(arrivalTime.getMinutes() + durationMinutes);
+  return arrivalTime;
+}

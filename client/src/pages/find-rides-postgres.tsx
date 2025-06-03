@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/use-auth-new';
-import { useRides } from '../hooks/use-rides';
-import { adaptPostgresRideToCardFormat } from '../lib/ride-adapter';
+import { usePostgresRides } from '../hooks/use-postgres-rides';
+
 import { formatDate } from '../lib/date-utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,7 +29,7 @@ const FLORIDA_CITIES = [
 
 export default function FindRidesPostgres() {
   const { currentUser } = useAuth();
-  const { rides, loading, error, loadRides } = useRides();
+  const { myRides: rides, loading, error, loadMyRides: loadRides } = usePostgresRides();
   const [, setLocation] = useLocation();
 
   // Form state

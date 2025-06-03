@@ -11,7 +11,7 @@ import Login from "@/pages/login";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 
-import RequestRide from "@/pages/request-ride";
+
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
 import React, { useEffect, useState, Suspense } from "react";
@@ -133,9 +133,7 @@ function AppRoutes() {
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" requiresContactInfo={true} />}
           </Route>
-          <Route path="/request-ride">
-            {(params) => <ProtectedRoute component={RequestRide} path="/request-ride" requiresContactInfo={true} />}
-          </Route>
+
           <Route path="/my-rides">
             {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
           </Route>

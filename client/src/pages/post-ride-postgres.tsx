@@ -2,24 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
-import { combineDateTime, formatTime } from '../lib/date-utils';
+import { combineDateTime, formatTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
 import { calculateRidePrice, CITY_DISTANCES } from '../../../shared/pricing';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
-import { BiMessageDetail } from 'react-icons/bi';
+
 
 export default function PostRidePostgres() {
   const [, setLocation] = useLocation();
   const { currentUser } = useAuth();
-  const { postRide, loading, error } = usePostgresRides();
+  const { createRide, loading, error } = usePostgresRides();
   
   // Form state
   const [rideType, setRideType] = useState<'driver' | 'passenger'>('driver');
@@ -149,17 +149,14 @@ export default function PostRidePostgres() {
         price: parseFloat(price),
         genderPreference,
         carModel: carModel || null,
-        notes: notes || null,
-        rideType,
-        phone: phone || null,
-        instagram: instagram || null,
-        snapchat: snapchat || null
+        notes: null,
+        rideType
       };
       
       console.log('Posting ride with data:', rideData);
       
       // Post the ride
-      const ride = await postRide(rideData);
+      const ride = await createRide(rideData);
       
       if (ride) {
         toast({

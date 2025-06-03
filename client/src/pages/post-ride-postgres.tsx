@@ -40,80 +40,56 @@ export default function PostRidePostgres() {
   
   // Auto-calculate price for passenger requests
   useEffect(() => {
-    console.log('🚗 AUTO-PRICE useEffect triggered:', { rideType, origin, destination, departureDate, availableSeats });
+    // Always log regardless of conditions
+    window.console?.log('PASSENGER PRICE CALC TRIGGERED:', { rideType, origin, destination, departureDate, availableSeats });
     
-    // Clear price first for drivers
-    if (rideType === 'driver') {
-      console.log('🚗 Driver mode - clearing auto-calculated price');
-      return;
-    }
-    
-    if (rideType === 'passenger') {
-      console.log('🛡️ PASSENGER MODE - Starting price calculation');
-      
-      if (!origin || !destination) {
-        console.log('❌ Missing origin or destination:', { origin, destination });
-        return;
-      }
-      
-      if (!departureDate) {
-        console.log('❌ Missing departure date');
-        return;
-      }
+    if (rideType === 'passenger' && origin && destination && departureDate) {
+      window.console?.log('PASSENGER CONDITIONS MET - CALCULATING PRICE');
       
       let distance = 0;
-      
-      console.log('🗺️ Available cities in CITY_DISTANCES:', Object.keys(CITY_DISTANCES));
+      window.console?.log('Available cities:', Object.keys(CITY_DISTANCES));
       
       // Calculate distance based on origin and destination
       if (origin === 'Gainesville' && destination !== 'Gainesville') {
         // From Gainesville to other cities
         const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
-        console.log('📍 Route: Gainesville to', destination, 'City data:', cityData);
+        window.console?.log(`Route: Gainesville to ${destination}`, cityData);
         if (cityData) {
           distance = cityData.miles;
         }
       } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
         // From other cities to Gainesville
         const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
-        console.log('📍 Route:', origin, 'to Gainesville. City data:', cityData);
+        window.console?.log(`Route: ${origin} to Gainesville`, cityData);
         if (cityData) {
           distance = cityData.miles;
         }
-      } else if (origin !== 'Gainesville' && destination !== 'Gainesville') {
-        // Between two non-Gainesville cities (estimate using both distances)
-        const originData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
-        const destData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
-        console.log('📍 Route between two cities:', { origin, destination, originData, destData });
-        if (originData && destData) {
-          // Simple estimation: average of both distances
-          distance = Math.abs(originData.miles - destData.miles);
-        }
       }
       
-      console.log('📏 Calculated distance:', distance, 'miles');
+      window.console?.log('Calculated distance:', distance);
       
       if (distance > 0) {
         try {
           const calculatedPrice = calculateRidePrice({
             distance: distance,
-            mpg: 30, // Default car efficiency
-            gasPrice: 3.50, // Current gas price
+            mpg: 30,
+            gasPrice: 3.50,
             destination: destination,
             seatsTotal: parseInt(availableSeats) || 1,
             date: departureDate ? new Date(departureDate) : undefined
           });
-          console.log('💰 PRICE CALCULATION SUCCESS:', { origin, destination, distance, calculatedPrice });
+          window.console?.log('CALCULATED PRICE:', calculatedPrice);
           setPrice(calculatedPrice.toString());
         } catch (error) {
-          console.error('❌ Price calculation error:', error);
-          setPrice('15'); // Fallback
+          window.console?.error('Price calculation error:', error);
+          setPrice('15');
         }
       } else {
-        console.log('❌ No distance found for route:', { origin, destination });
-        console.log('🎯 Setting fallback price of $15');
-        setPrice('15'); // Default $15
+        window.console?.log('No distance found, setting default price');
+        setPrice('15');
       }
+    } else {
+      window.console?.log('Passenger price calculation conditions not met');
     }
   }, [rideType, origin, destination, departureDate, availableSeats]);
   

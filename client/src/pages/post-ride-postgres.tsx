@@ -25,6 +25,11 @@ export default function PostRidePostgres() {
   const [rideType, setRideType] = useState<'driver' | 'passenger'>(
     location === '/request-ride' ? 'passenger' : 'driver'
   );
+
+  // Update rideType when location changes
+  useEffect(() => {
+    setRideType(location === '/request-ride' ? 'passenger' : 'driver');
+  }, [location]);
   const [origin, setOrigin] = useState('Gainesville');
   const [originArea, setOriginArea] = useState('');
   const [destination, setDestination] = useState('');

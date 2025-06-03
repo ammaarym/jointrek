@@ -288,27 +288,25 @@ export default function FindRidesPostgres() {
               </div>
             </div>
 
-            {feedType === 'drivers' && (
-              <div>
-                <Label htmlFor="passengers" className="block mb-3 text-sm font-medium">Seats Needed</Label>
-                <Select value={passengers} onValueChange={setPassengers}>
-                  <SelectTrigger className="h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Any number" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any number</SelectItem>
-                    <SelectItem value="1">1 seat</SelectItem>
-                    <SelectItem value="2">2 seats</SelectItem>
-                    <SelectItem value="3">3 seats</SelectItem>
-                    <SelectItem value="4">4 seats</SelectItem>
-                    <SelectItem value="5">5 seats</SelectItem>
-                    <SelectItem value="6">6 seats</SelectItem>
-                    <SelectItem value="7">7 seats</SelectItem>
-                    <SelectItem value="8">8 seats</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div>
+              <Label htmlFor="passengers" className="block mb-3 text-sm font-medium">Seats Needed</Label>
+              <Select value={passengers} onValueChange={setPassengers}>
+                <SelectTrigger className="h-12 rounded-md border-gray-200">
+                  <SelectValue placeholder="Any number" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any number</SelectItem>
+                  <SelectItem value="1">1 seat</SelectItem>
+                  <SelectItem value="2">2 seats</SelectItem>
+                  <SelectItem value="3">3 seats</SelectItem>
+                  <SelectItem value="4">4 seats</SelectItem>
+                  <SelectItem value="5">5 seats</SelectItem>
+                  <SelectItem value="6">6 seats</SelectItem>
+                  <SelectItem value="7">7 seats</SelectItem>
+                  <SelectItem value="8">8 seats</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <div>
               <Label htmlFor="gender" className="block mb-3 text-sm font-medium">Gender Preference</Label>

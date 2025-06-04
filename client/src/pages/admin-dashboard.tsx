@@ -61,6 +61,10 @@ interface RideRequest {
   createdAt: string;
   rideOrigin: string;
   rideDestination: string;
+  driverName: string;
+  driverEmail: string;
+  departureTime: string;
+  price: string;
 }
 
 export default function AdminDashboard() {
@@ -69,8 +73,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [rides, setRides] = useState<Ride[]>([]);
-  const [requests, setRequests] = useState<RideRequest[]>([]);
-  const [approvedRides, setApprovedRides] = useState<ApprovedRide[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [approvedRides, setApprovedRides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,17 +97,19 @@ export default function AdminDashboard() {
       };
 
       // Fetch dashboard stats
-      const [statsRes, usersRes, ridesRes, requestsRes] = await Promise.all([
+      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes] = await Promise.all([
         fetch('/api/admin/stats', { headers }),
         fetch('/api/admin/users', { headers }),
         fetch('/api/admin/rides', { headers }),
-        fetch('/api/admin/requests', { headers })
+        fetch('/api/admin/requests', { headers }),
+        fetch('/api/admin/approved-rides', { headers })
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
       if (usersRes.ok) setUsers(await usersRes.json());
       if (ridesRes.ok) setRides(await ridesRes.json());
       if (requestsRes.ok) setRequests(await requestsRes.json());
+      if (approvedRidesRes.ok) setApprovedRides(await approvedRidesRes.json());
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -232,8 +238,9 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="requests">Ride Requests</TabsTrigger>
+            <TabsTrigger value="approved">Approved Rides</TabsTrigger>
             <TabsTrigger value="rides">All Rides</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
@@ -247,34 +254,55 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {requests.map((request) => (
-                    <div key={request.id} className="flex items-center justify-between p-4 border border-stone-200 rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="font-medium">{request.passengerName}</div>
-                          <Badge className={getStatusColor(request.status)}>
-                            {request.status.toUpperCase()}
-                          </Badge>
+                    <div key={request.id} className="border border-stone-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <Badge className={getStatusColor(request.status)}>
+                          {request.status.toUpperCase()}
+                        </Badge>
+                        <div className="text-xs text-stone-500">
+                          {formatDate(request.createdAt)}
                         </div>
-                        <div className="text-sm text-stone-600 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4" />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-1">Passenger Requesting</h4>
+                          <div className="text-sm text-stone-900">{request.passengerName}</div>
+                          <div className="text-xs text-stone-600">{request.passengerEmail}</div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-1">Driver Being Requested</h4>
+                          <div className="text-sm text-stone-900">{request.driverName || 'N/A'}</div>
+                          <div className="text-xs text-stone-600">{request.driverEmail || 'N/A'}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-stone-100 pt-3">
+                        <div className="flex items-center gap-4 text-sm text-stone-600 mb-2">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
                             {request.rideOrigin} → {request.rideDestination}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            {formatDate(request.createdAt)}
-                          </div>
-                          {request.message && (
-                            <div className="mt-2 p-2 bg-stone-50 rounded text-sm">
-                              <strong>Message:</strong> {request.message}
+                          {request.departureTime && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDate(request.departureTime)}
+                            </div>
+                          )}
+                          {request.price && (
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              ${request.price}
                             </div>
                           )}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {request.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                        {request.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
-                        {request.status === 'pending' && <AlertCircle className="w-5 h-5 text-yellow-600" />}
+                        
+                        {request.message && (
+                          <div className="mt-2 p-2 bg-stone-50 rounded text-sm">
+                            <strong>Message:</strong> {request.message}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

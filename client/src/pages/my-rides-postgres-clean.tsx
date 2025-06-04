@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck, FaExclamationTriangle, FaUser } from 'react-icons/fa';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -440,9 +440,27 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="driver">Driver</TabsTrigger>
-          <TabsTrigger value="passenger">Passenger</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/30 rounded-lg p-1">
+          <TabsTrigger 
+            value="driver" 
+            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+          >
+            <FaCar className="w-4 h-4" />
+            <span>Driver Rides</span>
+            <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
+              {myRides.filter(ride => ride.rideType === 'driver').length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="passenger" 
+            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+          >
+            <FaUser className="w-4 h-4" />
+            <span>Passenger Requests</span>
+            <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
+              {myRides.filter(ride => ride.rideType === 'passenger').length}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="driver" className="mt-6">

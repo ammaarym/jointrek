@@ -570,7 +570,19 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/30 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/30 rounded-lg p-1">
+          <TabsTrigger 
+            value="approved" 
+            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+          >
+            <FaCheck className="w-4 h-4" />
+            <span>Approved</span>
+            {approvedRides.length > 0 && (
+              <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-2 py-0.5">
+                {approvedRides.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger 
             value="driver" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
@@ -610,6 +622,87 @@ export default function MyRidesPostgres() {
             )}
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="approved" className="mt-6">
+          <div className="space-y-6">
+            {approvedRidesLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-64" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : approvedRides.length > 0 ? (
+              approvedRides.map((ride) => (
+                <Card key={ride.id} className="p-6 border-green-200 bg-green-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                          <FaCheck className="w-6 h-6 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{ride.driverName}</h3>
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              APPROVED
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{ride.driverEmail}</p>
+                          {ride.driverPhone && (
+                            <p className="text-sm font-medium text-green-700">📞 {ride.driverPhone}</p>
+                          )}
+                          {ride.driverInstagram && (
+                            <p className="text-sm text-blue-600">📷 @{ride.driverInstagram}</p>
+                          )}
+                          {ride.driverSnapchat && (
+                            <p className="text-sm text-yellow-600">👻 @{ride.driverSnapchat}</p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {ride.rideOrigin} → {ride.rideDestination}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
+                          {ride.rideCarModel && (
+                            <span className="text-sm text-muted-foreground">• {ride.rideCarModel}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <FaCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No approved rides yet</h3>
+                <p className="text-muted-foreground">
+                  When drivers approve your ride requests, they'll appear here with contact info.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
         
         <TabsContent value="driver" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

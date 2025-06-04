@@ -47,6 +47,8 @@ export default function FindRidesPostgres() {
   
   // Track requested rides
   const [requestedRides, setRequestedRides] = useState<Set<number>>(new Set());
+  // Track approved rides
+  const [approvedRides, setApprovedRides] = useState<Set<number>>(new Set());
   
   // Modal states
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
@@ -552,6 +554,7 @@ export default function FindRidesPostgres() {
                     showRequestButton={true}
                     onRequestRide={handleRequestRide}
                     isRequested={requestedRides.has(ride.id)}
+                    isApproved={approvedRides.has(ride.id)}
                     rideTypeFilter={rideTypeFilter}
                   />
                 );

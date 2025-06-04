@@ -39,7 +39,7 @@ export default function Login() {
 
       <div className="w-full max-w-md space-y-8 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome to GatorLift</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Welcome to Trek</h2>
           <p className="mt-2 text-gray-600">
             Please sign in with your UF email to continue.
           </p>

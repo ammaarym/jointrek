@@ -293,7 +293,7 @@ export default function AdminDashboard() {
                           {request.price && (
                             <div className="flex items-center gap-1">
                               <DollarSign className="w-3 h-3" />
-                              ${request.price}
+                              {request.price}
                             </div>
                           )}
                         </div>
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
                             </div>
                             <div className="flex items-center gap-1">
                               <DollarSign className="w-3 h-3" />
-                              ${ride.price}
+                              {ride.price}
                             </div>
                           </div>
                         </div>

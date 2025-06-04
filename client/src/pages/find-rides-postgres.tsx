@@ -174,6 +174,16 @@ export default function FindRidesPostgres() {
     .filter(ride => {
       if (!ride) return false;
       
+      // Don't show user's own rides
+      if (currentUser && ride.driverId === currentUser.uid) {
+        return false;
+      }
+      
+      // Don't show rides with 0 seats available
+      if (ride.seatsLeft <= 0) {
+        return false;
+      }
+      
       // Filter by ride type (driver or passenger)
       if (ride.rideType !== rideTypeFilter) {
         return false;

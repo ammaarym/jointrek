@@ -562,6 +562,111 @@ export default function MyRidesPostgres() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="requests" className="mt-6">
+          <div className="space-y-6">
+            {requestsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-64" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-10 w-20" />
+                        <Skeleton className="h-10 w-20" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : rideRequests.length > 0 ? (
+              rideRequests.map((request) => (
+                <Card key={request.id} className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <FaUser className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{request.passengerName}</h3>
+                          <p className="text-sm text-muted-foreground">{request.passengerEmail}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {request.rideOrigin} → {request.rideDestination}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {formatDate(new Date(request.rideDepartureTime))}
+                          </span>
+                        </div>
+                      </div>
+
+                      {request.message && (
+                        <div className="bg-muted/50 p-3 rounded-lg mb-4">
+                          <p className="text-sm">{request.message}</p>
+                        </div>
+                      )}
+
+                      {request.passengerPhone && request.status === 'approved' && (
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <p className="text-sm font-medium text-green-800">Contact Information:</p>
+                          <p className="text-sm text-green-700">Phone: {request.passengerPhone}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          onClick={() => handleRequestResponse(request.id, 'rejected')}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-200 text-red-700 hover:bg-red-50"
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          onClick={() => handleRequestResponse(request.id, 'approved')}
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <FaUserFriends className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No ride requests yet</h3>
+                <p className="text-muted-foreground">
+                  Passengers will be able to request seats for your posted rides.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Review Modal */}

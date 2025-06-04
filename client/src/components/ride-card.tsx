@@ -304,7 +304,7 @@ export default function RideCard({
 
       {/* Detailed View Dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="max-w-[900px] w-[90vw]">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold flex items-center">
               <MapPin className="w-5 h-5 mr-2 text-primary" />
@@ -315,7 +315,7 @@ export default function RideCard({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 py-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
             {/* Driver Info Section */}
             <div className="bg-neutral-50 p-4 rounded-lg">
               <h3 className="text-md font-semibold mb-3 flex items-center">
@@ -425,7 +425,7 @@ export default function RideCard({
                 Ride Details
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">From</div>

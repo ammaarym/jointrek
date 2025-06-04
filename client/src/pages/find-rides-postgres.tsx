@@ -68,10 +68,12 @@ export default function FindRidesPostgres() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
         },
         body: JSON.stringify({
           rideId,
-          passengerId: currentUser.uid,
           message: `Hi! I'd like to request a seat for your ride.`
         }),
       });

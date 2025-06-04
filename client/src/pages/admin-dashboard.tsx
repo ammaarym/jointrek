@@ -159,19 +159,24 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-stone-100">
       {/* Header */}
-      <div className="bg-white border-b border-stone-200">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Shield className="w-8 h-8 text-stone-900 mr-3" />
-              <h1 className="text-xl font-bold text-stone-900">Trek Admin Dashboard</h1>
+            <div className="flex items-center space-x-4">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900">Trek Admin Dashboard</h1>
+                <p className="text-xs text-slate-600">System monitoring and management</p>
+              </div>
             </div>
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -184,51 +189,61 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-stone-600" />
+                <CardTitle className="text-sm font-medium text-blue-700">Total Users</CardTitle>
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                <div className="text-3xl font-bold text-blue-900">{stats.totalUsers}</div>
+                <p className="text-xs text-blue-600 mt-1">Registered students</p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-green-50 to-green-100 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Rides</CardTitle>
-                <Car className="h-4 w-4 text-stone-600" />
+                <CardTitle className="text-sm font-medium text-green-700">Total Rides</CardTitle>
+                <div className="p-2 bg-green-500 rounded-lg">
+                  <Car className="h-4 w-4 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalRides}</div>
+                <div className="text-3xl font-bold text-green-900">{stats.totalRides}</div>
+                <p className="text-xs text-green-600 mt-1">Rides posted</p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ride Requests</CardTitle>
-                <MessageSquare className="h-4 w-4 text-stone-600" />
+                <CardTitle className="text-sm font-medium text-orange-700">Ride Requests</CardTitle>
+                <div className="p-2 bg-orange-500 rounded-lg">
+                  <MessageSquare className="h-4 w-4 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalRequests}</div>
-                <p className="text-xs text-stone-600">
+                <div className="text-3xl font-bold text-orange-900">{stats.totalRequests}</div>
+                <p className="text-xs text-orange-600 mt-1">
                   {stats.pendingRequests} pending
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-md bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Approval Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-stone-600" />
+                <CardTitle className="text-sm font-medium text-purple-700">Approval Rate</CardTitle>
+                <div className="p-2 bg-purple-500 rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-3xl font-bold text-purple-900">
                   {stats.totalRequests > 0 
                     ? Math.round((stats.approvedRequests / stats.totalRequests) * 100)
                     : 0}%
                 </div>
-                <p className="text-xs text-stone-600">
+                <p className="text-xs text-purple-600 mt-1">
                   {stats.approvedRequests} approved
                 </p>
               </CardContent>
@@ -238,20 +253,43 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="requests">Ride Requests</TabsTrigger>
-            <TabsTrigger value="approved">Approved Rides</TabsTrigger>
-            <TabsTrigger value="rides">All Rides</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm border border-slate-200 shadow-sm">
+            <TabsTrigger 
+              value="requests" 
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+            >
+              Ride Requests
+            </TabsTrigger>
+            <TabsTrigger 
+              value="approved" 
+              className="data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+            >
+              Approved Rides
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rides" 
+              className="data-[state=active]:bg-purple-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+            >
+              All Rides
+            </TabsTrigger>
+            <TabsTrigger 
+              value="users" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all"
+            >
+              Users
+            </TabsTrigger>
           </TabsList>
 
           {/* Ride Requests Tab */}
           <TabsContent value="requests">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ride Requests</CardTitle>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-lg">
+                <CardTitle className="text-blue-900 flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Ride Requests
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-4">
                   {requests.map((request) => (
                     <div key={request.id} className="border border-stone-200 rounded-lg p-4">
@@ -318,11 +356,14 @@ export default function AdminDashboard() {
 
           {/* Approved Rides Tab */}
           <TabsContent value="approved">
-            <Card>
-              <CardHeader>
-                <CardTitle>Approved Rides with Passengers</CardTitle>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 rounded-t-lg">
+                <CardTitle className="text-green-900 flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5" />
+                  Approved Rides with Passengers
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-6">
                   {approvedRides.map((ride) => (
                     <div key={ride.id} className="border border-stone-200 rounded-lg p-4">
@@ -388,11 +429,14 @@ export default function AdminDashboard() {
 
           {/* Rides Tab */}
           <TabsContent value="rides">
-            <Card>
-              <CardHeader>
-                <CardTitle>All Rides</CardTitle>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-lg">
+                <CardTitle className="text-purple-900 flex items-center gap-2">
+                  <Car className="h-5 w-5" />
+                  All Rides
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-4">
                   {rides.map((ride) => (
                     <div key={ride.id} className="flex items-center justify-between p-4 border border-stone-200 rounded-lg">

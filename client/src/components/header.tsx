@@ -96,56 +96,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
 
           <div className="flex items-center space-x-4">
             {/* Help Button */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600 hidden md:flex items-center gap-2"
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  Help
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2 mb-4">
-                    <HelpCircle className="h-5 w-5 text-blue-500" />
-                    How to Use Trek
-                  </DialogTitle>
-                  <DialogDescription className="text-left space-y-4">
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-900 mb-2">📱 Contact Method Required</h4>
-                      <p className="text-sm text-gray-600">You must add a contact method (phone number or social media) in your profile to access the Find Rides section and view other users' rides.</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-900 mb-2">🚗 Post a Ride (As Driver)</h4>
-                      <p className="text-sm text-gray-600">Share your trip from/to Gainesville. Set your price, departure time, and available seats. Other students can find and contact you.</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-900 mb-2">🎒 Request a Ride (As Passenger)</h4>
-                      <p className="text-sm text-gray-600">Looking for a ride? Post your travel needs and drivers can reach out to offer you a spot in their car.</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-900 mb-2">🔍 Find Rides</h4>
-                      <p className="text-sm text-gray-600">Browse available rides and ride requests. Filter by date, destination, and preferences to find the perfect match.</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-900 mb-2">📱 Contact & Complete</h4>
-                      <p className="text-sm text-gray-600">Use the contact info to coordinate with other students. Mark rides as complete when finished to keep your profile clean.</p>
-                    </div>
-                    
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="text-xs text-blue-800"><strong>UF Students Only:</strong> You must use your @ufl.edu email to access Trek. All rides must start from or end in Gainesville.</p>
-                    </div>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
+
 
             {currentUser ? (
               <>

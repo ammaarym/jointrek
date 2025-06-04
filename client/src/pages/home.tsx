@@ -25,7 +25,7 @@ export default function Home() {
             <div>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
                 Share rides with fellow{" "}
-                <span className="text-orange-600">Gators</span>
+                <span className="text-stone-600">Gators</span>
               </h1>
               <p className="text-lg mb-8 text-stone-700 max-w-3xl mx-auto">
                 The safe, convenient way for UF students to carpool to campus,

@@ -21,6 +21,8 @@ export function RideRequestsTab({
   formatDate: (date: Date) => string;
 }) {
   console.log('RideRequestsTab - Incoming requests:', rideRequests.length, 'Outgoing requests:', pendingRequests.length);
+  console.log('RideRequestsTab - rideRequests data:', rideRequests);
+  console.log('RideRequestsTab - pendingRequests data:', pendingRequests);
 
   if (requestsLoading) {
     return (

@@ -65,7 +65,7 @@ export class PostgresStorage implements IStorage {
     return ride;
   }
 
-  async getAllRides(): Promise<Ride[]> {
+  async getAllRidesOriginal(): Promise<Ride[]> {
     return await db.select().from(rides).orderBy(desc(rides.departureTime));
   }
 
@@ -392,6 +392,73 @@ export class PostgresStorage implements IStorage {
       .returning();
 
     return updatedRequest;
+  }
+
+  // Admin methods
+  async getUserCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return result[0].count;
+  }
+
+  async getRideCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(rides);
+    return result[0].count;
+  }
+
+  async getRequestStats(): Promise<{ total: number; pending: number; approved: number; rejected: number }> {
+    const result = await db.select({
+      total: sql<number>`count(*)`,
+      pending: sql<number>`sum(case when status = 'pending' then 1 else 0 end)`,
+      approved: sql<number>`sum(case when status = 'approved' then 1 else 0 end)`,
+      rejected: sql<number>`sum(case when status = 'rejected' then 1 else 0 end)`
+    }).from(rideRequests);
+    
+    return {
+      total: result[0].total,
+      pending: result[0].pending,
+      approved: result[0].approved,
+      rejected: result[0].rejected
+    };
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async getAllRides(): Promise<any[]> {
+    return await db.select({
+      id: rides.id,
+      origin: rides.origin,
+      destination: rides.destination,
+      departureTime: rides.departureTime,
+      price: rides.price,
+      seatsTotal: rides.seatsTotal,
+      seatsLeft: rides.seatsLeft,
+      isCompleted: rides.isCompleted,
+      driverName: users.displayName,
+      driverEmail: users.email
+    })
+    .from(rides)
+    .leftJoin(users, eq(rides.driverId, users.firebaseUid))
+    .orderBy(desc(rides.createdAt));
+  }
+
+  async getAllRequests(): Promise<any[]> {
+    return await db.select({
+      id: rideRequests.id,
+      rideId: rideRequests.rideId,
+      status: rideRequests.status,
+      message: rideRequests.message,
+      createdAt: rideRequests.createdAt,
+      passengerName: users.displayName,
+      passengerEmail: users.email,
+      rideOrigin: rides.origin,
+      rideDestination: rides.destination
+    })
+    .from(rideRequests)
+    .leftJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
+    .leftJoin(rides, eq(rideRequests.rideId, rides.id))
+    .orderBy(desc(rideRequests.createdAt));
   }
 }
 

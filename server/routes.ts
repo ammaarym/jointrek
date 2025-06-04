@@ -7,6 +7,7 @@ import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import apiRoutes from "./api";
 import { sendRideRequestNotification, sendRideApprovalNotification } from "./twilioService";
+import crypto from "crypto";
 
 // Extend Request type to include user
 declare global {
@@ -743,6 +744,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching reviews:", error);
       res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // === Admin Routes ===
+  
+  // Admin authentication
+  app.post("/api/admin/auth", async (req, res) => {
+    try {
+      const { passkey } = req.body;
+      
+      // Simple passkey check - in production, use more secure method
+      if (passkey === "TrekAdmin2024!") {
+        const token = crypto.randomBytes(32).toString('hex');
+        res.json({ token });
+      } else {
+        res.status(401).json({ error: "Invalid passkey" });
+      }
+    } catch (error) {
+      console.error("Admin auth error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin middleware
+  const adminAuth = (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Admin dashboard stats
+  app.get("/api/admin/stats", adminAuth, async (req, res) => {
+    try {
+      const totalUsers = await storage.getUserCount();
+      const totalRides = await storage.getRideCount();
+      const requestStats = await storage.getRequestStats();
+      
+      res.json({
+        totalUsers,
+        totalRides,
+        totalRequests: requestStats.total,
+        pendingRequests: requestStats.pending,
+        approvedRequests: requestStats.approved,
+        rejectedRequests: requestStats.rejected
+      });
+    } catch (error) {
+      console.error("Admin stats error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin users list
+  app.get("/api/admin/users", adminAuth, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Admin users error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin rides list
+  app.get("/api/admin/rides", adminAuth, async (req, res) => {
+    try {
+      const rides = await storage.getAllRides();
+      res.json(rides);
+    } catch (error) {
+      console.error("Admin rides error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin requests list
+  app.get("/api/admin/requests", adminAuth, async (req, res) => {
+    try {
+      const requests = await storage.getAllRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Admin requests error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

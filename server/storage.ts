@@ -56,6 +56,14 @@ export interface IStorage {
   getReviewsByReviewee(revieweeId: string): Promise<Review[]>;
   getReviewsByRide(rideId: number): Promise<Review[]>;
   hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean>;
+
+  // Admin methods
+  getUserCount(): Promise<number>;
+  getRideCount(): Promise<number>;
+  getRequestStats(): Promise<{ total: number; pending: number; approved: number; rejected: number }>;
+  getAllUsers(): Promise<User[]>;
+  getAllRides(): Promise<any[]>;
+  getAllRequests(): Promise<any[]>;
 }
 
 // In-memory storage implementation

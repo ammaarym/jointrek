@@ -43,6 +43,9 @@ export default function FindRidesPostgres() {
   const [quickFilter, setQuickFilter] = useState('departures'); // 'departures' or 'arrivals'
   const [rideTypeFilter, setRideTypeFilter] = useState('driver'); // 'driver' or 'passenger'
   
+  // Track requested rides
+  const [requestedRides, setRequestedRides] = useState<Set<number>>(new Set());
+  
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
     from: 'Gainesville',
@@ -79,6 +82,7 @@ export default function FindRidesPostgres() {
       });
 
       if (response.ok) {
+        setRequestedRides(prev => new Set(prev).add(rideId));
         alert('Ride request sent successfully! The driver will be notified.');
       } else {
         const errorData = await response.json();
@@ -479,6 +483,8 @@ export default function FindRidesPostgres() {
                     ride={adaptedRide} 
                     showRequestButton={true}
                     onRequestRide={handleRequestRide}
+                    isRequested={requestedRides.has(ride.id)}
+                    rideTypeFilter={rideTypeFilter}
                   />
                 );
               })}

@@ -39,6 +39,8 @@ interface RideCardProps {
   showCompleteButton?: boolean;
   onRequestRide?: (rideId: number) => void;
   showRequestButton?: boolean;
+  isRequested?: boolean;
+  rideTypeFilter?: string;
 }
 
 export default function RideCard({
@@ -49,6 +51,8 @@ export default function RideCard({
   showCompleteButton = false,
   onRequestRide,
   showRequestButton = false,
+  isRequested = false,
+  rideTypeFilter = 'driver',
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
@@ -272,15 +276,25 @@ export default function RideCard({
               {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
-                    className="block mt-2 bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                    className={`block mt-2 px-4 py-2 rounded-md font-medium transition ${
+                      isRequested 
+                        ? "bg-green-600 text-white hover:bg-green-700" 
+                        : "bg-primary text-white hover:bg-primary/90"
+                    }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide) {
+                      if (onRequestRide && !isRequested) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
+                    disabled={isRequested}
                   >
-                    Request a Trek
+                    {isRequested 
+                      ? "Request Sent" 
+                      : rideTypeFilter === 'passenger' 
+                        ? "Offer a Trek" 
+                        : "Request a Trek"
+                    }
                   </Button>
                 </div>
               )}

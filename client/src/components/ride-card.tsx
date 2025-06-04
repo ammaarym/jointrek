@@ -155,9 +155,20 @@ export default function RideCard({
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="font-semibold text-black">
-                    {ride.driver.name}
-                  </h4>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold text-black">
+                      {ride.driver.name}
+                    </h4>
+                    {ride.genderPreference === "female" ? (
+                      <Badge className="px-2 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 border-pink-200">
+                        Female riders only
+                      </Badge>
+                    ) : ride.genderPreference === "male" ? (
+                      <Badge className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border-blue-200">
+                        Male riders only
+                      </Badge>
+                    ) : null}
+                  </div>
                   <div className="flex items-center">
                     <svg
                       className="w-4 h-4 text-yellow-400 mr-1"
@@ -241,20 +252,7 @@ export default function RideCard({
                   {ride.seatsLeft} of {ride.seatsTotal} seats available
                 </div>
 
-                {/* Gender preference badges moved under seats info */}
-                <div className="mt-1">
-                  {ride.genderPreference === "female" ? (
-                    <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800 border-pink-200">
-                      <Users className="w-3 h-3 mr-1" />
-                      Female riders only
-                    </Badge>
-                  ) : ride.genderPreference === "male" ? (
-                    <Badge className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-black border-black">
-                      <Users className="w-3 h-3 mr-1" />
-                      Male riders only
-                    </Badge>
-                  ) : null}
-                </div>
+
               </div>
 
               {isDriverUser && (
@@ -300,19 +298,7 @@ export default function RideCard({
               )}
             </div>
           </div>
-          <div className="mt-3 flex justify-center">
-            <Button
-              variant="outline"
-              className="bg-white hover:bg-primary/5 border-2 border-primary/30 text-primary hover:border-primary/50 hover:text-primary/80 px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200"
-              onClick={(e) => {
-                e.stopPropagation();
-                setDetailsOpen(true);
-              }}
-            >
-              <Info className="w-4 h-4 mr-2" />
-              View details
-            </Button>
-          </div>
+
         </div>
       </div>
 

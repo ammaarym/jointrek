@@ -4,7 +4,7 @@ import {
   signOut as firebaseSignOut,
   getRedirectResult,
   GoogleAuthProvider,
-  signInWithRedirect
+  signInWithPopup
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { User } from 'firebase/auth';
@@ -113,7 +113,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("Popup sign-in successful:", result.user.email);
     } catch (error) {
       console.error("Error signing in with Google:", error);
       throw error;

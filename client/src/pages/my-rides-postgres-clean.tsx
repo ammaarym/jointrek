@@ -50,7 +50,7 @@ export default function MyRidesPostgres() {
     setError(null);
     
     try {
-      const response = await fetch(`/api/rides/user/${userId}`, {
+      const response = await fetch('/api/user-rides', {
         headers: {
           'x-user-id': userId,
           'x-user-email': currentUser?.email || '',

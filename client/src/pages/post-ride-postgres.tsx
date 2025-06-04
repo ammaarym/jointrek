@@ -179,7 +179,7 @@ export default function PostRidePostgres() {
         price: price,
         genderPreference,
         carModel: carModel || null,
-        notes: null,
+
         rideType
       };
       

@@ -180,7 +180,6 @@ export default function EditRideModal({
       seatsTotal: "",
       carType: "",
       genderPreference: "no-preference",
-      notes: "",
     },
   });
 
@@ -201,7 +200,6 @@ export default function EditRideModal({
           seatsTotal: ride.seatsTotal.toString(),
           carType: carType,
           genderPreference: ride.genderPreference || "no-preference",
-          notes: ride.notes || "",
         });
       } catch (error) {
         console.log("Error updating form:", error);
@@ -494,23 +492,7 @@ export default function EditRideModal({
               )}
             />
 
-            {/* Notes */}
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Additional Notes (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any additional information about the ride..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

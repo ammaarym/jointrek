@@ -407,11 +407,7 @@ export default function MyRidesPostgres() {
               <div>To: {ride.destinationArea || ride.destination}</div>
             </div>
           </div>
-          {ride.notes && (
-            <div className="text-muted-foreground">
-              <strong>Notes:</strong> {ride.notes}
-            </div>
-          )}
+
         </div>
       </CardContent>
       

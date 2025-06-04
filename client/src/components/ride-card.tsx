@@ -540,14 +540,7 @@ export default function RideCard({
                 </div>
               )}
 
-              {ride.notes && (
-                <div className="mt-3">
-                  <div className="text-neutral-500 text-sm">Notes</div>
-                  <div className="bg-white p-3 rounded border mt-1">
-                    {ride.notes}
-                  </div>
-                </div>
-              )}
+
             </div>
           </div>
 

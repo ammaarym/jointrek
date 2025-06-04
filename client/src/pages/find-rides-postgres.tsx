@@ -13,6 +13,7 @@ import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import GasPriceEstimate from '@/components/gas-price-estimate';
 import RideCard from '@/components/ride-card';
 
@@ -31,6 +32,7 @@ export default function FindRidesPostgres() {
   const { currentUser } = useAuth();
   const { rides, loading, error, loadAllRides } = usePostgresRides();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   // Form state
   const [from, setFrom] = useState('Gainesville');
@@ -45,6 +47,10 @@ export default function FindRidesPostgres() {
   
   // Track requested rides
   const [requestedRides, setRequestedRides] = useState<Set<number>>(new Set());
+  
+  // Modal states
+  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+  const [selectedRide, setSelectedRide] = useState<any>(null);
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -89,19 +95,20 @@ export default function FindRidesPostgres() {
   }, [currentUser]);
 
   // Handle ride request with confirmation
-  const handleRequestRide = async (rideId: number) => {
+  const handleRequestRide = (rideId: number) => {
     if (!currentUser) return;
     
     // Find the ride to get driver's name
     const ride = filteredRides.find(r => r.id === rideId);
     if (!ride) return;
     
-    const driverName = ride.driverName || 'the driver';
-    const confirmed = window.confirm(
-      `Are you sure you want to send a ride request to ${driverName} for the ${ride.origin} to ${ride.destination} trip on ${new Date(ride.departureTime).toLocaleDateString()}?`
-    );
-    
-    if (!confirmed) return;
+    setSelectedRide(ride);
+    setConfirmationModalOpen(true);
+  };
+
+  // Confirm and send the ride request
+  const confirmRideRequest = async () => {
+    if (!currentUser || !selectedRide) return;
     
     try {
       const response = await fetch('/api/ride-requests', {
@@ -113,21 +120,35 @@ export default function FindRidesPostgres() {
           'x-user-name': currentUser.displayName || ''
         },
         body: JSON.stringify({
-          rideId,
+          rideId: selectedRide.id,
           message: `Hi! I'd like to request a seat for your ride.`
         }),
       });
 
       if (response.ok) {
-        setRequestedRides(prev => new Set(prev).add(rideId));
-        alert('Ride request sent successfully! The driver will be notified.');
+        setRequestedRides(prev => new Set(prev).add(selectedRide.id));
+        toast({
+          title: "Request Sent Successfully!",
+          description: `Your ride request has been sent to ${selectedRide.driverName || 'the driver'}. They will be notified and can approve your request.`,
+        });
       } else {
         const errorData = await response.json();
-        alert(`Failed to send ride request: ${errorData.error || 'Unknown error'}`);
+        toast({
+          title: "Request Failed",
+          description: `Failed to send ride request: ${errorData.error || 'Unknown error'}`,
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error requesting ride:', error);
-      alert('Failed to send ride request. Please try again.');
+      toast({
+        title: "Request Failed",
+        description: "Failed to send ride request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setConfirmationModalOpen(false);
+      setSelectedRide(null);
     }
   };
 
@@ -539,6 +560,57 @@ export default function FindRidesPostgres() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Dialog open={confirmationModalOpen} onOpenChange={setConfirmationModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Ride Request</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to send a ride request for this trip?
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedRide && (
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <FaUser className="text-blue-600" />
+                  <span className="font-medium">Driver:</span>
+                  <span>{selectedRide.driverName || 'Driver'}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <FaMapMarkerAlt className="text-green-600" />
+                  <span className="font-medium">Route:</span>
+                  <span>{selectedRide.origin} → {selectedRide.destination}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <FaCalendar className="text-purple-600" />
+                  <span className="font-medium">Departure:</span>
+                  <span>{new Date(selectedRide.departureTime).toLocaleDateString()} at {new Date(selectedRide.departureTime).toLocaleTimeString()}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <FaDollarSign className="text-green-600" />
+                  <span className="font-medium">Price:</span>
+                  <span>${selectedRide.price}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmationModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmRideRequest}>
+              Send Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

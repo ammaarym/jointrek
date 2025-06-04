@@ -393,12 +393,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedRequest = await storage.updateRideRequestStatus(id, status, req.user.uid);
 
-      // Send SMS notification to passenger if approved
+      // If approved, decrement available seats and send SMS notification
       if (status === "approved") {
         try {
           // Get request details with ride and user info
           const requestDetails = await storage.getRideRequestsForDriver(req.user.uid);
           const thisRequest = requestDetails.find(r => r.id === id);
+          
+          if (thisRequest) {
+            // Decrement available seats
+            const ride = await storage.getRide(thisRequest.rideId);
+            if (ride && ride.seatsLeft > 0) {
+              await storage.updateRide(ride.id, { 
+                seatsLeft: ride.seatsLeft - 1 
+              });
+              console.log(`Seat decremented for ride ${ride.id}. Seats left: ${ride.seatsLeft - 1}`);
+            }
+          }
           const driver = await storage.getUserByFirebaseUid(req.user.uid);
           const passenger = await storage.getUserByFirebaseUid(thisRequest?.passengerId);
 

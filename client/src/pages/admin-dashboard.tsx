@@ -292,7 +292,7 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {requests.map((request) => (
-                    <div key={request.id} className="bg-white/60 border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={request.id} className="border border-stone-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <Badge className={getStatusColor(request.status)}>
                           {request.status.toUpperCase()}
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
               <CardContent className="p-6">
                 <div className="space-y-6">
                   {approvedRides.map((ride) => (
-                    <div key={ride.id} className="bg-white/60 border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={ride.id} className="border border-stone-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                           <h4 className="text-sm font-medium text-stone-700 mb-2">Driver</h4>
@@ -479,14 +479,11 @@ export default function AdminDashboard() {
 
           {/* Users Tab */}
           <TabsContent value="users">
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-t-lg">
-                <CardTitle className="text-orange-900 flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  All Users
-                </CardTitle>
+            <Card>
+              <CardHeader>
+                <CardTitle>Users</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent>
                 <div className="space-y-4">
                   {users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between p-4 border border-stone-200 rounded-lg">

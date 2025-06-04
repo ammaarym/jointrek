@@ -53,6 +53,10 @@ export default function MyRidesPostgres() {
   // Pending requests (outgoing) state
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [pendingRequestsLoading, setPendingRequestsLoading] = useState(false);
+  
+  // Approved rides state
+  const [approvedRides, setApprovedRides] = useState<any[]>([]);
+  const [approvedRidesLoading, setApprovedRidesLoading] = useState(false);
 
 
 
@@ -90,6 +94,7 @@ export default function MyRidesPostgres() {
       loadMyRides(currentUser.uid);
       loadRideRequests();
       loadPendingRequests();
+      loadApprovedRides();
     }
   }, [currentUser?.uid]);
 
@@ -140,6 +145,31 @@ export default function MyRidesPostgres() {
       console.error('Error loading pending requests:', error);
     } finally {
       setPendingRequestsLoading(false);
+    }
+  };
+
+  // Load approved rides for user
+  const loadApprovedRides = async () => {
+    if (!currentUser) return;
+    
+    setApprovedRidesLoading(true);
+    try {
+      const response = await fetch('/api/ride-requests/approved', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const rides = await response.json();
+        setApprovedRides(rides);
+      }
+    } catch (error) {
+      console.error('Error loading approved rides:', error);
+    } finally {
+      setApprovedRidesLoading(false);
     }
   };
 

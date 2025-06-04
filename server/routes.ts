@@ -377,6 +377,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get approved rides for user
+  app.get("/api/ride-requests/approved", authenticate, async (req, res) => {
+    try {
+      const approvedRides = await storage.getApprovedRidesForUser(req.user.uid);
+      res.json(approvedRides);
+    } catch (error) {
+      console.error("Error fetching approved rides:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Update ride request status (approve/reject)
   app.patch("/api/ride-requests/:id", authenticate, async (req, res) => {
     try {

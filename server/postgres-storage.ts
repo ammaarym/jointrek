@@ -419,6 +419,39 @@ export class PostgresStorage implements IStorage {
     return updatedRequest;
   }
 
+  async getApprovedRidesForUser(userId: string): Promise<any[]> {
+    const approvedRides = await db
+      .select({
+        id: rideRequests.id,
+        rideId: rideRequests.rideId,
+        requestId: rideRequests.id,
+        status: rideRequests.status,
+        message: rideRequests.message,
+        createdAt: rideRequests.createdAt,
+        driverName: users.displayName,
+        driverEmail: users.email,
+        driverPhone: users.phone,
+        driverInstagram: users.instagram,
+        driverSnapchat: users.snapchat,
+        rideOrigin: rides.origin,
+        rideDestination: rides.destination,
+        rideDepartureTime: rides.departureTime,
+        rideArrivalTime: rides.arrivalTime,
+        ridePrice: rides.price,
+        rideCarModel: rides.carModel
+      })
+      .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
+      .innerJoin(users, eq(rides.driverId, users.firebaseUid))
+      .where(and(
+        eq(rideRequests.passengerId, userId),
+        eq(rideRequests.status, 'approved')
+      ))
+      .orderBy(desc(rideRequests.createdAt));
+    
+    return approvedRides;
+  }
+
   // Admin methods
   async getUserCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(users);

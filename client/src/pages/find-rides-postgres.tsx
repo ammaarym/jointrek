@@ -350,8 +350,6 @@ export default function FindRidesPostgres() {
         <div className="lg:col-span-3 mt-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-4">
-              <h3 className="text-xl font-semibold">Available Rides</h3>
-              
               {/* Ride Type Toggle Tabs */}
               <div className="flex bg-gray-100 rounded-lg p-1">
                 <button

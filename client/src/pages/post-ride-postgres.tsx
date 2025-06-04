@@ -47,7 +47,7 @@ export default function PostRidePostgres() {
     // Always log regardless of conditions
     window.console?.log('PRICE CALC TRIGGERED:', { rideType, origin, destination, departureDate, availableSeats });
     
-    if (origin && destination && departureDate) {
+    if (origin && destination) {
       window.console?.log('CONDITIONS MET - CALCULATING PRICE');
       
       let distance = 0;
@@ -364,44 +364,21 @@ export default function PostRidePostgres() {
                 </div>
               )}
               
-              {rideType === 'passenger' && (
-                <div className="space-y-2">
-                  <Label htmlFor="price">
-                    <FaMoneyBillWave className="inline mr-2" />
-                    Amount Willing to Pay ($) (Auto-calculated)
-                  </Label>
-                  <Input
-                    id="price"
-                    type="text"
-                    placeholder="Calculated automatically"
-                    value={price}
-                    readOnly
-                    disabled
-                    className="bg-gray-100 cursor-not-allowed"
-                  />
-                  <p className="text-sm text-gray-600">
-                    Price calculated based on distance, gas costs, and passenger count
-                  </p>
-                </div>
-              )}
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {rideType === 'driver' && (
-                  <div className="space-y-2">
-                    <Label className="text-sm text-gray-600">
-                      <FaMoneyBillWave className="inline mr-2" />
-                      Price per Person (Auto-calculated)
-                    </Label>
-                    <div className="p-3 bg-gray-50 rounded-md border">
-                      <span className="text-lg font-semibold text-green-600">
-                        ${price || '0.00'}
-                      </span>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Based on distance and gas costs
-                      </p>
-                    </div>
+                <div className="space-y-2">
+                  <Label className="text-sm text-gray-600">
+                    <FaMoneyBillWave className="inline mr-2" />
+                    Price per Person (Auto-calculated)
+                  </Label>
+                  <div className="p-3 bg-gray-50 rounded-md border">
+                    <span className="text-lg font-semibold text-green-600">
+                      ${price || '0.00'}
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Based on distance and gas costs
+                    </p>
                   </div>
-                )}
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="genderPreference">
                     <TbGenderMale className="inline mr-1" />

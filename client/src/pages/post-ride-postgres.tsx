@@ -329,7 +329,7 @@ export default function PostRidePostgres() {
                         <SelectValue placeholder="Select car type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No preference</SelectItem>
+                        <SelectItem value="none">No preference</SelectItem>
                         <SelectItem value="SUV">SUV</SelectItem>
                         <SelectItem value="Sedan">Sedan</SelectItem>
                         <SelectItem value="Truck">Truck</SelectItem>

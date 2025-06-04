@@ -830,5 +830,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin approved rides with passengers
+  app.get("/api/admin/approved-rides", adminAuth, async (req, res) => {
+    try {
+      const approvedRides = await storage.getApprovedRidesWithPassengers();
+      res.json(approvedRides);
+    } catch (error) {
+      console.error("Admin approved rides error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

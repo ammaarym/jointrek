@@ -70,6 +70,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [rides, setRides] = useState<Ride[]>([]);
   const [requests, setRequests] = useState<RideRequest[]>([]);
+  const [approvedRides, setApprovedRides] = useState<ApprovedRide[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

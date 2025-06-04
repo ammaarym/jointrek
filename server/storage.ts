@@ -64,6 +64,7 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   getAllRides(): Promise<any[]>;
   getAllRequests(): Promise<any[]>;
+  getApprovedRidesWithPassengers(): Promise<any[]>;
 }
 
 // In-memory storage implementation

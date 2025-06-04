@@ -453,12 +453,68 @@ export class PostgresStorage implements IStorage {
       passengerName: users.displayName,
       passengerEmail: users.email,
       rideOrigin: rides.origin,
-      rideDestination: rides.destination
+      rideDestination: rides.destination,
+      driverName: sql<string>`driver_users.display_name`,
+      driverEmail: sql<string>`driver_users.email`,
+      departureTime: rides.departureTime,
+      price: rides.price
     })
     .from(rideRequests)
     .leftJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
     .leftJoin(rides, eq(rideRequests.rideId, rides.id))
+    .leftJoin(sql`users as driver_users`, sql`rides.driver_id = driver_users.firebase_uid`)
     .orderBy(desc(rideRequests.createdAt));
+  }
+
+  async getApprovedRidesWithPassengers(): Promise<any[]> {
+    // Get all rides that have approved passengers
+    const ridesWithPassengers = await db.select({
+      rideId: rides.id,
+      origin: rides.origin,
+      destination: rides.destination,
+      departureTime: rides.departureTime,
+      price: rides.price,
+      seatsTotal: rides.seatsTotal,
+      seatsLeft: rides.seatsLeft,
+      driverName: sql<string>`driver_users.display_name`,
+      driverEmail: sql<string>`driver_users.email`,
+      passengerName: users.displayName,
+      passengerEmail: users.email,
+      approvedAt: rideRequests.updatedAt
+    })
+    .from(rides)
+    .innerJoin(rideRequests, eq(rides.id, rideRequests.rideId))
+    .innerJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
+    .innerJoin(sql`users as driver_users`, sql`rides.driver_id = driver_users.firebase_uid`)
+    .where(eq(rideRequests.status, 'approved'))
+    .orderBy(desc(rides.departureTime));
+
+    // Group passengers by ride
+    const groupedRides = ridesWithPassengers.reduce((acc, row) => {
+      const rideId = row.rideId;
+      if (!acc[rideId]) {
+        acc[rideId] = {
+          id: rideId,
+          origin: row.origin,
+          destination: row.destination,
+          departureTime: row.departureTime,
+          price: row.price,
+          seatsTotal: row.seatsTotal,
+          seatsLeft: row.seatsLeft,
+          driverName: row.driverName,
+          driverEmail: row.driverEmail,
+          passengers: []
+        };
+      }
+      acc[rideId].passengers.push({
+        name: row.passengerName,
+        email: row.passengerEmail,
+        approvedAt: row.approvedAt
+      });
+      return acc;
+    }, {} as Record<number, any>);
+
+    return Object.values(groupedRides);
   }
 }
 

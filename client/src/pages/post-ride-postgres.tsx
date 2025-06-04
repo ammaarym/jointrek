@@ -120,6 +120,18 @@ export default function PostRidePostgres() {
       return;
     }
     
+    // Additional validation for drivers
+    if (rideType === 'driver') {
+      if (!availableSeats || !carModel) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in available seats and car model",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     console.log('Form submission started with data:', {
       rideType,
       origin,
@@ -151,8 +163,8 @@ export default function PostRidePostgres() {
         destinationArea,
         departureTime: departureDateTime,
         arrivalTime: arrivalTime,
-        seatsTotal: parseInt(availableSeats),
-        seatsLeft: parseInt(availableSeats),
+        seatsTotal: rideType === 'passenger' ? 1 : parseInt(availableSeats),
+        seatsLeft: rideType === 'passenger' ? 1 : parseInt(availableSeats),
         price: price,
         genderPreference,
         carModel: carModel || null,
@@ -323,13 +335,12 @@ export default function PostRidePostgres() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="carModel">Car Model (Optional)</Label>
+                    <Label htmlFor="carModel">Car Model (Required)</Label>
                     <Select value={carModel} onValueChange={setCarModel}>
                       <SelectTrigger id="carModel">
                         <SelectValue placeholder="Select car type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">No preference</SelectItem>
                         <SelectItem value="SUV">SUV</SelectItem>
                         <SelectItem value="Sedan">Sedan</SelectItem>
                         <SelectItem value="Truck">Truck</SelectItem>
@@ -340,29 +351,7 @@ export default function PostRidePostgres() {
                 </div>
               )}
               
-              {rideType === 'passenger' && (
-                <div className="space-y-2">
-                  <Label htmlFor="seatsNeeded">
-                    <FaUser className="inline mr-2" />
-                    Seats Needed (Required)
-                  </Label>
-                  <Select 
-                    value={availableSeats} 
-                    onValueChange={setAvailableSeats}
-                  >
-                    <SelectTrigger id="seatsNeeded">
-                      <SelectValue placeholder="How many seats do you need?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} {num === 1 ? 'seat' : 'seats'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

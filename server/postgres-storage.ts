@@ -375,9 +375,17 @@ export class PostgresStorage implements IStorage {
         passengerId: rideRequests.passengerId,
         status: rideRequests.status,
         message: rideRequests.message,
-        createdAt: rideRequests.createdAt
+        createdAt: rideRequests.createdAt,
+        driverName: users.displayName,
+        driverEmail: users.email,
+        driverPhone: users.phone,
+        rideOrigin: rides.origin,
+        rideDestination: rides.destination,
+        rideDepartureTime: rides.departureTime
       })
       .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
+      .innerJoin(users, eq(rides.driverId, users.firebaseUid))
       .where(eq(rideRequests.passengerId, userId))
       .orderBy(desc(rideRequests.createdAt));
     

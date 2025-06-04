@@ -95,6 +95,17 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Admin Login Button */}
+            <Link href="/admin-login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+              >
+                Admin
+              </Button>
+            </Link>
+
             {/* Help Button */}
 
 
@@ -175,6 +186,16 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                   </span>
                 </Link>
               )}
+
+              {/* Mobile Admin Button */}
+              <Link href="/admin-login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600 w-full justify-start items-center gap-2 py-2 px-3"
+                >
+                  Admin Login
+                </Button>
+              </Link>
 
               {/* Mobile Help Button */}
               <Dialog>

@@ -41,6 +41,7 @@ interface RideCardProps {
   showRequestButton?: boolean;
   isRequested?: boolean;
   rideTypeFilter?: string;
+  isApproved?: boolean; // New prop to show if request is approved
 }
 
 export default function RideCard({
@@ -53,6 +54,7 @@ export default function RideCard({
   showRequestButton = false,
   isRequested = false,
   rideTypeFilter = 'driver',
+  isApproved = false,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
@@ -365,40 +367,43 @@ export default function RideCard({
                 <h5 className="font-medium text-neutral-900 mb-3">
                   Contact Information
                 </h5>
-                <div className="grid grid-cols-1 gap-3">
-                  {/* Show phone first if available */}
-                  {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
-                    <div className="flex items-center text-neutral-700">
-                      <Phone className="w-5 h-5 mr-3 text-primary" />
-                      <span className="font-medium">
-                        {ride.driver.contactInfo?.phone || ride.driver.phone}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Show email if no phone available */}
-                  {!(ride.driver.contactInfo?.phone || ride.driver.phone) &&
-                    (ride.driver.contactInfo?.email || ride.driver.email) && (
+                
+                {/* Only show contact info if user is driver or request is approved */}
+                {(isDriverUser || isApproved) ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Show phone first if available */}
+                    {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
                       <div className="flex items-center text-neutral-700">
-                        <Mail className="w-5 h-5 mr-3 text-primary" />
+                        <Phone className="w-5 h-5 mr-3 text-primary" />
                         <span className="font-medium">
-                          {ride.driver.contactInfo?.email || ride.driver.email}
+                          {ride.driver.contactInfo?.phone || ride.driver.phone}
                         </span>
                       </div>
                     )}
 
-                  {/* Show Instagram */}
-                  {(ride.driver.contactInfo?.instagram ||
-                    ride.driver.instagram) && (
-                    <div className="flex items-center text-neutral-700">
-                      <Instagram className="w-5 h-5 mr-3 text-primary" />
-                      <span className="font-medium">
-                        @
-                        {ride.driver.contactInfo?.instagram ||
-                          ride.driver.instagram}
-                      </span>
-                    </div>
-                  )}
+                    {/* Show email if no phone available */}
+                    {!(ride.driver.contactInfo?.phone || ride.driver.phone) &&
+                      (ride.driver.contactInfo?.email || ride.driver.email) && (
+                        <div className="flex items-center text-neutral-700">
+                          <Mail className="w-5 h-5 mr-3 text-primary" />
+                          <span className="font-medium">
+                            {ride.driver.contactInfo?.email || ride.driver.email}
+                          </span>
+                        </div>
+                      )}
+
+                    {/* Show Instagram */}
+                    {(ride.driver.contactInfo?.instagram ||
+                      ride.driver.instagram) && (
+                      <div className="flex items-center text-neutral-700">
+                        <Instagram className="w-5 h-5 mr-3 text-primary" />
+                        <span className="font-medium">
+                          @
+                          {ride.driver.contactInfo?.instagram ||
+                            ride.driver.instagram}
+                        </span>
+                      </div>
+                    )}
 
                   {/* Show Snapchat */}
                   {(ride.driver.contactInfo?.snapchat ||
@@ -420,7 +425,18 @@ export default function RideCard({
                       </span>
                     </div>
                   )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    <div className="flex items-center justify-center mb-2">
+                      <Info className="w-5 h-5 mr-2" />
+                      <span className="font-medium">Contact info hidden</span>
+                    </div>
+                    <p className="text-sm">
+                      Request this trek to see driver contact information
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

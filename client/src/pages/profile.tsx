@@ -50,6 +50,15 @@ export default function Profile() {
 
   const handleSave = async () => {
     if (!currentUser) return;
+    
+    if (!phone || phone.trim() === '') {
+      toast({
+        title: "Phone Number Required",
+        description: "Phone number is required for SMS notifications.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -200,7 +209,7 @@ export default function Profile() {
               <div>
                 <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
                   <FaPhone className="text-primary" />
-                  Phone Number
+                  Phone Number (Required)
                 </Label>
                 <Input
                   id="phone"
@@ -209,13 +218,15 @@ export default function Profile() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full"
+                  required
                 />
+                <p className="text-xs text-gray-500 mt-1">Required for SMS ride notifications</p>
               </div>
 
               <div>
                 <Label htmlFor="instagram" className="flex items-center gap-2 mb-2">
                   <FaInstagram className="text-primary" />
-                  Instagram Username
+                  Instagram Username (Optional)
                 </Label>
                 <Input
                   id="instagram"
@@ -229,7 +240,7 @@ export default function Profile() {
               <div>
                 <Label htmlFor="snapchat" className="flex items-center gap-2 mb-2">
                   <RiSnapchatFill className="text-primary" />
-                  Snapchat Username
+                  Snapchat Username (Optional)
                 </Label>
                 <Input
                   id="snapchat"

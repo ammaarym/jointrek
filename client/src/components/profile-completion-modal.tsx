@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 
 const profileSchema = z.object({
-  phone: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required for SMS notifications"),
   instagram: z.string().optional(),
   snapchat: z.string().optional(),
 });
@@ -44,10 +44,12 @@ export default function ProfileCompletionModal({
   });
 
   const handleSubmit = (values: ProfileFormValues) => {
-    // Filter out empty strings
-    const cleanedValues = Object.fromEntries(
-      Object.entries(values).filter(([_, value]) => value && value.trim() !== '')
-    );
+    // Phone is required, Instagram and Snapchat are optional
+    const cleanedValues: ProfileFormValues = {
+      phone: values.phone, // Required field
+      instagram: values.instagram && values.instagram.trim() !== '' ? values.instagram : undefined,
+      snapchat: values.snapchat && values.snapchat.trim() !== '' ? values.snapchat : undefined,
+    };
     
     onComplete(cleanedValues);
     
@@ -84,7 +86,7 @@ export default function ProfileCompletionModal({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number (Recommended)</FormLabel>
+                    <FormLabel>Phone Number (Required)</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="(555) 123-4567" 
@@ -92,7 +94,7 @@ export default function ProfileCompletionModal({
                         className="h-12 rounded-md border-gray-200"
                       />
                     </FormControl>
-                    <p className="text-xs text-gray-500">Primary contact method for ride coordination</p>
+                    <p className="text-xs text-gray-500">Required for SMS ride notifications and coordination</p>
                     <FormMessage />
                   </FormItem>
                 )}

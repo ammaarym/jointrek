@@ -606,6 +606,7 @@ export default function MyRidesPostgres() {
             <span>Ride Requests</span>
             {(() => {
               const pendingCount = rideRequests.filter(req => req.status === 'pending').length;
+              console.log('Ride requests with statuses:', rideRequests.map(req => ({ id: req.id, status: req.status })));
               console.log('Pending requests count:', pendingCount, 'Total requests:', rideRequests.length);
               return pendingCount > 0 ? (
                 <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg ring-2 ring-yellow-300">

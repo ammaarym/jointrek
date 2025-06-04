@@ -81,7 +81,7 @@ export default function AdminDashboard() {
     // Check admin authentication
     const adminToken = sessionStorage.getItem('adminToken');
     if (!adminToken) {
-      setLocation('/admin/login');
+      setLocation('/admin-login');
       return;
     }
 
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminToken');
-    setLocation('/admin/login');
+    setLocation('/admin-login');
   };
 
   const getStatusColor = (status: string) => {
@@ -309,6 +309,76 @@ export default function AdminDashboard() {
                   {requests.length === 0 && (
                     <div className="text-center py-8 text-stone-600">
                       No ride requests found
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Approved Rides Tab */}
+          <TabsContent value="approved">
+            <Card>
+              <CardHeader>
+                <CardTitle>Approved Rides with Passengers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {approvedRides.map((ride) => (
+                    <div key={ride.id} className="border border-stone-200 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-2">Driver</h4>
+                          <div className="text-sm text-stone-900">{ride.driverName}</div>
+                          <div className="text-xs text-stone-600">{ride.driverEmail}</div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-2">Route Details</h4>
+                          <div className="flex items-center gap-4 text-sm text-stone-600">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {ride.origin} → {ride.destination}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDate(ride.departureTime)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              ${ride.price}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-stone-100 pt-4">
+                        <h4 className="text-sm font-medium text-stone-700 mb-3">
+                          Approved Passengers ({ride.passengers?.length || 0})
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {ride.passengers?.map((passenger, index) => (
+                            <div key={index} className="bg-green-50 border border-green-200 rounded-lg p-3">
+                              <div className="text-sm font-medium text-green-900">{passenger.name}</div>
+                              <div className="text-xs text-green-700">{passenger.email}</div>
+                              <div className="text-xs text-green-600 mt-1">
+                                Approved: {formatDate(passenger.approvedAt)}
+                              </div>
+                            </div>
+                          )) || (
+                            <div className="text-sm text-stone-500 col-span-full">No passengers approved yet</div>
+                          )}
+                        </div>
+                        
+                        <div className="mt-3 text-xs text-stone-500">
+                          Seats: {ride.seatsLeft}/{ride.seatsTotal} remaining
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {approvedRides.length === 0 && (
+                    <div className="text-center py-8 text-stone-600">
+                      No approved rides with passengers found
                     </div>
                   )}
                 </div>

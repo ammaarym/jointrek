@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { useAuth } from '../hooks/use-auth-new';
-import { usePostgresRides } from '../hooks/use-postgres-rides';
-import { formatDate } from '../lib/date-utils';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaDollarSign, FaCar, FaTrash, FaEdit, FaStar, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { useLocation } from 'wouter';
@@ -12,14 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
 import { Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Helper function to capitalize car types
 const capitalizeCarType = (carType: string) => {
   if (!carType) return 'Car not specified';
-  
-  // Handle special cases
+  // Handle specific capitalizations
   if (carType.toLowerCase() === 'suv') return 'SUV';
-  
   // Capitalize first letter for other types
   return carType.charAt(0).toUpperCase() + carType.slice(1).toLowerCase();
 };
@@ -27,6 +25,7 @@ const capitalizeCarType = (carType: string) => {
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
   const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState('driver');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [rideToDelete, setRideToDelete] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -41,58 +40,78 @@ export default function MyRidesPostgres() {
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
-  const { 
-    myRides, 
-    loading, 
-    error, 
-    loadMyRides, 
-    removeRide,
-    updateRide 
-  } = usePostgresRides();
+  const [myRides, setMyRides] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load rides only once when component mounts
-  React.useEffect(() => {
-    if (currentUser) {
+  // Load user's rides
+  const loadMyRides = async (userId: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/rides/user/${userId}`, {
+        headers: {
+          'x-user-id': userId,
+          'x-user-email': currentUser?.email || '',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setMyRides(data || []);
+    } catch (error) {
+      console.error('Error loading my rides:', error);
+      setError('Failed to load your rides. Please try again.');
+      setMyRides([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load rides on component mount and when user changes
+  useEffect(() => {
+    if (currentUser?.uid) {
       loadMyRides(currentUser.uid);
     }
   }, [currentUser?.uid]);
 
-  // Handle posting a new ride
-  const handlePostRide = () => {
-    setLocation('/post-ride');
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
-  // Handle marking ride as complete - show confirmation dialog
   const handleMarkComplete = (ride: any) => {
     setRideToComplete(ride);
     setCompleteDialogOpen(true);
   };
 
-  // Confirm and actually mark ride as complete
   const confirmMarkComplete = async () => {
-    if (!rideToComplete) return;
+    if (!rideToComplete || !currentUser) return;
 
     try {
       const response = await fetch(`/api/rides/${rideToComplete.id}/complete`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'x-user-id': currentUser?.uid || '',
-          'x-user-email': currentUser?.email || '',
-          'x-user-name': currentUser?.displayName || '',
         },
       });
 
       if (response.ok) {
-        // Reload rides to get updated data
-        if (currentUser) {
-          loadMyRides(currentUser.uid);
-        }
         setCompleteDialogOpen(false);
+        setRideToComplete(null);
+        
+        // Show review modal
         setRideToReview(rideToComplete);
         setReviewModalOpen(true);
-        setRideToComplete(null);
-        // Removed the toast notification popup
       } else {
         throw new Error('Failed to mark ride as complete');
       }
@@ -106,13 +125,12 @@ export default function MyRidesPostgres() {
     }
   };
 
-  // Handle submitting review
   const handleSubmitReview = async () => {
-    if (rating === 0) {
+    if (!rideToReview || rating === 0 || !currentUser) {
       toast({
-        title: "Rating Required",
-        description: "Please select a star rating before submitting.",
-        variant: "destructive"
+        title: "Invalid Review",
+        description: "Please provide a rating to submit your review.",
+        variant: "destructive",
       });
       return;
     }
@@ -156,45 +174,53 @@ export default function MyRidesPostgres() {
       
       // Reload rides to sync with server
       if (currentUser) {
-        loadMyRides(currentUser.uid, true); // Force reload
+        loadMyRides(currentUser.uid);
       }
     } catch (error) {
+      console.error('Error submitting review:', error);
       toast({
         title: "Error",
         description: "Failed to submit review. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  // Handle skipping the review
-  const handleSkipReview = () => {
-    // Update the ride status immediately in the state since ride is already completed in DB
-    if (rideToReview) {
-      setCompletedRides(prev => new Set(Array.from(prev).concat(rideToReview.id)));
-    }
-    
-    setReviewModalOpen(false);
-    setRating(0);
-    setRideToReview(null);
-    
-    // Reload rides to sync with server
-    if (currentUser) {
-      loadMyRides(currentUser.uid, true); // Force reload
-    }
-  };
-
-  // Open the edit modal with automatic pricing
   const handleEditRide = (ride: any) => {
     setRideToEdit(ride);
     setEditModalOpen(true);
   };
 
-  // Handle delete ride
+  const updateRide = (updatedRide: any) => {
+    setMyRides(rides => rides.map(ride => 
+      ride.id === updatedRide.id ? updatedRide : ride
+    ));
+  };
+
   const handleDeleteRide = async () => {
-    if (rideToDelete) {
-      try {
-        await removeRide(rideToDelete.id);
+    if (!rideToDelete) return;
+
+    if (rideToDelete.isCompleted) {
+      toast({
+        title: "Cannot Delete",
+        description: "Completed rides cannot be deleted.",
+        variant: "destructive",
+      });
+      setDeleteDialogOpen(false);
+      setRideToDelete(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/rides/${rideToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': currentUser?.uid || '',
+        }
+      });
+
+      if (response.ok) {
+        setMyRides(rides => rides.filter(ride => ride.id !== rideToDelete.id));
         setDeleteDialogOpen(false);
         setRideToDelete(null);
         
@@ -207,7 +233,7 @@ export default function MyRidesPostgres() {
         if (currentUser) {
           loadMyRides(currentUser.uid);
         }
-      } catch (error) {
+      } else {
         console.error('Error removing ride:', error);
         toast({
           title: "Error",
@@ -215,12 +241,152 @@ export default function MyRidesPostgres() {
           variant: "destructive",
         });
       }
+    } catch (error) {
+      console.error('Error removing ride:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove ride. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const navigateToPostRide = () => {
     setLocation('/post-ride');
   };
+
+  const renderRideCard = (ride: any) => (
+    <Card key={ride.id} className="overflow-hidden h-full flex flex-col">
+      <CardContent className="p-4 flex-1">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-lg font-semibold">
+              {ride.origin} → {ride.destination}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {formatDate(new Date(ride.departureTime))}
+            </p>
+          </div>
+          <span className="text-lg font-semibold text-primary">
+            ${ride.price}
+          </span>
+        </div>
+        
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center">
+            <FaCalendarAlt className="text-primary mr-2 flex-shrink-0" />
+            <span>Departure: {formatDate(new Date(ride.departureTime))} at {new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+          </div>
+          {ride.rideType === 'driver' && (
+            <>
+              <div className="flex items-center">
+                <FaCar className="text-primary mr-2 flex-shrink-0" />
+                <span>{capitalizeCarType(ride.carModel || '')}</span>
+              </div>
+              <div className="flex items-center">
+                <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
+                <span>{ride.seatsLeft} available</span>
+              </div>
+            </>
+          )}
+          {ride.rideType === 'passenger' && (
+            <div className="flex items-center">
+              <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
+              <span>1 passenger needed</span>
+            </div>
+          )}
+          <div className="flex items-start">
+            <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
+            <div>
+              <div>From: {ride.originArea || ride.origin}</div>
+              <div>To: {ride.destinationArea || ride.destination}</div>
+            </div>
+          </div>
+          {ride.notes && (
+            <div className="text-muted-foreground">
+              <strong>Notes:</strong> {ride.notes}
+            </div>
+          )}
+        </div>
+      </CardContent>
+      
+      <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+        {ride.isCompleted ? (
+          <div className="flex items-center gap-1 text-green-600 font-medium">
+            <FaCheck className="w-4 h-4" />
+            Completed
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleMarkComplete(ride)}
+            className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+          >
+            <FaCheck className="w-4 h-4" />
+            Mark Complete
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleEditRide(ride)}
+          className="flex items-center gap-1"
+        >
+          <FaEdit className="w-4 h-4" />
+          Edit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setRideToDelete(ride);
+            setDeleteDialogOpen(true);
+          }}
+          className="flex items-center gap-1"
+        >
+          <FaTrash className="w-4 h-4" />
+          Delete
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  const renderEmptyState = (type: 'driver' | 'passenger') => (
+    <div className="col-span-full text-center py-12">
+      <p className="text-muted-foreground mb-4">
+        You haven't posted any {type} {type === 'driver' ? 'rides' : 'requests'} yet.
+      </p>
+      <Button onClick={navigateToPostRide} className="bg-primary hover:bg-primary/90">
+        Post a {type === 'driver' ? 'Driver Ride' : 'Passenger Request'}
+      </Button>
+    </div>
+  );
+
+  const renderSkeletonCards = () => (
+    Array.from({ length: 3 }).map((_, i) => (
+      <Card key={i} className="overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-4">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-8 w-16" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-24" />
+        </CardFooter>
+      </Card>
+    ))
+  );
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -248,13 +414,16 @@ export default function MyRidesPostgres() {
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteRide}>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteRide}
+            >
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Edit ride modal with automatic pricing */}
       <EditRideModal 
         ride={rideToEdit}
@@ -268,128 +437,37 @@ export default function MyRidesPostgres() {
         }}
       />
 
-      {/* Rides list */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          // Loading skeleton
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2 p-4 pt-0">
-                <Skeleton className="h-9 w-24" />
-                <Skeleton className="h-9 w-24" />
-              </CardFooter>
-            </Card>
-          ))
-        ) : myRides.length > 0 ? (
-          myRides.map((ride) => (
-            <Card key={ride.id} className="overflow-hidden h-full flex flex-col">
-              <CardContent className="p-4 flex-1">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {ride.origin} → {ride.destination}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(new Date(ride.departureTime))}
-                    </p>
-                  </div>
-                  <div className="text-lg font-bold text-primary">
-                    ${ride.price}
-                  </div>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center">
-                    <FaCalendarAlt className="text-primary mr-2 flex-shrink-0" />
-                    <span>Departure: {formatDate(new Date(ride.departureTime))} at {new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FaCar className="text-primary mr-2 flex-shrink-0" />
-                    <span>{capitalizeCarType(ride.carModel)}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
-                    <span>{ride.seatsLeft} available</span>
-                  </div>
-                  <div className="flex items-start">
-                    <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />
-                    <div>
-                      <div>From: {ride.originArea || ride.origin}</div>
-                      <div>To: {ride.destinationArea || ride.destination}</div>
-                    </div>
-                  </div>
-                  {ride.notes && (
-                    <div className="text-muted-foreground">
-                      <strong>Notes:</strong> {ride.notes}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex justify-end gap-2 p-4 pt-0">
-                {ride.isCompleted ? (
-                  <div className="flex items-center gap-1 text-green-600 font-medium">
-                    <FaCheck className="w-4 h-4" />
-                    Completed
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMarkComplete(ride)}
-                    className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-                  >
-                    <FaCheck className="w-4 h-4" />
-                    Mark Complete
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditRide(ride)}
-                  className="flex items-center gap-1"
-                >
-                  <FaEdit className="w-4 h-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setRideToDelete(ride);
-                    setDeleteDialogOpen(true);
-                  }}
-                  className="flex items-center gap-1"
-                >
-                  <FaTrash className="w-4 h-4" />
-                  Delete
-                </Button>
-              </CardFooter>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground mb-4">You haven't posted any rides yet.</p>
-            <Button onClick={navigateToPostRide} className="bg-primary hover:bg-primary/90">
-              Post Your First Ride
-            </Button>
+      {/* Rides list with tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="driver">Driver</TabsTrigger>
+          <TabsTrigger value="passenger">Passenger</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="driver" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              renderSkeletonCards()
+            ) : myRides.filter(ride => ride.rideType === 'driver').length > 0 ? (
+              myRides.filter(ride => ride.rideType === 'driver').map(renderRideCard)
+            ) : (
+              renderEmptyState('driver')
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="passenger" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              renderSkeletonCards()
+            ) : myRides.filter(ride => ride.rideType === 'passenger').length > 0 ? (
+              myRides.filter(ride => ride.rideType === 'passenger').map(renderRideCard)
+            ) : (
+              renderEmptyState('passenger')
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Review Modal */}
       <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
@@ -412,7 +490,6 @@ export default function MyRidesPostgres() {
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
-                  type="button"
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
@@ -421,7 +498,7 @@ export default function MyRidesPostgres() {
                   <Star
                     className={`w-8 h-8 ${
                       star <= (hoveredRating || rating)
-                        ? 'fill-primary text-primary'
+                        ? 'fill-yellow-400 text-yellow-400'
                         : 'text-gray-300'
                     }`}
                   />
@@ -429,27 +506,29 @@ export default function MyRidesPostgres() {
               ))}
             </div>
             
-            {/* Rating Text */}
-            <div className="text-center text-sm">
-              {rating === 0 && 'Select a rating'}
-              {rating === 1 && 'Poor'}
-              {rating === 2 && 'Fair'}
-              {rating === 3 && 'Good'}
-              {rating === 4 && 'Very Good'}
-              {rating === 5 && 'Excellent'}
-            </div>
-            
-
+            {rating > 0 && (
+              <div className="text-center text-sm font-medium">
+                {rating === 1 && "Poor"}
+                {rating === 2 && "Fair"}
+                {rating === 3 && "Good"}
+                {rating === 4 && "Very Good"}
+                {rating === 5 && "Excellent"}
+              </div>
+            )}
           </div>
           
           <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSkipReview}
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setReviewModalOpen(false);
+                setRating(0);
+                setRideToReview(null);
+              }}
             >
               Skip
             </Button>
-            <Button
+            <Button 
               onClick={handleSubmitReview}
               disabled={rating === 0}
               className="bg-primary hover:bg-primary/90"
@@ -460,23 +539,20 @@ export default function MyRidesPostgres() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation dialog for marking ride complete */}
+      {/* Complete confirmation dialog */}
       <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="flex items-center gap-3">
-              <FaExclamationTriangle className="text-yellow-500 text-xl" />
-              <AlertDialogTitle>Confirm Ride Completion</AlertDialogTitle>
-            </div>
-            <AlertDialogDescription className="text-base mt-4">
-              Are you sure your ride is completed? <strong>You cannot undo this action.</strong>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <FaExclamationTriangle className="text-yellow-500" />
+              Mark Ride as Complete?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this ride as complete? This action cannot be undone and you'll be asked to rate your experience.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setCompleteDialogOpen(false);
-              setRideToComplete(null);
-            }}>
+            <AlertDialogCancel onClick={() => setCompleteDialogOpen(false)}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 

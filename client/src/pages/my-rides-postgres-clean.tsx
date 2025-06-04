@@ -104,6 +104,7 @@ export default function MyRidesPostgres() {
     
     setRequestsLoading(true);
     try {
+      console.log('Loading ride requests for driver:', currentUser.uid);
       const response = await fetch('/api/ride-requests/driver', {
         headers: {
           'x-user-id': currentUser.uid,
@@ -114,7 +115,11 @@ export default function MyRidesPostgres() {
       
       if (response.ok) {
         const requests = await response.json();
+        console.log('Driver ride requests loaded:', requests.length);
+        console.log('Driver requests:', requests);
         setRideRequests(requests);
+      } else {
+        console.error('Failed to load ride requests, status:', response.status);
       }
     } catch (error) {
       console.error('Error loading ride requests:', error);

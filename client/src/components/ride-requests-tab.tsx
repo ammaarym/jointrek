@@ -50,6 +50,8 @@ export default function RideRequestsTab() {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Ride requests received:', data.length);
+        console.log('Ride requests with statuses:', data.map(r => ({ id: r.id, status: r.status })));
         setRequests(data);
       } else {
         throw new Error('Failed to fetch requests');
@@ -134,6 +136,8 @@ export default function RideRequestsTab() {
 
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const processedRequests = requests.filter(r => r.status !== 'pending');
+  
+  console.log('Pending requests count:', pendingRequests.length, 'Total requests:', requests.length);
 
   return (
     <div className="space-y-6">

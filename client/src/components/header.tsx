@@ -148,16 +148,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                   </DropdownMenu>
                 </div>
               </>
-            ) : (
-              <div className="hidden md:flex items-center space-x-3">
-                <Button
-                  onClick={onLogin}
-                  className="bg-primary text-white hover:bg-primary"
-                >
-                  Log In
-                </Button>
-              </div>
-            )}
+            ) : null}
 
             {/* Mobile menu button */}
             <Button

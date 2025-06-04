@@ -49,6 +49,9 @@ export default function MyRidesPostgres() {
   // Ride request state
   const [rideRequests, setRideRequests] = useState<any[]>([]);
   
+  // Force re-render when rideRequests changes
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
   // Debug log in render
   console.log('RENDER DEBUG - rideRequests state:', rideRequests.length, rideRequests);
   const [requestsLoading, setRequestsLoading] = useState(false);
@@ -121,6 +124,7 @@ export default function MyRidesPostgres() {
         console.log('Driver ride requests loaded:', requests.length);
         console.log('Driver requests:', requests);
         setRideRequests(requests);
+        setForceUpdate(prev => prev + 1); // Force re-render
       } else {
         console.error('Failed to load ride requests, status:', response.status);
       }
@@ -732,7 +736,6 @@ export default function MyRidesPostgres() {
 
         <TabsContent value="requests" className="mt-6">
           <div className="space-y-6">
-            {console.log('TAB RENDER - requestsLoading:', requestsLoading, 'rideRequests.length:', rideRequests.length)}
             {requestsLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -752,7 +755,9 @@ export default function MyRidesPostgres() {
                 ))}
               </div>
             ) : rideRequests.length > 0 ? (
-              rideRequests.map((request) => (
+              rideRequests.map((request) => {
+                console.log('RENDERING REQUEST:', request.id, request.passengerName);
+                return (
                 <Card key={request.id} className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -819,7 +824,8 @@ export default function MyRidesPostgres() {
                     )}
                   </div>
                 </Card>
-              ))
+                );
+              })
             ) : (
               <div className="text-center py-12">
                 <FaUserFriends className="w-16 h-16 text-muted-foreground mx-auto mb-4" />

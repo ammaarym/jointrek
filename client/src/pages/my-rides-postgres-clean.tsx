@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/hooks/use-auth-new';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -191,10 +191,16 @@ export default function MyRidesPostgres() {
     setEditModalOpen(true);
   };
 
-  const updateRide = (updatedRide: any) => {
-    setMyRides(rides => rides.map(ride => 
-      ride.id === updatedRide.id ? updatedRide : ride
-    ));
+  const updateRide = async (id: number, data: any): Promise<boolean> => {
+    try {
+      setMyRides(rides => rides.map(ride => 
+        ride.id === id ? { ...ride, ...data } : ride
+      ));
+      return true;
+    } catch (error) {
+      console.error('Error updating ride:', error);
+      return false;
+    }
   };
 
   const handleDeleteRide = async () => {
@@ -234,12 +240,7 @@ export default function MyRidesPostgres() {
           loadMyRides(currentUser.uid);
         }
       } else {
-        console.error('Error removing ride:', error);
-        toast({
-          title: "Error",
-          description: "Failed to remove ride. Please try again.",
-          variant: "destructive",
-        });
+        throw new Error('Failed to remove ride');
       }
     } catch (error) {
       console.error('Error removing ride:', error);

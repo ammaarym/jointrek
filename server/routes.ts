@@ -362,7 +362,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get ride requests for a driver
   app.get("/api/ride-requests/driver", authenticate, async (req, res) => {
     try {
+      console.log(`Fetching ride requests for driver: ${req.user.uid}`);
       const requests = await storage.getRideRequestsForDriver(req.user.uid);
+      console.log(`Found ${requests.length} ride requests for driver ${req.user.uid}`);
       res.json(requests);
     } catch (error) {
       console.error("Error fetching ride requests:", error);

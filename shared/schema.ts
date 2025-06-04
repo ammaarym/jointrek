@@ -63,6 +63,7 @@ export const rideRequests = pgTable("ride_requests", {
 // Ride request insert schema
 export const insertRideRequestSchema = createInsertSchema(rideRequests).omit({
   id: true,
+  passengerId: true, // This is set automatically on the server
   createdAt: true,
   updatedAt: true
 });

@@ -605,7 +605,7 @@ export default function MyRidesPostgres() {
             <FaUserFriends className="w-4 h-4" />
             <span>Ride Requests</span>
             {rideRequests.filter(req => req.status === 'pending').length > 0 && (
-              <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+              <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg ring-2 ring-yellow-300">
                 {rideRequests.filter(req => req.status === 'pending').length}
               </span>
             )}

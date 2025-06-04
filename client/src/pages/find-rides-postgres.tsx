@@ -88,9 +88,20 @@ export default function FindRidesPostgres() {
     }
   }, [currentUser]);
 
-  // Handle ride request
+  // Handle ride request with confirmation
   const handleRequestRide = async (rideId: number) => {
     if (!currentUser) return;
+    
+    // Find the ride to get driver's name
+    const ride = filteredRides.find(r => r.id === rideId);
+    if (!ride) return;
+    
+    const driverName = ride.driverName || 'the driver';
+    const confirmed = window.confirm(
+      `Are you sure you want to send a ride request to ${driverName} for the ${ride.origin} to ${ride.destination} trip on ${new Date(ride.departureTime).toLocaleDateString()}?`
+    );
+    
+    if (!confirmed) return;
     
     try {
       const response = await fetch('/api/ride-requests', {

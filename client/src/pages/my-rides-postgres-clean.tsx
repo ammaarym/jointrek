@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import RideRequestsTab from '@/components/ride-requests-tab';
 
 // Helper function to capitalize car types
 const capitalizeCarType = (carType: string) => {
@@ -47,6 +48,8 @@ export default function MyRidesPostgres() {
   // Ride request state
   const [rideRequests, setRideRequests] = useState<any[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
+
+
 
   // Load user's rides
   const loadMyRides = async (userId: string) => {

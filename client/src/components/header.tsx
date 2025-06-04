@@ -150,6 +150,19 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
+                        onClick={async () => {
+                          await signOut();
+                          // Clear all browser storage to remove cached credentials
+                          localStorage.clear();
+                          sessionStorage.clear();
+                          // Force a page reload to clear Firebase cache
+                          window.location.href = '/';
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Switch Account
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={handleLogout}
                         className="cursor-pointer"
                       >

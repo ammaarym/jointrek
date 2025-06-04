@@ -113,13 +113,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      // Force account selection by setting prompt parameter
-      googleProvider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu' // Restrict to UFL domain
-      });
+      // First, sign out to clear any cached credentials
+      if (auth.currentUser) {
+        console.log("Signing out current user to force account selection");
+        await firebaseSignOut(auth);
+      }
       
-      const result = await signInWithPopup(auth, googleProvider);
+      // Create a fresh provider instance to force account selection
+      const freshProvider = new GoogleAuthProvider();
+      freshProvider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      freshProvider.addScope('email');
+      freshProvider.addScope('profile');
+      
+      console.log("Starting fresh Google sign-in with account selection");
+      const result = await signInWithPopup(auth, freshProvider);
       console.log("Popup sign-in successful:", result.user.email);
     } catch (error) {
       console.error("Error signing in with Google:", error);

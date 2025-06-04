@@ -82,6 +82,12 @@ export default function FindRidesPostgres() {
         const userRequests = await response.json();
         const requestedRideIds = new Set(userRequests.map((req: any) => req.rideId));
         setRequestedRides(requestedRideIds);
+        
+        // Extract ride IDs that have been approved
+        const approvedRideIds = userRequests
+          .filter((request: any) => request.status === 'approved')
+          .map((request: any) => request.rideId);
+        setApprovedRides(new Set(approvedRideIds));
       }
     } catch (error) {
       console.error('Error loading user ride requests:', error);

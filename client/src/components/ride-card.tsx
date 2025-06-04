@@ -283,19 +283,23 @@ export default function RideCard({
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
                     className={`block mt-2 px-4 py-2 rounded-md font-medium transition ${
-                      isRequested 
+                      isApproved
                         ? "bg-green-600 text-white hover:bg-green-700" 
+                        : isRequested 
+                        ? "bg-orange-500 text-white hover:bg-orange-600" 
                         : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested) {
+                      if (onRequestRide && !isRequested && !isApproved) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested}
+                    disabled={isRequested || isApproved}
                   >
-                    {isRequested 
+                    {isApproved
+                      ? "Ride Approved"
+                      : isRequested 
                       ? "Request Sent" 
                       : rideTypeFilter === 'passenger' 
                         ? "Offer a Trek" 

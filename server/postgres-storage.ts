@@ -367,6 +367,23 @@ export class PostgresStorage implements IStorage {
     return requests;
   }
 
+  async getRideRequestsForUser(userId: string): Promise<any[]> {
+    const requests = await db
+      .select({
+        id: rideRequests.id,
+        rideId: rideRequests.rideId,
+        passengerId: rideRequests.passengerId,
+        status: rideRequests.status,
+        message: rideRequests.message,
+        createdAt: rideRequests.createdAt
+      })
+      .from(rideRequests)
+      .where(eq(rideRequests.passengerId, userId))
+      .orderBy(desc(rideRequests.createdAt));
+    
+    return requests;
+  }
+
   async updateRideRequestStatus(requestId: number, status: string, driverId: string): Promise<RideRequest> {
     // First verify the request belongs to this driver
     const [request] = await db

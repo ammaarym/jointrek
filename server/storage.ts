@@ -57,6 +57,12 @@ export interface IStorage {
   getReviewsByRide(rideId: number): Promise<Review[]>;
   hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean>;
 
+  // Ride request methods
+  createRideRequest(request: any): Promise<any>;
+  getRideRequestsForDriver(driverId: string): Promise<any[]>;
+  getRideRequestsForUser(userId: string): Promise<any[]>;
+  updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any>;
+
   // Admin methods
   getUserCount(): Promise<number>;
   getRideCount(): Promise<number>;

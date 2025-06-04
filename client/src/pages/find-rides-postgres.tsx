@@ -55,10 +55,36 @@ export default function FindRidesPostgres() {
     genderFilter: 'no preference'
   });
 
-  // Load all rides when component mounts
+  // Load existing ride requests for the current user
+  const loadUserRideRequests = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch('/api/ride-requests/user', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+      
+      if (response.ok) {
+        const userRequests = await response.json();
+        const requestedRideIds = new Set(userRequests.map((req: any) => req.rideId));
+        setRequestedRides(requestedRideIds);
+      }
+    } catch (error) {
+      console.error('Error loading user ride requests:', error);
+    }
+  };
+
+  // Load all rides and user requests when component mounts
   useEffect(() => {
     if (currentUser) {
       loadAllRides();
+      loadUserRideRequests();
     }
   }, [currentUser]);
 

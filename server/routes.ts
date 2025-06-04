@@ -366,6 +366,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get ride requests for a user (passenger)
+  app.get("/api/ride-requests/user", authenticate, async (req, res) => {
+    try {
+      const requests = await storage.getRideRequestsForUser(req.user.uid);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching user ride requests:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Update ride request status (approve/reject)
   app.patch("/api/ride-requests/:id", authenticate, async (req, res) => {
     try {

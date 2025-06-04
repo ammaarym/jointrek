@@ -779,11 +779,7 @@ export default function MyRidesPostgres() {
                         </div>
                       </div>
 
-                      {request.message && (
-                        <div className="bg-muted/50 p-3 rounded-lg mb-4">
-                          <p className="text-sm">{request.message}</p>
-                        </div>
-                      )}
+
 
                       {request.passengerPhone && request.status === 'approved' && (
                         <div className="bg-green-50 p-3 rounded-lg">
@@ -881,12 +877,7 @@ export default function MyRidesPostgres() {
                             {formatDate(new Date(request.rideDepartureTime))} at {new Date(request.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                           </span>
                         </div>
-                        {request.message && (
-                          <div className="flex items-start gap-2 mt-3">
-                            <BiMessageDetail className="w-4 h-4 text-muted-foreground mt-0.5" />
-                            <p className="text-sm text-muted-foreground italic">"{request.message}"</p>
-                          </div>
-                        )}
+
                       </div>
                     </div>
                     

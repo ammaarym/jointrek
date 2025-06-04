@@ -140,8 +140,7 @@ export default function FindRidesPostgres() {
           'x-user-name': currentUser.displayName || ''
         },
         body: JSON.stringify({
-          rideId: selectedRide.id,
-          message: `Hi! I'd like to request a seat for your ride.`
+          rideId: selectedRide.id
         }),
       });
 

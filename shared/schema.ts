@@ -49,6 +49,24 @@ export const insertRideSchema = createInsertSchema(rides).omit({
   createdAt: true
 });
 
+// Ride requests table schema
+export const rideRequests = pgTable("ride_requests", {
+  id: serial("id").primaryKey(),
+  rideId: integer("ride_id").notNull().references(() => rides.id),
+  passengerId: text("passenger_id").notNull().references(() => users.firebaseUid),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Ride request insert schema
+export const insertRideRequestSchema = createInsertSchema(rideRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Completed rides table schema
 export const completedRides = pgTable("completed_rides", {
   id: serial("id").primaryKey(),

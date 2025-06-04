@@ -37,6 +37,8 @@ interface RideCardProps {
   isDriverUser?: boolean;
   onMarkComplete?: (rideId: number) => void;
   showCompleteButton?: boolean;
+  onRequestRide?: (rideId: number) => void;
+  showRequestButton?: boolean;
 }
 
 export default function RideCard({
@@ -45,6 +47,8 @@ export default function RideCard({
   isDriverUser = false,
   onMarkComplete,
   showCompleteButton = false,
+  onRequestRide,
+  showRequestButton = false,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
@@ -261,6 +265,22 @@ export default function RideCard({
                     }}
                   >
                     Edit Ride
+                  </Button>
+                </div>
+              )}
+              
+              {showRequestButton && (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    className="block mt-2 bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onRequestRide) {
+                        onRequestRide(Number(ride.id));
+                      }
+                    }}
+                  >
+                    Request a Trek
                   </Button>
                 </div>
               )}

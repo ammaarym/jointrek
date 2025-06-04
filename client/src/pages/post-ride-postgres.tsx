@@ -55,6 +55,7 @@ export default function PostRidePostgres() {
   const [price, setPrice] = useState('');
   const [genderPreference, setGenderPreference] = useState('no-preference');
   const [carModel, setCarModel] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   
   // Auto-calculate price for all requests
@@ -116,6 +117,13 @@ export default function PostRidePostgres() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (isSubmitting || loading) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     // Validate form
     if (!currentUser) {
       toast({
@@ -123,6 +131,7 @@ export default function PostRidePostgres() {
         description: "You must be logged in to post a ride",
         variant: "destructive"
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -132,6 +141,7 @@ export default function PostRidePostgres() {
         description: "Please fill out all required fields",
         variant: "destructive"
       });
+      setIsSubmitting(false);
       return;
     }
     
@@ -143,6 +153,7 @@ export default function PostRidePostgres() {
           description: "Please fill in available seats and car model",
           variant: "destructive"
         });
+        setIsSubmitting(false);
         return;
       }
     }
@@ -211,6 +222,8 @@ export default function PostRidePostgres() {
         description: "Failed to post your ride. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -427,9 +440,9 @@ export default function PostRidePostgres() {
             <Button
               type="submit"
               className="bg-primary hover:bg-primary/90 text-white"
-              disabled={loading}
+              disabled={loading || isSubmitting}
             >
-{loading ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
+{(loading || isSubmitting) ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
             </Button>
           </div>
         </form>

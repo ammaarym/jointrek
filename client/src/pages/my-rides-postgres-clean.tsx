@@ -43,6 +43,10 @@ export default function MyRidesPostgres() {
   const [myRides, setMyRides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Ride request state
+  const [rideRequests, setRideRequests] = useState<any[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
 
   // Load user's rides
   const loadMyRides = async (userId: string) => {
@@ -76,8 +80,74 @@ export default function MyRidesPostgres() {
   useEffect(() => {
     if (currentUser?.uid) {
       loadMyRides(currentUser.uid);
+      loadRideRequests();
     }
   }, [currentUser?.uid]);
+
+  // Load ride requests for driver
+  const loadRideRequests = async () => {
+    if (!currentUser) return;
+    
+    setRequestsLoading(true);
+    try {
+      const response = await fetch('/api/ride-requests/driver', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+      
+      if (response.ok) {
+        const requests = await response.json();
+        setRideRequests(requests);
+      }
+    } catch (error) {
+      console.error('Error loading ride requests:', error);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  // Handle ride request approval/rejection
+  const handleRequestResponse = async (requestId: number, status: 'approved' | 'rejected') => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch(`/api/ride-requests/${requestId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (response.ok) {
+        toast({
+          title: `Request ${status}`,
+          description: `Passenger request has been ${status}.`
+        });
+        loadRideRequests(); // Reload requests
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: 'Error',
+          description: errorData.error || 'Failed to update request',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error updating request:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update request',
+        variant: 'destructive'
+      });
+    }
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -440,7 +510,7 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/30 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/30 rounded-lg p-1">
           <TabsTrigger 
             value="driver" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
@@ -454,6 +524,18 @@ export default function MyRidesPostgres() {
           >
             <FaUser className="w-4 h-4" />
             <span>Passenger Requests</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="requests" 
+            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+          >
+            <FaUserFriends className="w-4 h-4" />
+            <span>Ride Requests</span>
+            {rideRequests.filter(req => req.status === 'pending').length > 0 && (
+              <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                {rideRequests.filter(req => req.status === 'pending').length}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
         

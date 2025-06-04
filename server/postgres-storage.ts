@@ -335,6 +335,64 @@ export class PostgresStorage implements IStorage {
       ));
     return !!review;
   }
+
+  // Ride request methods
+  async createRideRequest(requestData: InsertRideRequest): Promise<RideRequest> {
+    const [request] = await db.insert(rideRequests).values(requestData).returning();
+    return request;
+  }
+
+  async getRideRequestsForDriver(driverId: string): Promise<any[]> {
+    const requests = await db
+      .select({
+        id: rideRequests.id,
+        rideId: rideRequests.rideId,
+        passengerId: rideRequests.passengerId,
+        status: rideRequests.status,
+        message: rideRequests.message,
+        createdAt: rideRequests.createdAt,
+        passengerName: users.displayName,
+        passengerEmail: users.email,
+        passengerPhone: users.phone,
+        rideOrigin: rides.origin,
+        rideDestination: rides.destination,
+        rideDepartureTime: rides.departureTime
+      })
+      .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
+      .innerJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
+      .where(eq(rides.driverId, driverId))
+      .orderBy(desc(rideRequests.createdAt));
+    
+    return requests;
+  }
+
+  async updateRideRequestStatus(requestId: number, status: string, driverId: string): Promise<RideRequest> {
+    // First verify the request belongs to this driver
+    const [request] = await db
+      .select()
+      .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
+      .where(and(
+        eq(rideRequests.id, requestId),
+        eq(rides.driverId, driverId)
+      ));
+
+    if (!request) {
+      throw new Error('Request not found or unauthorized');
+    }
+
+    const [updatedRequest] = await db
+      .update(rideRequests)
+      .set({ 
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(rideRequests.id, requestId))
+      .returning();
+
+    return updatedRequest;
+  }
 }
 
 // Export a singleton instance

@@ -166,3 +166,6 @@ export type InsertCompletedRide = z.infer<typeof insertCompletedRideSchema>;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type RideRequest = typeof rideRequests.$inferSelect;
+export type InsertRideRequest = z.infer<typeof insertRideRequestSchema>;

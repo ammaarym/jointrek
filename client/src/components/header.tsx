@@ -60,15 +60,6 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
-            {!currentUser && (
-              <Link href="/">
-                <span
-                  className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/" ? "text-primary" : ""}`}
-                >
-                  Home
-                </span>
-              </Link>
-            )}
             {currentUser && (
               <>
                 <Link href="/find-rides">

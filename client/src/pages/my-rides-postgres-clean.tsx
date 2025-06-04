@@ -732,6 +732,7 @@ export default function MyRidesPostgres() {
 
         <TabsContent value="requests" className="mt-6">
           <div className="space-y-6">
+            {console.log('TAB RENDER - requestsLoading:', requestsLoading, 'rideRequests.length:', rideRequests.length)}
             {requestsLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (

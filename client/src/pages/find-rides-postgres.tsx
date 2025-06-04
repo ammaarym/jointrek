@@ -102,6 +102,18 @@ export default function FindRidesPostgres() {
     }
   }, [currentUser]);
 
+  // Refresh rides data periodically to update seat counts
+  useEffect(() => {
+    if (currentUser) {
+      const interval = setInterval(() => {
+        loadAllRides();
+        loadUserRideRequests();
+      }, 10000); // Refresh every 10 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
+
   // Handle ride request with confirmation
   const handleRequestRide = (rideId: number) => {
     if (!currentUser) return;

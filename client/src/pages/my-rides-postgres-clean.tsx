@@ -48,6 +48,9 @@ export default function MyRidesPostgres() {
   
   // Ride request state
   const [rideRequests, setRideRequests] = useState<any[]>([]);
+  
+  // Debug log in render
+  console.log('RENDER DEBUG - rideRequests state:', rideRequests.length, rideRequests);
   const [requestsLoading, setRequestsLoading] = useState(false);
   
   // Pending requests (outgoing) state

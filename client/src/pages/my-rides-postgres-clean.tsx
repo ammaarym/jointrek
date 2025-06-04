@@ -570,7 +570,7 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/30 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/30 rounded-lg p-1">
           <TabsTrigger 
             value="approved" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
@@ -597,8 +597,9 @@ export default function MyRidesPostgres() {
             <FaUser className="w-4 h-4" />
             <span>Passenger Requests</span>
           </TabsTrigger>
+
           <TabsTrigger 
-            value="requests" 
+            value="pending" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             <FaUserFriends className="w-4 h-4" />
@@ -606,18 +607,6 @@ export default function MyRidesPostgres() {
             {rideRequests.filter(req => req.status === 'pending').length > 0 && (
               <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
                 {rideRequests.filter(req => req.status === 'pending').length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="pending" 
-            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-          >
-            <FaExclamationTriangle className="w-4 h-4" />
-            <span>Pending Requests</span>
-            {pendingRequests.filter(req => req.status === 'pending').length > 0 && (
-              <span className="ml-1 bg-orange-500 text-white text-xs rounded-full px-2 py-0.5">
-                {pendingRequests.filter(req => req.status === 'pending').length}
               </span>
             )}
           </TabsTrigger>

@@ -11,6 +11,8 @@ import Login from "@/pages/login";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 import RideRequestApproval from "@/pages/ride-request-approval";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
@@ -146,6 +148,8 @@ function AppRoutes() {
           <Route path="/requests/:requestId">
             {(params) => <ProtectedRoute component={RideRequestApproval} path="/requests/:requestId" />}
           </Route>
+          <Route path="/admin-login" component={AdminLogin} />
+          <Route path="/admin-dashboard" component={AdminDashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>

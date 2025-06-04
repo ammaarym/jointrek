@@ -6,6 +6,7 @@ import * as admin from 'firebase-admin';
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import apiRoutes from "./api";
+import { sendRideRequestNotification, sendRideApprovalNotification } from "./twilioService";
 
 // Extend Request type to include user
 declare global {
@@ -315,6 +316,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...validatedData,
         passengerId: req.user.uid
       });
+
+      // Send SMS notification to driver
+      try {
+        // Get ride and driver details
+        const ride = await storage.getRide(validatedData.rideId);
+        const driver = await storage.getUserByFirebaseUid(ride.driverId);
+        const passenger = await storage.getUserByFirebaseUid(req.user.uid);
+
+        if (ride && driver && driver.phone && passenger) {
+          await sendRideRequestNotification({
+            driverPhone: driver.phone,
+            passengerName: passenger.displayName || passenger.email.split('@')[0],
+            origin: ride.origin,
+            destination: ride.destination,
+            departureTime: ride.departureTime.toISOString(),
+            price: ride.price,
+            requestId: rideRequest.id.toString()
+          });
+          console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
+        } else {
+          console.log(`Cannot send SMS - missing driver phone number or user data`);
+        }
+      } catch (smsError) {
+        console.error("Error sending SMS notification:", smsError);
+        // Don't fail the request if SMS fails
+      }
+
       res.status(201).json(rideRequest);
     } catch (error) {
       if (error instanceof ZodError) {

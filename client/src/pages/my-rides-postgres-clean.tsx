@@ -747,7 +747,7 @@ export default function MyRidesPostgres() {
                   </Card>
                 ))}
               </div>
-            ) : rideRequests.length > 0 ? (
+            ) : (console.log('UI Render Debug - Requests Loading:', requestsLoading, 'Requests Length:', rideRequests.length, 'Requests Array:', rideRequests), rideRequests.length > 0) ? (
               rideRequests.map((request) => (
                 <Card key={request.id} className="p-6">
                   <div className="flex justify-between items-start">

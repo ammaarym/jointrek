@@ -278,6 +278,11 @@ export default function FindRidesPostgres() {
         }
       }
       
+      // Filter out rides with zero available seats
+      if (ride.seatsLeft <= 0) {
+        return false;
+      }
+      
       // Filter by passenger count (if selected)
       if (appliedFilters.passengers && appliedFilters.passengers !== 'any' && appliedFilters.passengers !== '') {
         const requiredSeats = parseInt(appliedFilters.passengers);

@@ -772,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { passkey } = req.body;
       
       // Simple passkey check - in production, use more secure method
-      if (passkey === "trek2025") {
+      if (passkey === "admin") {
         const token = crypto.randomBytes(32).toString('hex');
         res.json({ token });
       } else {

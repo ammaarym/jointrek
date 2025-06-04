@@ -176,25 +176,42 @@ export default function RideCard({
 
             {/* Route info */}
             <div className="md:w-2/4">
-              <div className="flex items-center mb-3">
+              <div className="flex mb-3">
                 <div className="flex flex-col items-center mr-3">
                   <div className="w-3 h-3 rounded-full bg-black"></div>
                   <div className="w-0.5 h-10 bg-neutral-300"></div>
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
                 </div>
                 <div className="flex-1">
-                  <div className="mb-2">
-                    <span className="text-neutral-900 font-medium">
-                      {ride.origin.city}
-                    </span>
-                    <span className="text-neutral-500 text-sm ml-1">
-                      {ride.origin.area}
-                    </span>
-                    <div className="text-neutral-500 text-sm">
-                      {formatDateTime(ride.departureTime)}
+                  <div className="mb-2 flex items-center justify-between">
+                    <div>
+                      <span className="text-neutral-900 font-medium">
+                        {ride.origin.city}
+                      </span>
+                      <span className="text-neutral-500 text-sm ml-1">
+                        {ride.origin.area}
+                      </span>
+                      <div className="text-neutral-500 text-sm">
+                        {formatDateTime(ride.departureTime)}
+                      </div>
+                      <div className="text-neutral-500 text-xs">
+                        {formatTime(ride.departureTime)}
+                      </div>
                     </div>
-                    <div className="text-neutral-500 text-xs">
-                      {formatTime(ride.departureTime)}
+                    
+                    {/* Gender preference badge aligned with upper city */}
+                    <div className="ml-4">
+                      {ride.genderPreference === "female" ? (
+                        <div className="flex items-center px-4 py-2 rounded-full bg-pink-50 border border-pink-200">
+                          <User className="w-4 h-4 mr-2 text-pink-600" />
+                          <span className="text-sm font-medium text-pink-700">Female riders only</span>
+                        </div>
+                      ) : ride.genderPreference === "male" ? (
+                        <div className="flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200">
+                          <User className="w-4 h-4 mr-2 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-700">Male riders only</span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                   <div>
@@ -211,21 +228,6 @@ export default function RideCard({
                       {getEstimatedArrival() || formatTime(ride.arrivalTime)}
                     </div>
                   </div>
-                </div>
-                
-                {/* Gender preference badge on the right */}
-                <div className="ml-4">
-                  {ride.genderPreference === "female" ? (
-                    <div className="flex items-center px-4 py-2 rounded-full bg-pink-50 border border-pink-200">
-                      <User className="w-4 h-4 mr-2 text-pink-600" />
-                      <span className="text-sm font-medium text-pink-700">Female riders only</span>
-                    </div>
-                  ) : ride.genderPreference === "male" ? (
-                    <div className="flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200">
-                      <User className="w-4 h-4 mr-2 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-700">Male riders only</span>
-                    </div>
-                  ) : null}
                 </div>
               </div>
             </div>

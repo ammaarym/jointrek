@@ -42,13 +42,13 @@ export default function PostRidePostgres() {
   const [carModel, setCarModel] = useState('');
 
   
-  // Auto-calculate price for passenger requests
+  // Auto-calculate price for all requests
   useEffect(() => {
     // Always log regardless of conditions
-    window.console?.log('PASSENGER PRICE CALC TRIGGERED:', { rideType, origin, destination, departureDate, availableSeats });
+    window.console?.log('PRICE CALC TRIGGERED:', { rideType, origin, destination, departureDate, availableSeats });
     
-    if (rideType === 'passenger' && origin && destination && departureDate) {
-      window.console?.log('PASSENGER CONDITIONS MET - CALCULATING PRICE');
+    if (origin && destination && departureDate) {
+      window.console?.log('CONDITIONS MET - CALCULATING PRICE');
       
       let distance = 0;
       window.console?.log('Available cities:', Object.keys(CITY_DISTANCES));
@@ -93,7 +93,7 @@ export default function PostRidePostgres() {
         setPrice('15');
       }
     } else {
-      window.console?.log('Passenger price calculation conditions not met');
+      window.console?.log('Price calculation conditions not met');
     }
   }, [rideType, origin, destination, departureDate, availableSeats]);
   
@@ -153,7 +153,7 @@ export default function PostRidePostgres() {
         arrivalTime: arrivalTime,
         seatsTotal: parseInt(availableSeats),
         seatsLeft: parseInt(availableSeats),
-        price: parseFloat(price),
+        price: price,
         genderPreference,
         carModel: carModel || null,
         notes: null,
@@ -324,12 +324,18 @@ export default function PostRidePostgres() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="carModel">Car Model (Optional)</Label>
-                    <Input
-                      id="carModel"
-                      placeholder="e.g. Toyota Camry"
-                      value={carModel}
-                      onChange={(e) => setCarModel(e.target.value)}
-                    />
+                    <Select value={carModel} onValueChange={setCarModel}>
+                      <SelectTrigger id="carModel">
+                        <SelectValue placeholder="Select car type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No preference</SelectItem>
+                        <SelectItem value="SUV">SUV</SelectItem>
+                        <SelectItem value="Sedan">Sedan</SelectItem>
+                        <SelectItem value="Truck">Truck</SelectItem>
+                        <SelectItem value="Minivan">Minivan</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -358,31 +364,44 @@ export default function PostRidePostgres() {
                 </div>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {rideType === 'passenger' && (
                 <div className="space-y-2">
                   <Label htmlFor="price">
                     <FaMoneyBillWave className="inline mr-2" />
-                    {rideType === 'driver' ? 'Price per Person ($) (Required)' : 'Amount Willing to Pay ($) (Auto-calculated)'}
+                    Amount Willing to Pay ($) (Auto-calculated)
                   </Label>
                   <Input
                     id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder={rideType === 'driver' ? "e.g. 15.00" : "Calculated automatically"}
+                    type="text"
+                    placeholder="Calculated automatically"
                     value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    readOnly={rideType === 'passenger'}
-                    disabled={rideType === 'passenger'}
-                    className={rideType === 'passenger' ? 'bg-gray-100 cursor-not-allowed' : ''}
-                    required
+                    readOnly
+                    disabled
+                    className="bg-gray-100 cursor-not-allowed"
                   />
-                  {rideType === 'passenger' && (
-                    <p className="text-sm text-gray-600">
-                      Price calculated based on distance, gas costs, and passenger count
-                    </p>
-                  )}
+                  <p className="text-sm text-gray-600">
+                    Price calculated based on distance, gas costs, and passenger count
+                  </p>
                 </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {rideType === 'driver' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm text-gray-600">
+                      <FaMoneyBillWave className="inline mr-2" />
+                      Price per Person (Auto-calculated)
+                    </Label>
+                    <div className="p-3 bg-gray-50 rounded-md border">
+                      <span className="text-lg font-semibold text-green-600">
+                        ${price || '0.00'}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Based on distance and gas costs
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="genderPreference">
                     <TbGenderMale className="inline mr-1" />

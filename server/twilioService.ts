@@ -45,8 +45,12 @@ export async function sendRideRequestNotification({
       hour12: true
     });
 
-    // Create the approval URL - using placeholder domain for now
-    const approvalUrl = `https://trek.app/requests/${requestId}`;
+    // Create the approval URL using the actual deployment domain
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      : 'https://1cb44fa1-20ec-4cdb-a065-663477f691ab-00-kp492x7mwy8q.worf.replit.dev';
+    
+    const approvalUrl = `${baseUrl}/requests/${requestId}`;
 
     const message = `${passengerName} has requested to trek with you from ${origin} to ${destination} on ${formattedTime} for $${price}. View & approve here: ${approvalUrl}`;
 

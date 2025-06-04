@@ -10,7 +10,7 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
-
+import RideRequestApproval from "@/pages/ride-request-approval";
 
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
@@ -142,6 +142,9 @@ function AppRoutes() {
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}
+          </Route>
+          <Route path="/requests/:requestId">
+            {(params) => <ProtectedRoute component={RideRequestApproval} path="/requests/:requestId" />}
           </Route>
           <Route component={NotFound} />
         </Switch>

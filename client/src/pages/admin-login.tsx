@@ -32,7 +32,7 @@ export default function AdminLogin() {
           title: "Access Granted",
           description: "Welcome to Trek Admin Dashboard",
         });
-        setLocation('/admin/dashboard');
+        setLocation('/admin-dashboard');
       } else {
         toast({
           title: "Access Denied",

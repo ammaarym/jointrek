@@ -318,6 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passengerId: req.user.uid
       });
 
+      // SMS notification disabled for testing
+      // TODO: Re-enable SMS notifications after in-app approval is confirmed working
+      /*
       // Send SMS notification to driver
       try {
         // Get ride and driver details
@@ -343,6 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error sending SMS notification:", smsError);
         // Don't fail the request if SMS fails
       }
+      */
 
       res.status(201).json(rideRequest);
     } catch (error) {
@@ -404,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedRequest = await storage.updateRideRequestStatus(id, status, req.user.uid);
 
-      // If approved, decrement available seats and send SMS notification
+      // If approved, decrement available seats
       if (status === "approved") {
         try {
           // Get request details with ride and user info
@@ -421,33 +425,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`Seat decremented for ride ${ride.id}. Seats left: ${ride.seatsLeft - 1}`);
             }
           }
-          const driver = await storage.getUserByFirebaseUid(req.user.uid);
-          const passenger = await storage.getUserByFirebaseUid(thisRequest?.passengerId);
-
-          if (thisRequest && driver && passenger && passenger.phone) {
-            // Get driver contact info (phone, instagram, snapchat)
-            let driverContact = '';
-            if (driver.phone) driverContact += `Phone: ${driver.phone}`;
-            if (driver.instagram) driverContact += driverContact ? `, Instagram: @${driver.instagram}` : `Instagram: @${driver.instagram}`;
-            if (driver.snapchat) driverContact += driverContact ? `, Snapchat: @${driver.snapchat}` : `Snapchat: @${driver.snapchat}`;
-            
-            if (!driverContact) driverContact = driver.email; // Fallback to email
-
-            await sendRideApprovalNotification({
-              passengerPhone: passenger.phone,
-              driverName: driver.displayName || driver.email.split('@')[0],
-              origin: thisRequest.rideOrigin,
-              destination: thisRequest.rideDestination,
-              departureTime: thisRequest.rideDepartureTime,
-              driverContact: driverContact
-            });
-            console.log(`Approval SMS sent to passenger ${passenger.email} for request ${id}`);
-          } else {
-            console.log(`Cannot send approval SMS - missing passenger phone number or request data`);
-          }
-        } catch (smsError) {
-          console.error("Error sending approval SMS notification:", smsError);
-          // Don't fail the request if SMS fails
+          
+          // SMS approval notification disabled for testing
+          // TODO: Re-enable SMS notifications after in-app approval is confirmed working
+          
+        } catch (error) {
+          console.error("Error processing approved request:", error);
+          // Don't fail the request if processing fails
         }
       }
 

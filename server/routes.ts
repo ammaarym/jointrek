@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./postgres-storage"; // Use PostgreSQL storage
-import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema, insertReviewSchema } from "@shared/schema";
+import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema, insertReviewSchema, insertRideRequestSchema } from "@shared/schema";
 import * as admin from 'firebase-admin';
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -302,6 +302,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user bookings:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // === Ride Request Routes ===
+  
+  // Create ride request
+  app.post("/api/ride-requests", authenticate, async (req, res) => {
+    try {
+      const validatedData = insertRideRequestSchema.parse(req.body);
+      const rideRequest = await storage.createRideRequest({
+        ...validatedData,
+        passengerId: req.user.uid
+      });
+      res.status(201).json(rideRequest);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ error: validationError.toString() });
+      }
+      console.error("Error creating ride request:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Get ride requests for a driver
+  app.get("/api/ride-requests/driver", authenticate, async (req, res) => {
+    try {
+      const requests = await storage.getRideRequestsForDriver(req.user.uid);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching ride requests:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Update ride request status (approve/reject)
+  app.patch("/api/ride-requests/:id", authenticate, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+
+      if (!["approved", "rejected"].includes(status)) {
+        return res.status(400).json({ error: "Status must be 'approved' or 'rejected'" });
+      }
+
+      const updatedRequest = await storage.updateRideRequestStatus(id, status, req.user.uid);
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating ride request:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
   

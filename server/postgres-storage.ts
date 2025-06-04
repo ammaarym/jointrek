@@ -7,6 +7,7 @@ import {
   conversations,
   completedRides,
   reviews,
+  rideRequests,
   type Ride,
   type InsertRide,
   type User,
@@ -20,7 +21,9 @@ import {
   type CompletedRide,
   type InsertCompletedRide,
   type Review,
-  type InsertReview
+  type InsertReview,
+  type RideRequest,
+  type InsertRideRequest
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql } from "drizzle-orm";
 import { IStorage } from "./storage";

@@ -59,6 +59,35 @@ export default function FindRidesPostgres() {
     }
   }, [currentUser]);
 
+  // Handle ride request
+  const handleRequestRide = async (rideId: number) => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch('/api/ride-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rideId,
+          passengerId: currentUser.uid,
+          message: `Hi! I'd like to request a seat for your ride.`
+        }),
+      });
+
+      if (response.ok) {
+        alert('Ride request sent successfully! The driver will be notified.');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to send ride request: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error requesting ride:', error);
+      alert('Failed to send ride request. Please try again.');
+    }
+  };
+
   // Adapter function to convert PostgreSQL ride format to card format
   const adaptPostgresRideToCardFormat = (ride: any) => {
     return {
@@ -443,7 +472,12 @@ export default function FindRidesPostgres() {
                 const adaptedRide = adaptPostgresRideToCardFormat(ride);
                 
                 return (
-                  <RideCard key={ride.id} ride={adaptedRide} />
+                  <RideCard 
+                    key={ride.id} 
+                    ride={adaptedRide} 
+                    showRequestButton={true}
+                    onRequestRide={handleRequestRide}
+                  />
                 );
               })}
             </div>

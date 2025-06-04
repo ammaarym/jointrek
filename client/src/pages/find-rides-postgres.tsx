@@ -41,6 +41,7 @@ export default function FindRidesPostgres() {
   const [sortBy, setSortBy] = useState('date');
 
   const [quickFilter, setQuickFilter] = useState('departures'); // 'departures' or 'arrivals'
+  const [rideTypeFilter, setRideTypeFilter] = useState('driver'); // 'driver' or 'passenger'
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -101,7 +102,10 @@ export default function FindRidesPostgres() {
     .filter(ride => {
       if (!ride) return false;
       
-      // Show all available rides (both drivers and passengers)
+      // Filter by ride type (driver or passenger)
+      if (ride.rideType !== rideTypeFilter) {
+        return false;
+      }
       
       // Filter by gender if selected
       if (appliedFilters.genderFilter !== 'no preference') {
@@ -345,7 +349,33 @@ export default function FindRidesPostgres() {
         {/* Main content with rides */}
         <div className="lg:col-span-3 mt-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold">Available Rides</h3>
+            <div className="flex items-center space-x-4">
+              <h3 className="text-xl font-semibold">Available Rides</h3>
+              
+              {/* Ride Type Toggle Tabs */}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setRideTypeFilter('driver')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                    rideTypeFilter === 'driver'
+                      ? 'bg-white shadow text-primary'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Available Drivers
+                </button>
+                <button
+                  onClick={() => setRideTypeFilter('passenger')}
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
+                    rideTypeFilter === 'passenger'
+                      ? 'bg-white shadow text-primary'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Available Passengers
+                </button>
+              </div>
+            </div>
             
             <div className="flex items-center">
               <span className="text-sm mr-2">Sort by:</span>

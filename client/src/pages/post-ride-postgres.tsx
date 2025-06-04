@@ -60,33 +60,23 @@ export default function PostRidePostgres() {
   
   // Auto-calculate price for all requests
   useEffect(() => {
-    // Always log regardless of conditions
-    window.console?.log('PRICE CALC TRIGGERED:', { rideType, origin, destination, departureDate, availableSeats });
-    
     if (origin && destination) {
-      window.console?.log('CONDITIONS MET - CALCULATING PRICE');
-      
       let distance = 0;
-      window.console?.log('Available cities:', Object.keys(CITY_DISTANCES));
       
       // Calculate distance based on origin and destination
       if (origin === 'Gainesville' && destination !== 'Gainesville') {
         // From Gainesville to other cities
         const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
-        window.console?.log(`Route: Gainesville to ${destination}`, cityData);
         if (cityData) {
           distance = cityData.miles;
         }
       } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
         // From other cities to Gainesville
         const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
-        window.console?.log(`Route: ${origin} to Gainesville`, cityData);
         if (cityData) {
           distance = cityData.miles;
         }
       }
-      
-      window.console?.log('Calculated distance:', distance);
       
       if (distance > 0) {
         try {
@@ -98,18 +88,13 @@ export default function PostRidePostgres() {
             seatsTotal: parseInt(availableSeats) || 1,
             date: departureDate ? new Date(departureDate) : undefined
           });
-          window.console?.log('CALCULATED PRICE:', calculatedPrice);
           setPrice(calculatedPrice.toString());
         } catch (error) {
-          window.console?.error('Price calculation error:', error);
           setPrice('15');
         }
       } else {
-        window.console?.log('No distance found, setting default price');
         setPrice('15');
       }
-    } else {
-      window.console?.log('Price calculation conditions not met');
     }
   }, [rideType, origin, destination, departureDate, availableSeats]);
   

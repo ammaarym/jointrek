@@ -3,9 +3,10 @@ import {
   onAuthStateChanged, 
   signOut as firebaseSignOut,
   getRedirectResult,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  signInWithRedirect
 } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, googleProvider } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -13,6 +14,7 @@ interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   isUFEmail: (email: string) => boolean;
 }
 
@@ -20,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
   signOut: async () => {},
+  signInWithGoogle: async () => {},
   isUFEmail: () => false
 });
 
@@ -108,10 +111,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const signInWithGoogle = async (): Promise<void> => {
+    try {
+      await signInWithRedirect(auth, googleProvider);
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     currentUser,
     loading,
     signOut,
+    signInWithGoogle,
     isUFEmail
   };
 

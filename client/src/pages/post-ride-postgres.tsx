@@ -15,6 +15,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 
+// List of major Florida cities
+const FLORIDA_CITIES = [
+  "Gainesville",
+  "Jacksonville",
+  "Miami",
+  "Orlando",
+  "Tampa",
+  "Tallahassee",
+  "Fort Lauderdale",
+  "St. Petersburg",
+  "Pensacola",
+  "Daytona Beach",
+  "Fort Myers"
+];
+
 
 export default function PostRidePostgres() {
   const [location, setLocation] = useLocation();
@@ -230,13 +245,16 @@ export default function PostRidePostgres() {
                     <FaMapMarkerAlt className="inline mr-2" />
                     From City (Required)
                   </Label>
-                  <Input
-                    id="origin"
-                    placeholder="e.g. Gainesville"
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    required
-                  />
+                  <Select value={origin} onValueChange={setOrigin}>
+                    <SelectTrigger id="origin">
+                      <SelectValue placeholder="Select departure city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLORIDA_CITIES.map(city => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="originArea">Area/Location</Label>
@@ -255,13 +273,16 @@ export default function PostRidePostgres() {
                     <FaMapMarkerAlt className="inline mr-2" />
                     To City (Required)
                   </Label>
-                  <Input
-                    id="destination"
-                    placeholder="e.g. Orlando"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    required
-                  />
+                  <Select value={destination} onValueChange={setDestination}>
+                    <SelectTrigger id="destination">
+                      <SelectValue placeholder="Select destination city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLORIDA_CITIES.map(city => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="destinationArea">Area/Location</Label>

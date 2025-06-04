@@ -113,6 +113,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
+      // Force account selection by setting prompt parameter
+      googleProvider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu' // Restrict to UFL domain
+      });
+      
       const result = await signInWithPopup(auth, googleProvider);
       console.log("Popup sign-in successful:", result.user.email);
     } catch (error) {

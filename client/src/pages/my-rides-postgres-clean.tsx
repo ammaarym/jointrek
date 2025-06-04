@@ -48,6 +48,10 @@ export default function MyRidesPostgres() {
   // Ride request state
   const [rideRequests, setRideRequests] = useState<any[]>([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
+  
+  // Pending requests (outgoing) state
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [pendingRequestsLoading, setPendingRequestsLoading] = useState(false);
 
 
 
@@ -84,6 +88,7 @@ export default function MyRidesPostgres() {
     if (currentUser?.uid) {
       loadMyRides(currentUser.uid);
       loadRideRequests();
+      loadPendingRequests();
     }
   }, [currentUser?.uid]);
 
@@ -109,6 +114,31 @@ export default function MyRidesPostgres() {
       console.error('Error loading ride requests:', error);
     } finally {
       setRequestsLoading(false);
+    }
+  };
+
+  // Load pending ride requests (outgoing requests from user)
+  const loadPendingRequests = async () => {
+    if (!currentUser) return;
+    
+    setPendingRequestsLoading(true);
+    try {
+      const response = await fetch('/api/ride-requests/user', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const requests = await response.json();
+        setPendingRequests(requests);
+      }
+    } catch (error) {
+      console.error('Error loading pending requests:', error);
+    } finally {
+      setPendingRequestsLoading(false);
     }
   };
 
@@ -513,7 +543,7 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/30 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/30 rounded-lg p-1">
           <TabsTrigger 
             value="driver" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
@@ -537,6 +567,18 @@ export default function MyRidesPostgres() {
             {rideRequests.filter(req => req.status === 'pending').length > 0 && (
               <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
                 {rideRequests.filter(req => req.status === 'pending').length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="pending" 
+            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+          >
+            <FaExclamationTriangle className="w-4 h-4" />
+            <span>Pending Requests</span>
+            {pendingRequests.filter(req => req.status === 'pending').length > 0 && (
+              <span className="ml-1 bg-orange-500 text-white text-xs rounded-full px-2 py-0.5">
+                {pendingRequests.filter(req => req.status === 'pending').length}
               </span>
             )}
           </TabsTrigger>
@@ -666,6 +708,110 @@ export default function MyRidesPostgres() {
                 <p className="text-muted-foreground">
                   Passengers will be able to request seats for your posted rides.
                 </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pending" className="mt-6">
+          <div className="space-y-6">
+            {pendingRequestsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-64" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-8 w-20" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : pendingRequests.length > 0 ? (
+              pendingRequests.map((request) => (
+                <Card key={request.id} className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <FaCar className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{request.driverName}</h3>
+                          <p className="text-sm text-muted-foreground">{request.driverEmail}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {request.rideOrigin} → {request.rideDestination}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="w-4 h-4 text-primary" />
+                          <span className="text-sm">
+                            {formatDate(new Date(request.rideDepartureTime))} at {new Date(request.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                          </span>
+                        </div>
+                        {request.message && (
+                          <div className="flex items-start gap-2 mt-3">
+                            <BiMessageDetail className="w-4 h-4 text-muted-foreground mt-0.5" />
+                            <p className="text-sm text-muted-foreground italic">"{request.message}"</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        Sent {formatDate(new Date(request.createdAt))}
+                      </span>
+                      {request.status === 'pending' && (
+                        <span className="text-xs text-orange-600 font-medium">
+                          Awaiting response
+                        </span>
+                      )}
+                      {request.status === 'approved' && (
+                        <span className="text-xs text-green-600 font-medium">
+                          Request approved!
+                        </span>
+                      )}
+                      {request.status === 'rejected' && (
+                        <span className="text-xs text-red-600 font-medium">
+                          Request declined
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <FaExclamationTriangle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No pending requests</h3>
+                <p className="text-muted-foreground">
+                  You haven't sent any ride requests yet. Browse available rides to get started.
+                </p>
+                <Button 
+                  onClick={() => setLocation('/find-rides')} 
+                  className="mt-4"
+                >
+                  Find Rides
+                </Button>
               </div>
             )}
           </div>

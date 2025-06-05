@@ -192,9 +192,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       console.log("DEBUG: Provider configuration created");
       
-      // Try redirect-based authentication instead of popup for better account switching
-      console.log("DEBUG: Using signInWithRedirect for better account switching");
-      await signInWithRedirect(auth, freshProvider);
+      // Try popup-based authentication with enhanced error handling
+      console.log("DEBUG: Attempting signInWithPopup with enhanced configuration");
+      try {
+        const result = await signInWithPopup(auth, freshProvider);
+        console.log("DEBUG: Popup sign-in successful:", result.user.email);
+        console.log("DEBUG: User UID:", result.user.uid);
+      } catch (popupError: any) {
+        console.log("DEBUG: Popup failed, trying alternative approach:", popupError.code);
+        
+        // If popup fails due to blocked popup or other issues, throw a helpful error
+        if (popupError.code === 'auth/popup-blocked' || 
+            popupError.code === 'auth/popup-closed-by-user' ||
+            popupError.code === 'auth/cancelled-popup-request') {
+          
+          throw new Error("ACCOUNT_SWITCHING_ISSUE: The authentication popup was blocked or cancelled. To switch accounts, please:\n\n1. Sign out completely\n2. Clear your browser cache\n3. Go to accounts.google.com and sign out of all accounts\n4. Then try signing in again with your desired UFL account");
+        }
+        
+        // For other errors, re-throw the original error
+        throw popupError;
+      }
       
     } catch (error: any) {
       console.error("DEBUG: Error signing in with Google:", error);

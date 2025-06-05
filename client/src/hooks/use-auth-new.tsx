@@ -185,7 +185,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         prompt: 'select_account consent',
         hd: 'ufl.edu',
         access_type: 'online',
-        include_granted_scopes: 'false'
+        include_granted_scopes: 'false',
+        login_hint: '', // Clear any login hints
+        authuser: '-1' // Force fresh authentication
       });
       freshProvider.addScope('email');
       freshProvider.addScope('profile');

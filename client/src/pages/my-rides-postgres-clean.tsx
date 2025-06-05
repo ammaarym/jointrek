@@ -763,7 +763,7 @@ export default function MyRidesPostgres() {
                     </h3>
                     <div className="space-y-4">
                       {rideRequests.map((request) => (
-                        <Card key={`incoming-${request.id}`} className="p-6 border-l-4 border-l-blue-500">
+                        <Card key={`incoming-${request.id}`} className="p-6">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-3">
@@ -853,7 +853,7 @@ export default function MyRidesPostgres() {
                     </h3>
                     <div className="space-y-4">
                       {pendingRequests.map((request) => (
-                        <Card key={`outgoing-${request.id}`} className="p-6 border-l-4 border-l-green-500">
+                        <Card key={`outgoing-${request.id}`} className="p-6">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-3">

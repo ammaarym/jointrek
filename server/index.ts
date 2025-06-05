@@ -103,5 +103,8 @@ function scheduleDailyCleanup() {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Start the daily cleanup scheduler
+    scheduleDailyCleanup();
   });
 })();

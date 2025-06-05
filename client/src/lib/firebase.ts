@@ -40,10 +40,11 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('email');
 googleProvider.addScope('profile');
 
-// Set custom parameters with domain hint for UF emails
+// Set custom parameters to force account selection and clear cache
 googleProvider.setCustomParameters({
-  prompt: 'select_account',
-  hd: 'ufl.edu' // This hints Google to show UF accounts first, but doesn't restrict
+  prompt: 'select_account consent',
+  hd: 'ufl.edu', // This hints Google to show UF accounts first, but doesn't restrict
+  access_type: 'online'
 });
 
 // Get firestore database reference with improved caching

@@ -102,9 +102,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = async (): Promise<void> => {
     try {
+      // Clear Firebase auth state
       await firebaseSignOut(auth);
+      
+      // Clear React Query cache
       queryClient.clear();
+      
+      // Clear local state
       setCurrentUser(null);
+      
+      // Clear any Firebase-related localStorage items
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Clear sessionStorage as well
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      console.log("Complete sign out performed");
     } catch (error) {
       console.error("Error signing out:", error);
       throw error;
@@ -113,22 +134,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      // First, sign out to clear any cached credentials
-      if (auth.currentUser) {
-        console.log("Signing out current user to force account selection");
-        await firebaseSignOut(auth);
-      }
+      // Always sign out first to clear any cached credentials
+      console.log("Clearing authentication cache before sign-in");
+      await firebaseSignOut(auth);
       
-      // Create a fresh provider instance to force account selection
+      // Clear all Firebase-related storage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase')) {
+          localStorage.removeItem(key);
+        }
+      });
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      // Wait a brief moment for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Create a completely fresh provider instance
       const freshProvider = new GoogleAuthProvider();
       freshProvider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
+        prompt: 'select_account consent',
+        hd: 'ufl.edu',
+        access_type: 'online'
       });
       freshProvider.addScope('email');
       freshProvider.addScope('profile');
       
-      console.log("Starting fresh Google sign-in with account selection");
+      console.log("Starting fresh Google sign-in with forced account selection");
       const result = await signInWithPopup(auth, freshProvider);
       console.log("Popup sign-in successful:", result.user.email);
     } catch (error) {

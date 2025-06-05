@@ -219,6 +219,11 @@ export default function FindRidesPostgres() {
         return false;
       }
       
+      // Don't show completed rides
+      if (ride.isCompleted) {
+        return false;
+      }
+      
       // Don't show rides with 0 seats available
       if (ride.seatsLeft <= 0) {
         return false;

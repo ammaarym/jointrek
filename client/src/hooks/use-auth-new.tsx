@@ -4,7 +4,8 @@ import {
   signOut as firebaseSignOut,
   getRedirectResult,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { User } from 'firebase/auth';
@@ -189,15 +190,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       freshProvider.addScope('email');
       freshProvider.addScope('profile');
       
-      console.log("DEBUG: Provider configuration:", {
-        customParameters: freshProvider.customParameters,
-        scopes: freshProvider.scopes
-      });
+      console.log("DEBUG: Provider configuration created");
       
-      console.log("DEBUG: Starting signInWithPopup");
-      const result = await signInWithPopup(auth, freshProvider);
-      console.log("DEBUG: Popup sign-in successful:", result.user.email);
-      console.log("DEBUG: User UID:", result.user.uid);
+      // Try redirect-based authentication instead of popup for better account switching
+      console.log("DEBUG: Using signInWithRedirect for better account switching");
+      await signInWithRedirect(auth, freshProvider);
       
     } catch (error: any) {
       console.error("DEBUG: Error signing in with Google:", error);

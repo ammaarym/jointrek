@@ -102,17 +102,13 @@ export default function FindRidesPostgres() {
     }
   }, [currentUser]);
 
-  // Refresh rides data periodically to update seat counts
-  useEffect(() => {
+  // Only refresh when user performs actions that might change data
+  const refreshData = () => {
     if (currentUser) {
-      const interval = setInterval(() => {
-        loadAllRides();
-        loadUserRideRequests();
-      }, 10000); // Refresh every 10 seconds
-      
-      return () => clearInterval(interval);
+      loadAllRides();
+      loadUserRideRequests();
     }
-  }, [currentUser]);
+  };
 
   // Handle ride request with confirmation
   const handleRequestRide = (rideId: number) => {
@@ -146,6 +142,8 @@ export default function FindRidesPostgres() {
 
       if (response.ok) {
         setRequestedRides(prev => new Set(prev).add(selectedRide.id));
+        // Refresh data to show updated state
+        refreshData();
         toast({
           title: "Request Sent Successfully!",
           description: `Your ride request has been sent to ${selectedRide.driverName || 'the driver'}. They will be notified and can approve your request.`,

@@ -415,6 +415,24 @@ export class PostgresStorage implements IStorage {
   }
 
   async getRideRequestsForDriver(driverId: string): Promise<any[]> {
+    // Helper function to format names from "Last, First" to "First Last"
+    const formatPassengerName = (displayName: string | null): string => {
+      if (!displayName) return '';
+      
+      // Check if name is in "Last, First" format
+      if (displayName.includes(', ')) {
+        const parts = displayName.split(', ');
+        if (parts.length >= 2) {
+          const lastName = parts[0];
+          const firstName = parts[1];
+          return `${firstName} ${lastName}`;
+        }
+      }
+      
+      // Return as-is if not in expected format
+      return displayName;
+    };
+
     const requests = await db
       .select({
         id: rideRequests.id,
@@ -436,7 +454,11 @@ export class PostgresStorage implements IStorage {
       .where(eq(rides.driverId, driverId))
       .orderBy(desc(rideRequests.createdAt));
     
-    return requests;
+    // Format passenger names from "Last, First" to "First Last"
+    return requests.map(request => ({
+      ...request,
+      passengerName: formatPassengerName(request.passengerName)
+    }));
   }
 
   async getPendingRequestsForRide(rideId: number): Promise<RideRequest[]> {
@@ -447,6 +469,24 @@ export class PostgresStorage implements IStorage {
   }
 
   async getRideRequestsForUser(userId: string): Promise<any[]> {
+    // Helper function to format names from "Last, First" to "First Last"
+    const formatDriverName = (displayName: string | null): string => {
+      if (!displayName) return '';
+      
+      // Check if name is in "Last, First" format
+      if (displayName.includes(', ')) {
+        const parts = displayName.split(', ');
+        if (parts.length >= 2) {
+          const lastName = parts[0];
+          const firstName = parts[1];
+          return `${firstName} ${lastName}`;
+        }
+      }
+      
+      // Return as-is if not in expected format
+      return displayName;
+    };
+
     const requests = await db
       .select({
         id: rideRequests.id,
@@ -468,7 +508,11 @@ export class PostgresStorage implements IStorage {
       .where(eq(rideRequests.passengerId, userId))
       .orderBy(desc(rideRequests.createdAt));
     
-    return requests;
+    // Format driver names from "Last, First" to "First Last"
+    return requests.map(request => ({
+      ...request,
+      driverName: formatDriverName(request.driverName)
+    }));
   }
 
   async updateRideRequestStatus(requestId: number, status: string, driverId: string): Promise<RideRequest> {
@@ -605,7 +649,25 @@ export class PostgresStorage implements IStorage {
   }
 
   async getAllRequests(): Promise<any[]> {
-    return await db.select({
+    // Helper function to format names from "Last, First" to "First Last"
+    const formatName = (displayName: string | null): string => {
+      if (!displayName) return '';
+      
+      // Check if name is in "Last, First" format
+      if (displayName.includes(', ')) {
+        const parts = displayName.split(', ');
+        if (parts.length >= 2) {
+          const lastName = parts[0];
+          const firstName = parts[1];
+          return `${firstName} ${lastName}`;
+        }
+      }
+      
+      // Return as-is if not in expected format
+      return displayName;
+    };
+
+    const results = await db.select({
       id: rideRequests.id,
       rideId: rideRequests.rideId,
       status: rideRequests.status,
@@ -625,9 +687,34 @@ export class PostgresStorage implements IStorage {
     .leftJoin(rides, eq(rideRequests.rideId, rides.id))
     .leftJoin(sql`users as driver_users`, sql`rides.driver_id = driver_users.firebase_uid`)
     .orderBy(desc(rideRequests.createdAt));
+
+    // Format both passenger and driver names from "Last, First" to "First Last"
+    return results.map(request => ({
+      ...request,
+      passengerName: formatName(request.passengerName),
+      driverName: formatName(request.driverName)
+    }));
   }
 
   async getApprovedRidesWithPassengers(): Promise<any[]> {
+    // Helper function to format names from "Last, First" to "First Last"
+    const formatName = (displayName: string | null): string => {
+      if (!displayName) return '';
+      
+      // Check if name is in "Last, First" format
+      if (displayName.includes(', ')) {
+        const parts = displayName.split(', ');
+        if (parts.length >= 2) {
+          const lastName = parts[0];
+          const firstName = parts[1];
+          return `${firstName} ${lastName}`;
+        }
+      }
+      
+      // Return as-is if not in expected format
+      return displayName;
+    };
+
     // Get all rides that have approved passengers
     const ridesWithPassengers = await db.select({
       rideId: rides.id,
@@ -662,13 +749,13 @@ export class PostgresStorage implements IStorage {
           price: row.price,
           seatsTotal: row.seatsTotal,
           seatsLeft: row.seatsLeft,
-          driverName: row.driverName,
+          driverName: formatName(row.driverName),
           driverEmail: row.driverEmail,
           passengers: []
         };
       }
       acc[rideId].passengers.push({
-        name: row.passengerName,
+        name: formatName(row.passengerName),
         email: row.passengerEmail,
         approvedAt: row.approvedAt
       });

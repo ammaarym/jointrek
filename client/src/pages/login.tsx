@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth-new";
-import { LogIn, ArrowLeft } from "lucide-react";
+import { LogIn, ArrowLeft, HelpCircle, ExternalLink } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Login() {
   const { currentUser, signInWithGoogle } = useAuth();
   const [, navigate] = useLocation();
+  const [showAccountSwitchHelp, setShowAccountSwitchHelp] = useState(false);
 
   // If user is already logged in, redirect to profile
   useEffect(() => {
@@ -77,6 +79,56 @@ export default function Login() {
           </p>
         </div>
 
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-sm"
+            onClick={() => setShowAccountSwitchHelp(!showAccountSwitchHelp)}
+          >
+            <HelpCircle className="mr-2 h-4 w-4" />
+            Need to switch UFL accounts?
+          </Button>
+
+          {showAccountSwitchHelp && (
+            <Alert className="mt-4 bg-blue-50 border-blue-200">
+              <HelpCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-sm text-blue-800">
+                <div className="space-y-2">
+                  <p className="font-medium">To switch between different UFL accounts:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-xs">
+                    <li>Open a new private/incognito browser window</li>
+                    <li>
+                      <a 
+                        href="https://accounts.google.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline inline-flex items-center"
+                      >
+                        Go to accounts.google.com <ExternalLink className="ml-1 h-3 w-3" />
+                      </a> and sign out of all accounts
+                    </li>
+                    <li>
+                      <a 
+                        href="https://login.ufl.edu" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline inline-flex items-center"
+                      >
+                        Go to login.ufl.edu <ExternalLink className="ml-1 h-3 w-3" />
+                      </a> and sign out
+                    </li>
+                    <li>Return to Trek in the private window</li>
+                    <li>Sign in with your desired UFL account</li>
+                  </ol>
+                  <p className="text-xs text-blue-700 mt-2 italic">
+                    This prevents both Google and UF systems from using cached credentials.
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
 
       </div>
     </div>

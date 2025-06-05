@@ -208,7 +208,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             popupError.code === 'auth/popup-closed-by-user' ||
             popupError.code === 'auth/cancelled-popup-request') {
           
-          throw new Error("ACCOUNT_SWITCHING_ISSUE: The authentication popup was blocked or cancelled. To switch accounts, please:\n\n1. Sign out completely\n2. Clear your browser cache\n3. Go to accounts.google.com and sign out of all accounts\n4. Then try signing in again with your desired UFL account");
+          throw new Error("ACCOUNT_SWITCHING_ISSUE: To switch UFL accounts, the authentication system is automatically using cached credentials. Please follow these steps:\n\n1. Sign out from Trek completely\n2. Open a new private/incognito browser window\n3. Go to accounts.google.com and sign out of all accounts\n4. Go to login.ufl.edu and sign out\n5. Return to Trek in the private window and sign in with your desired UFL account\n\nThis ensures both Google and UF authentication systems don't use cached credentials.");
         }
         
         // For other errors, re-throw the original error

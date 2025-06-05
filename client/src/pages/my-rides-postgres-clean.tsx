@@ -754,6 +754,7 @@ export default function MyRidesPostgres() {
             ) : (
               <>
                 {/* Incoming Requests - Passengers requesting your rides */}
+                {console.log('COMBINED TAB DEBUG - rideRequests.length:', rideRequests.length, 'pendingRequests.length:', pendingRequests.length)}
                 {rideRequests.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">

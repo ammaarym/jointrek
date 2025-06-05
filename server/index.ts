@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -35,6 +36,42 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Function to clean up expired rides
+async function cleanupExpiredRides() {
+  try {
+    const deletedCount = await storage.deleteExpiredRides();
+    if (deletedCount > 0) {
+      console.log(`Daily cleanup: Removed ${deletedCount} expired rides`);
+    }
+  } catch (error) {
+    console.error('Error during daily cleanup:', error);
+  }
+}
+
+// Schedule daily cleanup at 2 AM
+function scheduleDailyCleanup() {
+  const now = new Date();
+  const next2AM = new Date(now);
+  
+  // Set to 2 AM today
+  next2AM.setHours(2, 0, 0, 0);
+  
+  // If 2 AM today has passed, schedule for tomorrow
+  if (next2AM <= now) {
+    next2AM.setDate(next2AM.getDate() + 1);
+  }
+  
+  const timeUntilNext2AM = next2AM.getTime() - now.getTime();
+  
+  setTimeout(() => {
+    cleanupExpiredRides();
+    // Schedule to run every 24 hours after the first run
+    setInterval(cleanupExpiredRides, 24 * 60 * 60 * 1000);
+  }, timeUntilNext2AM);
+  
+  console.log(`Daily cleanup scheduled for ${next2AM.toLocaleString()}`);
+}
 
 (async () => {
   const server = await registerRoutes(app);

@@ -72,6 +72,9 @@ export interface IStorage {
   getAllRides(): Promise<any[]>;
   getAllRequests(): Promise<any[]>;
   getApprovedRidesWithPassengers(): Promise<any[]>;
+  
+  // Cleanup methods
+  deleteExpiredRides(): Promise<number>;
 }
 
 // In-memory storage implementation
@@ -474,6 +477,10 @@ export class MemStorage implements IStorage {
 
   async hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean> {
     return false;
+  }
+
+  async deleteExpiredRides(): Promise<number> {
+    return 0; // MemStorage stub - use PostgreSQL in production
   }
 }
 

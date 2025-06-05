@@ -25,7 +25,7 @@ import {
   type RideRequest,
   type InsertRideRequest
 } from "@shared/schema";
-import { eq, and, or, desc, gte, sql } from "drizzle-orm";
+import { eq, and, or, desc, gte, sql, lt } from "drizzle-orm";
 import { IStorage } from "./storage";
 
 export class PostgresStorage implements IStorage {
@@ -583,6 +583,41 @@ export class PostgresStorage implements IStorage {
     }, {} as Record<number, any>);
 
     return Object.values(groupedRides);
+  }
+
+  // Delete expired rides (past their departure time)
+  async deleteExpiredRides(): Promise<number> {
+    const now = new Date();
+    
+    // Get rides that are past their departure time
+    const expiredRides = await db
+      .select({ id: rides.id })
+      .from(rides)
+      .where(lt(rides.departureTime, now));
+    
+    if (expiredRides.length === 0) {
+      return 0;
+    }
+
+    const expiredRideIds = expiredRides.map(ride => ride.id);
+    
+    // Delete associated ride requests first
+    for (const rideId of expiredRideIds) {
+      await db.delete(rideRequests).where(eq(rideRequests.rideId, rideId));
+    }
+    
+    // Delete associated reviews
+    for (const rideId of expiredRideIds) {
+      await db.delete(reviews).where(eq(reviews.rideId, rideId));
+    }
+    
+    // Delete the expired rides
+    for (const rideId of expiredRideIds) {
+      await db.delete(rides).where(eq(rides.id, rideId));
+    }
+    
+    console.log(`Cleaned up ${expiredRideIds.length} expired rides`);
+    return expiredRideIds.length;
   }
 }
 

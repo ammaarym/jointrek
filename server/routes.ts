@@ -410,7 +410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedRequest = await storage.updateRideRequestStatus(id, status, req.user.uid);
 
-      // If approved, decrement available seats
+      // If approved, decrement available seats and auto-reject other requests if full
       if (status === "approved") {
         try {
           // Get request details with ride and user info
@@ -421,10 +421,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Decrement available seats
             const ride = await storage.getRide(thisRequest.rideId);
             if (ride && ride.seatsLeft > 0) {
+              const newSeatsLeft = ride.seatsLeft - 1;
               await storage.updateRide(ride.id, { 
-                seatsLeft: ride.seatsLeft - 1 
+                seatsLeft: newSeatsLeft 
               });
-              console.log(`Seat decremented for ride ${ride.id}. Seats left: ${ride.seatsLeft - 1}`);
+              console.log(`Seat decremented for ride ${ride.id}. Seats left: ${newSeatsLeft}`);
+              
+              // If no seats left, auto-reject all other pending requests for this ride
+              if (newSeatsLeft === 0) {
+                console.log(`Ride ${ride.id} is now full. Auto-rejecting remaining pending requests...`);
+                
+                // Get all pending requests for this specific ride
+                const allRequestsForRide = await storage.getPendingRequestsForRide(thisRequest.rideId);
+                const pendingRequests = allRequestsForRide.filter(req => 
+                  req.status === 'pending' && req.id !== id
+                );
+                
+                // Auto-reject all remaining pending requests
+                for (const pendingRequest of pendingRequests) {
+                  try {
+                    await storage.updateRideRequestStatus(pendingRequest.id, 'rejected', req.user.uid);
+                    console.log(`Auto-rejected request ${pendingRequest.id} - ride is full`);
+                  } catch (error) {
+                    console.error(`Failed to auto-reject request ${pendingRequest.id}:`, error);
+                  }
+                }
+                
+                if (pendingRequests.length > 0) {
+                  console.log(`Auto-rejected ${pendingRequests.length} pending requests for full ride ${ride.id}`);
+                }
+              }
             }
           }
           

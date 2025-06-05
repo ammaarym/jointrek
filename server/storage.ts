@@ -61,6 +61,7 @@ export interface IStorage {
   createRideRequest(request: any): Promise<any>;
   getRideRequestsForDriver(driverId: string): Promise<any[]>;
   getRideRequestsForUser(userId: string): Promise<any[]>;
+  getPendingRequestsForRide(rideId: number): Promise<any[]>;
   updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any>;
 
   // Admin methods
@@ -394,6 +395,85 @@ export class MemStorage implements IStorage {
     this.conversations.set(id, updatedConversation);
     
     return updatedConversation;
+  }
+
+  // Ride request methods (stubs for interface compliance - using PostgreSQL in production)
+  async createRideRequest(request: any): Promise<any> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  async getRideRequestsForDriver(driverId: string): Promise<any[]> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  async getRideRequestsForUser(userId: string): Promise<any[]> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  async getPendingRequestsForRide(rideId: number): Promise<any[]> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  async updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  // Admin methods (stubs)
+  async getUserCount(): Promise<number> {
+    return this.users.size;
+  }
+
+  async getRideCount(): Promise<number> {
+    return this.rides.size;
+  }
+
+  async getRequestStats(): Promise<{ total: number; pending: number; approved: number; rejected: number }> {
+    return { total: 0, pending: 0, approved: 0, rejected: 0 };
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAllRides(): Promise<any[]> {
+    return Array.from(this.rides.values());
+  }
+
+  async getAllRequests(): Promise<any[]> {
+    return [];
+  }
+
+  async getApprovedRidesWithPassengers(): Promise<any[]> {
+    return [];
+  }
+
+  // Completion and review methods (stubs)
+  async markRideComplete(id: number): Promise<Ride | undefined> {
+    return this.rides.get(id);
+  }
+
+  async getCompletedRidesByUser(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async isRideCompletedByUser(rideId: number, userId: string): Promise<boolean> {
+    return false;
+  }
+
+  async createReview(review: any): Promise<any> {
+    return review;
+  }
+
+  async getReviewsByReviewee(revieweeId: string): Promise<any[]> {
+    return [];
+  }
+
+  async getReviewsByRide(rideId: number): Promise<any[]> {
+    return [];
+  }
+
+  async hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean> {
+    return false;
   }
 }
 

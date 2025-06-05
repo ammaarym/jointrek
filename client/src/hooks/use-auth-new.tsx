@@ -134,40 +134,76 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
+      console.log("DEBUG: Starting comprehensive authentication cleanup");
+      
+      // First, check current auth state
+      console.log("DEBUG: Current user before cleanup:", auth.currentUser?.email || "null");
+      
       // Always sign out first to clear any cached credentials
-      console.log("Clearing authentication cache before sign-in");
+      console.log("DEBUG: Signing out from Firebase");
       await firebaseSignOut(auth);
       
-      // Clear all Firebase-related storage
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('firebase:') || key.includes('firebase')) {
+      // Verify sign out completed
+      console.log("DEBUG: Current user after signOut:", auth.currentUser?.email || "null");
+      
+      // Clear all Firebase-related storage with debugging
+      console.log("DEBUG: Clearing localStorage items");
+      const localStorageItems = Object.keys(localStorage);
+      console.log("DEBUG: localStorage keys before cleanup:", localStorageItems);
+      localStorageItems.forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
+          console.log("DEBUG: Removing localStorage key:", key);
           localStorage.removeItem(key);
         }
       });
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('firebase:') || key.includes('firebase')) {
+      
+      console.log("DEBUG: Clearing sessionStorage items");
+      const sessionStorageItems = Object.keys(sessionStorage);
+      console.log("DEBUG: sessionStorage keys before cleanup:", sessionStorageItems);
+      sessionStorageItems.forEach(key => {
+        if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
+          console.log("DEBUG: Removing sessionStorage key:", key);
           sessionStorage.removeItem(key);
         }
       });
       
-      // Wait a brief moment for cleanup to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Clear any Google OAuth related cookies by setting them to expire
+      console.log("DEBUG: Attempting to clear Google OAuth cookies");
+      document.cookie = "oauth_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.google.com";
+      document.cookie = "oauth_code_verifier=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.google.com";
+      document.cookie = "session_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.accounts.google.com";
       
-      // Create a completely fresh provider instance
+      // Wait longer for cleanup to complete
+      console.log("DEBUG: Waiting for cleanup to complete...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create a completely fresh provider instance with maximum forcing
+      console.log("DEBUG: Creating fresh GoogleAuthProvider");
       const freshProvider = new GoogleAuthProvider();
       freshProvider.setCustomParameters({
         prompt: 'select_account consent',
         hd: 'ufl.edu',
-        access_type: 'online'
+        access_type: 'online',
+        include_granted_scopes: 'false'
       });
       freshProvider.addScope('email');
       freshProvider.addScope('profile');
       
-      console.log("Starting fresh Google sign-in with forced account selection");
+      console.log("DEBUG: Provider configuration:", {
+        customParameters: freshProvider.customParameters,
+        scopes: freshProvider.scopes
+      });
+      
+      console.log("DEBUG: Starting signInWithPopup");
       const result = await signInWithPopup(auth, freshProvider);
-      console.log("Popup sign-in successful:", result.user.email);
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
+      console.log("DEBUG: Popup sign-in successful:", result.user.email);
+      console.log("DEBUG: User UID:", result.user.uid);
+      
+    } catch (error: any) {
+      console.error("DEBUG: Error signing in with Google:", error);
+      console.error("DEBUG: Error code:", error.code);
+      console.error("DEBUG: Error message:", error.message);
+      console.error("DEBUG: Full error object:", error);
       throw error;
     }
   };

@@ -537,8 +537,6 @@ export default function FindRidesPostgres() {
           )}
         </div>
       </div>
-
-
     </div>
   );
 }

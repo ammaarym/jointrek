@@ -4,8 +4,10 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCar, FaTrash, FaEdit, FaCheck, FaExclamationTriangle, FaUser } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCar, FaTrash, FaEdit, FaCheck, FaExclamationTriangle, FaUser, FaKey } from 'react-icons/fa';
 import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -240,6 +242,110 @@ export default function MyRidesPostgres() {
   const handleMarkComplete = (ride: any) => {
     setRideToComplete(ride);
     setCompleteDialogOpen(true);
+  };
+
+  // Generate verification code (driver action)
+  const generateVerificationCode = async (ride: any) => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch(`/api/rides/${ride.id}/generate-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || ''
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setGeneratedCode(result.verificationCode);
+        setShowVerificationCode(true);
+        setRideToComplete(ride);
+        
+        toast({
+          title: "Verification Code Generated",
+          description: `Share code ${result.verificationCode} with passengers to complete the ride.`,
+        });
+      } else {
+        throw new Error('Failed to generate verification code');
+      }
+    } catch (error: any) {
+      console.error('Error generating verification code:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle passenger verification input
+  const handlePassengerVerification = (ride: any) => {
+    setRideToComplete(ride);
+    setIsPassenger(true);
+    setVerificationDialogOpen(true);
+  };
+
+  // Verify and complete ride
+  const verifyAndCompleteRide = async () => {
+    if (!rideToComplete || !currentUser || !inputVerificationCode) return;
+
+    try {
+      const response = await fetch(`/api/rides/${rideToComplete.id}/verify-complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || ''
+        },
+        body: JSON.stringify({
+          verificationCode: inputVerificationCode
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        setVerificationDialogOpen(false);
+        setShowVerificationCode(false);
+        setRideToComplete(null);
+        setInputVerificationCode('');
+        
+        // Show success message with payment capture details
+        const paymentsProcessed = result.paymentsProcessed || 0;
+        const successfulPayments = result.paymentResults?.filter((p: any) => p.status === 'captured').length || 0;
+        
+        toast({
+          title: "Ride Completed Successfully",
+          description: paymentsProcessed > 0 
+            ? `Ride completed and ${successfulPayments}/${paymentsProcessed} payments captured.`
+            : "Ride completed successfully.",
+        });
+        
+        console.log('Payment capture results:', result.paymentResults);
+        
+        // Refresh the rides data
+        loadMyRides();
+        
+        // Show review modal
+        setRideToReview(rideToComplete);
+        setReviewModalOpen(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to verify ride completion');
+      }
+    } catch (error: any) {
+      console.error('Error verifying ride completion:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Invalid verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const confirmMarkComplete = async () => {
@@ -519,15 +625,31 @@ export default function MyRidesPostgres() {
             Completed
           </div>
         ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleMarkComplete(ride)}
-            className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-          >
-            <FaCheck className="w-4 h-4" />
-            Mark Complete
-          </Button>
+          <>
+            {ride.driverId === currentUser?.uid ? (
+              // Driver view - generate verification code
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => generateVerificationCode(ride)}
+                className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                <FaKey className="w-4 h-4" />
+                Generate Code
+              </Button>
+            ) : (
+              // Passenger view - enter verification code
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePassengerVerification(ride)}
+                className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+              >
+                <FaCheck className="w-4 h-4" />
+                Ride Complete
+              </Button>
+            )}
+          </>
         )}
         <Button
           variant="outline"
@@ -1205,6 +1327,79 @@ export default function MyRidesPostgres() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Driver Verification Code Display Dialog */}
+      <Dialog open={showVerificationCode} onOpenChange={setShowVerificationCode}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verification Code Generated</DialogTitle>
+            <DialogDescription>
+              Share this code with passengers to complete the ride. The code is required for payment processing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-6">
+            <div className="text-4xl font-bold text-primary bg-primary/10 px-6 py-4 rounded-lg">
+              {generatedCode}
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Passengers need this 6-digit code to confirm ride completion and process payment.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowVerificationCode(false)} className="w-full">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Passenger Verification Code Input Dialog */}
+      <Dialog open={verificationDialogOpen} onOpenChange={setVerificationDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Verification Code</DialogTitle>
+            <DialogDescription>
+              Enter the 6-digit verification code provided by the driver to complete the ride and process payment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="verification-code">Verification Code</Label>
+              <Input
+                id="verification-code"
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={inputVerificationCode}
+                onChange={(e) => setInputVerificationCode(e.target.value)}
+                maxLength={6}
+                className="text-center text-lg font-mono"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Once verified, your payment will be processed and the ride will be marked as complete.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setVerificationDialogOpen(false);
+                setInputVerificationCode('');
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={verifyAndCompleteRide}
+              disabled={inputVerificationCode.length !== 6}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              Complete Ride
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

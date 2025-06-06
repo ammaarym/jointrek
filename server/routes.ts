@@ -1204,37 +1204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Webhook endpoint for Stripe Connect account updates
-  app.post('/api/webhooks/stripe-connect', async (req: Request, res: Response) => {
-    try {
-      if (!stripe) {
-        return res.status(500).json({ message: "Stripe not configured" });
-      }
 
-      const event = req.body;
-
-      // Handle the event
-      switch (event.type) {
-        case 'account.updated':
-          const account = event.data.object;
-          console.log(`Connect account ${account.id} was updated`);
-          break;
-        
-        case 'account.application.deauthorized':
-          const deauthorizedAccount = event.data.object;
-          console.log(`Connect account ${deauthorizedAccount.id} was deauthorized`);
-          break;
-
-        default:
-          console.log(`Unhandled event type ${event.type}`);
-      }
-
-      res.json({ received: true });
-    } catch (error: any) {
-      console.error('Webhook error:', error);
-      res.status(500).json({ message: "Webhook processing failed" });
-    }
-  });
 
   // === Payment Routes ===
   

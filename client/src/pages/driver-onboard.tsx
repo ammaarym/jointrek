@@ -11,6 +11,10 @@ interface DriverStatus {
   canAcceptRides: boolean;
   accountId?: string;
   payoutsEnabled?: boolean;
+  chargesEnabled?: boolean;
+  detailsSubmitted?: boolean;
+  requirementsEventuallyDue?: string[];
+  requirementsCurrentlyDue?: string[];
 }
 
 export default function DriverOnboard() {
@@ -19,6 +23,7 @@ export default function DriverOnboard() {
   const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
 
   useEffect(() => {
     loadDriverStatus();
@@ -107,6 +112,39 @@ export default function DriverOnboard() {
     }
   };
 
+  const openDashboard = async () => {
+    if (!currentUser) return;
+
+    setIsLoadingDashboard(true);
+    try {
+      const response = await fetch('/api/driver/dashboard-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        window.open(result.dashboardUrl, '_blank');
+      } else {
+        throw new Error('Failed to create dashboard link');
+      }
+    } catch (error: any) {
+      console.error('Error opening dashboard:', error);
+      toast({
+        title: "Dashboard Error",
+        description: "Failed to open Stripe dashboard",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDashboard(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 max-w-2xl">
@@ -159,11 +197,17 @@ export default function DriverOnboard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="font-medium">Account Verified</span>
+                    {driverStatus.detailsSubmitted ? (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <Clock className="w-5 h-5 text-yellow-600" />
+                    )}
+                    <span className="font-medium">Account Details</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Your identity and bank account are verified
+                    {driverStatus.detailsSubmitted 
+                      ? "Identity and bank information verified" 
+                      : "Verification in progress"}
                   </p>
                 </div>
                 
@@ -174,15 +218,79 @@ export default function DriverOnboard() {
                     ) : (
                       <Clock className="w-5 h-5 text-yellow-600" />
                     )}
-                    <span className="font-medium">Payouts</span>
+                    <span className="font-medium">Bank Payouts</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {driverStatus.payoutsEnabled 
                       ? "Ready to receive payments" 
-                      : "Being processed by Stripe"}
+                      : "Bank verification in progress"}
                   </p>
                 </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    {driverStatus.chargesEnabled ? (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <Clock className="w-5 h-5 text-yellow-600" />
+                    )}
+                    <span className="font-medium">Payment Processing</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {driverStatus.chargesEnabled 
+                      ? "Can accept ride payments" 
+                      : "Payment setup in progress"}
+                  </p>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium">Manage Account</span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={openDashboard}
+                    disabled={isLoadingDashboard}
+                    className="mt-2 w-full"
+                  >
+                    {isLoadingDashboard ? (
+                      <>
+                        <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2" />
+                        Opening...
+                      </>
+                    ) : (
+                      "Open Stripe Dashboard"
+                    )}
+                  </Button>
+                </div>
               </div>
+
+              {/* Show any pending requirements */}
+              {(driverStatus.requirementsCurrentlyDue && driverStatus.requirementsCurrentlyDue.length > 0) && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">Action Required:</p>
+                      <ul className="list-disc list-inside text-sm space-y-1">
+                        {driverStatus.requirementsCurrentlyDue.map((req, index) => (
+                          <li key={index}>{req.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>
+                        ))}
+                      </ul>
+                      <Button 
+                        size="sm" 
+                        onClick={openDashboard}
+                        disabled={isLoadingDashboard}
+                        className="mt-2"
+                      >
+                        Complete Requirements
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           ) : (
             <div className="space-y-4">

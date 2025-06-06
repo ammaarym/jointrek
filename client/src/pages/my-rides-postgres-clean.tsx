@@ -265,6 +265,14 @@ export default function MyRidesPostgres() {
         setShowVerificationCode(true);
         setRideToComplete(ride);
         
+        // Refresh all ride data to show updated status
+        if (currentUser?.uid) {
+          loadMyRides(currentUser.uid);
+          loadRideRequests();
+          loadPendingRequests();
+          loadApprovedRides();
+        }
+        
         toast({
           title: "Verification Code Generated",
           description: `Share code ${result.verificationCode} with passengers to complete the ride.`,
@@ -328,8 +336,13 @@ export default function MyRidesPostgres() {
         
         console.log('Payment capture results:', result.paymentResults);
         
-        // Refresh the rides data
-        loadMyRides();
+        // Refresh all ride data to update both driver and passenger views
+        if (currentUser?.uid) {
+          loadMyRides(currentUser.uid);
+          loadRideRequests();
+          loadPendingRequests();
+          loadApprovedRides();
+        }
         
         // Show review modal
         setRideToReview(rideToComplete);

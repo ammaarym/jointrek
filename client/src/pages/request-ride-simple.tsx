@@ -46,7 +46,7 @@ export default function RequestRideSimplePage() {
         description: "Your request has been sent to the driver with payment authorization.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/ride-requests"] });
-      setLocation("/dashboard");
+      setLocation("/my-rides");
     },
     onError: (error: any) => {
       toast({

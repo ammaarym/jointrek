@@ -1116,6 +1116,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel ride request by passenger
+  app.delete("/api/ride-requests/:id/cancel", authenticate, async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      
+      if (isNaN(requestId)) {
+        return res.status(400).json({ message: "Invalid request ID" });
+      }
+
+      // Get the ride request to verify ownership
+      const rideRequest = await storage.getRideRequestById(requestId);
+      if (!rideRequest) {
+        return res.status(404).json({ message: "Ride request not found" });
+      }
+
+      // Only the passenger can cancel their own request
+      if (rideRequest.passengerId !== req.user!.uid) {
+        return res.status(403).json({ message: "You can only cancel your own requests" });
+      }
+
+      // Only allow canceling pending requests
+      if (rideRequest.status !== "pending") {
+        return res.status(400).json({ message: "Only pending requests can be cancelled" });
+      }
+
+      // Cancel the payment intent if it exists
+      if (rideRequest.stripePaymentIntentId && stripe) {
+        try {
+          await stripe.paymentIntents.cancel(rideRequest.stripePaymentIntentId);
+          await storage.updateRideRequestPaymentStatus(requestId, "cancelled");
+        } catch (stripeError) {
+          console.error("Error cancelling Stripe payment:", stripeError);
+          // Continue with request cancellation even if Stripe fails
+        }
+      }
+
+      // Update request status to cancelled
+      await storage.updateRideRequestStatus(requestId, "cancelled", req.user!.uid);
+
+      res.json({ 
+        success: true,
+        message: "Ride request cancelled successfully"
+      });
+    } catch (error: any) {
+      console.error("Error cancelling ride request:", error);
+      res.status(500).json({ message: "Error cancelling ride request: " + error.message });
+    }
+  });
+
   // === Admin Routes ===
   
   // Admin authentication

@@ -268,6 +268,41 @@ export default function MyRidesPostgres() {
     }
   };
 
+  // Cancel ride request
+  const handleCancelRequest = async (requestId: number) => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch(`/api/ride-requests/${requestId}/cancel`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Request Cancelled",
+          description: "Your ride request has been cancelled successfully.",
+        });
+        // Refresh the pending requests
+        loadPendingRequests();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to cancel request');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling request:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!rideToReview || rating === 0 || !currentUser) {
       toast({
@@ -900,6 +935,36 @@ export default function MyRidesPostgres() {
                               <span className="text-sm text-muted-foreground">
                                 Sent {formatDate(new Date(request.createdAt))}
                               </span>
+                              {request.status === 'pending' && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="border-red-200 text-red-700 hover:bg-red-50"
+                                    >
+                                      Cancel Request
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Cancel Ride Request</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to cancel this ride request? This action cannot be undone and any payment authorization will be cancelled.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Keep Request</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleCancelRequest(request.id)}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Cancel Request
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </div>
                           </div>
                         </Card>

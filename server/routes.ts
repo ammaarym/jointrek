@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertRideRequestSchema.parse(req.body);
       const rideRequest = await storage.createRideRequest({
         ...validatedData,
-        passengerId: req.user.uid
+        passengerId: req.user!.uid
       });
 
       // SMS notification disabled for testing

@@ -379,7 +379,11 @@ export class PostgresStorage implements IStorage {
     return updatedRide;
   }
 
-
+  // Get a ride by ID
+  async getRideById(id: number): Promise<Ride | undefined> {
+    const [ride] = await db.select().from(rides).where(eq(rides.id, id));
+    return ride;
+  }
 
   async getCompletedRidesByUser(userId: string): Promise<CompletedRide[]> {
     return await db.select().from(completedRides).where(eq(completedRides.participantId, userId));

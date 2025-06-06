@@ -292,7 +292,7 @@ export default function RequestRidePage() {
 
             <Button 
               onClick={handleInitialRequest}
-              disabled={createPaymentMutation.isPending || !user}
+              disabled={createPaymentMutation.isPending || !currentUser}
               className="w-full"
               size="lg"
             >

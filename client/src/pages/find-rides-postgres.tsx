@@ -50,9 +50,7 @@ export default function FindRidesPostgres() {
   // Track approved rides
   const [approvedRides, setApprovedRides] = useState<Set<number>>(new Set());
   
-  // Modal states
-  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
-  const [selectedRide, setSelectedRide] = useState<any>(null);
+
   
   // Applied filter state (only updated when Apply Filter is clicked)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -110,64 +108,15 @@ export default function FindRidesPostgres() {
     }
   };
 
-  // Handle ride request with confirmation
+  // Handle ride request - redirect to payment-enabled request page
   const handleRequestRide = (rideId: number) => {
     if (!currentUser) return;
     
-    // Find the ride to get driver's name
-    const ride = filteredRides.find(r => r.id === rideId);
-    if (!ride) return;
-    
-    setSelectedRide(ride);
-    setConfirmationModalOpen(true);
+    // Redirect to the new request-ride page with the ride ID
+    setLocation(`/request-ride/${rideId}`);
   };
 
-  // Confirm and send the ride request
-  const confirmRideRequest = async () => {
-    if (!currentUser || !selectedRide) return;
-    
-    try {
-      const response = await fetch('/api/ride-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': currentUser.uid,
-          'x-user-email': currentUser.email || '',
-          'x-user-name': currentUser.displayName || ''
-        },
-        body: JSON.stringify({
-          rideId: selectedRide.id
-        }),
-      });
 
-      if (response.ok) {
-        setRequestedRides(prev => new Set(prev).add(selectedRide.id));
-        // Refresh data to show updated state
-        refreshData();
-        toast({
-          title: "Request Sent Successfully!",
-          description: `Your ride request has been sent to ${selectedRide.driverName || 'the driver'}. They will be notified and can approve your request.`,
-        });
-      } else {
-        const errorData = await response.json();
-        toast({
-          title: "Request Failed",
-          description: `Failed to send ride request: ${errorData.error || 'Unknown error'}`,
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error requesting ride:', error);
-      toast({
-        title: "Request Failed",
-        description: "Failed to send ride request. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setConfirmationModalOpen(false);
-      setSelectedRide(null);
-    }
-  };
 
   // Adapter function to convert PostgreSQL ride format to card format
   const adaptPostgresRideToCardFormat = (ride: any) => {
@@ -589,56 +538,7 @@ export default function FindRidesPostgres() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      <Dialog open={confirmationModalOpen} onOpenChange={setConfirmationModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Ride Request</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to send a ride request for this trip?
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedRide && (
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <FaUser className="text-blue-600" />
-                  <span className="font-medium">Driver:</span>
-                  <span>{selectedRide.driverName || 'Driver'}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-green-600" />
-                  <span className="font-medium">Route:</span>
-                  <span>{selectedRide.origin} → {selectedRide.destination}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <FaCalendar className="text-purple-600" />
-                  <span className="font-medium">Departure:</span>
-                  <span>{new Date(selectedRide.departureTime).toLocaleDateString()} at {new Date(selectedRide.departureTime).toLocaleTimeString()}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <FaDollarSign className="text-green-600" />
-                  <span className="font-medium">Price:</span>
-                  <span>${selectedRide.price}</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmationModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={confirmRideRequest}>
-              Send Request
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }

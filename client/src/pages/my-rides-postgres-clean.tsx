@@ -241,28 +241,49 @@ export default function MyRidesPostgres() {
 
     try {
       const response = await fetch(`/api/rides/${rideToComplete.id}/complete`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || ''
         },
       });
 
       if (response.ok) {
+        const result = await response.json();
+        
         setCompleteDialogOpen(false);
         setRideToComplete(null);
+        
+        // Show success message with payment capture details
+        const paymentsProcessed = result.paymentsProcessed || 0;
+        const successfulPayments = result.paymentResults?.filter((p: any) => p.status === 'captured').length || 0;
+        
+        toast({
+          title: "Ride Completed Successfully",
+          description: paymentsProcessed > 0 
+            ? `Ride completed and ${successfulPayments}/${paymentsProcessed} payments captured.`
+            : "Ride completed successfully.",
+        });
+        
+        console.log('Payment capture results:', result.paymentResults);
+        
+        // Refresh the rides data
+        loadMyRides();
         
         // Show review modal
         setRideToReview(rideToComplete);
         setReviewModalOpen(true);
       } else {
-        throw new Error('Failed to mark ride as complete');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to mark ride as complete');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error marking ride complete:', error);
       toast({
         title: "Error",
-        description: "Failed to mark ride as complete. Please try again.",
+        description: error.message || "Failed to mark ride as complete. Please try again.",
         variant: "destructive",
       });
     }

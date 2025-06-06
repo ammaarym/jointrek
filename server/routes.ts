@@ -9,6 +9,9 @@ import apiRoutes from "./api";
 import { sendRideRequestNotification, sendRideApprovalNotification } from "./twilioService";
 import crypto from "crypto";
 import Stripe from "stripe";
+import { db } from "./db";
+import { rideRequests } from "@shared/schema";
+import { and, eq } from "drizzle-orm";
 
 // Initialize Stripe
 let stripe: Stripe;
@@ -741,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark ride as complete
+  // Mark ride as complete and capture payments
   app.patch('/api/rides/:id/complete', authenticate, async (req: Request, res: Response) => {
     try {
       const rideId = parseInt(req.params.id);
@@ -761,8 +764,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only complete your own rides" });
       }
 
+      // Get all approved ride requests for this ride to capture payments
+      const approvedRequests = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.status, 'approved')
+        ));
+
+      const paymentResults = [];
+      
+      // Capture payment for each approved passenger
+      for (const request of approvedRequests) {
+        if (request.stripePaymentIntentId && stripe) {
+          try {
+            console.log(`Capturing payment for request ${request.id}, payment intent: ${request.stripePaymentIntentId}`);
+            
+            // Capture the payment
+            const paymentIntent = await stripe.paymentIntents.capture(request.stripePaymentIntentId);
+            
+            // Update payment status in database
+            await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+            
+            paymentResults.push({
+              requestId: request.id,
+              paymentIntentId: request.stripePaymentIntentId,
+              status: 'captured',
+              amount: paymentIntent.amount / 100
+            });
+            
+            console.log(`Payment captured successfully for request ${request.id}: $${paymentIntent.amount / 100}`);
+          } catch (stripeError: any) {
+            console.error(`Failed to capture payment for request ${request.id}:`, stripeError);
+            paymentResults.push({
+              requestId: request.id,
+              paymentIntentId: request.stripePaymentIntentId,
+              status: 'failed',
+              error: stripeError.message
+            });
+          }
+        }
+      }
+
+      // Mark ride as complete
       const updatedRide = await storage.markRideComplete(rideId);
-      res.json(updatedRide);
+      
+      res.json({
+        ride: updatedRide,
+        paymentsProcessed: paymentResults.length,
+        paymentResults
+      });
     } catch (error) {
       console.error("Error marking ride complete:", error);
       res.status(500).json({ message: "Failed to mark ride complete" });

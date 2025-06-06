@@ -56,6 +56,9 @@ export const rideRequests = pgTable("ride_requests", {
   passengerId: text("passenger_id").notNull().references(() => users.firebaseUid),
   status: text("status").notNull().default("pending"), // pending, approved, rejected
   message: text("message"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"), // For holding payment
+  paymentAmount: integer("payment_amount"), // Amount in cents
+  paymentStatus: text("payment_status").default("pending"), // pending, authorized, captured, failed
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

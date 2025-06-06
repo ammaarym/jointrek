@@ -8,6 +8,17 @@ import { fromZodError } from "zod-validation-error";
 import apiRoutes from "./api";
 import { sendRideRequestNotification, sendRideApprovalNotification } from "./twilioService";
 import crypto from "crypto";
+import Stripe from "stripe";
+
+// Initialize Stripe
+let stripe: Stripe;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-06-20",
+  });
+} else {
+  console.warn("STRIPE_SECRET_KEY not found. Payment functionality will be disabled.");
+}
 
 // Extend Request type to include user
 declare global {
@@ -789,6 +800,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching reviews:", error);
       res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // === Payment Routes ===
+  
+  // Create payment intent for ride request
+  app.post("/api/create-payment-intent", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const { rideId, amount } = req.body;
+      
+      if (!rideId || !amount) {
+        return res.status(400).json({ message: "rideId and amount are required" });
+      }
+
+      // Get ride details for payment description
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Create payment intent with authorization only (don't capture yet)
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        capture_method: "manual", // This allows us to authorize now and capture later
+        description: `Trek ride from ${ride.origin} to ${ride.destination}`,
+        metadata: {
+          rideId: rideId.toString(),
+          passengerId: req.user!.uid,
+          driverId: ride.driverId
+        }
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id 
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  // Capture payment when ride is completed
+  app.post("/api/capture-payment", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const { paymentIntentId, rideRequestId } = req.body;
+      
+      if (!paymentIntentId || !rideRequestId) {
+        return res.status(400).json({ message: "paymentIntentId and rideRequestId are required" });
+      }
+
+      // Get the ride request to verify ownership
+      const rideRequest = await storage.getRideRequestById(rideRequestId);
+      if (!rideRequest) {
+        return res.status(404).json({ message: "Ride request not found" });
+      }
+
+      // Get the ride to verify the driver
+      const ride = await storage.getRideById(rideRequest.rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Only the driver can capture payment
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "Only the driver can capture payment" });
+      }
+
+      // Capture the payment
+      const paymentIntent = await stripe.paymentIntents.capture(paymentIntentId);
+
+      // Update payment status in database
+      await storage.updateRideRequestPaymentStatus(rideRequestId, "captured");
+
+      res.json({ 
+        success: true,
+        paymentIntent: {
+          id: paymentIntent.id,
+          status: paymentIntent.status,
+          amount: paymentIntent.amount
+        }
+      });
+    } catch (error: any) {
+      console.error("Error capturing payment:", error);
+      res.status(500).json({ message: "Error capturing payment: " + error.message });
+    }
+  });
+
+  // Cancel payment intent if ride request is rejected or cancelled
+  app.post("/api/cancel-payment", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const { paymentIntentId, rideRequestId } = req.body;
+      
+      if (!paymentIntentId || !rideRequestId) {
+        return res.status(400).json({ message: "paymentIntentId and rideRequestId are required" });
+      }
+
+      // Get the ride request to verify
+      const rideRequest = await storage.getRideRequestById(rideRequestId);
+      if (!rideRequest) {
+        return res.status(404).json({ message: "Ride request not found" });
+      }
+
+      // Cancel the payment intent
+      const paymentIntent = await stripe.paymentIntents.cancel(paymentIntentId);
+
+      // Update payment status in database
+      await storage.updateRideRequestPaymentStatus(rideRequestId, "cancelled");
+
+      res.json({ 
+        success: true,
+        paymentIntent: {
+          id: paymentIntent.id,
+          status: paymentIntent.status
+        }
+      });
+    } catch (error: any) {
+      console.error("Error cancelling payment:", error);
+      res.status(500).json({ message: "Error cancelling payment: " + error.message });
     }
   });
 

@@ -844,6 +844,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           enabled: true,
           allow_redirects: "never"
         },
+        payment_method_options: {
+          card: {
+            request_three_d_secure: "automatic"
+          }
+        },
         usage: "off_session", // For future payments
         metadata: {
           firebaseUid: user.firebaseUid

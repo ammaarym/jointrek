@@ -53,7 +53,12 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement 
         options={{
-          layout: 'tabs'
+          layout: 'tabs',
+          wallets: {
+            applePay: 'auto',
+            googlePay: 'auto',
+            amazonPay: 'never'
+          }
         }}
       />
       

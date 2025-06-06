@@ -90,6 +90,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     My Rides
                   </span>
                 </Link>
+                <Link href="/driver-onboard">
+                  <span
+                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/driver-onboard" ? "text-primary" : ""}`}
+                  >
+                    Driver Setup
+                  </span>
+                </Link>
               </>
             )}
           </div>

@@ -14,7 +14,7 @@ import Stripe from "stripe";
 let stripe: Stripe;
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2024-06-20",
+    apiVersion: "2025-05-28.basil",
   });
 } else {
   console.warn("STRIPE_SECRET_KEY not found. Payment functionality will be disabled.");

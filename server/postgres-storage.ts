@@ -379,10 +379,7 @@ export class PostgresStorage implements IStorage {
     return updatedRide;
   }
 
-  async getRideById(id: number): Promise<Ride | undefined> {
-    const [ride] = await db.select().from(rides).where(eq(rides.id, id));
-    return ride;
-  }
+
 
   async getCompletedRidesByUser(userId: string): Promise<CompletedRide[]> {
     return await db.select().from(completedRides).where(eq(completedRides.participantId, userId));
@@ -795,11 +792,7 @@ export class PostgresStorage implements IStorage {
     return request;
   }
 
-  // Get a ride by ID
-  async getRideById(id: number): Promise<Ride | undefined> {
-    const [ride] = await db.select().from(rides).where(eq(rides.id, id));
-    return ride;
-  }
+
 
   // Delete expired rides (past their departure time)
   async deleteExpiredRides(): Promise<number> {

@@ -805,7 +805,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === Payment Routes ===
   
-  // Create payment intent for ride request
+  // Setup payment method for user profile
+  app.post("/api/setup-payment-method", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let stripeCustomerId = user.stripeCustomerId;
+
+      // Create Stripe customer if doesn't exist
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.displayName,
+          metadata: {
+            firebaseUid: user.firebaseUid
+          }
+        });
+        stripeCustomerId = customer.id;
+        await storage.updateUserStripeInfo(user.firebaseUid, stripeCustomerId);
+      }
+
+      // Create setup intent for saving payment method
+      const setupIntent = await stripe.setupIntents.create({
+        customer: stripeCustomerId,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: "never"
+        },
+        usage: "off_session", // For future payments
+        metadata: {
+          firebaseUid: user.firebaseUid
+        }
+      });
+
+      res.json({ 
+        clientSecret: setupIntent.client_secret,
+        customerId: stripeCustomerId 
+      });
+    } catch (error: any) {
+      console.error("Error setting up payment method:", error);
+      res.status(500).json({ message: "Error setting up payment method: " + error.message });
+    }
+  });
+
+  // Get user's saved payment methods
+  app.get("/api/payment-methods", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user || !user.stripeCustomerId) {
+        return res.json({ paymentMethods: [], hasDefaultPaymentMethod: false });
+      }
+
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: user.stripeCustomerId,
+        type: 'card',
+      });
+
+      res.json({ 
+        paymentMethods: paymentMethods.data,
+        hasDefaultPaymentMethod: !!user.defaultPaymentMethodId,
+        defaultPaymentMethodId: user.defaultPaymentMethodId
+      });
+    } catch (error: any) {
+      console.error("Error fetching payment methods:", error);
+      res.status(500).json({ message: "Error fetching payment methods: " + error.message });
+    }
+  });
+
+  // Set default payment method
+  app.post("/api/set-default-payment-method", authenticate, async (req, res) => {
+    try {
+      const { paymentMethodId } = req.body;
+      
+      if (!paymentMethodId) {
+        return res.status(400).json({ message: "paymentMethodId is required" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      await storage.updateUserStripeInfo(user.firebaseUid, user.stripeCustomerId!, paymentMethodId);
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error setting default payment method:", error);
+      res.status(500).json({ message: "Error setting default payment method: " + error.message });
+    }
+  });
+
+  // Confirm ride request with saved payment method (new simplified flow)
+  app.post("/api/confirm-ride-request", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const { rideId } = req.body;
+      
+      if (!rideId) {
+        return res.status(400).json({ message: "rideId is required" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user || !user.stripeCustomerId || !user.defaultPaymentMethodId) {
+        return res.status(400).json({ message: "Please add a payment method to your profile first" });
+      }
+
+      // Get ride details
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Create payment intent with saved payment method
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(parseFloat(ride.price) * 100), // Convert to cents
+        currency: "usd",
+        customer: user.stripeCustomerId,
+        payment_method: user.defaultPaymentMethodId,
+        confirmation_method: "manual",
+        confirm: true,
+        capture_method: "manual", // Authorize now, capture later
+        description: `Trek ride from ${ride.origin} to ${ride.destination}`,
+        metadata: {
+          rideId: rideId.toString(),
+          passengerId: req.user!.uid,
+          driverId: ride.driverId
+        }
+      });
+
+      // Create ride request with payment info
+      const rideRequest = await storage.createRideRequest({
+        rideId,
+        passengerId: req.user!.uid,
+        status: "pending",
+        stripePaymentIntentId: paymentIntent.id,
+        paymentAmount: parseFloat(ride.price),
+        paymentStatus: "authorized"
+      });
+
+      res.json({ 
+        success: true,
+        rideRequestId: rideRequest.id,
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status
+      });
+    } catch (error: any) {
+      console.error("Error confirming ride request:", error);
+      res.status(500).json({ message: "Error confirming ride request: " + error.message });
+    }
+  });
+  
+  // Create payment intent for ride request (legacy method - keeping for compatibility)
   app.post("/api/create-payment-intent", authenticate, async (req, res) => {
     try {
       if (!stripe) {

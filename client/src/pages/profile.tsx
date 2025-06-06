@@ -3,21 +3,176 @@ import { useAuth } from '@/hooks/use-auth-new';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { FaPhone, FaInstagram, FaEdit } from 'react-icons/fa';
+import { FaPhone, FaInstagram, FaEdit, FaCreditCard } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
+import { Plus, Star } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { stripePromise } from '@/lib/stripe';
 
+
+// Payment Setup Form Component
+const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    const { error, setupIntent } = await stripe.confirmSetup({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/profile`,
+      },
+      redirect: "if_required",
+    });
+
+    if (error) {
+      toast({
+        title: "Payment Method Setup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else if (setupIntent) {
+      toast({
+        title: "Payment Method Added",
+        description: "Your payment method has been saved successfully.",
+      });
+      onSuccess();
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Payment Method</p>
+        <p className="text-xs text-muted-foreground">
+          Add a credit card, debit card, or digital wallet for secure payments
+        </p>
+      </div>
+      
+      <PaymentElement 
+        options={{
+          layout: 'tabs',
+          wallets: {
+            applePay: 'auto',
+            googlePay: 'auto'
+          },
+          fields: {
+            billingDetails: {
+              name: 'auto',
+              email: 'auto'
+            }
+          }
+        }}
+      />
+      
+      <div className="text-xs text-muted-foreground">
+        <p>Supported cards: Visa, Mastercard, American Express, Discover, and more</p>
+        <p>Your payment information is securely encrypted and stored with Stripe</p>
+      </div>
+      
+      <div className="flex gap-4">
+        <Button 
+          type="submit" 
+          disabled={!stripe || isLoading}
+          className="flex-1"
+        >
+          {isLoading ? "Adding Payment Method..." : "Add Payment Method"}
+        </Button>
+      </div>
+    </form>
+  );
+};
 
 export default function Profile() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
   const [snapchat, setSnapchat] = useState('');
+  const [showAddPayment, setShowAddPayment] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+
+  // Fetch user's payment methods
+  const { data: paymentData, isLoading: paymentLoading } = useQuery({
+    queryKey: ["/api/payment-methods"],
+    enabled: !!currentUser,
+  });
+
+  // Setup payment method mutation
+  const setupPaymentMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/setup-payment-method", {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret);
+      setShowAddPayment(true);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Setup Failed",
+        description: error.message || "Failed to setup payment method. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Set default payment method mutation
+  const setDefaultMutation = useMutation({
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest("POST", "/api/set-default-payment-method", {
+        paymentMethodId
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Default Payment Method Updated",
+        description: "Your default payment method has been updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update default payment method.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddPaymentMethod = () => {
+    setupPaymentMutation.mutate();
+  };
+
+  const handlePaymentSetupSuccess = () => {
+    setShowAddPayment(false);
+    setClientSecret("");
+    queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
+  };
+
+  const handleSetDefault = (paymentMethodId: string) => {
+    setDefaultMutation.mutate(paymentMethodId);
+  };
 
   // Load user profile data on mount
   useEffect(() => {
@@ -315,6 +470,123 @@ export default function Profile() {
               )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Payment Methods Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FaCreditCard className="w-5 h-5" />
+            Payment Methods
+          </CardTitle>
+          <CardDescription>
+            Manage your payment methods for quick and secure ride payments
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {paymentLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+              <span className="ml-2 text-sm text-muted-foreground">Loading payment methods...</span>
+            </div>
+          ) : (
+            <>
+              {/* Existing Payment Methods */}
+              {(paymentData as any)?.paymentMethods?.length > 0 ? (
+                <div className="space-y-3">
+                  {(paymentData as any).paymentMethods.map((method: any) => (
+                    <div
+                      key={method.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FaCreditCard className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="font-medium">
+                            •••• •••• •••• {method.card.last4}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {method.card.brand.toUpperCase()} expires {method.card.exp_month}/{method.card.exp_year}
+                          </p>
+                        </div>
+                        {(paymentData as any).defaultPaymentMethodId === method.id && (
+                          <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs">
+                            <Star className="w-3 h-3 fill-current" />
+                            Default
+                          </div>
+                        )}
+                      </div>
+                      {(paymentData as any).defaultPaymentMethodId !== method.id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSetDefault(method.id)}
+                          disabled={setDefaultMutation.isPending}
+                        >
+                          Set as Default
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FaCreditCard className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-500 mb-4">No payment methods added yet</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Add a payment method to make ride payments quick and secure
+                  </p>
+                </div>
+              )}
+
+              {/* Add Payment Method Button */}
+              <Button
+                onClick={handleAddPaymentMethod}
+                disabled={setupPaymentMutation.isPending}
+                className="w-full"
+                variant="outline"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {setupPaymentMutation.isPending ? "Setting up..." : "Add Payment Method"}
+              </Button>
+            </>
+          )}
+
+          {/* Add Payment Method Form */}
+          {showAddPayment && clientSecret && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Add Payment Method</CardTitle>
+                <CardDescription>
+                  Add a new payment method to your profile for quick ride requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <PaymentSetupForm 
+                    clientSecret={clientSecret}
+                    onSuccess={handlePaymentSetupSuccess}
+                  />
+                </Elements>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Payment Info */}
+          <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2 text-sm">
+                How Payment Works
+              </h3>
+              <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <li>• Your payment method is securely stored with Stripe</li>
+                <li>• When you request a ride, your card is authorized but not charged</li>
+                <li>• Payment is only processed after the ride is completed</li>
+                <li>• You can change your default payment method anytime</li>
+              </ul>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </div>

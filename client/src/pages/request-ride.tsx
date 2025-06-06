@@ -5,8 +5,7 @@ import { useAuth } from "@/hooks/use-auth-new";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import { useToast } from "@/hooks/use-toast";
 import PaymentForm from "@/components/payment-form";
 import { ArrowLeft, MapPin, Clock, DollarSign, Users } from "lucide-react";
@@ -17,7 +16,6 @@ export default function RequestRidePage() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [message, setMessage] = useState("");
   const [showPayment, setShowPayment] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
@@ -264,22 +262,10 @@ export default function RequestRidePage() {
           <CardHeader>
             <CardTitle>Send Request</CardTitle>
             <CardDescription>
-              Add an optional message to introduce yourself to the driver.
               Your payment method will be authorized but not charged until the ride is completed.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="message">Message (Optional)</Label>
-              <Textarea
-                id="message"
-                placeholder="Hi! I'd like to request a seat for your ride."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={3}
-              />
-            </div>
-
             <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
               <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
                 Payment Authorization

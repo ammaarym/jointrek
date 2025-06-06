@@ -589,7 +589,8 @@ export class PostgresStorage implements IStorage {
   }
 
   async getApprovedRidesForUser(userId: string): Promise<any[]> {
-    const approvedRides = await db
+    // Get rides where user is a passenger (approved requests)
+    const passengerRides = await db
       .select({
         id: rideRequests.id,
         rideId: rideRequests.rideId,
@@ -597,6 +598,7 @@ export class PostgresStorage implements IStorage {
         status: rideRequests.status,
         message: rideRequests.message,
         createdAt: rideRequests.createdAt,
+        driverId: rides.driverId,
         driverName: users.displayName,
         driverEmail: users.email,
         driverPhone: users.phone,
@@ -607,7 +609,8 @@ export class PostgresStorage implements IStorage {
         rideDepartureTime: rides.departureTime,
         rideArrivalTime: rides.arrivalTime,
         ridePrice: rides.price,
-        rideCarModel: rides.carModel
+        rideCarModel: rides.carModel,
+        userRole: sql<string>`'passenger'` // Mark user role
       })
       .from(rideRequests)
       .innerJoin(rides, eq(rideRequests.rideId, rides.id))
@@ -615,10 +618,43 @@ export class PostgresStorage implements IStorage {
       .where(and(
         eq(rideRequests.passengerId, userId),
         eq(rideRequests.status, 'approved')
-      ))
-      .orderBy(desc(rideRequests.createdAt));
+      ));
+
+    // Get rides where user is a driver (with approved passengers)
+    const driverRides = await db
+      .select({
+        id: rideRequests.id,
+        rideId: rideRequests.rideId,
+        requestId: rideRequests.id,
+        status: rideRequests.status,
+        message: rideRequests.message,
+        createdAt: rideRequests.createdAt,
+        driverId: rides.driverId,
+        driverName: sql<string>`'You'`, // Driver sees "You" as driver name
+        driverEmail: users.email, // Passenger email
+        driverPhone: users.phone, // Passenger phone
+        driverInstagram: users.instagram, // Passenger instagram
+        driverSnapchat: users.snapchat, // Passenger snapchat
+        rideOrigin: rides.origin,
+        rideDestination: rides.destination,
+        rideDepartureTime: rides.departureTime,
+        rideArrivalTime: rides.arrivalTime,
+        ridePrice: rides.price,
+        rideCarModel: rides.carModel,
+        userRole: sql<string>`'driver'` // Mark user role
+      })
+      .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
+      .innerJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
+      .where(and(
+        eq(rides.driverId, userId),
+        eq(rideRequests.status, 'approved')
+      ));
+
+    // Combine both result sets
+    const allApprovedRides = [...passengerRides, ...driverRides];
     
-    return approvedRides;
+    return allApprovedRides.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   // Admin methods

@@ -857,7 +857,7 @@ export default function MyRidesPostgres() {
                       </span>
                       
                       {/* Show verification buttons based on user role */}
-                      {ride.driverId === currentUser?.uid ? (
+                      {ride.userRole === 'driver' ? (
                         // Driver can generate verification code
                         <Button
                           variant="outline"

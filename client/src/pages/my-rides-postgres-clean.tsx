@@ -624,33 +624,7 @@ export default function MyRidesPostgres() {
             <FaCheck className="w-4 h-4" />
             Completed
           </div>
-        ) : (
-          <>
-            {ride.driverId === currentUser?.uid ? (
-              // Driver view - generate verification code
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => generateVerificationCode(ride)}
-                className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
-              >
-                <FaKey className="w-4 h-4" />
-                Generate Code
-              </Button>
-            ) : (
-              // Passenger view - enter verification code
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePassengerVerification(ride)}
-                className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-              >
-                <FaCheck className="w-4 h-4" />
-                Ride Complete
-              </Button>
-            )}
-          </>
-        )}
+        ) : null}
         <Button
           variant="outline"
           size="sm"
@@ -1019,6 +993,17 @@ export default function MyRidesPostgres() {
                                     Approve
                                   </Button>
                                 </div>
+                              )}
+                              {request.status === 'approved' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => generateVerificationCode({ id: request.rideId })}
+                                  className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                                >
+                                  <FaKey className="w-4 h-4" />
+                                  Generate Code
+                                </Button>
                               )}
                             </div>
                           </div>

@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth-new';
 import { CheckCircle, AlertCircle, DollarSign, Shield, Clock } from 'lucide-react';
+import StripeConnectOnboarding from '@/components/StripeConnectOnboarding';
 
 interface DriverStatus {
   isOnboarded: boolean;
@@ -293,48 +294,16 @@ export default function DriverOnboard() {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  You need to complete driver onboarding before you can offer rides or accept ride requests.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-3">
-                <h3 className="font-medium">What you'll need to provide:</h3>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <Shield className="w-4 h-4" />
-                    Personal identification (SSN, ID document)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
-                    Bank account for receiving payments
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Business information (if applicable)
-                  </li>
-                </ul>
-              </div>
-              
-              <Button 
-                onClick={startOnboarding}
-                disabled={isOnboarding}
-                className="w-full"
-                size="lg"
-              >
-                {isOnboarding ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                    Setting up...
-                  </>
-                ) : (
-                  "Start Driver Onboarding"
-                )}
-              </Button>
-            </div>
+            <StripeConnectOnboarding 
+              onComplete={loadDriverStatus}
+              onError={(error) => {
+                toast({
+                  title: "Onboarding Error",
+                  description: error,
+                  variant: "destructive",
+                });
+              }}
+            />
           )}
         </CardContent>
       </Card>

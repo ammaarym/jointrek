@@ -51,16 +51,33 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Payment Method</p>
+        <p className="text-xs text-muted-foreground">
+          Add a credit card, debit card, or digital wallet for secure payments
+        </p>
+      </div>
+      
       <PaymentElement 
         options={{
           layout: 'tabs',
           wallets: {
             applePay: 'auto',
-            googlePay: 'auto',
-            amazonPay: 'never'
+            googlePay: 'auto'
+          },
+          fields: {
+            billingDetails: {
+              name: 'auto',
+              email: 'auto'
+            }
           }
         }}
       />
+      
+      <div className="text-xs text-muted-foreground">
+        <p>Supported cards: Visa, Mastercard, American Express, Discover, and more</p>
+        <p>Your payment information is securely encrypted and stored with Stripe</p>
+      </div>
       
       <div className="flex gap-4">
         <Button 

@@ -87,7 +87,17 @@ const CheckoutForm = ({ amount, rideDetails, onPaymentSuccess, onCancel }: Omit<
           
           <PaymentElement 
             options={{
-              layout: 'tabs'
+              layout: 'tabs',
+              wallets: {
+                applePay: 'auto',
+                googlePay: 'auto'
+              },
+              fields: {
+                billingDetails: {
+                  name: 'auto',
+                  email: 'auto'
+                }
+              }
             }}
           />
           

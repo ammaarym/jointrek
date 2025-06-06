@@ -141,6 +141,9 @@ function AppRoutes() {
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" requiresContactInfo={true} />}
           </Route>
+          <Route path="/request-ride">
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/request-ride" requiresContactInfo={true} />}
+          </Route>
           <Route path="/request-ride/:id">
             {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride/:id" requiresContactInfo={true} />}
           </Route>

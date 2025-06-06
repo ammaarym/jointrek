@@ -946,9 +946,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "usd",
         customer: user.stripeCustomerId,
         payment_method: user.defaultPaymentMethodId,
-        confirmation_method: "manual",
         confirm: true,
         capture_method: "manual", // Authorize now, capture later
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: "never"
+        },
         description: `Trek ride from ${ride.origin} to ${ride.destination}`,
         metadata: {
           rideId: rideId.toString(),

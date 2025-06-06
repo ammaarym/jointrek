@@ -59,6 +59,20 @@ export class PostgresStorage implements IStorage {
     return updatedUser;
   }
 
+  async updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string): Promise<User | undefined> {
+    const updateData: any = { stripeCustomerId };
+    if (defaultPaymentMethodId) {
+      updateData.defaultPaymentMethodId = defaultPaymentMethodId;
+    }
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.firebaseUid, firebaseUid))
+      .returning();
+    return updatedUser;
+  }
+
   // Ride methods
   async getRide(id: number): Promise<Ride | undefined> {
     const [ride] = await db.select().from(rides).where(eq(rides.id, id));

@@ -834,7 +834,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           enabled: true,
           allow_redirects: "never"
         },
-        payment_method_types: ["card", "apple_pay", "google_pay"],
         metadata: {
           rideId: rideId.toString(),
           passengerId: req.user!.uid,

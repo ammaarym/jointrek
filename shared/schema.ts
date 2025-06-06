@@ -13,6 +13,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   instagram: text("instagram"),
   snapchat: text("snapchat"),
+  stripeCustomerId: text("stripe_customer_id"),
+  defaultPaymentMethodId: text("default_payment_method_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -974,6 +974,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct payment intent route
+  app.post('/api/payment-intent', authenticate, async (req: Request, res: Response) => {
+    try {
+      const { amount } = req.body;
+
+      if (!amount || typeof amount !== 'number' || amount <= 0) {
+        return res.status(400).json({ message: "Valid amount in cents is required" });
+      }
+
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never',
+        },
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
   // === Payment Routes ===
   
   // Setup payment method for user profile

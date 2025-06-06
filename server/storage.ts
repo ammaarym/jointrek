@@ -68,6 +68,7 @@ export interface IStorage {
   getRideRequestById(id: number): Promise<any>;
   updateRideRequestPaymentStatus(id: number, status: string): Promise<any>;
   getRideById(id: number): Promise<any>;
+  updateUserStripeConnectAccount(userId: number, accountId: string): Promise<User>;
 
   // Admin methods
   getUserCount(): Promise<number>;

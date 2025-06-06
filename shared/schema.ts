@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   snapchat: text("snapchat"),
   stripeCustomerId: text("stripe_customer_id"),
   defaultPaymentMethodId: text("default_payment_method_id"),
+  stripeConnectAccountId: text("stripe_connect_account_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

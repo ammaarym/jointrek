@@ -1003,6 +1003,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Driver Stripe Connect onboarding
+  app.post('/api/driver/onboard', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user already has a Stripe Connect account
+      if (user.stripeConnectAccountId) {
+        // Get account status
+        const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
+        return res.json({ 
+          accountId: user.stripeConnectAccountId,
+          status: account.details_submitted ? 'complete' : 'pending',
+          dashboardUrl: `https://dashboard.stripe.com/connect/accounts/${user.stripeConnectAccountId}`
+        });
+      }
+
+      // Create new Stripe Connect account
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'US',
+        email: user.email,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+      });
+
+      // Save the account ID to user record
+      await storage.updateUserStripeConnectAccount(user.id, account.id);
+
+      // Create account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${req.headers.origin}/driver/onboard?refresh=true`,
+        return_url: `${req.headers.origin}/driver/onboard?success=true`,
+        type: 'account_onboarding',
+      });
+
+      res.json({ 
+        accountId: account.id,
+        onboardingUrl: accountLink.url,
+        status: 'pending'
+      });
+    } catch (error: any) {
+      console.error('Error creating driver account:', error);
+      res.status(500).json({ message: "Error setting up driver account: " + error.message });
+    }
+  });
+
+  // Check driver onboarding status
+  app.get('/api/driver/status', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user || !user.stripeConnectAccountId) {
+        return res.json({ 
+          isOnboarded: false,
+          canAcceptRides: false 
+        });
+      }
+
+      const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
+      
+      res.json({
+        isOnboarded: account.details_submitted && account.charges_enabled,
+        canAcceptRides: account.details_submitted && account.charges_enabled,
+        accountId: user.stripeConnectAccountId,
+        payoutsEnabled: account.payouts_enabled
+      });
+    } catch (error: any) {
+      console.error('Error checking driver status:', error);
+      res.status(500).json({ message: "Error checking driver status: " + error.message });
+    }
+  });
+
   // === Payment Routes ===
   
   // Setup payment method for user profile

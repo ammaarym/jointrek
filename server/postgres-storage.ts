@@ -899,6 +899,16 @@ export class PostgresStorage implements IStorage {
     console.log(`Cleaned up ${expiredRideIds.length} expired rides`);
     return expiredRideIds.length;
   }
+
+  async updateUserStripeConnectAccount(userId: number, accountId: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ stripeConnectAccountId: accountId })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
 }
 
 // Export a singleton instance

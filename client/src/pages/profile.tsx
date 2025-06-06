@@ -72,10 +72,7 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
             googlePay: 'auto'
           },
           fields: {
-            billingDetails: {
-              name: 'auto',
-              email: 'auto'
-            }
+            billingDetails: 'auto'
           }
         }}
       />

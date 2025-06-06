@@ -812,7 +812,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Payment service not available" });
       }
 
+      console.log("Setup payment method - Looking for user with Firebase UID:", req.user!.uid);
       const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      console.log("Setup payment method - Found user:", user ? { id: user.id, email: user.email, firebaseUid: user.firebaseUid } : "null");
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

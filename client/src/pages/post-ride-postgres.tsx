@@ -15,6 +15,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 
+interface DriverStatus {
+  isOnboarded: boolean;
+  canAcceptRides: boolean;
+  accountId?: string;
+  payoutsEnabled?: boolean;
+}
+
 // List of major Florida cities
 const FLORIDA_CITIES = [
   "Gainesville",
@@ -35,6 +42,8 @@ export default function PostRidePostgres() {
   const [location, setLocation] = useLocation();
   const { currentUser } = useAuth();
   const { createRide, loading, error } = usePostgresRides();
+  const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
+  const [checkingDriverStatus, setCheckingDriverStatus] = useState(false);
   
   // Form state - auto-select passenger tab if on request-ride route
   const [rideType, setRideType] = useState<'driver' | 'passenger'>(
@@ -45,6 +54,37 @@ export default function PostRidePostgres() {
   useEffect(() => {
     setRideType(location === '/request-ride' ? 'passenger' : 'driver');
   }, [location]);
+
+  // Check driver status when switching to driver mode
+  useEffect(() => {
+    if (rideType === 'driver' && currentUser) {
+      checkDriverStatus();
+    }
+  }, [rideType, currentUser]);
+
+  const checkDriverStatus = async () => {
+    if (!currentUser) return;
+
+    setCheckingDriverStatus(true);
+    try {
+      const response = await fetch('/api/driver/status', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const status = await response.json();
+        setDriverStatus(status);
+      }
+    } catch (error) {
+      console.error('Error checking driver status:', error);
+    } finally {
+      setCheckingDriverStatus(false);
+    }
+  };
   const [origin, setOrigin] = useState('Gainesville');
   const [originArea, setOriginArea] = useState('');
   const [destination, setDestination] = useState('');
@@ -139,6 +179,18 @@ export default function PostRidePostgres() {
           variant: "destructive"
         });
         setIsSubmitting(false);
+        return;
+      }
+      
+      // Check if driver has completed Stripe Connect setup
+      if (driverStatus && !driverStatus.canAcceptRides) {
+        toast({
+          title: "Driver Setup Required",
+          description: "Please complete driver payment setup before offering rides",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        setLocation('/driver-onboard');
         return;
       }
     }
@@ -330,7 +382,26 @@ export default function PostRidePostgres() {
                 </div>
               </div>
               
-              {rideType === 'driver' && (
+              {rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides && (
+                <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FaCarSide className="text-orange-600" />
+                    <span className="font-medium text-orange-800">Driver Setup Required</span>
+                  </div>
+                  <p className="text-sm text-orange-700 mb-3">
+                    You need to complete driver payment setup before offering rides. This allows you to receive payments from passengers.
+                  </p>
+                  <Button 
+                    type="button"
+                    onClick={() => setLocation('/driver-onboard')}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    Complete Driver Setup
+                  </Button>
+                </div>
+              )}
+
+              {rideType === 'driver' && (!driverStatus || driverStatus.canAcceptRides) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="availableSeats">

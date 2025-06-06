@@ -312,6 +312,16 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     </span>
                   </Link>
                   <Link
+                    href="/driver-onboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span
+                      className={`block py-2 px-3 rounded-md ${location === "/driver-onboard" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
+                    >
+                      Driver Setup
+                    </span>
+                  </Link>
+                  <Link
                     href="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

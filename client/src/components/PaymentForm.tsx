@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth-new';
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
@@ -33,17 +34,26 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>('');
 
   useEffect(() => {
     // Create PaymentIntent as soon as the component loads
     const createPaymentIntent = async () => {
+      if (!currentUser) {
+        onPaymentError?.("User authentication required");
+        return;
+      }
+
       try {
         const response = await fetch('/api/payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-user-id': currentUser.uid,
+            'x-user-email': currentUser.email || '',
+            'x-user-name': currentUser.displayName || ''
           },
           body: JSON.stringify({ amount }),
         });

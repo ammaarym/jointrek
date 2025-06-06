@@ -850,6 +850,37 @@ export default function MyRidesPostgres() {
                         </div>
                       </div>
                     </div>
+                    
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        Approved {formatDate(new Date(ride.createdAt))}
+                      </span>
+                      
+                      {/* Show verification buttons based on user role */}
+                      {ride.driverId === currentUser?.uid ? (
+                        // Driver can generate verification code
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => generateVerificationCode({ id: ride.rideId })}
+                          className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                        >
+                          <FaKey className="w-4 h-4" />
+                          Generate Code
+                        </Button>
+                      ) : (
+                        // Passenger can enter verification code to complete ride
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePassengerVerification({ id: ride.rideId })}
+                          className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+                        >
+                          <FaCheck className="w-4 h-4" />
+                          Ride Complete
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))

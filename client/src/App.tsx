@@ -144,6 +144,9 @@ function AppRoutes() {
           <Route path="/request-ride/:id">
             {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride/:id" requiresContactInfo={true} />}
           </Route>
+          <Route path="/request-ride-simple/:id">
+            {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride-simple/:id" requiresContactInfo={true} />}
+          </Route>
           <Route path="/profile/payment">
             {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile/payment" requiresContactInfo={true} />}
           </Route>

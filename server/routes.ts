@@ -1171,11 +1171,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isOnboarded: account.details_submitted && account.charges_enabled,
         canAcceptRides: account.details_submitted && account.charges_enabled,
         accountId: user.stripeConnectAccountId,
-        payoutsEnabled: account.payouts_enabled
+        payoutsEnabled: account.payouts_enabled,
+        chargesEnabled: account.charges_enabled,
+        detailsSubmitted: account.details_submitted,
+        requirementsEventuallyDue: account.requirements?.eventually_due || [],
+        requirementsCurrentlyDue: account.requirements?.currently_due || []
       });
     } catch (error: any) {
       console.error('Error checking driver status:', error);
       res.status(500).json({ message: "Error checking driver status: " + error.message });
+    }
+  });
+
+  // Create dashboard link for drivers to manage their Connect account
+  app.post('/api/driver/dashboard-link', authenticate, async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user || !user.stripeConnectAccountId) {
+        return res.status(404).json({ message: "Driver account not found" });
+      }
+
+      const link = await stripe.accounts.createLoginLink(user.stripeConnectAccountId);
+      
+      res.json({ dashboardUrl: link.url });
+    } catch (error: any) {
+      console.error('Error creating dashboard link:', error);
+      res.status(500).json({ message: "Error creating dashboard link: " + error.message });
+    }
+  });
+
+  // Webhook endpoint for Stripe Connect account updates
+  app.post('/api/webhooks/stripe-connect', async (req: Request, res: Response) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const event = req.body;
+
+      // Handle the event
+      switch (event.type) {
+        case 'account.updated':
+          const account = event.data.object;
+          console.log(`Connect account ${account.id} was updated`);
+          break;
+        
+        case 'account.application.deauthorized':
+          const deauthorizedAccount = event.data.object;
+          console.log(`Connect account ${deauthorizedAccount.id} was deauthorized`);
+          break;
+
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error('Webhook error:', error);
+      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 

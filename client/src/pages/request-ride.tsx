@@ -79,7 +79,7 @@ export default function RequestRidePage() {
   });
 
   const handleInitialRequest = () => {
-    if (!ride || !user) return;
+    if (!ride || !currentUser) return;
 
     const amount = parseFloat(ride.price);
     createPaymentMutation.mutate({ rideId: ride.id, amount });

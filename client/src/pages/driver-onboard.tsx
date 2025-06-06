@@ -73,7 +73,7 @@ export default function DriverOnboard() {
         const result = await response.json();
         
         if (result.onboardingUrl) {
-          // Redirect to Stripe onboarding
+          // Redirect to Stripe Express onboarding
           window.location.href = result.onboardingUrl;
         } else {
           toast({
@@ -84,7 +84,16 @@ export default function DriverOnboard() {
         }
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to start onboarding');
+        
+        if (error.connectSetupRequired) {
+          toast({
+            title: "Platform Setup Required",
+            description: "Stripe Connect needs to be enabled in the platform dashboard first. Please contact support.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(error.message || 'Failed to start onboarding');
+        }
       }
     } catch (error: any) {
       console.error('Error starting onboarding:', error);

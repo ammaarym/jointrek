@@ -974,36 +974,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Direct payment intent route
+  // Payment intent with destination charges for marketplace
   app.post('/api/payment-intent', authenticate, async (req: Request, res: Response) => {
     try {
-      const { amount } = req.body;
+      const { amount, rideId } = req.body;
 
       if (!amount || typeof amount !== 'number' || amount <= 0) {
         return res.status(400).json({ message: "Valid amount in cents is required" });
+      }
+
+      if (!rideId) {
+        return res.status(400).json({ message: "Ride ID is required" });
       }
 
       if (!stripe) {
         return res.status(500).json({ message: "Stripe not configured" });
       }
 
+      // Get ride details to find the driver
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Get driver details to check for Connect account
+      const driver = await storage.getUserByFirebaseUid(ride.driverId);
+      if (!driver || !driver.stripeConnectAccountId) {
+        return res.status(400).json({ 
+          message: "Driver hasn't completed Connect onboarding yet" 
+        });
+      }
+
+      // Verify Connect account is ready for transfers
+      const account = await stripe.accounts.retrieve(driver.stripeConnectAccountId);
+      if (!account.details_submitted || !account.charges_enabled) {
+        return res.status(400).json({ 
+          message: "Driver's payment account is not ready to receive transfers" 
+        });
+      }
+
+      // Calculate platform fee (10% of ride cost)
+      const platformFeePercent = 0.10;
+      const totalAmountCents = Math.round(amount * 100);
+      const platformFeeCents = Math.round(totalAmountCents * platformFeePercent);
+
+      // Create payment intent with destination charges
       const paymentIntent = await stripe.paymentIntents.create({
-        amount,
+        amount: totalAmountCents,
         currency: 'usd',
+        application_fee_amount: platformFeeCents,
+        transfer_data: {
+          destination: driver.stripeConnectAccountId,
+        },
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: 'never',
         },
+        metadata: {
+          rideId: rideId.toString(),
+          passengerId: req.user!.uid,
+          driverId: ride.driverId,
+          platformFee: (platformFeeCents / 100).toString(),
+          driverAmount: ((totalAmountCents - platformFeeCents) / 100).toString(),
+        },
       });
 
-      res.json({ clientSecret: paymentIntent.client_secret });
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        platformFee: platformFeeCents / 100,
+        driverAmount: (totalAmountCents - platformFeeCents) / 100,
+        totalAmount: totalAmountCents / 100
+      });
     } catch (error: any) {
       console.error('Error creating payment intent:', error);
       res.status(500).json({ message: "Error creating payment intent: " + error.message });
     }
   });
 
-  // Driver Stripe Connect onboarding
+  // Driver Stripe Connect Express onboarding
   app.post('/api/driver/onboard', authenticate, async (req: Request, res: Response) => {
     try {
       if (!stripe) {
@@ -1015,18 +1063,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check if user already has a Stripe Connect account
+      // Check if user already has a Connect account
       if (user.stripeConnectAccountId) {
-        // Get account status
-        const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
-        return res.json({ 
-          accountId: user.stripeConnectAccountId,
-          status: account.details_submitted ? 'complete' : 'pending',
-          dashboardUrl: `https://dashboard.stripe.com/connect/accounts/${user.stripeConnectAccountId}`
-        });
+        try {
+          const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
+          
+          if (!account.details_submitted) {
+            // Create new account link for existing incomplete account
+            const accountLink = await stripe.accountLinks.create({
+              account: user.stripeConnectAccountId,
+              refresh_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?refresh=true`,
+              return_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?success=true`,
+              type: 'account_onboarding',
+            });
+            
+            return res.json({ 
+              accountId: user.stripeConnectAccountId,
+              onboardingUrl: accountLink.url,
+              status: 'pending'
+            });
+          } else {
+            return res.json({ 
+              accountId: user.stripeConnectAccountId,
+              status: 'complete',
+              message: 'Driver account already onboarded'
+            });
+          }
+        } catch (accountError) {
+          console.error('Error retrieving existing account:', accountError);
+          // Account might be invalid, create a new one
+        }
       }
 
-      // Create new Stripe Connect account
+      // Create new Stripe Express account
       const account = await stripe.accounts.create({
         type: 'express',
         country: 'US',
@@ -1035,6 +1104,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           card_payments: { requested: true },
           transfers: { requested: true },
         },
+        business_type: 'individual',
+        individual: {
+          email: user.email,
+          first_name: user.displayName?.split(' ')[0] || '',
+          last_name: user.displayName?.split(' ').slice(1).join(' ') || '',
+        },
+        settings: {
+          payouts: {
+            schedule: {
+              interval: 'daily'
+            }
+          }
+        }
       });
 
       // Save the account ID to user record
@@ -1043,8 +1125,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create account link for onboarding
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `${req.headers.origin}/driver/onboard?refresh=true`,
-        return_url: `${req.headers.origin}/driver/onboard?success=true`,
+        refresh_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?refresh=true`,
+        return_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?success=true`,
         type: 'account_onboarding',
       });
 
@@ -1055,6 +1137,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error('Error creating driver account:', error);
+      
+      // Check if it's the Connect not enabled error
+      if (error.message?.includes('signed up for Connect')) {
+        return res.status(400).json({ 
+          message: "Stripe Connect needs to be enabled in your Stripe dashboard first. Please go to Dashboard → Connect to enable it.",
+          connectSetupRequired: true
+        });
+      }
+      
       res.status(500).json({ message: "Error setting up driver account: " + error.message });
     }
   });

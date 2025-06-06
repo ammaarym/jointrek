@@ -38,6 +38,12 @@ export default function MyRidesPostgres() {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [rideToComplete, setRideToComplete] = useState<any>(null);
+  const [verificationCode, setVerificationCode] = useState<string>('');
+  const [showVerificationCode, setShowVerificationCode] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState<string>('');
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
+  const [inputVerificationCode, setInputVerificationCode] = useState<string>('');
+  const [isPassenger, setIsPassenger] = useState(false);
 
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();

@@ -42,6 +42,7 @@ export const rides = pgTable("rides", {
   notes: text("notes"),
   rideType: text("ride_type").notNull(),
   isCompleted: boolean("is_completed").default(false),
+  verificationCode: text("verification_code"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

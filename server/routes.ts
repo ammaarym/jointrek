@@ -10,7 +10,7 @@ import { sendRideRequestNotification, sendRideApprovalNotification } from "./twi
 import crypto from "crypto";
 import Stripe from "stripe";
 import { db } from "./db";
-import { rideRequests } from "@shared/schema";
+import { rideRequests, rides } from "@shared/schema";
 import { and, eq } from "drizzle-orm";
 
 // Initialize Stripe
@@ -744,7 +744,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mark ride as complete and capture payments
+  // Generate verification code for ride completion
+  app.post('/api/rides/:id/generate-verification', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      // Get the ride to verify ownership
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if user is the driver
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "You can only generate verification codes for your own rides" });
+      }
+
+      // Generate a 6-digit verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Update ride with verification code
+      await db.update(rides).set({ verificationCode }).where(eq(rides.id, rideId));
+      
+      res.json({ verificationCode });
+    } catch (error) {
+      console.error("Error generating verification code:", error);
+      res.status(500).json({ message: "Failed to generate verification code" });
+    }
+  });
+
+  // Verify completion code and mark ride as complete
+  app.patch('/api/rides/:id/verify-complete', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      const { verificationCode } = req.body;
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      if (!verificationCode) {
+        return res.status(400).json({ message: "Verification code is required" });
+      }
+
+      // Get the ride to verify the code
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Verify the code matches
+      if (ride.verificationCode !== verificationCode) {
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+
+      // Get all approved ride requests for this ride to capture payments
+      const approvedRequests = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.status, 'approved')
+        ));
+
+      const paymentResults = [];
+      
+      // Capture payment for each approved passenger
+      for (const request of approvedRequests) {
+        if (request.stripePaymentIntentId && stripe) {
+          try {
+            console.log(`Capturing payment for request ${request.id}, payment intent: ${request.stripePaymentIntentId}`);
+            
+            // Capture the payment
+            const paymentIntent = await stripe.paymentIntents.capture(request.stripePaymentIntentId);
+            
+            // Update payment status in database
+            await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+            
+            paymentResults.push({
+              requestId: request.id,
+              paymentIntentId: request.stripePaymentIntentId,
+              status: 'captured',
+              amount: paymentIntent.amount / 100
+            });
+            
+            console.log(`Payment captured successfully for request ${request.id}: $${paymentIntent.amount / 100}`);
+          } catch (stripeError: any) {
+            console.error(`Failed to capture payment for request ${request.id}:`, stripeError);
+            paymentResults.push({
+              requestId: request.id,
+              paymentIntentId: request.stripePaymentIntentId,
+              status: 'failed',
+              error: stripeError.message
+            });
+          }
+        }
+      }
+
+      // Mark ride as complete and clear verification code
+      const updatedRide = await storage.markRideComplete(rideId);
+      await db.update(rides).set({ verificationCode: null }).where(eq(rides.id, rideId));
+      
+      res.json({
+        ride: updatedRide,
+        paymentsProcessed: paymentResults.length,
+        paymentResults
+      });
+    } catch (error) {
+      console.error("Error verifying ride completion:", error);
+      res.status(500).json({ message: "Failed to verify ride completion" });
+    }
+  });
+
+  // Legacy endpoint - Mark ride as complete and capture payments
   app.patch('/api/rides/:id/complete', authenticate, async (req: Request, res: Response) => {
     try {
       const rideId = parseInt(req.params.id);

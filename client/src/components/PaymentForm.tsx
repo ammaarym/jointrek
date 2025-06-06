@@ -19,7 +19,8 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface PaymentFormProps {
-  amount: number; // Amount in cents
+  amount: number; // Amount in dollars
+  rideId?: number; // Required for marketplace payments
   onPaymentSuccess?: (paymentIntentId: string) => void;
   onPaymentError?: (error: string) => void;
   disabled?: boolean;
@@ -27,6 +28,7 @@ interface PaymentFormProps {
 
 const CheckoutForm: React.FC<PaymentFormProps> = ({
   amount,
+  rideId,
   onPaymentSuccess,
   onPaymentError,
   disabled = false
@@ -37,6 +39,11 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>('');
+  const [paymentDetails, setPaymentDetails] = useState<{
+    platformFee: number;
+    driverAmount: number;
+    totalAmount: number;
+  } | null>(null);
 
   useEffect(() => {
     // Create PaymentIntent as soon as the component loads
@@ -55,15 +62,27 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
             'x-user-email': currentUser.email || '',
             'x-user-name': currentUser.displayName || ''
           },
-          body: JSON.stringify({ amount }),
+          body: JSON.stringify({ 
+            amount,
+            rideId 
+          }),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create payment intent');
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to create payment intent');
         }
 
         const data = await response.json();
         setClientSecret(data.clientSecret);
+        
+        if (data.platformFee !== undefined) {
+          setPaymentDetails({
+            platformFee: data.platformFee,
+            driverAmount: data.driverAmount,
+            totalAmount: data.totalAmount
+          });
+        }
       } catch (error: any) {
         console.error('Error creating payment intent:', error);
         toast({
@@ -78,7 +97,7 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
     if (amount > 0) {
       createPaymentIntent();
     }
-  }, [amount, onPaymentError, toast]);
+  }, [amount, rideId, onPaymentError, toast]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

@@ -64,6 +64,7 @@ export interface IStorage {
   getRideRequestsForUser(userId: string): Promise<any[]>;
   getPendingRequestsForRide(rideId: number): Promise<any[]>;
   updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any>;
+  cancelRideRequest(requestId: number, passengerId: string): Promise<any>;
   getRideRequestById(id: number): Promise<any>;
   updateRideRequestPaymentStatus(id: number, status: string): Promise<any>;
   getRideById(id: number): Promise<any>;
@@ -422,6 +423,10 @@ export class MemStorage implements IStorage {
   }
 
   async updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any> {
+    throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
+  }
+
+  async cancelRideRequest(requestId: number, passengerId: string): Promise<any> {
     throw new Error("MemStorage ride request methods not implemented - use PostgreSQL");
   }
 

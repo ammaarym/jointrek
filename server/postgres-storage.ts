@@ -557,6 +557,37 @@ export class PostgresStorage implements IStorage {
     return updatedRequest;
   }
 
+  async cancelRideRequest(requestId: number, passengerId: string): Promise<RideRequest> {
+    // First verify the request belongs to this passenger
+    const [request] = await db
+      .select()
+      .from(rideRequests)
+      .where(and(
+        eq(rideRequests.id, requestId),
+        eq(rideRequests.passengerId, passengerId)
+      ));
+
+    if (!request) {
+      throw new Error('Request not found or unauthorized');
+    }
+
+    // Only allow canceling pending requests
+    if (request.status !== 'pending') {
+      throw new Error('Only pending requests can be cancelled');
+    }
+
+    const [updatedRequest] = await db
+      .update(rideRequests)
+      .set({ 
+        status: 'cancelled',
+        updatedAt: new Date()
+      })
+      .where(eq(rideRequests.id, requestId))
+      .returning();
+
+    return updatedRequest;
+  }
+
   async getApprovedRidesForUser(userId: string): Promise<any[]> {
     const approvedRides = await db
       .select({

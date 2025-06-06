@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update request status to cancelled
-      await storage.updateRideRequestStatus(requestId, "cancelled", req.user!.uid);
+      await storage.cancelRideRequest(requestId, req.user!.uid);
 
       res.json({ 
         success: true,

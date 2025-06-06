@@ -52,31 +52,23 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 dark:text-white">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/">
-                  <a className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
-                    Home
-                  </a>
+                <Link href="/" className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/find-rides">
-                  <a className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
-                    Find Rides
-                  </a>
+                <Link href="/find-rides" className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
+                  Find Rides
                 </Link>
               </li>
               <li>
-                <Link href="/post-ride">
-                  <a className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
-                    Post a Ride
-                  </a>
+                <Link href="/post-ride" className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
+                  Post a Ride
                 </Link>
               </li>
               <li>
-                <Link href="/profile">
-                  <a className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
-                    My Account
-                  </a>
+                <Link href="/profile" className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
+                  My Account
                 </Link>
               </li>
             </ul>

@@ -43,25 +43,28 @@ const initFirebase = () => {
   }
 };
 
-// Simplified authentication middleware since we're using client-side auth
+// Authentication middleware that extracts Firebase user info from headers
 const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // For now, we're using a simplified auth approach since we're handling 
-    // authentication on the client side using Firebase Authentication
+    // Get Firebase user info from headers (set by client-side auth)
+    const firebaseUid = req.headers['x-user-id'] as string;
+    const userEmail = req.headers['x-user-email'] as string;
+    const userName = req.headers['x-user-name'] as string;
     
-    // In a production app, we would verify the token here with Firebase Admin SDK
-    // For the demo, we'll use a simplified approach
+    if (!firebaseUid) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
     
-    // Create a dummy authenticated user for development
-    const dummyUser = {
-      uid: req.headers['x-user-id'] as string || 'demo-user',
-      email: req.headers['x-user-email'] as string || 'student@ufl.edu',
+    // Create user object with Firebase info
+    const authenticatedUser = {
+      uid: firebaseUid,
+      email: userEmail || '',
       email_verified: true,
-      name: req.headers['x-user-name'] as string || 'Demo Student',
+      name: userName || 'Trek User',
     } as admin.auth.DecodedIdToken;
     
     // Add user info to request
-    req.user = dummyUser;
+    req.user = authenticatedUser;
     next();
   } catch (error) {
     console.error("Authentication error:", error);

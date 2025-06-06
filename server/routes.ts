@@ -830,6 +830,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "usd",
         capture_method: "manual", // This allows us to authorize now and capture later
         description: `Trek ride from ${ride.origin} to ${ride.destination}`,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: "never"
+        },
+        payment_method_types: ["card", "apple_pay", "google_pay"],
         metadata: {
           rideId: rideId.toString(),
           passengerId: req.user!.uid,

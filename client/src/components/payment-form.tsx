@@ -78,7 +78,18 @@ const CheckoutForm = ({ amount, rideDetails, onPaymentSuccess, onCancel }: Omit<
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <PaymentElement />
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Payment Method</p>
+            <p className="text-xs text-muted-foreground">
+              Credit card, Apple Pay, and Google Pay are supported
+            </p>
+          </div>
+          
+          <PaymentElement 
+            options={{
+              layout: 'tabs'
+            }}
+          />
           
           <div className="flex gap-4">
             <Button 

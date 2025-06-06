@@ -63,6 +63,9 @@ export interface IStorage {
   getRideRequestsForUser(userId: string): Promise<any[]>;
   getPendingRequestsForRide(rideId: number): Promise<any[]>;
   updateRideRequestStatus(id: number, status: string, driverId: string): Promise<any>;
+  getRideRequestById(id: number): Promise<any>;
+  updateRideRequestPaymentStatus(id: number, status: string): Promise<any>;
+  getRideById(id: number): Promise<any>;
 
   // Admin methods
   getUserCount(): Promise<number>;

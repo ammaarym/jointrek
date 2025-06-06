@@ -765,6 +765,28 @@ export class PostgresStorage implements IStorage {
     return Object.values(groupedRides);
   }
 
+  // Get a ride request by ID
+  async getRideRequestById(id: number): Promise<RideRequest | undefined> {
+    const [request] = await db.select().from(rideRequests).where(eq(rideRequests.id, id));
+    return request;
+  }
+
+  // Update payment status for a ride request
+  async updateRideRequestPaymentStatus(id: number, status: string): Promise<RideRequest | undefined> {
+    const [request] = await db
+      .update(rideRequests)
+      .set({ paymentStatus: status, updatedAt: new Date() })
+      .where(eq(rideRequests.id, id))
+      .returning();
+    return request;
+  }
+
+  // Get a ride by ID
+  async getRideById(id: number): Promise<Ride | undefined> {
+    const [ride] = await db.select().from(rides).where(eq(rides.id, id));
+    return ride;
+  }
+
   // Delete expired rides (past their departure time)
   async deleteExpiredRides(): Promise<number> {
     const now = new Date();

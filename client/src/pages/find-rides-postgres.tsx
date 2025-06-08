@@ -25,7 +25,18 @@ const FLORIDA_CITIES = [
   "Orlando",
   "Tampa",
   "Tallahassee",
-  "Fort Lauderdale"
+  "Fort Lauderdale",
+  "St. Petersburg",
+  "Pensacola",
+  "Daytona Beach",
+  "Fort Myers",
+  "Atlanta",
+  "Ocala",
+  "Melbourne",
+  "West Palm Beach",
+  "Boca Raton",
+  "Sarasota",
+  "Naples"
 ];
 
 export default function FindRidesPostgres() {

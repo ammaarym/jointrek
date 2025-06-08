@@ -61,5 +61,12 @@ export const CITY_DISTANCES = {
   "St. Petersburg": { miles: 135, hours: 2.5 },
   "Pensacola": { miles: 340, hours: 5 },
   "Daytona Beach": { miles: 125, hours: 2 },
-  "Fort Myers": { miles: 200, hours: 3.5 }
+  "Fort Myers": { miles: 200, hours: 3.5 },
+  "Atlanta": { miles: 350, hours: 5.5 },
+  "Ocala": { miles: 38, hours: 0.75 },
+  "Melbourne": { miles: 140, hours: 2.5 },
+  "West Palm Beach": { miles: 280, hours: 4.5 },
+  "Boca Raton": { miles: 300, hours: 4.5 },
+  "Sarasota": { miles: 150, hours: 2.5 },
+  "Naples": { miles: 220, hours: 3.5 }
 };

@@ -34,7 +34,14 @@ const FLORIDA_CITIES = [
   "St. Petersburg",
   "Pensacola",
   "Daytona Beach",
-  "Fort Myers"
+  "Fort Myers",
+  "Atlanta",
+  "Ocala",
+  "Melbourne",
+  "West Palm Beach",
+  "Boca Raton",
+  "Sarasota",
+  "Naples"
 ];
 
 

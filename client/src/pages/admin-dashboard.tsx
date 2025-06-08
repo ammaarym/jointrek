@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Users, 
   Car, 
@@ -17,7 +21,13 @@ import {
   Phone,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Database,
+  Edit,
+  Trash2,
+  Plus,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -65,6 +75,375 @@ interface RideRequest {
   driverEmail: string;
   departureTime: string;
   price: string;
+}
+
+// Database Management Component
+function DatabaseManagement() {
+  const [selectedTable, setSelectedTable] = useState('users');
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState('');
+  const { toast } = useToast();
+
+  const tables = [
+    { value: 'users', label: 'Users' },
+    { value: 'rides', label: 'Rides' },
+    { value: 'ride_requests', label: 'Ride Requests' },
+    { value: 'conversations', label: 'Conversations' },
+    { value: 'messages', label: 'Messages' }
+  ];
+
+  const fetchTableData = async (table: string) => {
+    setLoading(true);
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/table/${table}`, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTableData(data);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load table data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteRecord = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this record?')) return;
+    
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/table/${selectedTable}/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      if (response.ok) {
+        toast({ title: "Success", description: "Record deleted successfully" });
+        fetchTableData(selectedTable);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete record",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const executeSQL = async () => {
+    if (!query.trim()) return;
+    
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch('/api/admin/sql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setTableData(result);
+        toast({ title: "SQL Executed", description: "Query completed successfully" });
+      }
+    } catch (error) {
+      toast({
+        title: "SQL Error",
+        description: "Failed to execute query",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchTableData(selectedTable);
+  }, [selectedTable]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="w-5 h-5" />
+          Database Management
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-4 items-center">
+          <Select value={selectedTable} onValueChange={setSelectedTable}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select table" />
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map(table => (
+                <SelectItem key={table.value} value={table.value}>
+                  {table.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => fetchTableData(selectedTable)}>
+            Refresh
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-50">
+                  {tableData.length > 0 && Object.keys(tableData[0]).map(key => (
+                    <th key={key} className="border border-gray-300 px-4 py-2 text-left">
+                      {key}
+                    </th>
+                  ))}
+                  <th className="border border-gray-300 px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableData.map((row, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    {Object.values(row).map((value: any, cellIndex) => (
+                      <td key={cellIndex} className="border border-gray-300 px-4 py-2 max-w-xs truncate">
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                      </td>
+                    ))}
+                    <td className="border border-gray-300 px-4 py-2">
+                      <Button size="sm" variant="destructive" onClick={() => deleteRecord(row.id)}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="mt-6 space-y-4">
+          <h3 className="text-lg font-semibold">Raw SQL Query</h3>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Enter SQL query here..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="font-mono"
+              rows={4}
+            />
+            <Button onClick={executeSQL} disabled={!query.trim()}>
+              Execute Query
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Excel Sheets Component
+function ExcelSheets({ users, rides, requests }: { users: User[], rides: Ride[], requests: any[] }) {
+  const { toast } = useToast();
+
+  const downloadCSV = (data: any[], filename: string) => {
+    if (data.length === 0) return;
+
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => 
+        headers.map(header => {
+          const value = row[header];
+          return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download Complete",
+      description: `${filename}.csv has been downloaded`,
+    });
+  };
+
+  const driversData = users.filter(user => 
+    rides.some(ride => ride.driverEmail === user.email)
+  ).map(driver => {
+    const driverRides = rides.filter(ride => ride.driverEmail === driver.email);
+    return {
+      id: driver.id,
+      name: driver.displayName,
+      email: driver.email,
+      phone: driver.phone || 'N/A',
+      joinDate: driver.createdAt,
+      totalRides: driverRides.length,
+      completedRides: driverRides.filter(ride => ride.isCompleted).length,
+      totalEarnings: driverRides.reduce((sum, ride) => sum + parseFloat(ride.price || '0'), 0),
+    };
+  });
+
+  const passengersData = users.filter(user => 
+    requests.some(req => req.passengerEmail === user.email)
+  ).map(passenger => {
+    const passengerRequests = requests.filter(req => req.passengerEmail === passenger.email);
+    return {
+      id: passenger.id,
+      name: passenger.displayName,
+      email: passenger.email,
+      phone: passenger.phone || 'N/A',
+      joinDate: passenger.createdAt,
+      totalRequests: passengerRequests.length,
+      approvedRequests: passengerRequests.filter(req => req.status === 'approved').length,
+      rejectedRequests: passengerRequests.filter(req => req.status === 'rejected').length,
+      pendingRequests: passengerRequests.filter(req => req.status === 'pending').length,
+      totalSpent: passengerRequests
+        .filter(req => req.status === 'approved')
+        .reduce((sum, req) => sum + parseFloat(req.price || '0'), 0)
+    };
+  });
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5" />
+            Excel Data Sheets
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Drivers Sheet */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Drivers Data ({driversData.length} drivers)</h3>
+              <Button onClick={() => downloadCSV(driversData, 'drivers_data')}>
+                <Download className="w-4 h-4 mr-2" />
+                Download Drivers CSV
+              </Button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                  <tr className="bg-blue-50">
+                    <th className="border border-gray-300 px-3 py-2">ID</th>
+                    <th className="border border-gray-300 px-3 py-2">Name</th>
+                    <th className="border border-gray-300 px-3 py-2">Email</th>
+                    <th className="border border-gray-300 px-3 py-2">Phone</th>
+                    <th className="border border-gray-300 px-3 py-2">Join Date</th>
+                    <th className="border border-gray-300 px-3 py-2">Total Rides</th>
+                    <th className="border border-gray-300 px-3 py-2">Completed</th>
+                    <th className="border border-gray-300 px-3 py-2">Earnings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {driversData.map(driver => (
+                    <tr key={driver.id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-3 py-2">{driver.id}</td>
+                      <td className="border border-gray-300 px-3 py-2">{driver.name}</td>
+                      <td className="border border-gray-300 px-3 py-2">{driver.email}</td>
+                      <td className="border border-gray-300 px-3 py-2">{driver.phone}</td>
+                      <td className="border border-gray-300 px-3 py-2">
+                        {new Date(driver.joinDate).toLocaleDateString()}
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2">{driver.totalRides}</td>
+                      <td className="border border-gray-300 px-3 py-2">{driver.completedRides}</td>
+                      <td className="border border-gray-300 px-3 py-2">${driver.totalEarnings.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Passengers Sheet */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Passengers Data ({passengersData.length} passengers)</h3>
+              <Button onClick={() => downloadCSV(passengersData, 'passengers_data')}>
+                <Download className="w-4 h-4 mr-2" />
+                Download Passengers CSV
+              </Button>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300 text-sm">
+                <thead>
+                  <tr className="bg-green-50">
+                    <th className="border border-gray-300 px-3 py-2">ID</th>
+                    <th className="border border-gray-300 px-3 py-2">Name</th>
+                    <th className="border border-gray-300 px-3 py-2">Email</th>
+                    <th className="border border-gray-300 px-3 py-2">Phone</th>
+                    <th className="border border-gray-300 px-3 py-2">Join Date</th>
+                    <th className="border border-gray-300 px-3 py-2">Total Requests</th>
+                    <th className="border border-gray-300 px-3 py-2">Approved</th>
+                    <th className="border border-gray-300 px-3 py-2">Rejected</th>
+                    <th className="border border-gray-300 px-3 py-2">Pending</th>
+                    <th className="border border-gray-300 px-3 py-2">Total Spent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {passengersData.map(passenger => (
+                    <tr key={passenger.id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-3 py-2">{passenger.id}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.name}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.email}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.phone}</td>
+                      <td className="border border-gray-300 px-3 py-2">
+                        {new Date(passenger.joinDate).toLocaleDateString()}
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.totalRequests}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.approvedRequests}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.rejectedRequests}</td>
+                      <td className="border border-gray-300 px-3 py-2">{passenger.pendingRequests}</td>
+                      <td className="border border-gray-300 px-3 py-2">${passenger.totalSpent.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* All Data Export */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Export All Data</h3>
+              <div className="flex gap-2">
+                <Button onClick={() => downloadCSV(users, 'all_users')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Users CSV
+                </Button>
+                <Button onClick={() => downloadCSV(rides, 'all_rides')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Rides CSV
+                </Button>
+                <Button onClick={() => downloadCSV(requests, 'all_requests')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Requests CSV
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default function AdminDashboard() {
@@ -238,11 +617,13 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="requests">Ride Requests</TabsTrigger>
             <TabsTrigger value="approved">Approved Rides</TabsTrigger>
             <TabsTrigger value="rides">All Rides</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
+            <TabsTrigger value="sheets">Excel Sheets</TabsTrigger>
           </TabsList>
 
           {/* Ride Requests Tab */}
@@ -466,6 +847,16 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Database Management Tab */}
+          <TabsContent value="database">
+            <DatabaseManagement />
+          </TabsContent>
+
+          {/* Excel Sheets Tab */}
+          <TabsContent value="sheets">
+            <ExcelSheets users={users} rides={rides} requests={requests} />
           </TabsContent>
         </Tabs>
       </div>

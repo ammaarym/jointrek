@@ -1677,5 +1677,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database management - Get table data
+  app.get("/api/admin/table/:tableName", adminAuth, async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const allowedTables = ['users', 'rides', 'ride_requests', 'conversations', 'messages'];
+      
+      if (!allowedTables.includes(tableName)) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      const data = await storage.getTableData(tableName);
+      res.json(data);
+    } catch (error) {
+      console.error(`Admin table ${req.params.tableName} error:`, error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Database management - Delete record
+  app.delete("/api/admin/table/:tableName/:id", adminAuth, async (req, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const allowedTables = ['users', 'rides', 'ride_requests', 'conversations', 'messages'];
+      
+      if (!allowedTables.includes(tableName)) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      await storage.deleteRecord(tableName, parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error(`Admin delete ${req.params.tableName}/${req.params.id} error:`, error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Database management - Execute SQL query
+  app.post("/api/admin/sql", adminAuth, async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: "Invalid query" });
+      }
+
+      // Basic safety check - only allow SELECT, INSERT, UPDATE, DELETE
+      const trimmedQuery = query.trim().toLowerCase();
+      const allowedOperations = ['select', 'insert', 'update', 'delete'];
+      const operation = trimmedQuery.split(' ')[0];
+      
+      if (!allowedOperations.includes(operation)) {
+        return res.status(400).json({ error: "Only SELECT, INSERT, UPDATE, DELETE operations allowed" });
+      }
+
+      const result = await storage.executeSQL(query);
+      res.json(result);
+    } catch (error) {
+      console.error("Admin SQL error:", error);
+      res.status(500).json({ error: "SQL execution failed: " + (error as Error).message });
+    }
+  });
+
   return httpServer;
 }

@@ -105,45 +105,45 @@ export default function PostRidePostgres() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   
-  // Auto-calculate price for all requests
-  useEffect(() => {
-    if (origin && destination) {
-      let distance = 0;
-      
-      // Calculate distance based on origin and destination
-      if (origin === 'Gainesville' && destination !== 'Gainesville') {
-        // From Gainesville to other cities
-        const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
-        if (cityData) {
-          distance = cityData.miles;
-        }
-      } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
-        // From other cities to Gainesville
-        const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
-        if (cityData) {
-          distance = cityData.miles;
-        }
-      }
-      
-      if (distance > 0) {
-        try {
-          const calculatedPrice = calculateRidePrice({
-            distance: distance,
-            mpg: 30,
-            gasPrice: 3.50,
-            destination: destination,
-            seatsTotal: parseInt(availableSeats) || 1,
-            date: departureDate ? new Date(departureDate) : undefined
-          });
-          setPrice(calculatedPrice.toString());
-        } catch (error) {
-          setPrice('15');
-        }
-      } else {
-        setPrice('15');
-      }
-    }
-  }, [rideType, origin, destination, departureDate, availableSeats]);
+  // Auto-calculate price for all requests (COMMENTED OUT - NOW USING FREE MARKET PRICING)
+  // useEffect(() => {
+  //   if (origin && destination) {
+  //     let distance = 0;
+  //     
+  //     // Calculate distance based on origin and destination
+  //     if (origin === 'Gainesville' && destination !== 'Gainesville') {
+  //       // From Gainesville to other cities
+  //       const cityData = CITY_DISTANCES[destination as keyof typeof CITY_DISTANCES];
+  //       if (cityData) {
+  //         distance = cityData.miles;
+  //       }
+  //     } else if (destination === 'Gainesville' && origin !== 'Gainesville') {
+  //       // From other cities to Gainesville
+  //       const cityData = CITY_DISTANCES[origin as keyof typeof CITY_DISTANCES];
+  //       if (cityData) {
+  //         distance = cityData.miles;
+  //       }
+  //     }
+  //     
+  //     if (distance > 0) {
+  //       try {
+  //         const calculatedPrice = calculateRidePrice({
+  //           distance: distance,
+  //           mpg: 30,
+  //           gasPrice: 3.50,
+  //           destination: destination,
+  //           seatsTotal: parseInt(availableSeats) || 1,
+  //           date: departureDate ? new Date(departureDate) : undefined
+  //         });
+  //         setPrice(calculatedPrice.toString());
+  //       } catch (error) {
+  //         setPrice('15');
+  //       }
+  //     } else {
+  //       setPrice('15');
+  //     }
+  //   }
+  // }, [rideType, origin, destination, departureDate, availableSeats]);
   
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -171,6 +171,18 @@ export default function PostRidePostgres() {
       toast({
         title: "Missing Information",
         description: "Please fill out all required fields",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Validate price range
+    const priceNum = parseFloat(price);
+    if (isNaN(priceNum) || priceNum < 5 || priceNum > 50) {
+      toast({
+        title: "Invalid Price",
+        description: "Price must be between $5 and $50",
         variant: "destructive"
       });
       setIsSubmitting(false);
@@ -433,18 +445,29 @@ export default function PostRidePostgres() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm text-gray-600">
+                  <Label htmlFor="totalPrice" className="text-sm text-gray-600">
                     <FaMoneyBillWave className="inline mr-2" />
-                    Price per Person (Auto-calculated)
+                    Total Price ($5 - $50)
                   </Label>
-                  <div className="p-3 bg-gray-50 rounded-md border">
-                    <span className="text-lg font-semibold text-green-600">
-                      ${price || '0.00'}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Based on distance and gas costs
-                    </p>
-                  </div>
+                  <Input
+                    id="totalPrice"
+                    type="number"
+                    min="5"
+                    max="50"
+                    step="1"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Enter total price"
+                    className="text-lg font-semibold"
+                    required
+                  />
+                  <p className="text-xs text-gray-500">
+                    {price && availableSeats ? (
+                      <>Price per person: ${(parseFloat(price) / parseInt(availableSeats)).toFixed(2)}</>
+                    ) : (
+                      'Set your total trip price (will be divided by available seats)'
+                    )}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="genderPreference">

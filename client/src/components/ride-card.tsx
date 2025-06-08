@@ -78,37 +78,26 @@ export default function RideCard({
     });
   };
 
-  // Calculate pricing breakdown
+  // Calculate pricing breakdown - FREE MARKET PRICING
   const getPricingBreakdown = () => {
-    const carType = ride.carModel?.split(" - ")[0] || ride.carModel || "sedan";
-    const mpg = CAR_TYPE_MPG[carType as keyof typeof CAR_TYPE_MPG] || 32;
     const destinationCity =
       typeof ride.destination === "string"
         ? ride.destination
         : ride.destination?.city || "destination";
     const cityData =
       CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
-    const gasPrice = 3.2;
 
     if (!cityData) return null;
 
-    const baseCost = (cityData.miles / mpg) * gasPrice;
-    const withBuffer = baseCost * 1.2;
-    const tollCities = ["Miami", "Tampa"];
-    const tollFee = tollCities.includes(destinationCity) ? 2.5 : 0;
-    const totalCost = withBuffer + tollFee;
-    const perPersonCost = totalCost / ride.seatsTotal;
+    // Driver's total price divided by available seats
+    const totalPrice = parseFloat(ride.price.toString());
+    const perPersonCost = totalPrice / ride.seatsTotal;
 
     return {
       distance: cityData.miles,
-      mpg,
-      gasPrice,
-      baseCost,
-      buffer: baseCost * 0.2,
-      tollFee,
-      totalCost,
+      totalPrice,
       perPersonCost,
-      carType,
+      carType: ride.carModel || "sedan",
       destinationCity,
     };
   };

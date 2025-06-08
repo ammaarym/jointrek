@@ -569,127 +569,48 @@ export default function RideCard({
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-3">Trip Breakdown:</h4>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-medium mb-3 text-blue-800">Free Market Pricing:</h4>
+              <p className="text-sm text-blue-700 mb-4">
+                This driver has set their own price for this trip. Prices range from $5-$50 total.
+              </p>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span>
+                  <span className="text-blue-700">
                     Distance to{" "}
                     {getPricingBreakdown()?.destinationCity || "destination"}:
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium text-blue-800">
                     {getPricingBreakdown()?.distance || 350} miles
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Car type ({ride.carModel || "sedan"}):</span>
-                  <span className="font-medium">
-                    {ride.carModel?.includes("minivan")
-                      ? "28"
-                      : ride.carModel?.includes("suv")
-                        ? "25"
-                        : ride.carModel?.includes("truck")
-                          ? "22"
-                          : "32"}{" "}
-                    MPG
+                  <span className="text-blue-700">Driver's total price:</span>
+                  <span className="font-bold text-blue-800">
+                    ${getPricingBreakdown()?.totalPrice || ride.price}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Gas price (Gainesville):</span>
-                  <span className="font-medium">$3.20/gallon</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span>Base gas cost:</span>
-                  <span className="font-medium">
-                    $
-                    {(
-                      (350 /
-                        (ride.carModel?.includes("minivan")
-                          ? 28
-                          : ride.carModel?.includes("suv")
-                            ? 25
-                            : ride.carModel?.includes("truck")
-                              ? 22
-                              : 32)) *
-                      3.2
-                    ).toFixed(2)}
+                  <span className="text-blue-700">Available seats:</span>
+                  <span className="font-medium text-blue-800">
+                    {ride.seatsTotal} seats
                   </span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Safety buffer (20%):</span>
-                  <span className="font-medium">
-                    +$
-                    {(
-                      (350 /
-                        (ride.carModel?.includes("minivan")
-                          ? 28
-                          : ride.carModel?.includes("suv")
-                            ? 25
-                            : ride.carModel?.includes("truck")
-                              ? 22
-                              : 32)) *
-                      3.2 *
-                      0.2
-                    ).toFixed(2)}
+                <div className="flex justify-between border-t border-blue-200 pt-3">
+                  <span className="font-medium text-blue-700">Price per person:</span>
+                  <span className="font-bold text-lg text-blue-800">
+                    ${getPricingBreakdown()?.perPersonCost.toFixed(2) || (parseFloat(ride.price.toString()) / ride.seatsTotal).toFixed(2)}
                   </span>
-                </div>
-
-                {((typeof ride.destination === "string"
-                  ? ride.destination
-                  : ride.destination?.city) === "Miami" ||
-                  (typeof ride.destination === "string"
-                    ? ride.destination
-                    : ride.destination?.city) === "Tampa") && (
-                  <div className="flex justify-between">
-                    <span>Toll fees:</span>
-                    <span className="font-medium">+$2.50</span>
-                  </div>
-                )}
-
-                <hr className="my-2" />
-
-                <div className="flex justify-between font-medium">
-                  <span>Total trip cost:</span>
-                  <span>
-                    $
-                    {Math.round(
-                      (350 /
-                        (ride.carModel?.includes("minivan")
-                          ? 28
-                          : ride.carModel?.includes("suv")
-                            ? 25
-                            : ride.carModel?.includes("truck")
-                              ? 22
-                              : 32)) *
-                        3.2 *
-                        1.2 +
-                        ((typeof ride.destination === "string"
-                          ? ride.destination
-                          : ride.destination?.city) === "Miami" ||
-                        (typeof ride.destination === "string"
-                          ? ride.destination
-                          : ride.destination?.city) === "Tampa"
-                          ? 2.5
-                          : 0),
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-lg font-bold text-primary">
-                  <span>Per person ({ride.seatsTotal} seats):</span>
-                  <span>${ride.price}</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-xs text-gray-500 text-center">
-              Price calculated automatically based on distance, car efficiency,
-              gas prices, and passenger count
+            <div className="text-xs text-blue-600 text-center">
+              Driver sets their own price between $5-$50. Price shown is per person based on available seats.
             </div>
           </div>
 

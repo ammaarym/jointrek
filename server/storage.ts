@@ -81,6 +81,11 @@ export interface IStorage {
   
   // Cleanup methods
   deleteExpiredRides(): Promise<number>;
+  
+  // Database management methods
+  getTableData(tableName: string): Promise<any[]>;
+  deleteRecord(tableName: string, id: number): Promise<void>;
+  executeSQL(query: string): Promise<any[]>;
 }
 
 // In-memory storage implementation

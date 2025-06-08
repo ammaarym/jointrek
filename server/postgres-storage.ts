@@ -909,6 +909,52 @@ export class PostgresStorage implements IStorage {
     
     return updatedUser;
   }
+
+  // Database management methods
+  async getTableData(tableName: string): Promise<any[]> {
+    switch (tableName) {
+      case 'users':
+        return await db.select().from(users).orderBy(desc(users.createdAt));
+      case 'rides':
+        return await db.select().from(rides).orderBy(desc(rides.createdAt));
+      case 'ride_requests':
+        return await db.select().from(rideRequests).orderBy(desc(rideRequests.createdAt));
+      case 'conversations':
+        return await db.select().from(conversations).orderBy(desc(conversations.createdAt));
+      case 'messages':
+        return await db.select().from(messages).orderBy(desc(messages.createdAt));
+      default:
+        throw new Error(`Table ${tableName} not allowed`);
+    }
+  }
+
+  async deleteRecord(tableName: string, id: number): Promise<void> {
+    switch (tableName) {
+      case 'users':
+        await db.delete(users).where(eq(users.id, id));
+        break;
+      case 'rides':
+        await db.delete(rides).where(eq(rides.id, id));
+        break;
+      case 'ride_requests':
+        await db.delete(rideRequests).where(eq(rideRequests.id, id));
+        break;
+      case 'conversations':
+        await db.delete(conversations).where(eq(conversations.id, id));
+        break;
+      case 'messages':
+        await db.delete(messages).where(eq(messages.id, id));
+        break;
+      default:
+        throw new Error(`Table ${tableName} not allowed`);
+    }
+  }
+
+  async executeSQL(query: string): Promise<any[]> {
+    // Execute raw SQL query with safety restrictions
+    const result = await db.execute(sql.raw(query));
+    return result.rows || [];
+  }
 }
 
 // Export a singleton instance

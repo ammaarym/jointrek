@@ -389,26 +389,7 @@ export default function PostRidePostgres() {
                 </div>
               </div>
               
-              {rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides && (
-                <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FaCarSide className="text-orange-600" />
-                    <span className="font-medium text-orange-800">Driver Setup Required</span>
-                  </div>
-                  <p className="text-sm text-orange-700 mb-3">
-                    You need to complete driver payment setup before offering rides. This allows you to receive payments from passengers.
-                  </p>
-                  <Button 
-                    type="button"
-                    onClick={() => setLocation('/driver-onboard')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                  >
-                    Complete Driver Setup
-                  </Button>
-                </div>
-              )}
-
-              {rideType === 'driver' && (!driverStatus || driverStatus.canAcceptRides) && (
+              {rideType === 'driver' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="availableSeats">
@@ -499,11 +480,30 @@ export default function PostRidePostgres() {
             </div>
           )}
           
+          {rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides && (
+            <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <FaCarSide className="text-orange-600" />
+                <span className="font-medium text-orange-800">Driver Setup Required</span>
+              </div>
+              <p className="text-sm text-orange-700 mb-3">
+                You need to complete driver payment setup before offering rides. This allows you to receive payments from passengers.
+              </p>
+              <Button 
+                type="button"
+                onClick={() => setLocation('/driver-onboard')}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Complete Driver Setup
+              </Button>
+            </div>
+          )}
+          
           <div className="flex justify-end">
             <Button
               type="submit"
               className="bg-primary hover:bg-primary/90 text-white"
-              disabled={loading || isSubmitting}
+              disabled={loading || isSubmitting || (rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides)}
             >
 {(loading || isSubmitting) ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
             </Button>

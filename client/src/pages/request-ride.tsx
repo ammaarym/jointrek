@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 
 import { useToast } from "@/hooks/use-toast";
-import PaymentForm from "@/components/payment-form";
+
 import { ArrowLeft, MapPin, Clock, DollarSign, Users } from "lucide-react";
 
 export default function RequestRidePage() {
@@ -59,7 +59,7 @@ export default function RequestRidePage() {
 
     confirmRideRequestMutation.mutate({
       rideId: ride.id,
-      message: message.trim() || null
+      message: message?.trim() || undefined
     });
   };
 
@@ -91,37 +91,7 @@ export default function RequestRidePage() {
     );
   }
 
-  if (showPayment) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-6">
-            <Button
-              variant="ghost"
-              onClick={handleCancel}
-              className="mb-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Request
-            </Button>
-          </div>
-          
-          <PaymentForm
-            clientSecret={clientSecret}
-            amount={parseFloat(ride.price)}
-            rideDetails={{
-              origin: ride.origin,
-              destination: ride.destination,
-              departureTime: ride.departureTime,
-              price: ride.price
-            }}
-            onPaymentSuccess={handlePaymentSuccess}
-            onCancel={handleCancel}
-          />
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -238,14 +208,14 @@ export default function RequestRidePage() {
             </div>
 
             <Button 
-              onClick={handleInitialRequest}
-              disabled={createPaymentMutation.isPending || !currentUser}
+              onClick={handleConfirmRequest}
+              disabled={confirmRideRequestMutation.isPending || !currentUser}
               className="w-full"
               size="lg"
             >
-              {createPaymentMutation.isPending 
-                ? "Setting up payment..." 
-                : `Request Ride - Authorize $${ride.price}`
+              {confirmRideRequestMutation.isPending 
+                ? "Processing payment..." 
+                : `Confirm Ride Request - Pay $${ride.price}`
               }
             </Button>
           </CardContent>

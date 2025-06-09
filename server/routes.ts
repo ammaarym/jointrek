@@ -1366,10 +1366,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Driver has not completed payment setup" });
       }
 
-      // Calculate platform fee (2% of ride price, covers Stripe fees)
+      // Calculate platform fee (7% of ride price)
       const totalAmount = Math.round(parseFloat(ride.price) * 100); // Convert to cents
-      const applicationFee = Math.round(totalAmount * 0.02); // 2% platform fee
-      const driverAmount = totalAmount - applicationFee; // 98% to driver
+      const applicationFee = Math.round(totalAmount * 0.07); // 7% platform fee
+      const driverAmount = totalAmount - applicationFee; // 93% to driver
 
       // Create payment intent with automatic capture and application fee
       const paymentIntent = await stripe.paymentIntents.create({

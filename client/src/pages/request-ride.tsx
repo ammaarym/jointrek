@@ -16,9 +16,7 @@ export default function RequestRidePage() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showPayment, setShowPayment] = useState(false);
-  const [paymentIntentId, setPaymentIntentId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
+  const [message, setMessage] = useState("");
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
@@ -28,41 +26,21 @@ export default function RequestRidePage() {
     enabled: !!rideId,
   });
 
-  const ride = rides?.find((r: any) => r.id === rideId);
+  const ride = Array.isArray(rides) ? rides.find((r: any) => r.id === rideId) : null;
 
-  // Create payment intent mutation
-  const createPaymentMutation = useMutation({
-    mutationFn: async ({ rideId, amount }: { rideId: number; amount: number }) => {
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
+  // Consolidated payment and ride request mutation
+  const confirmRideRequestMutation = useMutation({
+    mutationFn: async ({ rideId, message }: { rideId: number; message?: string }) => {
+      const response = await apiRequest("POST", "/api/confirm-ride-request", {
         rideId,
-        amount
+        message: message?.trim() || undefined
       });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setClientSecret(data.clientSecret);
-      setPaymentIntentId(data.paymentIntentId);
-      setShowPayment(true);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Payment Setup Failed",
-        description: error.message || "Unable to set up payment. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Create ride request mutation
-  const createRequestMutation = useMutation({
-    mutationFn: async (requestData: any) => {
-      const response = await apiRequest("POST", "/api/ride-requests", requestData);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Ride Request Sent",
-        description: "Your request has been sent to the driver with payment authorization.",
+        title: "Ride Request Confirmed",
+        description: "Your payment has been processed and request sent to the driver.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/ride-requests"] });
       setLocation("/dashboard");
@@ -70,36 +48,19 @@ export default function RequestRidePage() {
     onError: (error: any) => {
       toast({
         title: "Request Failed",
-        description: error.message || "Failed to send ride request. Please try again.",
+        description: error.message || "Failed to confirm ride request. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handleInitialRequest = () => {
+  const handleConfirmRequest = () => {
     if (!ride || !currentUser) return;
 
-    const amount = parseFloat(ride.price);
-    createPaymentMutation.mutate({ rideId: ride.id, amount });
-  };
-
-  const handlePaymentSuccess = (paymentIntentId: string) => {
-    if (!ride) return;
-
-    // Create the ride request with payment information
-    createRequestMutation.mutate({
+    confirmRideRequestMutation.mutate({
       rideId: ride.id,
-      message: message.trim() || null,
-      stripePaymentIntentId: paymentIntentId,
-      paymentAmount: Math.round(parseFloat(ride.price) * 100), // Convert to cents
-      paymentStatus: "authorized"
+      message: message.trim() || null
     });
-  };
-
-  const handleCancel = () => {
-    setShowPayment(false);
-    setClientSecret("");
-    setPaymentIntentId("");
   };
 
   if (ridesLoading) {

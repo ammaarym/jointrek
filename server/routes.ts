@@ -1335,9 +1335,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByFirebaseUid(req.user!.uid);
-      if (!user || !user.stripeCustomerId || !user.defaultPaymentMethodId) {
+      if (!user || !user.stripeCustomerId) {
         return res.status(400).json({ message: "Please add a payment method to your profile first" });
       }
+
+      // Get user's payment methods to use any available one
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: user.stripeCustomerId,
+        type: 'card',
+      });
+
+      if (paymentMethods.data.length === 0) {
+        return res.status(400).json({ message: "Please add a payment method to your profile first" });
+      }
+
+      // Use default if available, otherwise use the first payment method
+      const paymentMethod = user.defaultPaymentMethodId 
+        ? paymentMethods.data.find(pm => pm.id === user.defaultPaymentMethodId) || paymentMethods.data[0]
+        : paymentMethods.data[0];
 
       // Get ride details
       const ride = await storage.getRideById(rideId);

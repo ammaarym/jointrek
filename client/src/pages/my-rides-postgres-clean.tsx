@@ -815,7 +815,7 @@ export default function MyRidesPostgres() {
               </div>
             ) : approvedRides.length > 0 ? (
               approvedRides.map((ride) => (
-                <Card key={ride.id} className="p-6 border-green-200 bg-green-50">
+                <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
@@ -1038,7 +1038,7 @@ export default function MyRidesPostgres() {
                                   </Button>
                                 </div>
                               )}
-                              {request.status === 'approved' && (
+                              {request.status === 'approved' && !request.isCompleted && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1048,6 +1048,12 @@ export default function MyRidesPostgres() {
                                   <FaKey className="w-4 h-4" />
                                   Generate Code
                                 </Button>
+                              )}
+                              {request.status === 'approved' && request.isCompleted && (
+                                <div className="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
+                                  <FaCheck className="w-4 h-4" />
+                                  Completed
+                                </div>
                               )}
                             </div>
                           </div>

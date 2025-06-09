@@ -871,8 +871,16 @@ export default function MyRidesPostgres() {
                         Approved {formatDate(new Date(ride.createdAt))}
                       </span>
                       
-                      {/* Show verification buttons based on user role */}
-                      {ride.userRole === 'driver' ? (
+                      {/* Show verification buttons or completed badge based on completion status */}
+                      {ride.isCompleted ? (
+                        // Show completed badge instead of buttons
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                            COMPLETED
+                          </span>
+                          <FaCheck className="w-5 h-5 text-green-600" />
+                        </div>
+                      ) : ride.userRole === 'driver' ? (
                         // Driver can generate verification code
                         <Button
                           variant="outline"

@@ -1167,9 +1167,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
       
+      // Allow ride posting if details are submitted, even if charges not yet enabled
+      // Charges may be pending review but driver can still post rides
+      const isOnboarded = account.details_submitted;
+      const canAcceptRides = account.details_submitted && (account.requirements?.currently_due || []).length === 0;
+      
       res.json({
-        isOnboarded: account.details_submitted && account.charges_enabled,
-        canAcceptRides: account.details_submitted && account.charges_enabled,
+        isOnboarded,
+        canAcceptRides,
         accountId: user.stripeConnectAccountId,
         payoutsEnabled: account.payouts_enabled,
         chargesEnabled: account.charges_enabled,

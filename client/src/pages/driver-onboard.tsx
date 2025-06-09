@@ -30,6 +30,35 @@ export default function DriverOnboard() {
     loadDriverStatus();
   }, [currentUser]);
 
+  // Check URL parameters for onboarding completion
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      // User returned from successful onboarding, refresh status after delay
+      setTimeout(() => {
+        loadDriverStatus();
+      }, 2000); // Wait 2 seconds for Stripe to process
+      
+      toast({
+        title: "Onboarding Complete!",
+        description: "Your driver payment account has been set up successfully.",
+      });
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('refresh') === 'true') {
+      // User needs to refresh/retry onboarding
+      toast({
+        title: "Please Complete Setup",
+        description: "Please complete the driver payment setup to continue.",
+        variant: "destructive",
+      });
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const loadDriverStatus = async () => {
     if (!currentUser) return;
 

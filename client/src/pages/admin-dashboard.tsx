@@ -38,6 +38,9 @@ interface DashboardStats {
   pendingRequests: number;
   approvedRequests: number;
   rejectedRequests: number;
+  totalPayments: number;
+  totalRevenue: number;
+  platformFees: number;
 }
 
 interface User {
@@ -617,9 +620,10 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="requests">Ride Requests</TabsTrigger>
             <TabsTrigger value="approved">Approved Rides</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="rides">All Rides</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
@@ -760,6 +764,140 @@ export default function AdminDashboard() {
                   {approvedRides.length === 0 && (
                     <div className="text-center py-8 text-stone-600">
                       No approved rides with passengers found
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Payments Tab */}
+          <TabsContent value="payments">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Payment Tracking
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Total Revenue</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">
+                        ${requests.filter(r => r.status === 'approved' && r.paymentStatus === 'captured')
+                          .reduce((sum, r) => sum + parseFloat(r.paymentAmount || '0'), 0).toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">From completed rides</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Platform Fees</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-blue-600">
+                        ${(requests.filter(r => r.status === 'approved' && r.paymentStatus === 'captured')
+                          .reduce((sum, r) => sum + parseFloat(r.paymentAmount || '0'), 0) * 0.10).toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">10% of total revenue</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Driver Payouts</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${(requests.filter(r => r.status === 'approved' && r.paymentStatus === 'captured')
+                          .reduce((sum, r) => sum + parseFloat(r.paymentAmount || '0'), 0) * 0.90).toFixed(2)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">90% to drivers</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Payment Transactions</h3>
+                  {requests.filter(r => r.paymentAmount && parseFloat(r.paymentAmount) > 0).map((payment) => {
+                    const amount = parseFloat(payment.paymentAmount || '0');
+                    const platformFee = amount * 0.10;
+                    const driverAmount = amount * 0.90;
+                    
+                    return (
+                      <div key={payment.id} className="border border-stone-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className={payment.paymentStatus === 'captured' ? 'bg-green-100 text-green-800' : 
+                                             payment.paymentStatus === 'authorized' ? 'bg-yellow-100 text-yellow-800' : 
+                                             'bg-gray-100 text-gray-800'}>
+                              {payment.paymentStatus?.toUpperCase() || 'PENDING'}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              Transaction #{payment.id}
+                            </span>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(payment.createdAt)}
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                          <div>
+                            <h4 className="text-sm font-medium text-stone-700 mb-1">Passenger</h4>
+                            <div className="text-sm">{payment.passengerName}</div>
+                            <div className="text-xs text-muted-foreground">{payment.passengerEmail}</div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-medium text-stone-700 mb-1">Driver</h4>
+                            <div className="text-sm">{payment.driverName || 'N/A'}</div>
+                            <div className="text-xs text-muted-foreground">{payment.driverEmail || 'N/A'}</div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-medium text-stone-700 mb-1">Route</h4>
+                            <div className="text-sm flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {payment.rideOrigin} → {payment.rideDestination}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-stone-100 pt-3">
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div className="text-center">
+                              <div className="font-medium text-lg">${amount.toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground">Total Charged</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-medium text-lg text-blue-600">${platformFee.toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground">Platform Fee (10%)</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-medium text-lg text-green-600">${driverAmount.toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground">Driver Payout (90%)</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {payment.stripePaymentIntentId && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            Stripe Payment Intent: {payment.stripePaymentIntentId}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {requests.filter(r => r.paymentAmount && parseFloat(r.paymentAmount) > 0).length === 0 && (
+                    <div className="text-center py-8 text-stone-600">
+                      No payment transactions found
                     </div>
                   )}
                 </div>

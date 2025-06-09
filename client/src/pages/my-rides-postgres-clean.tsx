@@ -395,7 +395,9 @@ export default function MyRidesPostgres() {
         console.log('Payment capture results:', result.paymentResults);
         
         // Refresh the rides data
-        loadMyRides();
+        if (currentUser) {
+          loadMyRides(currentUser.uid);
+        }
         
         // Show review modal
         setRideToReview(rideToComplete);

@@ -1366,22 +1366,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Driver has not completed payment setup" });
       }
 
-      // Calculate platform fee (e.g., 10% of ride price)
+      // Calculate platform fee (2% of ride price, covers Stripe fees)
       const totalAmount = Math.round(parseFloat(ride.price) * 100); // Convert to cents
-      const platformFee = Math.round(totalAmount * 0.10); // 10% platform fee
-      const driverAmount = totalAmount - platformFee;
+      const applicationFee = Math.round(totalAmount * 0.02); // 2% platform fee
+      const driverAmount = totalAmount - applicationFee; // 98% to driver
 
-      // Create payment intent with transfer to driver
+      // Create payment intent with automatic capture and application fee
       const paymentIntent = await stripe.paymentIntents.create({
         amount: totalAmount,
         currency: "usd",
         customer: user.stripeCustomerId,
-        payment_method: user.defaultPaymentMethodId,
+        payment_method: paymentMethod.id,
         confirm: true,
-        capture_method: "manual", // Authorize now, capture later
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: "never"
+        },
+        application_fee_amount: applicationFee, // Platform keeps 2%
+        transfer_data: {
+          destination: driver.stripeConnectAccountId, // Driver gets 98%
         },
         description: `Trek ride from ${ride.origin} to ${ride.destination}`,
         metadata: {
@@ -1389,12 +1392,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           passengerId: req.user!.uid,
           driverId: ride.driverId,
           driverConnectAccountId: driver.stripeConnectAccountId,
-          platformFee: platformFee.toString(),
+          applicationFee: applicationFee.toString(),
           driverAmount: driverAmount.toString()
-        },
-        transfer_data: {
-          destination: driver.stripeConnectAccountId,
-          amount: driverAmount
         }
       });
 
@@ -1405,7 +1404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         stripePaymentIntentId: paymentIntent.id,
         paymentAmount: parseFloat(ride.price),
-        paymentStatus: "authorized"
+        paymentStatus: "succeeded"
       });
 
       res.json({ 
@@ -1420,50 +1419,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create payment intent for ride request (legacy method - keeping for compatibility)
+  // DEPRECATED: Legacy payment intent creation - use /api/confirm-ride-request instead
   app.post("/api/create-payment-intent", authenticate, async (req, res) => {
-    try {
-      if (!stripe) {
-        return res.status(500).json({ message: "Payment service not available" });
-      }
-
-      const { rideId, amount } = req.body;
-      
-      if (!rideId || !amount) {
-        return res.status(400).json({ message: "rideId and amount are required" });
-      }
-
-      // Get ride details for payment description
-      const ride = await storage.getRideById(rideId);
-      if (!ride) {
-        return res.status(404).json({ message: "Ride not found" });
-      }
-
-      // Create payment intent with authorization only (don't capture yet)
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        capture_method: "manual", // This allows us to authorize now and capture later
-        description: `Trek ride from ${ride.origin} to ${ride.destination}`,
-        automatic_payment_methods: {
-          enabled: true,
-          allow_redirects: "never"
-        },
-        metadata: {
-          rideId: rideId.toString(),
-          passengerId: req.user!.uid,
-          driverId: ride.driverId
-        }
-      });
-
-      res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id 
-      });
-    } catch (error: any) {
-      console.error("Error creating payment intent:", error);
-      res.status(500).json({ message: "Error creating payment intent: " + error.message });
-    }
+    res.status(410).json({ 
+      message: "This endpoint is deprecated. Please use /api/confirm-ride-request for payments.",
+      deprecated: true,
+      useInstead: "/api/confirm-ride-request"
+    });
   });
 
   // Capture payment when ride is completed

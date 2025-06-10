@@ -29,7 +29,7 @@ const capitalizeCarType = (carType: string) => {
 export default function MyRidesPostgres() {
   const { currentUser } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState('driver');
+  const [activeTab, setActiveTab] = useState('my-posts');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [rideToDelete, setRideToDelete] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -75,6 +75,9 @@ export default function MyRidesPostgres() {
   // Approved rides state
   const [approvedRides, setApprovedRides] = useState<any[]>([]);
   const [approvedRidesLoading, setApprovedRidesLoading] = useState(false);
+  
+  // My Posts sub-tab state
+  const [myPostsTab, setMyPostsTab] = useState('driver');
 
 
 
@@ -596,6 +599,20 @@ export default function MyRidesPostgres() {
         
         // Refresh the approved rides to show updated status
         loadApprovedRides();
+        
+        // Set up polling to automatically refresh when the other party verifies
+        const pollForUpdates = setInterval(async () => {
+          try {
+            await loadApprovedRides();
+          } catch (error) {
+            console.error('Error polling for updates:', error);
+          }
+        }, 3000); // Poll every 3 seconds
+        
+        // Stop polling after 2 minutes
+        setTimeout(() => {
+          clearInterval(pollForUpdates);
+        }, 120000);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Invalid verification code');

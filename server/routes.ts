@@ -744,6 +744,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate start verification code for passengers to show drivers
+  app.post('/api/rides/:id/generate-start-verification', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      // Get the ride request to verify the passenger has an approved request for this ride
+      const approvedRequest = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.passengerId, req.user!.uid),
+          eq(rideRequests.status, 'approved')
+        ))
+        .limit(1);
+
+      if (approvedRequest.length === 0) {
+        return res.status(403).json({ message: "You don't have an approved request for this ride" });
+      }
+
+      // Generate a 4-digit start verification code
+      const startVerificationCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Update ride with start verification code
+      await db.update(rides).set({ startVerificationCode }).where(eq(rides.id, rideId));
+      
+      res.json({ startVerificationCode });
+    } catch (error) {
+      console.error("Error generating start verification code:", error);
+      res.status(500).json({ message: "Failed to generate start verification code" });
+    }
+  });
+
+  // Verify start code and mark ride as started
+  app.patch('/api/rides/:id/verify-start', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      const { startVerificationCode } = req.body;
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      if (!startVerificationCode) {
+        return res.status(400).json({ message: "Start verification code is required" });
+      }
+
+      // Get the ride to verify the code and ownership
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if user is the driver
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "Only the driver can start the ride" });
+      }
+
+      // Verify the start code matches
+      if (ride.startVerificationCode !== startVerificationCode) {
+        return res.status(400).json({ message: "Invalid start verification code" });
+      }
+
+      // Mark ride as started and record start time
+      const startedAt = new Date();
+      await db.update(rides).set({ 
+        isStarted: true, 
+        startedAt,
+        startVerificationCode: null // Clear the code after use
+      }).where(eq(rides.id, rideId));
+      
+      res.json({
+        message: "Ride started successfully",
+        startedAt: startedAt.toISOString()
+      });
+    } catch (error) {
+      console.error("Error verifying start code:", error);
+      res.status(500).json({ message: "Failed to verify start code" });
+    }
+  });
+
   // Generate verification code for ride completion
   app.post('/api/rides/:id/generate-verification', authenticate, async (req: Request, res: Response) => {
     try {
@@ -762,6 +847,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is the driver
       if (ride.driverId !== req.user!.uid) {
         return res.status(403).json({ message: "You can only generate verification codes for your own rides" });
+      }
+
+      // Check if ride has been started
+      if (!ride.isStarted) {
+        return res.status(400).json({ message: "Ride must be started before generating completion code" });
       }
 
       // Generate a 6-digit verification code

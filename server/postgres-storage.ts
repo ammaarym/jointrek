@@ -959,18 +959,21 @@ export class PostgresStorage implements IStorage {
   }
 
   async getExpiredAuthorizedPayments(cutoffDate: Date): Promise<any[]> {
-    // Get approved ride requests older than 24 hours with authorized payments
+    // Get approved ride requests for started rides older than 24 hours with authorized payments
     const expiredPayments = await db
       .select()
       .from(rideRequests)
+      .innerJoin(rides, eq(rideRequests.rideId, rides.id))
       .where(and(
         eq(rideRequests.status, 'approved'),
         eq(rideRequests.paymentStatus, 'authorized'),
-        lt(rideRequests.updatedAt, cutoffDate),
+        eq(rides.isStarted, true),
+        sql`${rides.startedAt} IS NOT NULL`,
+        lt(rides.startedAt, cutoffDate),
         sql`${rideRequests.stripePaymentIntentId} IS NOT NULL`
       ));
     
-    return expiredPayments;
+    return expiredPayments.map(row => row.ride_requests);
   }
 }
 

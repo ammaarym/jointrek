@@ -957,6 +957,21 @@ export class PostgresStorage implements IStorage {
     const result = await db.execute(sql.raw(query));
     return result.rows || [];
   }
+
+  async getExpiredAuthorizedPayments(cutoffDate: Date): Promise<any[]> {
+    // Get approved ride requests older than 24 hours with authorized payments
+    const expiredPayments = await db
+      .select()
+      .from(rideRequests)
+      .where(and(
+        eq(rideRequests.status, 'approved'),
+        eq(rideRequests.paymentStatus, 'authorized'),
+        lt(rideRequests.updatedAt, cutoffDate),
+        sql`${rideRequests.stripePaymentIntentId} IS NOT NULL`
+      ));
+    
+    return expiredPayments;
+  }
 }
 
 // Export a singleton instance

@@ -49,7 +49,43 @@ async function cleanupExpiredRides() {
   }
 }
 
-// Schedule daily cleanup at 2 AM
+// Function to handle automatic payment capture after 24 hours
+async function processAutomaticPaymentCapture() {
+  try {
+    const stripe = (await import('stripe')).default;
+    const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-05-28.basil',
+    });
+
+    // Get approved ride requests older than 24 hours with authorized payments
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const expiredAuthorizations = await storage.getExpiredAuthorizedPayments(twentyFourHoursAgo);
+    
+    console.log(`Found ${expiredAuthorizations.length} expired payment authorizations`);
+    
+    for (const request of expiredAuthorizations) {
+      try {
+        if (request.stripePaymentIntentId) {
+          console.log(`Auto-capturing expired payment for request ${request.id}: ${request.stripePaymentIntentId}`);
+          
+          // Capture the payment
+          await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
+          
+          // Update payment status
+          await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+          
+          console.log(`Auto-captured payment for request ${request.id}`);
+        }
+      } catch (error: any) {
+        console.error(`Failed to auto-capture payment for request ${request.id}:`, error.message);
+      }
+    }
+  } catch (error) {
+    console.error('Error during automatic payment capture:', error);
+  }
+}
+
+// Schedule daily cleanup and payment processing at 2 AM
 function scheduleDailyCleanup() {
   const now = new Date();
   const next2AM = new Date(now);
@@ -66,11 +102,15 @@ function scheduleDailyCleanup() {
   
   setTimeout(() => {
     cleanupExpiredRides();
+    processAutomaticPaymentCapture();
     // Schedule to run every 24 hours after the first run
-    setInterval(cleanupExpiredRides, 24 * 60 * 60 * 1000);
+    setInterval(() => {
+      cleanupExpiredRides();
+      processAutomaticPaymentCapture();
+    }, 24 * 60 * 60 * 1000);
   }, timeUntilNext2AM);
   
-  console.log(`Daily cleanup scheduled for ${next2AM.toLocaleString()}`);
+  console.log(`Daily cleanup and payment processing scheduled for ${next2AM.toLocaleString()}`);
 }
 
 (async () => {

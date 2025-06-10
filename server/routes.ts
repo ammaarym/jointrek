@@ -744,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate start verification code for passengers to show drivers
+  // Generate start verification code for drivers to show passengers
   app.post('/api/rides/:id/generate-start-verification', authenticate, async (req: Request, res: Response) => {
     try {
       const rideId = parseInt(req.params.id);
@@ -753,19 +753,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid ride ID" });
       }
 
-      // Get the ride request to verify the passenger has an approved request for this ride
-      const approvedRequest = await db
+      // Get the ride to verify the driver owns it
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if user is the driver
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "You can only generate start codes for your own rides" });
+      }
+
+      // Check if ride has approved passengers
+      const approvedRequests = await db
         .select()
         .from(rideRequests)
         .where(and(
           eq(rideRequests.rideId, rideId),
-          eq(rideRequests.passengerId, req.user!.uid),
           eq(rideRequests.status, 'approved')
-        ))
-        .limit(1);
+        ));
 
-      if (approvedRequest.length === 0) {
-        return res.status(403).json({ message: "You don't have an approved request for this ride" });
+      if (approvedRequests.length === 0) {
+        return res.status(400).json({ message: "No approved passengers for this ride" });
       }
 
       // Generate a 4-digit start verification code

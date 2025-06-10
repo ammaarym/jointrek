@@ -518,6 +518,17 @@ export default function MyRidesPostgres() {
   const handlePassengerStartCode = async ({ id }: { id: number }) => {
     if (!currentUser) return;
 
+    setVerificationModalTitle("Enter Start Code from Driver");
+    setVerificationModalDescription("Enter the 4-digit code shown by your driver to start the ride:");
+    setVerificationModalOpen(true);
+    
+    // Store the ride ID for verification
+    setCurrentRideId(id);
+  };
+
+  const handleDriverStartVerification = async ({ id }: { id: number }) => {
+    if (!currentUser) return;
+
     try {
       const response = await fetch(`/api/rides/${id}/generate-start-verification`, {
         method: 'POST',
@@ -531,8 +542,8 @@ export default function MyRidesPostgres() {
       if (response.ok) {
         const data = await response.json();
         setVerificationCode(data.startVerificationCode);
-        setVerificationModalTitle("Show Start Code to Driver");
-        setVerificationModalDescription(`Show this 4-digit code to your driver to start the ride:`);
+        setVerificationModalTitle("Show Start Code to Passenger");
+        setVerificationModalDescription(`Show this 4-digit code to the passenger. They will enter it to start the ride:`);
         setVerificationModalOpen(true);
       } else {
         const errorData = await response.json();
@@ -546,17 +557,6 @@ export default function MyRidesPostgres() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleDriverStartVerification = async ({ id }: { id: number }) => {
-    if (!currentUser) return;
-
-    setVerificationModalTitle("Enter Start Verification Code");
-    setVerificationModalDescription("Enter the 4-digit code shown by the passenger to start the ride:");
-    setVerificationModalOpen(true);
-    
-    // Store the ride ID for verification
-    setCurrentRideId(id);
   };
 
   const handleStartVerification = async () => {

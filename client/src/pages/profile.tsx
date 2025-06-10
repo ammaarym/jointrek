@@ -4,15 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { FaPhone, FaInstagram, FaEdit, FaCreditCard } from 'react-icons/fa';
+import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, CheckCircle, DollarSign, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
 
+// Driver Status Interface
+interface DriverStatus {
+  isOnboarded: boolean;
+  canAcceptRides: boolean;
+  accountId?: string;
+  payoutsEnabled?: boolean;
+  chargesEnabled?: boolean;
+  detailsSubmitted?: boolean;
+  requirementsEventuallyDue?: string[];
+  requirementsCurrentlyDue?: string[];
+}
 
 // Payment Setup Form Component
 const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) => {
@@ -107,6 +119,10 @@ export default function Profile() {
   const [snapchat, setSnapchat] = useState('');
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
+  const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
+  const [isDriverLoading, setIsDriverLoading] = useState(false);
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
 
   // Fetch user's payment methods
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
@@ -171,12 +187,69 @@ export default function Profile() {
     setDefaultMutation.mutate(paymentMethodId);
   };
 
+  const loadDriverStatus = async () => {
+    if (!currentUser) return;
+
+    try {
+      setIsDriverLoading(true);
+      const response = await fetch('/api/driver/status', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const status = await response.json();
+        setDriverStatus(status);
+      } else {
+        throw new Error('Failed to load driver status');
+      }
+    } catch (error: any) {
+      console.error('Error loading driver status:', error);
+      // Don't show error toast for driver status - it's optional
+    } finally {
+      setIsDriverLoading(false);
+    }
+  };
+
   // Load user profile data on mount
   useEffect(() => {
     if (currentUser) {
       loadUserProfile();
+      loadDriverStatus();
     }
   }, [currentUser]);
+
+  // Check URL parameters for driver onboarding completion
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      // User returned from successful onboarding, refresh status after delay
+      setTimeout(() => {
+        loadDriverStatus();
+      }, 2000); // Wait 2 seconds for Stripe to process
+      
+      toast({
+        title: "Driver Setup Complete!",
+        description: "Your driver payment account has been set up successfully.",
+      });
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('refresh') === 'true') {
+      // User needs to refresh/retry onboarding
+      toast({
+        title: "Please Complete Setup",
+        description: "Please complete the driver payment setup to continue.",
+        variant: "destructive",
+      });
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -249,6 +322,94 @@ export default function Profile() {
   const handleCancel = () => {
     loadUserProfile(); // Reset to original values
     setIsEditing(false);
+  };
+
+  const startOnboarding = async () => {
+    if (!currentUser) return;
+
+    setIsOnboarding(true);
+    try {
+      const response = await fetch('/api/driver/onboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.onboardingUrl) {
+          // Redirect to Stripe Express onboarding
+          window.location.href = result.onboardingUrl;
+        } else {
+          toast({
+            title: "Already Setup",
+            description: "Your driver account is already set up",
+          });
+          loadDriverStatus();
+        }
+      } else {
+        const error = await response.json();
+        
+        if (error.connectSetupRequired) {
+          toast({
+            title: "Platform Setup Required",
+            description: "Stripe Connect needs to be enabled in the platform dashboard first. Please contact support.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(error.message || 'Failed to start onboarding');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error starting onboarding:', error);
+      toast({
+        title: "Driver Setup Error",
+        description: error.message || "Failed to start driver setup",
+        variant: "destructive",
+      });
+    } finally {
+      setIsOnboarding(false);
+    }
+  };
+
+  const openDashboard = async () => {
+    if (!currentUser) return;
+
+    setIsLoadingDashboard(true);
+    try {
+      const response = await fetch('/api/driver/dashboard-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.dashboardUrl) {
+          window.open(result.dashboardUrl, '_blank');
+        }
+      } else {
+        throw new Error('Failed to get dashboard link');
+      }
+    } catch (error: any) {
+      console.error('Error opening dashboard:', error);
+      toast({
+        title: "Dashboard Error",
+        description: "Failed to open driver dashboard",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDashboard(false);
+    }
   };
 
   if (!currentUser) {

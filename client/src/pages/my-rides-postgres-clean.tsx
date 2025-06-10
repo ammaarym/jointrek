@@ -867,13 +867,13 @@ export default function MyRidesPostgres() {
 
       {/* Rides list with tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-12 bg-muted/30 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/30 rounded-lg p-1">
           <TabsTrigger 
             value="approved" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             <FaCheck className="w-4 h-4" />
-            <span>Approved</span>
+            <span>Approved Rides</span>
             {approvedRides.length > 0 && (
               <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-2 py-0.5">
                 {approvedRides.length}
@@ -881,20 +881,12 @@ export default function MyRidesPostgres() {
             )}
           </TabsTrigger>
           <TabsTrigger 
-            value="driver" 
+            value="my-posts" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
           >
             <FaCar className="w-4 h-4" />
-            <span>Driver Rides</span>
+            <span>My Posts</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="passenger" 
-            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-          >
-            <FaUser className="w-4 h-4" />
-            <span>Passenger Requests</span>
-          </TabsTrigger>
-
           <TabsTrigger 
             value="requests" 
             className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
@@ -916,22 +908,43 @@ export default function MyRidesPostgres() {
         
         <TabsContent value="approved" className="mt-6">
           <div className="space-y-6">
-            {approvedRidesLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-6 w-48" />
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-4 w-64" />
-                      </div>
+            {/* Sub-tabs for Passenger and Driver approved rides */}
+            <Tabs value={myPostsTab} onValueChange={setMyPostsTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/30 rounded-lg p-1">
+                <TabsTrigger 
+                  value="passenger" 
+                  className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                >
+                  <FaUser className="w-3 h-3" />
+                  <span>As Passenger</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="driver" 
+                  className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                >
+                  <FaCar className="w-3 h-3" />
+                  <span>As Driver</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="passenger" className="mt-4">
+                <div className="space-y-4">
+                  {approvedRidesLoading ? (
+                    <div className="space-y-4">
+                      {Array.from({ length: 2 }).map((_, i) => (
+                        <Card key={i} className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-2 flex-1">
+                              <Skeleton className="h-6 w-48" />
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-64" />
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : approvedRides.length > 0 ? (
-              approvedRides.map((ride) => (
+                  ) : approvedRides.filter(ride => ride.userRole === 'passenger').length > 0 ? (
+                    approvedRides.filter(ride => ride.userRole === 'passenger').map((ride) => (
                 <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -1055,41 +1068,145 @@ export default function MyRidesPostgres() {
                     </div>
                   </div>
                 </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <FaCheck className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No approved rides yet</h3>
-                <p className="text-muted-foreground">
-                  When drivers approve your ride requests, they'll appear here with contact info.
-                </p>
+              ))) : (
+                    <div className="text-center py-12">
+                      <FaUser className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No approved passenger rides yet</h3>
+                      <p className="text-muted-foreground">
+                        When drivers approve your ride requests, they'll appear here with contact info.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="driver" className="mt-4">
+                <div className="space-y-4">
+                  {approvedRidesLoading ? (
+                    <div className="space-y-4">
+                      {Array.from({ length: 2 }).map((_, i) => (
+                        <Card key={i} className="p-6">
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-2 flex-1">
+                              <Skeleton className="h-6 w-48" />
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-64" />
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : approvedRides.filter(ride => ride.userRole === 'driver').length > 0 ? (
+                    approvedRides.filter(ride => ride.userRole === 'driver').map((ride) => (
+                      <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                <FaCheck className="w-6 h-6 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-lg">{ride.passengerName}</h3>
+                                  {ride.isCompleted ? (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                      COMPLETED
+                                    </span>
+                                  ) : ride.isStarted ? (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                      IN PROGRESS
+                                    </span>
+                                  ) : (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      APPROVED
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground">{ride.passengerEmail}</p>
+                                {ride.passengerPhone && (
+                                  <p className="text-sm font-medium text-green-700">📞 {ride.passengerPhone}</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center gap-2">
+                                <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                                <span className="text-sm">
+                                  {ride.rideOrigin} → {ride.rideDestination}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <FaCalendarAlt className="w-4 h-4 text-primary" />
+                                <span className="text-sm">
+                                  {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))) : (
+                    <div className="text-center py-12">
+                      <FaCar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No approved driver rides yet</h3>
+                      <p className="text-muted-foreground">
+                        When passengers request your rides and you approve them, they'll appear here.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="my-posts" className="mt-6">
+          <Tabs value={myPostsTab} onValueChange={setMyPostsTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/30 rounded-lg p-1">
+              <TabsTrigger 
+                value="driver" 
+                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+              >
+                <FaCar className="w-3 h-3" />
+                <span>Driver Posts</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="passenger" 
+                className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+              >
+                <FaUser className="w-3 h-3" />
+                <span>Passenger Posts</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="driver" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                  renderSkeletonCards()
+                ) : myRides.filter(ride => ride.rideType === 'driver').length > 0 ? (
+                  myRides.filter(ride => ride.rideType === 'driver').map(renderRideCard)
+                ) : (
+                  renderEmptyState('driver')
+                )}
               </div>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="driver" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              renderSkeletonCards()
-            ) : myRides.filter(ride => ride.rideType === 'driver').length > 0 ? (
-              myRides.filter(ride => ride.rideType === 'driver').map(renderRideCard)
-            ) : (
-              renderEmptyState('driver')
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="passenger" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              renderSkeletonCards()
-            ) : myRides.filter(ride => ride.rideType === 'passenger').length > 0 ? (
-              myRides.filter(ride => ride.rideType === 'passenger').map(renderRideCard)
-            ) : (
-              renderEmptyState('passenger')
-            )}
-          </div>
+            </TabsContent>
+            
+            <TabsContent value="passenger" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                  renderSkeletonCards()
+                ) : myRides.filter(ride => ride.rideType === 'passenger').length > 0 ? (
+                  myRides.filter(ride => ride.rideType === 'passenger').map(renderRideCard)
+                ) : (
+                  renderEmptyState('passenger')
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
@@ -1650,6 +1767,47 @@ export default function MyRidesPostgres() {
                 Start Ride
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </Tabs>
+      
+      {/* Review Modal */}
+      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rate Your Experience</DialogTitle>
+            <DialogDescription>
+              How was your ride? Your feedback helps improve the service.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="flex space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-8 h-8 cursor-pointer transition-colors ${
+                    star <= (hoveredRating || rating)
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-gray-300'
+                  }`}
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Click a star to rate your experience
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setReviewModalOpen(false)} className="flex-1">
+              Skip
+            </Button>
+            <Button onClick={handleSubmitReview} disabled={rating === 0} className="flex-1">
+              Submit Review
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -804,15 +804,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Start verification code is required" });
       }
 
-      // Get the ride to verify the code and ownership
+      // Get the ride to verify the code
       const ride = await storage.getRideById(rideId);
       if (!ride) {
         return res.status(404).json({ message: "Ride not found" });
       }
 
-      // Check if user is the driver
-      if (ride.driverId !== req.user!.uid) {
-        return res.status(403).json({ message: "Only the driver can start the ride" });
+      // Check if user has an approved request for this ride (passenger verification)
+      const approvedRequest = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.passengerId, req.user!.uid),
+          eq(rideRequests.status, 'approved')
+        ))
+        .limit(1);
+
+      if (approvedRequest.length === 0) {
+        return res.status(403).json({ message: "You don't have an approved request for this ride" });
       }
 
       // Verify the start code matches

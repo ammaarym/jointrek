@@ -925,9 +925,19 @@ export default function MyRidesPostgres() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-lg">{ride.driverName}</h3>
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              APPROVED
-                            </span>
+                            {ride.isCompleted ? (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                COMPLETED
+                              </span>
+                            ) : ride.isStarted ? (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                IN PROGRESS
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                APPROVED
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground">{ride.driverEmail}</p>
                           {ride.driverPhone && (
@@ -1021,7 +1031,7 @@ export default function MyRidesPostgres() {
                             className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
                           >
                             <FaKey className="w-4 h-4" />
-                            Show Start Code
+                            Enter Start Code
                           </Button>
                         )
                       )}

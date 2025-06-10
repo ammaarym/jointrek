@@ -1371,20 +1371,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const applicationFee = Math.round(totalAmount * 0.07); // 7% platform fee
       const driverAmount = totalAmount - applicationFee; // 93% to driver
 
-      // Create payment intent with automatic capture and application fee
+      // Create payment intent with manual capture (authorize only, capture on ride completion)
       const paymentIntent = await stripe.paymentIntents.create({
         amount: totalAmount,
         currency: "usd",
         customer: user.stripeCustomerId,
         payment_method: paymentMethod.id,
         confirm: true,
+        capture_method: 'manual', // Manual capture - only authorize payment now
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: "never"
         },
-        application_fee_amount: applicationFee, // Platform keeps 2%
+        application_fee_amount: applicationFee, // Platform keeps 7%
         transfer_data: {
-          destination: driver.stripeConnectAccountId, // Driver gets 98%
+          destination: driver.stripeConnectAccountId, // Driver gets 93%
         },
         description: `Trek ride from ${ride.origin} to ${ride.destination}`,
         metadata: {
@@ -1397,14 +1398,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Create ride request with payment info
+      // Create ride request with payment info (authorized but not captured)
       const rideRequest = await storage.createRideRequest({
         rideId,
         passengerId: req.user!.uid,
         status: "pending",
         stripePaymentIntentId: paymentIntent.id,
         paymentAmount: parseFloat(ride.price),
-        paymentStatus: "succeeded"
+        paymentStatus: "authorized" // Payment is authorized but not yet captured
       });
 
       res.json({ 

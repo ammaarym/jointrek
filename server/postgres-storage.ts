@@ -611,6 +611,9 @@ export class PostgresStorage implements IStorage {
         ridePrice: rides.price,
         rideCarModel: rides.carModel,
         isCompleted: rides.isCompleted, // Include completion status
+        isStarted: rides.isStarted, // Include start status
+        startVerificationCode: rides.startVerificationCode,
+        startedAt: rides.startedAt,
         userRole: sql<string>`'passenger'` // Mark user role
       })
       .from(rideRequests)
@@ -643,6 +646,9 @@ export class PostgresStorage implements IStorage {
         ridePrice: rides.price,
         rideCarModel: rides.carModel,
         isCompleted: rides.isCompleted, // Include completion status
+        isStarted: rides.isStarted, // Include start status
+        startVerificationCode: rides.startVerificationCode,
+        startedAt: rides.startedAt,
         userRole: sql<string>`'driver'` // Mark user role
       })
       .from(rideRequests)

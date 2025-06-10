@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCar, FaTrash, FaEdit, FaCheck, FaExclamationTriangle, FaUser, FaKey } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCar, FaTrash, FaEdit, FaCheck, FaExclamationTriangle, FaUser, FaKey, FaPlay } from 'react-icons/fa';
 import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
@@ -46,6 +46,13 @@ export default function MyRidesPostgres() {
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
   const [inputVerificationCode, setInputVerificationCode] = useState<string>('');
   const [isPassenger, setIsPassenger] = useState(false);
+  
+  // Start ride verification state
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
+  const [verificationModalTitle, setVerificationModalTitle] = useState('');
+  const [verificationModalDescription, setVerificationModalDescription] = useState('');
+  const [verificationCodeInput, setVerificationCodeInput] = useState('');
+  const [currentRideId, setCurrentRideId] = useState<number | null>(null);
 
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
@@ -497,16 +504,107 @@ export default function MyRidesPostgres() {
       }
       
       setRideToReview(null);
-      
-      // Reload rides to sync with server
-      if (currentUser) {
-        loadMyRides(currentUser.uid);
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting review:', error);
       toast({
         title: "Error",
         description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Start ride verification handlers
+  const handlePassengerStartCode = async ({ id }: { id: number }) => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch(`/api/rides/${id}/generate-start-verification`, {
+        method: 'POST',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setVerificationCode(data.startVerificationCode);
+        setVerificationModalTitle("Show Start Code to Driver");
+        setVerificationModalDescription(`Show this 4-digit code to your driver to start the ride:`);
+        setVerificationModalOpen(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate start code');
+      }
+    } catch (error: any) {
+      console.error('Error generating start code:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate start code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDriverStartVerification = async ({ id }: { id: number }) => {
+    if (!currentUser) return;
+
+    setVerificationModalTitle("Enter Start Verification Code");
+    setVerificationModalDescription("Enter the 4-digit code shown by the passenger to start the ride:");
+    setVerificationModalOpen(true);
+    
+    // Store the ride ID for verification
+    setCurrentRideId(id);
+  };
+
+  const handleStartVerification = async () => {
+    if (!currentUser || !currentRideId) return;
+
+    if (!verificationCodeInput.trim()) {
+      toast({
+        title: "Code Required",
+        description: "Please enter the verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/rides/${currentRideId}/verify-start`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({
+          startVerificationCode: verificationCodeInput.trim()
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Ride Started",
+          description: "The ride has been started successfully. Payment will be captured automatically after 24 hours if not completed.",
+        });
+        setVerificationModalOpen(false);
+        setVerificationCodeInput('');
+        setCurrentRideId(null);
+        
+        // Refresh the approved rides to show updated status
+        loadApprovedRides();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Invalid verification code');
+      }
+    } catch (error: any) {
+      console.error('Error verifying start code:', error);
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Failed to verify start code. Please try again.",
         variant: "destructive",
       });
     }
@@ -871,37 +969,61 @@ export default function MyRidesPostgres() {
                         Approved {formatDate(new Date(ride.createdAt))}
                       </span>
                       
-                      {/* Show verification buttons or completed badge based on completion status */}
+                      {/* Show verification buttons or status badges based on ride progress */}
                       {ride.isCompleted ? (
-                        // Show completed badge instead of buttons
+                        // Show completed badge
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
                             COMPLETED
                           </span>
                           <FaCheck className="w-5 h-5 text-green-600" />
                         </div>
-                      ) : ride.userRole === 'driver' ? (
-                        // Driver can generate verification code
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => generateVerificationCode({ id: ride.rideId })}
-                          className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
-                        >
-                          <FaKey className="w-4 h-4" />
-                          Generate Code
-                        </Button>
+                      ) : ride.isStarted ? (
+                        // Ride has started - show completion flow
+                        ride.userRole === 'driver' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => generateVerificationCode({ id: ride.rideId })}
+                            className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                          >
+                            <FaKey className="w-4 h-4" />
+                            Generate Code
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePassengerVerification({ id: ride.rideId })}
+                            className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+                          >
+                            <FaCheck className="w-4 h-4" />
+                            Ride Complete
+                          </Button>
+                        )
                       ) : (
-                        // Passenger can enter verification code to complete ride
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePassengerVerification({ id: ride.rideId })}
-                          className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-                        >
-                          <FaCheck className="w-4 h-4" />
-                          Ride Complete
-                        </Button>
+                        // Ride not started yet - show start flow
+                        ride.userRole === 'driver' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDriverStartVerification({ id: ride.rideId })}
+                            className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
+                          >
+                            <FaPlay className="w-4 h-4" />
+                            Start Ride
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePassengerStartCode({ id: ride.rideId })}
+                            className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
+                          >
+                            <FaKey className="w-4 h-4" />
+                            Show Start Code
+                          </Button>
+                        )
                       )}
                     </div>
                   </div>
@@ -1442,6 +1564,65 @@ export default function MyRidesPostgres() {
             >
               Complete Ride
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Ride Verification Modal */}
+      <Dialog open={verificationModalOpen} onOpenChange={setVerificationModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{verificationModalTitle}</DialogTitle>
+            <DialogDescription>{verificationModalDescription}</DialogDescription>
+          </DialogHeader>
+          
+          {verificationCode ? (
+            // Show code to passenger
+            <div className="flex flex-col items-center space-y-4">
+              <div className="text-4xl font-bold tracking-widest bg-gray-100 px-6 py-4 rounded-lg">
+                {verificationCode}
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                Show this code to your driver to start the ride
+              </p>
+            </div>
+          ) : (
+            // Input field for driver
+            <div className="space-y-4">
+              <Label htmlFor="start-verification-code">Enter 4-digit code from passenger:</Label>
+              <Input
+                id="start-verification-code"
+                value={verificationCodeInput}
+                onChange={(e) => setVerificationCodeInput(e.target.value)}
+                placeholder="1234"
+                maxLength={4}
+                className="text-center text-2xl tracking-widest"
+              />
+            </div>
+          )}
+          
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setVerificationModalOpen(false);
+                setVerificationCode('');
+                setVerificationCodeInput('');
+                setCurrentRideId(null);
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            {!verificationCode && (
+              <Button 
+                onClick={handleStartVerification}
+                disabled={verificationCodeInput.length !== 4}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+              >
+                Start Ride
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

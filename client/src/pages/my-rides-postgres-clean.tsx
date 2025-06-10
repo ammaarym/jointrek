@@ -959,7 +959,7 @@ export default function MyRidesPostgres() {
                           </div>
                         </div>
                       </Card>
-                    )) : (
+                    ))) : (
                     <div className="text-center py-12">
                       <FaUser className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium mb-2">No approved passenger rides yet</h3>

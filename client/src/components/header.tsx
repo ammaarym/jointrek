@@ -87,7 +87,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                   <span
                     className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/my-rides" ? "text-primary" : ""}`}
                   >
-                    My Rides
+                    My Posts
                   </span>
                 </Link>
                 <Link href="/driver-onboard">
@@ -308,7 +308,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     <span
                       className={`block py-2 px-3 rounded-md ${location === "/my-rides" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
                     >
-                      My Rides
+                      My Posts
                     </span>
                   </Link>
                   <Link

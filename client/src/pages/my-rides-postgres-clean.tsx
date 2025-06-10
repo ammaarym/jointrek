@@ -78,8 +78,18 @@ export default function MyRidesPostgres() {
   
   // My Posts sub-tab state
   const [myPostsTab, setMyPostsTab] = useState('driver');
+  
+  // Approved rides sub-tab state for passenger/driver views
+  const [approvedTab, setApprovedTab] = useState('passenger');
 
-
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   // Load user's rides
   const loadMyRides = async (userId: string) => {
@@ -101,47 +111,30 @@ export default function MyRidesPostgres() {
       const data = await response.json();
       setMyRides(data || []);
     } catch (error) {
-      console.error('Error loading my rides:', error);
-      setError('Failed to load your rides. Please try again.');
-      setMyRides([]);
+      console.error('Error loading rides:', error);
+      setError('Failed to load rides. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Load rides on component mount and when user changes
-  useEffect(() => {
-    if (currentUser?.uid) {
-      loadMyRides(currentUser.uid);
-      loadRideRequests();
-      loadPendingRequests();
-      loadApprovedRides();
-    }
-  }, [currentUser?.uid]);
-
-  // Load ride requests for driver
+  // Load ride requests for the user (incoming requests to user's rides)
   const loadRideRequests = async () => {
     if (!currentUser) return;
     
     setRequestsLoading(true);
     try {
-      console.log('Loading ride requests for driver:', currentUser.uid);
       const response = await fetch('/api/ride-requests/driver', {
         headers: {
           'x-user-id': currentUser.uid,
           'x-user-email': currentUser.email || '',
-          'x-user-name': currentUser.displayName || ''
         }
       });
       
       if (response.ok) {
-        const requests = await response.json();
-        console.log('Driver ride requests loaded:', requests.length);
-        console.log('Driver requests:', requests);
-        setRideRequests(requests);
-
-      } else {
-        console.error('Failed to load ride requests, status:', response.status);
+        const data = await response.json();
+        setRideRequests(data || []);
+        console.log('COMBINED TAB DEBUG - rideRequests.length:', data?.length || 0, 'pendingRequests.length:', pendingRequests.length);
       }
     } catch (error) {
       console.error('Error loading ride requests:', error);
@@ -150,7 +143,7 @@ export default function MyRidesPostgres() {
     }
   };
 
-  // Load pending ride requests (outgoing requests from user)
+  // Load pending requests (outgoing requests from user)
   const loadPendingRequests = async () => {
     if (!currentUser) return;
     
@@ -160,13 +153,13 @@ export default function MyRidesPostgres() {
         headers: {
           'x-user-id': currentUser.uid,
           'x-user-email': currentUser.email || '',
-          'x-user-name': currentUser.displayName || ''
         }
       });
-
+      
       if (response.ok) {
-        const requests = await response.json();
-        setPendingRequests(requests);
+        const data = await response.json();
+        setPendingRequests(data || []);
+        console.log('COMBINED TAB DEBUG - rideRequests.length:', rideRequests.length, 'pendingRequests.length:', data?.length || 0);
       }
     } catch (error) {
       console.error('Error loading pending requests:', error);
@@ -175,7 +168,7 @@ export default function MyRidesPostgres() {
     }
   };
 
-  // Load approved rides for user
+  // Load approved rides
   const loadApprovedRides = async () => {
     if (!currentUser) return;
     
@@ -185,13 +178,12 @@ export default function MyRidesPostgres() {
         headers: {
           'x-user-id': currentUser.uid,
           'x-user-email': currentUser.email || '',
-          'x-user-name': currentUser.displayName || ''
         }
       });
-
+      
       if (response.ok) {
-        const rides = await response.json();
-        setApprovedRides(rides);
+        const data = await response.json();
+        setApprovedRides(data || []);
       }
     } catch (error) {
       console.error('Error loading approved rides:', error);
@@ -200,10 +192,19 @@ export default function MyRidesPostgres() {
     }
   };
 
+  useEffect(() => {
+    if (currentUser) {
+      loadMyRides(currentUser.uid);
+      loadRideRequests();
+      loadPendingRequests();
+      loadApprovedRides();
+    }
+  }, [currentUser]);
+
   // Handle ride request approval/rejection
-  const handleRequestResponse = async (requestId: number, status: 'approved' | 'rejected') => {
+  const handleRequestAction = async (requestId: number, action: 'approve' | 'reject') => {
     if (!currentUser) return;
-    
+
     try {
       const response = await fetch(`/api/ride-requests/${requestId}`, {
         method: 'PATCH',
@@ -213,194 +214,112 @@ export default function MyRidesPostgres() {
           'x-user-email': currentUser.email || '',
           'x-user-name': currentUser.displayName || ''
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: action === 'approve' ? 'approved' : 'rejected' })
       });
 
       if (response.ok) {
         toast({
-          title: `Request ${status}`,
-          description: `Passenger request has been ${status}.`
+          title: action === 'approve' ? "Request Approved" : "Request Rejected",
+          description: `The ride request has been ${action === 'approve' ? 'approved' : 'rejected'}.`,
         });
-        loadRideRequests(); // Reload requests
+        // Refresh the requests
+        loadRideRequests();
+        loadApprovedRides();
       } else {
         const errorData = await response.json();
-        toast({
-          title: 'Error',
-          description: errorData.error || 'Failed to update request',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Error updating request:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update request',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const handleMarkComplete = (ride: any) => {
-    setRideToComplete(ride);
-    setCompleteDialogOpen(true);
-  };
-
-  // Generate verification code (driver action)
-  const generateVerificationCode = async (ride: any) => {
-    if (!currentUser) return;
-
-    try {
-      const response = await fetch(`/api/rides/${ride.id}/generate-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': currentUser?.uid || '',
-          'x-user-email': currentUser?.email || '',
-          'x-user-name': currentUser?.displayName || ''
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setGeneratedCode(result.verificationCode);
-        setShowVerificationCode(true);
-        setRideToComplete(ride);
-        
-        // Refresh all ride data to show updated status
-        if (currentUser?.uid) {
-          loadMyRides(currentUser.uid);
-          loadRideRequests();
-          loadPendingRequests();
-          loadApprovedRides();
-        }
-        
-        toast({
-          title: "Verification Code Generated",
-          description: `Share code ${result.verificationCode} with passengers to complete the ride.`,
-        });
-      } else {
-        throw new Error('Failed to generate verification code');
+        throw new Error(errorData.message || `Failed to ${action} request`);
       }
     } catch (error: any) {
-      console.error('Error generating verification code:', error);
+      console.error(`Error ${action}ing request:`, error);
       toast({
         title: "Error",
-        description: "Failed to generate verification code. Please try again.",
+        description: error.message || `Failed to ${action} request. Please try again.`,
         variant: "destructive",
       });
     }
   };
 
-  // Handle passenger verification input
-  const handlePassengerVerification = (ride: any) => {
-    setRideToComplete(ride);
+  // Generate verification code
+  const generateVerificationCode = async ({ id }: { id: number }) => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch(`/api/rides/${id}/generate-verification`, {
+        method: 'POST',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedCode(data.verificationCode);
+        setShowVerificationCode(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate verification code');
+      }
+    } catch (error: any) {
+      console.error('Error generating verification code:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle passenger verification
+  const handlePassengerVerification = async ({ id }: { id: number }) => {
+    if (!currentUser) return;
+
+    setRideToComplete({ id, rideId: id });
     setIsPassenger(true);
     setVerificationDialogOpen(true);
   };
 
-  // Verify and complete ride
+  // Verify code and complete ride
   const verifyAndCompleteRide = async () => {
-    if (!rideToComplete || !currentUser || !inputVerificationCode) return;
+    if (!rideToComplete || !currentUser) return;
+
+    if (!inputVerificationCode.trim()) {
+      toast({
+        title: "Code Required",
+        description: "Please enter the verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      const response = await fetch(`/api/rides/${rideToComplete.id}/verify-complete`, {
+      const response = await fetch(`/api/rides/${rideToComplete.rideId}/complete`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': currentUser?.uid || '',
-          'x-user-email': currentUser?.email || '',
-          'x-user-name': currentUser?.displayName || ''
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
         },
         body: JSON.stringify({
-          verificationCode: inputVerificationCode
+          verificationCode: inputVerificationCode.trim(),
+          isPassenger
         })
       });
 
       if (response.ok) {
         const result = await response.json();
         
+        toast({
+          title: "Ride Completed",
+          description: result.message || "Ride has been completed successfully. Payment has been processed.",
+        });
+        
         setVerificationDialogOpen(false);
-        setShowVerificationCode(false);
-        setRideToComplete(null);
         setInputVerificationCode('');
-        
-        // Show success message with payment capture details
-        const paymentsProcessed = result.paymentsProcessed || 0;
-        const successfulPayments = result.paymentResults?.filter((p: any) => p.status === 'captured').length || 0;
-        
-        toast({
-          title: "Ride Completed Successfully",
-          description: paymentsProcessed > 0 
-            ? `Ride completed and ${successfulPayments}/${paymentsProcessed} payments captured.`
-            : "Ride completed successfully.",
-        });
-        
-        console.log('Payment capture results:', result.paymentResults);
-        
-        // Refresh all ride data to update both driver and passenger views
-        if (currentUser?.uid) {
-          loadMyRides(currentUser.uid);
-          loadRideRequests();
-          loadPendingRequests();
-          loadApprovedRides();
-        }
-        
-        // Show review modal
-        setRideToReview(rideToComplete);
-        setReviewModalOpen(true);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to verify ride completion');
-      }
-    } catch (error: any) {
-      console.error('Error verifying ride completion:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Invalid verification code. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const confirmMarkComplete = async () => {
-    if (!rideToComplete || !currentUser) return;
-
-    try {
-      const response = await fetch(`/api/rides/${rideToComplete.id}/complete`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': currentUser?.uid || '',
-          'x-user-email': currentUser?.email || '',
-          'x-user-name': currentUser?.displayName || ''
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        
-        setCompleteDialogOpen(false);
         setRideToComplete(null);
-        
-        // Show success message with payment capture details
-        const paymentsProcessed = result.paymentsProcessed || 0;
-        const successfulPayments = result.paymentResults?.filter((p: any) => p.status === 'captured').length || 0;
-        
-        toast({
-          title: "Ride Completed Successfully",
-          description: paymentsProcessed > 0 
-            ? `Ride completed and ${successfulPayments}/${paymentsProcessed} payments captured.`
-            : "Ride completed successfully.",
-        });
+        setIsPassenger(false);
         
         console.log('Payment capture results:', result.paymentResults);
         
@@ -909,7 +828,7 @@ export default function MyRidesPostgres() {
         <TabsContent value="approved" className="mt-6">
           <div className="space-y-6">
             {/* Sub-tabs for Passenger and Driver approved rides */}
-            <Tabs value={myPostsTab} onValueChange={setMyPostsTab} className="w-full">
+            <Tabs value={approvedTab} onValueChange={setApprovedTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/30 rounded-lg p-1">
                 <TabsTrigger 
                   value="passenger" 
@@ -945,130 +864,102 @@ export default function MyRidesPostgres() {
                     </div>
                   ) : approvedRides.filter(ride => ride.userRole === 'passenger').length > 0 ? (
                     approvedRides.filter(ride => ride.userRole === 'passenger').map((ride) => (
-                <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                          <FaCheck className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-lg">{ride.driverName}</h3>
+                      <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                <FaCheck className="w-6 h-6 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-lg">{ride.driverName}</h3>
+                                  {ride.isCompleted ? (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
+                                      COMPLETED
+                                    </span>
+                                  ) : ride.isStarted ? (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                      IN PROGRESS
+                                    </span>
+                                  ) : (
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      APPROVED
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground">{ride.driverEmail}</p>
+                                {ride.driverPhone && (
+                                  <p className="text-sm font-medium text-green-700">📞 {ride.driverPhone}</p>
+                                )}
+                                {ride.driverInstagram && (
+                                  <p className="text-sm text-blue-600">📷 @{ride.driverInstagram}</p>
+                                )}
+                                {ride.driverSnapchat && (
+                                  <p className="text-sm text-yellow-600">👻 @{ride.driverSnapchat}</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center gap-2">
+                                <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                                <span className="text-sm">
+                                  {ride.rideOrigin} → {ride.rideDestination}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <FaCalendarAlt className="w-4 h-4 text-primary" />
+                                <span className="text-sm">
+                                  {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
+                                {ride.rideCarModel && (
+                                  <span className="text-sm text-muted-foreground">• {ride.rideCarModel}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              Approved {formatDate(new Date(ride.createdAt))}
+                            </span>
+                            
+                            {/* Show verification buttons or status badges based on ride progress */}
                             {ride.isCompleted ? (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
-                                COMPLETED
-                              </span>
+                              <div className="flex items-center gap-1 text-green-600 font-medium">
+                                <FaCheck className="w-5 h-5 text-green-600" />
+                              </div>
                             ) : ride.isStarted ? (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                                IN PROGRESS
-                              </span>
+                              // Ride has started - show completion flow
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePassengerVerification({ id: ride.rideId })}
+                                className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+                              >
+                                <FaCheck className="w-4 h-4" />
+                                Ride Complete
+                              </Button>
                             ) : (
-                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                APPROVED
-                              </span>
+                              // Ride not started yet - show start flow for passenger
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePassengerStartCode({ id: ride.rideId })}
+                                className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
+                              >
+                                <FaKey className="w-4 h-4" />
+                                Enter Start Code
+                              </Button>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground">{ride.driverEmail}</p>
-                          {ride.driverPhone && (
-                            <p className="text-sm font-medium text-green-700">📞 {ride.driverPhone}</p>
-                          )}
-                          {ride.driverInstagram && (
-                            <p className="text-sm text-blue-600">📷 @{ride.driverInstagram}</p>
-                          )}
-                          {ride.driverSnapchat && (
-                            <p className="text-sm text-yellow-600">👻 @{ride.driverSnapchat}</p>
-                          )}
                         </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2">
-                          <FaMapMarkerAlt className="w-4 h-4 text-primary" />
-                          <span className="text-sm">
-                            {ride.rideOrigin} → {ride.rideDestination}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <FaCalendarAlt className="w-4 h-4 text-primary" />
-                          <span className="text-sm">
-                            {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
-                          {ride.rideCarModel && (
-                            <span className="text-sm text-muted-foreground">• {ride.rideCarModel}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Approved {formatDate(new Date(ride.createdAt))}
-                      </span>
-                      
-                      {/* Show verification buttons or status badges based on ride progress */}
-                      {ride.isCompleted ? (
-                        // Show completed badge
-                        <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
-                            COMPLETED
-                          </span>
-                          <FaCheck className="w-5 h-5 text-green-600" />
-                        </div>
-                      ) : ride.isStarted ? (
-                        // Ride has started - show completion flow
-                        ride.userRole === 'driver' ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => generateVerificationCode({ id: ride.rideId })}
-                            className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
-                          >
-                            <FaKey className="w-4 h-4" />
-                            Generate Code
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handlePassengerVerification({ id: ride.rideId })}
-                            className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-                          >
-                            <FaCheck className="w-4 h-4" />
-                            Ride Complete
-                          </Button>
-                        )
-                      ) : (
-                        // Ride not started yet - show start flow
-                        ride.userRole === 'driver' ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDriverStartVerification({ id: ride.rideId })}
-                            className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
-                          >
-                            <FaPlay className="w-4 h-4" />
-                            Start Ride
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handlePassengerStartCode({ id: ride.rideId })}
-                            className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
-                          >
-                            <FaKey className="w-4 h-4" />
-                            Enter Start Code
-                          </Button>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))) : (
+                      </Card>
+                    )) : (
                     <div className="text-center py-12">
                       <FaUser className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium mb-2">No approved passenger rides yet</h3>
@@ -1147,9 +1038,44 @@ export default function MyRidesPostgres() {
                               </div>
                             </div>
                           </div>
+                          
+                          <div className="flex flex-col items-end gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              Approved {formatDate(new Date(ride.createdAt))}
+                            </span>
+                            
+                            {/* Show verification buttons or status badges based on ride progress */}
+                            {ride.isCompleted ? (
+                              <div className="flex items-center gap-1 text-green-600 font-medium">
+                                <FaCheck className="w-5 h-5 text-green-600" />
+                              </div>
+                            ) : ride.isStarted ? (
+                              // Ride has started - show completion flow for driver
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => generateVerificationCode({ id: ride.rideId })}
+                                className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                              >
+                                <FaKey className="w-4 h-4" />
+                                Generate Code
+                              </Button>
+                            ) : (
+                              // Ride not started yet - show start flow for driver
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDriverStartVerification({ id: ride.rideId })}
+                                className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
+                              >
+                                <FaPlay className="w-4 h-4" />
+                                Start Ride
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </Card>
-                    ))) : (
+                    )) : (
                     <div className="text-center py-12">
                       <FaCar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-medium mb-2">No approved driver rides yet</h3>
@@ -1222,8 +1148,8 @@ export default function MyRidesPostgres() {
                         <Skeleton className="h-4 w-64" />
                       </div>
                       <div className="flex gap-2">
-                        <Skeleton className="h-10 w-20" />
-                        <Skeleton className="h-10 w-20" />
+                        <Skeleton className="h-9 w-24" />
+                        <Skeleton className="h-9 w-24" />
                       </div>
                     </div>
                   </Card>
@@ -1231,33 +1157,51 @@ export default function MyRidesPostgres() {
               </div>
             ) : (
               <>
-                {/* Incoming Requests - Passengers requesting your rides */}
-                {console.log('COMBINED TAB DEBUG - rideRequests.length:', rideRequests.length, 'pendingRequests.length:', pendingRequests.length)}
-                {rideRequests.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <FaCar className="w-5 h-5 text-primary" />
-                      Requests for Your Rides ({rideRequests.length})
-                    </h3>
+                {/* Incoming requests (to user's rides) */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <BiMessageDetail className="w-5 h-5" />
+                    Incoming Requests ({rideRequests.length})
+                  </h2>
+                  {rideRequests.length > 0 ? (
                     <div className="space-y-4">
                       {rideRequests.map((request) => (
-                        <Card key={`incoming-${request.id}`} className="p-6">
+                        <Card key={request.id} className={`p-6 ${
+                          request.status === 'approved' ? 'border-green-200 bg-green-50' : 
+                          request.status === 'rejected' ? 'border-red-200 bg-red-50' :
+                          'border-yellow-200 bg-yellow-50'
+                        }`}>
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <FaUser className="w-5 h-5 text-primary" />
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                  request.status === 'approved' ? 'bg-green-100' : 
+                                  request.status === 'rejected' ? 'bg-red-100' :
+                                  'bg-yellow-100'
+                                }`}>
+                                  {request.status === 'approved' ? (
+                                    <FaCheck className="w-6 h-6 text-green-600" />
+                                  ) : request.status === 'rejected' ? (
+                                    <FaExclamationTriangle className="w-6 h-6 text-red-600" />
+                                  ) : (
+                                    <FaUser className="w-6 h-6 text-yellow-600" />
+                                  )}
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-lg">{request.passengerName}</h4>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold text-lg">{request.passengerName}</h3>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      request.status === 'approved' ? 'bg-green-600 text-white' : 
+                                      request.status === 'rejected' ? 'bg-red-600 text-white' :
+                                      'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {request.status.toUpperCase()}
+                                    </span>
+                                  </div>
                                   <p className="text-sm text-muted-foreground">{request.passengerEmail}</p>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                  'bg-red-100 text-red-800'
-                                }`}>
-                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                  {request.passengerPhone && (
+                                    <p className="text-sm font-medium text-green-700">📞 {request.passengerPhone}</p>
+                                  )}
                                 </div>
                               </div>
                               
@@ -1275,60 +1219,35 @@ export default function MyRidesPostgres() {
                                   </span>
                                 </div>
                                 {request.message && (
-                                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-sm text-gray-700">
-                                      <strong>Message:</strong> {request.message}
-                                    </p>
+                                  <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-sm italic">"{request.message}"</p>
                                   </div>
                                 )}
                               </div>
-
-                              {request.passengerPhone && request.status === 'approved' && (
-                                <div className="bg-green-50 p-3 rounded-lg">
-                                  <p className="text-sm font-medium text-green-800">Contact Information:</p>
-                                  <p className="text-sm text-green-700">Phone: {request.passengerPhone}</p>
-                                </div>
-                              )}
                             </div>
-
+                            
                             <div className="flex flex-col items-end gap-2">
                               <span className="text-sm text-muted-foreground">
-                                Received {formatDate(new Date(request.createdAt))}
+                                {formatDate(new Date(request.createdAt))}
                               </span>
+                              
                               {request.status === 'pending' && (
                                 <div className="flex gap-2">
                                   <Button
-                                    onClick={() => handleRequestResponse(request.id, 'rejected')}
-                                    variant="outline"
                                     size="sm"
-                                    className="border-red-200 text-red-700 hover:bg-red-50"
+                                    variant="outline"
+                                    onClick={() => handleRequestAction(request.id, 'reject')}
+                                    className="border-red-300 text-red-600 hover:bg-red-50"
                                   >
-                                    Decline
+                                    Reject
                                   </Button>
                                   <Button
-                                    onClick={() => handleRequestResponse(request.id, 'approved')}
                                     size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                    onClick={() => handleRequestAction(request.id, 'approve')}
+                                    className="bg-green-600 hover:bg-green-700"
                                   >
                                     Approve
                                   </Button>
-                                </div>
-                              )}
-                              {request.status === 'approved' && !request.isCompleted && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => generateVerificationCode({ id: request.rideId })}
-                                  className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
-                                >
-                                  <FaKey className="w-4 h-4" />
-                                  Generate Code
-                                </Button>
-                              )}
-                              {request.status === 'approved' && request.isCompleted && (
-                                <div className="flex items-center gap-1 text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
-                                  <FaCheck className="w-4 h-4" />
-                                  Completed
                                 </div>
                               )}
                             </div>
@@ -1336,35 +1255,64 @@ export default function MyRidesPostgres() {
                         </Card>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center py-8">
+                      <BiMessageDetail className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No incoming requests</h3>
+                      <p className="text-muted-foreground">
+                        When passengers request to join your rides, they'll appear here.
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                {/* Outgoing Requests - Your requests for other rides */}
-                {pendingRequests.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <FaUserFriends className="w-5 h-5 text-primary" />
-                      Your Requests ({pendingRequests.length})
-                    </h3>
+                {/* Outgoing requests (from user) */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <FaUser className="w-5 h-5" />
+                    Your Requests ({pendingRequests.length})
+                  </h2>
+                  {pendingRequests.length > 0 ? (
                     <div className="space-y-4">
                       {pendingRequests.map((request) => (
-                        <Card key={`outgoing-${request.id}`} className="p-6">
+                        <Card key={request.id} className={`p-6 ${
+                          request.status === 'approved' ? 'border-green-200 bg-green-50' : 
+                          request.status === 'rejected' ? 'border-red-200 bg-red-50' :
+                          request.status === 'cancelled' ? 'border-gray-200 bg-gray-50' :
+                          'border-blue-200 bg-blue-50'
+                        }`}>
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <FaCar className="w-5 h-5 text-primary" />
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                  request.status === 'approved' ? 'bg-green-100' : 
+                                  request.status === 'rejected' ? 'bg-red-100' :
+                                  request.status === 'cancelled' ? 'bg-gray-100' :
+                                  'bg-blue-100'
+                                }`}>
+                                  {request.status === 'approved' ? (
+                                    <FaCheck className="w-6 h-6 text-green-600" />
+                                  ) : request.status === 'rejected' ? (
+                                    <FaExclamationTriangle className="w-6 h-6 text-red-600" />
+                                  ) : request.status === 'cancelled' ? (
+                                    <FaExclamationTriangle className="w-6 h-6 text-gray-600" />
+                                  ) : (
+                                    <FaUser className="w-6 h-6 text-blue-600" />
+                                  )}
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-lg">{request.driverName}</h4>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold text-lg">Request to {request.driverName}</h3>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      request.status === 'approved' ? 'bg-green-600 text-white' : 
+                                      request.status === 'rejected' ? 'bg-red-600 text-white' :
+                                      request.status === 'cancelled' ? 'bg-gray-600 text-white' :
+                                      'bg-blue-100 text-blue-800'
+                                    }`}>
+                                      {request.status.toUpperCase()}
+                                    </span>
+                                  </div>
                                   <p className="text-sm text-muted-foreground">{request.driverEmail}</p>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                  'bg-red-100 text-red-800'
-                                }`}>
-                                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                                 </div>
                               </div>
                               
@@ -1382,10 +1330,8 @@ export default function MyRidesPostgres() {
                                   </span>
                                 </div>
                                 {request.message && (
-                                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-sm text-gray-700">
-                                      <strong>Your message:</strong> {request.message}
-                                    </p>
+                                  <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-sm italic">Your message: "{request.message}"</p>
                                   </div>
                                 )}
                               </div>
@@ -1395,249 +1341,37 @@ export default function MyRidesPostgres() {
                               <span className="text-sm text-muted-foreground">
                                 Sent {formatDate(new Date(request.createdAt))}
                               </span>
+                              
                               {request.status === 'pending' && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="border-red-200 text-red-700 hover:bg-red-50"
-                                    >
-                                      Cancel Request
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Cancel Ride Request</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to cancel this ride request? This action cannot be undone and any payment authorization will be cancelled.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Keep Request</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleCancelRequest(request.id)}
-                                        className="bg-red-600 hover:bg-red-700"
-                                      >
-                                        Cancel Request
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleCancelRequest(request.id)}
+                                  className="border-red-300 text-red-600 hover:bg-red-50"
+                                >
+                                  Cancel Request
+                                </Button>
                               )}
                             </div>
                           </div>
                         </Card>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* Empty state when no requests */}
-                {rideRequests.length === 0 && pendingRequests.length === 0 && (
-                  <div className="text-center py-12">
-                    <FaUserFriends className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No ride requests yet</h3>
-                    <p className="text-muted-foreground">
-                      Your ride requests and incoming passenger requests will appear here.
-                    </p>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center py-8">
+                      <FaUser className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No requests sent</h3>
+                      <p className="text-muted-foreground">
+                        When you request to join rides, they'll appear here.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
         </TabsContent>
-
-        <TabsContent value="pending" className="mt-6">
-          <div className="space-y-6">
-            {pendingRequestsLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-6 w-48" />
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-4 w-64" />
-                      </div>
-                      <div className="flex gap-2">
-                        <Skeleton className="h-10 w-20" />
-                        <Skeleton className="h-10 w-20" />
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : pendingRequests.length > 0 ? (
-              pendingRequests.map((request) => (
-                <Card key={request.id} className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <FaUser className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{request.driverName}</h3>
-                          <p className="text-sm text-muted-foreground">{request.driverEmail}</p>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2">
-                          <FaMapMarkerAlt className="w-4 h-4 text-primary" />
-                          <span className="text-sm">
-                            {request.rideOrigin} → {request.rideDestination}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <FaCalendarAlt className="w-4 h-4 text-primary" />
-                          <span className="text-sm">
-                            {formatDate(new Date(request.rideDepartureTime))} at {new Date(request.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                          </span>
-                        </div>
-                        {request.message && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                            <p className="text-sm text-gray-700">
-                              <strong>Message:</strong> {request.message}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {request.driverPhone && request.status === 'approved' && (
-                        <div className="bg-green-50 p-3 rounded-lg">
-                          <p className="text-sm font-medium text-green-800">Contact Information:</p>
-                          <p className="text-sm text-green-700">Phone: {request.driverPhone}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="text-sm text-muted-foreground">
-                        Sent {formatDate(new Date(request.createdAt))}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <FaUserFriends className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No pending requests</h3>
-                <p className="text-muted-foreground">
-                  Your ride requests will appear here when awaiting approval.
-                </p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-
       </Tabs>
-
-      {/* Review Modal */}
-      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rate Your Experience</DialogTitle>
-            <DialogDescription>
-              How was your ride with {rideToReview?.rideType === 'driver' ? 'your passengers' : 'the driver'}?
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-6 py-4">
-            {/* Route Info */}
-            <div className="text-center text-sm text-muted-foreground">
-              {rideToReview?.origin} → {rideToReview?.destination}
-            </div>
-            
-            {/* Star Rating */}
-            <div className="flex justify-center space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="p-1 transition-colors"
-                >
-                  <Star
-                    className={`w-8 h-8 ${
-                      star <= (hoveredRating || rating)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            
-            {rating > 0 && (
-              <div className="text-center text-sm font-medium">
-                {rating === 1 && "Poor"}
-                {rating === 2 && "Fair"}
-                {rating === 3 && "Good"}
-                {rating === 4 && "Very Good"}
-                {rating === 5 && "Excellent"}
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter className="gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setReviewModalOpen(false);
-                setRating(0);
-                setRideToReview(null);
-              }}
-            >
-              Skip
-            </Button>
-            <Button 
-              onClick={handleSubmitReview}
-              disabled={rating === 0}
-              className="bg-primary hover:bg-primary/90"
-            >
-              Submit Review
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Complete confirmation dialog */}
-      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <FaExclamationTriangle className="text-yellow-500" />
-              Mark Ride as Complete?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to mark this ride as complete? This action cannot be undone and you'll be asked to rate your experience.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setCompleteDialogOpen(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmMarkComplete}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Mark Complete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Driver Verification Code Display Dialog */}
       <Dialog open={showVerificationCode} onOpenChange={setShowVerificationCode}>
@@ -1645,7 +1379,7 @@ export default function MyRidesPostgres() {
           <DialogHeader>
             <DialogTitle>Verification Code Generated</DialogTitle>
             <DialogDescription>
-              Share this code with passengers to complete the ride. The code is required for payment processing.
+              Share this code with the passenger to complete the ride.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4 py-6">
@@ -1770,7 +1504,6 @@ export default function MyRidesPostgres() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </Tabs>
       
       {/* Review Modal */}
       <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>

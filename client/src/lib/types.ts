@@ -48,6 +48,8 @@ export interface Ride {
   genderPreference: string;
   carModel?: string;
   notes?: string;
+  baggageCheckIn?: number;
+  baggagePersonal?: number;
   createdAt: Timestamp | MockTimestamp;
   rideType: "driver" | "passenger";
   passengers?: string[];

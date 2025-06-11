@@ -152,6 +152,8 @@ export default function FindRidesPostgres() {
       rideType: ride.rideType,
       driverId: ride.driverId,
       isCompleted: ride.isCompleted,
+      baggageCheckIn: ride.baggageCheckIn || 0,
+      baggagePersonal: ride.baggagePersonal || 0,
       driver: {
         name: ride.driverName || 'Unknown Driver',
         email: ride.driverEmail || '',
@@ -194,6 +196,11 @@ export default function FindRidesPostgres() {
       
       // Filter by ride type (driver or passenger)
       if (ride.rideType !== rideTypeFilter) {
+        return false;
+      }
+
+      // Gainesville requirement: rides must be from or to Gainesville
+      if (ride.origin !== 'Gainesville' && ride.destination !== 'Gainesville') {
         return false;
       }
       

@@ -20,6 +20,8 @@ interface RideRequest {
   rideDestination: string;
   rideDepartureTime: string;
   ridePrice: string;
+  baggageCheckIn?: number;
+  baggagePersonal?: number;
 }
 
 export default function RideRequestsTab() {
@@ -194,6 +196,21 @@ export default function RideRequestsTab() {
                       )}
                     </div>
                   </div>
+
+                  {/* Baggage Requirements */}
+                  {(request.baggageCheckIn > 0 || request.baggagePersonal > 0) && (
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Baggage Requirements</h4>
+                      <div className="space-y-1 text-sm">
+                        {request.baggageCheckIn > 0 && (
+                          <p><span className="font-medium">Check-in bags:</span> {request.baggageCheckIn} large bag{request.baggageCheckIn > 1 ? 's' : ''}</p>
+                        )}
+                        {request.baggagePersonal > 0 && (
+                          <p><span className="font-medium">Personal bags:</span> {request.baggagePersonal} personal bag{request.baggagePersonal > 1 ? 's' : ''}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Trip Details */}
                   <div className="bg-stone-50 p-3 rounded-lg">

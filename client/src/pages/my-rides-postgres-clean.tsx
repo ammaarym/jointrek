@@ -1018,18 +1018,31 @@ export default function MyRidesPostgres() {
                         </Card>
                       ))}
                     </div>
-                  ) : approvedRides.filter(ride => ride.userRole === 'driver').length > 0 ? (
-                    approvedRides.filter(ride => ride.userRole === 'driver').map((ride) => (
-                      <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <FaCheck className="w-6 h-6 text-green-600" />
-                              </div>
-                              <div>
+                  ) : (() => {
+                    // Group approved rides by rideId to show each ride once with passenger count
+                    const groupedRides = approvedRides
+                      .filter(ride => ride.userRole === 'driver')
+                      .reduce((acc: Record<number, any>, ride: any) => {
+                        if (!acc[ride.rideId]) {
+                          acc[ride.rideId] = {
+                            ...ride,
+                            passengerCount: 1
+                          };
+                        } else {
+                          acc[ride.rideId].passengerCount += 1;
+                        }
+                        return acc;
+                      }, {});
+                    
+                    const uniqueRides = Object.values(groupedRides);
+                    
+                    if (uniqueRides.length > 0) {
+                      return uniqueRides.map((ride: any) => (
+                        <Card key={ride.rideId} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-3">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="font-semibold text-lg">{ride.passengerName}</h3>
                                   {ride.isCompleted ? (
                                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-600 text-white">
                                       COMPLETED
@@ -1044,78 +1057,82 @@ export default function MyRidesPostgres() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground">{ride.passengerEmail}</p>
-                                {ride.passengerPhone && (
-                                  <p className="text-sm font-medium text-green-700">📞 {ride.passengerPhone}</p>
-                                )}
+                              </div>
+                              
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center gap-2">
+                                  <FaMapMarkerAlt className="w-4 h-4 text-primary" />
+                                  <span className="text-sm font-medium">
+                                    {ride.rideOrigin} → {ride.rideDestination}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FaCalendarAlt className="w-4 h-4 text-primary" />
+                                  <span className="text-sm">
+                                    {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FaUserFriends className="w-4 h-4 text-blue-600" />
+                                  <span className="text-sm font-medium text-blue-700">
+                                    {ride.passengerCount} passenger{ride.passengerCount !== 1 ? 's' : ''} coming
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             
-                            <div className="space-y-2 mb-4">
-                              <div className="flex items-center gap-2">
-                                <FaMapMarkerAlt className="w-4 h-4 text-primary" />
-                                <span className="text-sm">
-                                  {ride.rideOrigin} → {ride.rideDestination}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <FaCalendarAlt className="w-4 h-4 text-primary" />
-                                <span className="text-sm">
-                                  {formatDate(new Date(ride.rideDepartureTime))} at {new Date(ride.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Price: ${ride.ridePrice}</span>
-                              </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                Approved {formatDate(new Date(ride.createdAt))}
+                              </span>
+                              
+                              {/* Show verification buttons or status badges based on ride progress */}
+                              {ride.isCompleted ? (
+                                <div className="flex items-center gap-1 text-green-600 font-medium">
+                                  <FaCheck className="w-5 h-5 text-green-600" />
+                                </div>
+                              ) : ride.isStarted ? (
+                                // Ride has started - show completion flow for driver
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => generateVerificationCode({ id: ride.rideId })}
+                                  className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                                >
+                                  <FaKey className="w-4 h-4" />
+                                  Generate Code
+                                </Button>
+                              ) : (
+                                // Ride not started yet - show start flow for driver
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDriverStartVerification({ id: ride.rideId })}
+                                  className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
+                                >
+                                  <FaPlay className="w-4 h-4" />
+                                  Start Ride
+                                </Button>
+                              )}
                             </div>
                           </div>
-                          
-                          <div className="flex flex-col items-end gap-2">
-                            <span className="text-sm text-muted-foreground">
-                              Approved {formatDate(new Date(ride.createdAt))}
-                            </span>
-                            
-                            {/* Show verification buttons or status badges based on ride progress */}
-                            {ride.isCompleted ? (
-                              <div className="flex items-center gap-1 text-green-600 font-medium">
-                                <FaCheck className="w-5 h-5 text-green-600" />
-                              </div>
-                            ) : ride.isStarted ? (
-                              // Ride has started - show completion flow for driver
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => generateVerificationCode({ id: ride.rideId })}
-                                className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
-                              >
-                                <FaKey className="w-4 h-4" />
-                                Generate Code
-                              </Button>
-                            ) : (
-                              // Ride not started yet - show start flow for driver
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDriverStartVerification({ id: ride.rideId })}
-                                className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
-                              >
-                                <FaPlay className="w-4 h-4" />
-                                Start Ride
-                              </Button>
-                            )}
-                          </div>
+                        </Card>
+                      ));
+                    } else {
+                      return (
+                        <div className="text-center py-12">
+                          <FaCar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-lg font-medium mb-2">No approved driver rides yet</h3>
+                          <p className="text-muted-foreground">
+                            When passengers request your rides and you approve them, they'll appear here.
+                          </p>
                         </div>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
-                      <FaCar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No approved driver rides yet</h3>
-                      <p className="text-muted-foreground">
-                        When passengers request your rides and you approve them, they'll appear here.
-                      </p>
-                    </div>
-                  )}
+                      );
+                    }
+                  })()}
                 </div>
               </TabsContent>
             </Tabs>

@@ -336,6 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send SMS notification to driver
+      let smsStatus = { sent: false, reason: 'Unknown error' };
       try {
         // Get ride and driver details
         const ride = await storage.getRide(validatedData.rideId);
@@ -353,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               hour12: true
             });
 
-            await twilioService.notifyDriverOfRequest(
+            const smsSent = await twilioService.notifyDriverOfRequest(
               driver.phone,
               passenger.displayName || passenger.email.split('@')[0],
               {
@@ -363,17 +364,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 seats: 1
               }
             );
-            console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
+            
+            if (smsSent) {
+              smsStatus = { sent: true, reason: `SMS sent to driver ${driver.displayName || driver.email.split('@')[0]} at ${driver.phone}` };
+              console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
+            } else {
+              smsStatus = { sent: false, reason: 'Failed to send SMS - Twilio error' };
+            }
+          } else if (!driver) {
+            smsStatus = { sent: false, reason: 'Driver not found' };
+          } else if (!driver.phone) {
+            smsStatus = { sent: false, reason: 'Driver has no phone number' };
           } else {
-            console.log(`Cannot send SMS - missing driver phone number or user data`);
+            smsStatus = { sent: false, reason: 'Passenger data not found' };
           }
+        } else {
+          smsStatus = { sent: false, reason: 'Ride not found' };
         }
       } catch (smsError) {
         console.error("Error sending SMS notification:", smsError);
-        // Don't fail the request if SMS fails
+        smsStatus = { sent: false, reason: `SMS error: ${smsError.message || 'Unknown error'}` };
       }
 
-      res.status(201).json(rideRequest);
+      res.status(201).json({
+        ...rideRequest,
+        smsStatus
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         const validationError = fromZodError(error);
@@ -480,6 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Send SMS notification to passenger when approved
+          let approvalSmsStatus = { sent: false, reason: 'Unknown error' };
           try {
             if (thisRequest && ride) {
               const passenger = await storage.getUserByFirebaseUid(thisRequest.passengerId);
@@ -495,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   hour12: true
                 });
 
-                await twilioService.notifyPassengerOfApproval(
+                const smsSent = await twilioService.notifyPassengerOfApproval(
                   passenger.phone,
                   driver.displayName || driver.email.split('@')[0],
                   {
@@ -505,14 +522,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     driverPhone: driver.phone || 'Contact via app'
                   }
                 );
-                console.log(`SMS approval notification sent to passenger ${passenger.email}`);
+                
+                if (smsSent) {
+                  approvalSmsStatus = { sent: true, reason: `SMS sent to passenger ${passenger.displayName || passenger.email.split('@')[0]} at ${passenger.phone}` };
+                  console.log(`SMS approval notification sent to passenger ${passenger.email}`);
+                } else {
+                  approvalSmsStatus = { sent: false, reason: 'Failed to send SMS - Twilio error' };
+                }
+              } else if (!passenger) {
+                approvalSmsStatus = { sent: false, reason: 'Passenger not found' };
+              } else if (!passenger.phone) {
+                approvalSmsStatus = { sent: false, reason: 'Passenger has no phone number' };
               } else {
-                console.log(`Cannot send SMS approval notification - missing passenger phone or user data`);
+                approvalSmsStatus = { sent: false, reason: 'Driver data not found' };
               }
+            } else {
+              approvalSmsStatus = { sent: false, reason: 'Request or ride data not found' };
             }
           } catch (smsError) {
             console.error("Error sending SMS approval notification:", smsError);
-            // Don't fail the request if SMS fails
+            approvalSmsStatus = { sent: false, reason: `SMS error: ${smsError.message || 'Unknown error'}` };
           }
           
         } catch (error) {
@@ -521,7 +550,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      res.json(updatedRequest);
+      // Include SMS status in response for approved requests
+      if (status === "approved") {
+        res.json({
+          ...updatedRequest,
+          smsStatus: approvalSmsStatus
+        });
+      } else {
+        res.json(updatedRequest);
+      }
     } catch (error) {
       console.error("Error updating ride request:", error);
       res.status(500).json({ error: "Internal server error" });

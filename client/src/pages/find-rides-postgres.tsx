@@ -141,8 +141,16 @@ export default function FindRidesPostgres() {
         city: ride.destination,
         area: ride.destinationArea || ''
       },
-      departureTime: new Date(ride.departureTime),
-      arrivalTime: new Date(ride.arrivalTime),
+      departureTime: {
+        toDate: () => new Date(ride.departureTime),
+        seconds: Math.floor(new Date(ride.departureTime).getTime() / 1000),
+        nanoseconds: 0
+      },
+      arrivalTime: {
+        toDate: () => new Date(ride.arrivalTime),
+        seconds: Math.floor(new Date(ride.arrivalTime).getTime() / 1000),
+        nanoseconds: 0
+      },
       seatsTotal: ride.seatsTotal,
       seatsLeft: ride.seatsLeft,
       price: ride.price,
@@ -165,7 +173,11 @@ export default function FindRidesPostgres() {
         rating: 4.8,
         totalRides: 15
       },
-      createdAt: new Date(ride.createdAt)
+      createdAt: {
+        toDate: () => new Date(ride.createdAt),
+        seconds: Math.floor(new Date(ride.createdAt).getTime() / 1000),
+        nanoseconds: 0
+      }
     };
   };
 

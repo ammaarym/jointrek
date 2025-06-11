@@ -198,15 +198,15 @@ export default function RideRequestsTab() {
                   </div>
 
                   {/* Baggage Requirements */}
-                  {(request.baggageCheckIn > 0 || request.baggagePersonal > 0) && (
+                  {((request.baggageCheckIn || 0) > 0 || (request.baggagePersonal || 0) > 0) && (
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">Baggage Requirements</h4>
                       <div className="space-y-1 text-sm">
-                        {request.baggageCheckIn > 0 && (
-                          <p><span className="font-medium">Check-in bags:</span> {request.baggageCheckIn} large bag{request.baggageCheckIn > 1 ? 's' : ''}</p>
+                        {(request.baggageCheckIn || 0) > 0 && (
+                          <p><span className="font-medium">Check-in bags:</span> {request.baggageCheckIn} large bag{(request.baggageCheckIn || 0) > 1 ? 's' : ''}</p>
                         )}
-                        {request.baggagePersonal > 0 && (
-                          <p><span className="font-medium">Personal bags:</span> {request.baggagePersonal} personal bag{request.baggagePersonal > 1 ? 's' : ''}</p>
+                        {(request.baggagePersonal || 0) > 0 && (
+                          <p><span className="font-medium">Personal bags:</span> {request.baggagePersonal} personal bag{(request.baggagePersonal || 0) > 1 ? 's' : ''}</p>
                         )}
                       </div>
                     </div>

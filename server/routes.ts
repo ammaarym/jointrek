@@ -6,7 +6,7 @@ import * as admin from 'firebase-admin';
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import apiRoutes from "./api";
-import { sendRideRequestNotification, sendRideApprovalNotification } from "./twilioService";
+import { twilioService } from "./twilio-service";
 import crypto from "crypto";
 import Stripe from "stripe";
 import { db } from "./db";
@@ -335,35 +335,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passengerId: req.user!.uid
       });
 
-      // SMS notification disabled for testing
-      // TODO: Re-enable SMS notifications after in-app approval is confirmed working
-      /*
       // Send SMS notification to driver
       try {
         // Get ride and driver details
         const ride = await storage.getRide(validatedData.rideId);
-        const driver = await storage.getUserByFirebaseUid(ride.driverId);
-        const passenger = await storage.getUserByFirebaseUid(req.user.uid);
+        if (ride) {
+          const driver = await storage.getUserByFirebaseUid(ride.driverId);
+          const passenger = await storage.getUserByFirebaseUid(req.user!.uid);
 
-        if (ride && driver && driver.phone && passenger) {
-          await sendRideRequestNotification({
-            driverPhone: driver.phone,
-            passengerName: passenger.displayName || passenger.email.split('@')[0],
-            origin: ride.origin,
-            destination: ride.destination,
-            departureTime: ride.departureTime.toISOString(),
-            price: ride.price,
-            requestId: rideRequest.id.toString()
-          });
-          console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
-        } else {
-          console.log(`Cannot send SMS - missing driver phone number or user data`);
+          if (driver && driver.phone && passenger) {
+            const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+              weekday: 'short',
+              month: 'short', 
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            });
+
+            await twilioService.notifyDriverOfRequest(
+              driver.phone,
+              passenger.displayName || passenger.email.split('@')[0],
+              {
+                origin: ride.origin,
+                destination: ride.destination,
+                departureTime: departureTime,
+                seats: 1
+              }
+            );
+            console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
+          } else {
+            console.log(`Cannot send SMS - missing driver phone number or user data`);
+          }
         }
       } catch (smsError) {
         console.error("Error sending SMS notification:", smsError);
         // Don't fail the request if SMS fails
       }
-      */
 
       res.status(201).json(rideRequest);
     } catch (error) {
@@ -471,8 +479,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
-          // SMS approval notification disabled for testing
-          // TODO: Re-enable SMS notifications after in-app approval is confirmed working
+          // Send SMS notification to passenger when approved
+          try {
+            if (thisRequest && ride) {
+              const passenger = await storage.getUserByFirebaseUid(thisRequest.passengerId);
+              const driver = await storage.getUserByFirebaseUid(req.user!.uid);
+              
+              if (passenger && passenger.phone && driver) {
+                const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+                  weekday: 'short',
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                });
+
+                await twilioService.notifyPassengerOfApproval(
+                  passenger.phone,
+                  driver.displayName || driver.email.split('@')[0],
+                  {
+                    origin: ride.origin,
+                    destination: ride.destination,
+                    departureTime: departureTime,
+                    driverPhone: driver.phone || 'Contact via app'
+                  }
+                );
+                console.log(`SMS approval notification sent to passenger ${passenger.email}`);
+              } else {
+                console.log(`Cannot send SMS approval notification - missing passenger phone or user data`);
+              }
+            }
+          } catch (smsError) {
+            console.error("Error sending SMS approval notification:", smsError);
+            // Don't fail the request if SMS fails
+          }
           
         } catch (error) {
           console.error("Error processing approved request:", error);

@@ -1089,12 +1089,22 @@ export default function MyRidesPostgres() {
                                       .filter(r => r.rideId === ride.rideId && r.userRole === 'driver')
                                       .map(r => r.passengerName);
                                     
+                                    // Determine the styling based on ride status
+                                    let slotStyles = "px-3 py-1 border rounded-full text-xs font-medium ";
+                                    if (ride.isCompleted) {
+                                      slotStyles += "bg-green-50 border-green-200 text-green-700";
+                                    } else if (ride.isStarted) {
+                                      slotStyles += "bg-gray-50 border-gray-200 text-gray-700";
+                                    } else {
+                                      slotStyles += "bg-blue-50 border-blue-200 text-blue-700";
+                                    }
+                                    
                                     return (
                                       <div className="flex flex-wrap gap-2">
                                         {passengers.map((passengerName, index) => (
                                           <div
                                             key={index}
-                                            className="px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs font-medium text-blue-700"
+                                            className={slotStyles}
                                           >
                                             {passengerName}
                                           </div>

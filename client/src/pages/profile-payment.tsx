@@ -9,6 +9,22 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Check, Plus, Trash2 } from "lucide-react";
 
+interface PaymentMethod {
+  id: string;
+  type: string;
+  card?: {
+    brand: string;
+    last4: string;
+    exp_month: number;
+    exp_year: number;
+  };
+}
+
+interface PaymentData {
+  paymentMethods: PaymentMethod[];
+  defaultPaymentMethodId: string | null;
+}
+
 const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -97,7 +113,7 @@ export default function ProfilePaymentPage() {
   const [clientSecret, setClientSecret] = useState("");
 
   // Fetch user's payment methods
-  const { data: paymentData, isLoading: paymentLoading } = useQuery({
+  const { data: paymentData, isLoading: paymentLoading } = useQuery<PaymentData>({
     queryKey: ["/api/payment-methods"],
     enabled: !!currentUser,
   });
@@ -224,9 +240,9 @@ export default function ProfilePaymentPage() {
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
                 <p className="mt-2 text-muted-foreground">Loading payment methods...</p>
               </div>
-            ) : paymentData?.paymentMethods?.length > 0 ? (
+            ) : paymentData?.paymentMethods && paymentData.paymentMethods.length > 0 ? (
               <div className="space-y-3">
-                {paymentData.paymentMethods.map((pm: any) => (
+                {paymentData.paymentMethods.map((pm: PaymentMethod) => (
                   <div 
                     key={pm.id} 
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -235,13 +251,13 @@ export default function ProfilePaymentPage() {
                       <CreditCard className="w-5 h-5 text-muted-foreground" />
                       <div>
                         <p className="font-medium">
-                          •••• •••• •••• {pm.card.last4}
+                          •••• •••• •••• {pm.card?.last4 || '****'}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {pm.card.brand.toUpperCase()} • Expires {pm.card.exp_month}/{pm.card.exp_year}
+                          {pm.card?.brand?.toUpperCase() || 'CARD'} • Expires {pm.card?.exp_month || 'XX'}/{pm.card?.exp_year || 'XXXX'}
                         </p>
                       </div>
-                      {paymentData.defaultPaymentMethodId === pm.id && (
+                      {paymentData?.defaultPaymentMethodId === pm.id && (
                         <div className="flex items-center gap-1 text-green-600 text-sm">
                           <Check className="w-4 h-4" />
                           Default
@@ -249,7 +265,7 @@ export default function ProfilePaymentPage() {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {paymentData.defaultPaymentMethodId !== pm.id && (
+                      {paymentData?.defaultPaymentMethodId !== pm.id && (
                         <Button
                           variant="outline"
                           size="sm"

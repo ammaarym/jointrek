@@ -324,22 +324,33 @@ export default function DriverOnboard() {
                     <DollarSign className="w-5 h-5 text-blue-600" />
                     <span className="font-medium">Manage Account</span>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={openDashboard}
-                    disabled={isLoadingDashboard}
-                    className="mt-2 w-full"
-                  >
-                    {isLoadingDashboard ? (
-                      <>
-                        <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2" />
-                        Opening...
-                      </>
-                    ) : (
-                      "Open Stripe Dashboard"
-                    )}
-                  </Button>
+                  <div className="space-y-2 mt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={openDashboard}
+                      disabled={isLoadingDashboard}
+                      className="w-full"
+                    >
+                      {isLoadingDashboard ? (
+                        <>
+                          <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2" />
+                          Opening...
+                        </>
+                      ) : (
+                        "Open Stripe Dashboard"
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={deleteDriverAccount}
+                      disabled={isLoading}
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      Delete Driver Account
+                    </Button>
+                  </div>
                 </div>
               </div>
 

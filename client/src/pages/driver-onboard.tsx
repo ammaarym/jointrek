@@ -175,6 +175,52 @@ export default function DriverOnboard() {
     }
   };
 
+  const deleteDriverAccount = async () => {
+    if (!currentUser) return;
+
+    const confirmed = confirm(
+      'Are you sure you want to delete your driver account? This will permanently remove your Stripe Connect account and you will need to complete the setup process again to become a driver.'
+    );
+
+    if (!confirmed) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/driver/account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Driver Account Deleted",
+          description: result.message,
+        });
+        
+        // Refresh the status to show the user can start over
+        loadDriverStatus();
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete driver account');
+      }
+    } catch (error: any) {
+      console.error('Error deleting driver account:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete driver account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 max-w-2xl">

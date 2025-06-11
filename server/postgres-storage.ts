@@ -64,7 +64,7 @@ export class PostgresStorage implements IStorage {
 
   async updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string | null): Promise<User | undefined> {
     const updateData: any = { stripeCustomerId };
-    if (defaultPaymentMethodId) {
+    if (defaultPaymentMethodId !== undefined) {
       updateData.defaultPaymentMethodId = defaultPaymentMethodId;
     }
     

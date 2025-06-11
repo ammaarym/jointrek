@@ -145,18 +145,46 @@ export default function ProfilePaymentPage() {
     },
   });
 
+  // Delete payment method mutation
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest("DELETE", `/api/payment-methods/${paymentMethodId}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Method Deleted",
+        description: "Your payment method has been removed successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete payment method.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddPaymentMethod = () => {
     setupPaymentMutation.mutate();
+  };
+
+  const handleSetDefault = (paymentMethodId: string) => {
+    setDefaultMutation.mutate(paymentMethodId);
+  };
+
+  const handleDeletePaymentMethod = (paymentMethodId: string) => {
+    if (confirm('Are you sure you want to delete this payment method?')) {
+      deletePaymentMutation.mutate(paymentMethodId);
+    }
   };
 
   const handlePaymentSetupSuccess = () => {
     setShowAddPayment(false);
     setClientSecret("");
     queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
-  };
-
-  const handleSetDefault = (paymentMethodId: string) => {
-    setDefaultMutation.mutate(paymentMethodId);
   };
 
   if (!currentUser) {
@@ -231,6 +259,15 @@ export default function ProfilePaymentPage() {
                           Set Default
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeletePaymentMethod(pm.id)}
+                        disabled={deletePaymentMutation.isPending}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}

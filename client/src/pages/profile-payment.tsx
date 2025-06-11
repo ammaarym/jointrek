@@ -446,7 +446,7 @@ export default function ProfilePaymentPage() {
                           try {
                             const response = await apiRequest('POST', '/api/driver/dashboard-link', {});
                             const data = await response.json();
-                            window.open(data.url, '_blank');
+                            window.open(data.dashboardUrl, '_blank');
                           } catch (error) {
                             console.error('Error opening Stripe dashboard:', error);
                             toast({

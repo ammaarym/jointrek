@@ -25,12 +25,10 @@ import {
   ChevronUp,
   Info,
   Edit,
-  Calculator,
   Mail,
   Star,
 } from "lucide-react";
 import UserProfileModal from "@/components/user-profile-modal";
-import { CAR_TYPE_MPG, CITY_DISTANCES } from "@shared/pricing";
 // Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 
 interface RideCardProps {
@@ -59,7 +57,6 @@ export default function RideCard({
   isApproved = false,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [pricingOpen, setPricingOpen] = useState(false);
 
   // Function to format the time from timestamp
   const formatDateTime = (timestamp: any) => {
@@ -80,29 +77,7 @@ export default function RideCard({
     });
   };
 
-  // Calculate pricing breakdown - FREE MARKET PRICING
-  const getPricingBreakdown = () => {
-    const destinationCity =
-      typeof ride.destination === "string"
-        ? ride.destination
-        : ride.destination?.city || "destination";
-    const cityData =
-      CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
 
-    if (!cityData) return null;
-
-    // Driver's total price divided by available seats
-    const totalPrice = parseFloat(ride.price.toString());
-    const perPersonCost = totalPrice / ride.seatsTotal;
-
-    return {
-      distance: cityData.miles,
-      totalPrice,
-      perPersonCost,
-      carType: ride.carModel || "sedan",
-      destinationCity,
-    };
-  };
 
   // Calculate estimated arrival time
   const getEstimatedArrival = () => {
@@ -228,26 +203,13 @@ export default function RideCard({
             {/* Price and booking */}
             <div className="md:w-1/4 flex flex-col items-end">
               <div className="flex flex-col items-end w-full mb-2">
-                {/* Price with calculator icon */}
-                <div className="flex items-center">
-                  <span className="text-2xl font-bold text-neutral-900 text-right">
-                    ${ride.price}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-2 p-1 h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPricingOpen(true);
-                    }}
-                  >
-                    <Calculator className="w-4 h-4 text-gray-500" />
-                  </Button>
+                {/* Price moved above available text */}
+                <div className="text-2xl font-bold text-neutral-900 text-right mb-1">
+                  ${ride.price}
                 </div>
 
                 {/* Seats available information */}
-                <div className="mt-1 text-sm text-gray-600">
+                <div className="text-sm text-gray-600">
                   {ride.seatsLeft} of {ride.seatsTotal} seats available
                 </div>
 
@@ -560,67 +522,7 @@ export default function RideCard({
         </DialogContent>
       </Dialog>
 
-      {/* Pricing Breakdown Popup */}
-      <Dialog open={pricingOpen} onOpenChange={setPricingOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold flex items-center">
-              <Calculator className="w-5 h-5 mr-2 text-primary" />
-              How is ${ride.price} calculated?
-            </DialogTitle>
-          </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-medium mb-3 text-blue-800">Free Market Pricing:</h4>
-              <p className="text-sm text-blue-700 mb-4">
-                This driver has set their own price for this trip. Prices range from $5-$50 total.
-              </p>
-
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-blue-700">
-                    Distance to{" "}
-                    {getPricingBreakdown()?.destinationCity || "destination"}:
-                  </span>
-                  <span className="font-medium text-blue-800">
-                    {getPricingBreakdown()?.distance || 350} miles
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Driver's total price:</span>
-                  <span className="font-bold text-blue-800">
-                    ${getPricingBreakdown()?.totalPrice || ride.price}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Available seats:</span>
-                  <span className="font-medium text-blue-800">
-                    {ride.seatsTotal} seats
-                  </span>
-                </div>
-
-                <div className="flex justify-between border-t border-blue-200 pt-3">
-                  <span className="font-medium text-blue-700">Price per person:</span>
-                  <span className="font-bold text-lg text-blue-800">
-                    ${getPricingBreakdown()?.perPersonCost.toFixed(2) || (parseFloat(ride.price.toString()) / ride.seatsTotal).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-xs text-blue-600 text-center">
-              Driver sets their own price between $5-$50. Price shown is per person based on available seats.
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => setPricingOpen(false)}>Got it!</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

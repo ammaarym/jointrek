@@ -8,6 +8,7 @@ import {
   completedRides,
   reviews,
   rideRequests,
+  userStats,
   type Ride,
   type InsertRide,
   type User,
@@ -23,7 +24,9 @@ import {
   type Review,
   type InsertReview,
   type RideRequest,
-  type InsertRideRequest
+  type InsertRideRequest,
+  type UserStats,
+  type InsertUserStats
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt } from "drizzle-orm";
 import { IStorage } from "./storage";
@@ -400,6 +403,10 @@ export class PostgresStorage implements IStorage {
   // Review methods
   async createReview(reviewData: InsertReview): Promise<Review> {
     const [review] = await db.insert(reviews).values(reviewData).returning();
+    
+    // Update user statistics after creating review
+    await this.updateUserRatingStats(reviewData.revieweeId, reviewData.reviewType, reviewData.rating);
+    
     return review;
   }
 
@@ -421,6 +428,83 @@ export class PostgresStorage implements IStorage {
         eq(reviews.revieweeId, revieweeId)
       ));
     return !!review;
+  }
+
+  // User Statistics methods
+  async getUserStats(userId: string): Promise<UserStats | undefined> {
+    const [stats] = await db.select().from(userStats).where(eq(userStats.userId, userId));
+    return stats;
+  }
+
+  async createUserStats(userId: string): Promise<UserStats> {
+    const [stats] = await db.insert(userStats).values({
+      userId,
+      driverRating: 0,
+      passengerRating: 0,
+      totalDriverRatings: 0,
+      totalPassengerRatings: 0,
+      ridesAsDriver: 0,
+      ridesAsPassenger: 0
+    }).returning();
+    return stats;
+  }
+
+  async updateUserRatingStats(userId: string, reviewType: string, rating: number): Promise<void> {
+    // Get existing stats or create new ones
+    let stats = await this.getUserStats(userId);
+    if (!stats) {
+      stats = await this.createUserStats(userId);
+    }
+
+    if (reviewType === 'driver') {
+      const newTotal = stats.totalDriverRatings + 1;
+      const currentSum = stats.driverRating * stats.totalDriverRatings;
+      const newAverage = (currentSum + rating) / newTotal;
+
+      await db.update(userStats)
+        .set({
+          driverRating: newAverage,
+          totalDriverRatings: newTotal,
+          updatedAt: new Date()
+        })
+        .where(eq(userStats.userId, userId));
+    } else if (reviewType === 'passenger') {
+      const newTotal = stats.totalPassengerRatings + 1;
+      const currentSum = stats.passengerRating * stats.totalPassengerRatings;
+      const newAverage = (currentSum + rating) / newTotal;
+
+      await db.update(userStats)
+        .set({
+          passengerRating: newAverage,
+          totalPassengerRatings: newTotal,
+          updatedAt: new Date()
+        })
+        .where(eq(userStats.userId, userId));
+    }
+  }
+
+  async updateUserRideCount(userId: string, rideType: 'driver' | 'passenger'): Promise<void> {
+    // Get existing stats or create new ones
+    let stats = await this.getUserStats(userId);
+    if (!stats) {
+      stats = await this.createUserStats(userId);
+    }
+
+    if (rideType === 'driver') {
+      await db.update(userStats)
+        .set({
+          ridesAsDriver: stats.ridesAsDriver + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(userStats.userId, userId));
+    } else {
+      await db.update(userStats)
+        .set({
+          ridesAsPassenger: stats.ridesAsPassenger + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(userStats.userId, userId));
+    }
   }
 
   // Ride request methods

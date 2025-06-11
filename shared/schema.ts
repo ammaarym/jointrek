@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -109,6 +109,25 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true
 });
 
+// User statistics table schema
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.firebaseUid),
+  driverRating: real("driver_rating").default(0),
+  passengerRating: real("passenger_rating").default(0),
+  totalDriverRatings: integer("total_driver_ratings").default(0),
+  totalPassengerRatings: integer("total_passenger_ratings").default(0),
+  ridesAsDriver: integer("rides_as_driver").default(0),
+  ridesAsPassenger: integer("rides_as_passenger").default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User statistics insert schema
+export const insertUserStatsSchema = createInsertSchema(userStats).omit({
+  id: true,
+  updatedAt: true
+});
+
 // Booking table schema
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
@@ -179,3 +198,6 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 
 export type RideRequest = typeof rideRequests.$inferSelect;
 export type InsertRideRequest = z.infer<typeof insertRideRequestSchema>;
+
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;

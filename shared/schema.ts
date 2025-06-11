@@ -42,6 +42,8 @@ export const rides = pgTable("rides", {
   carModel: text("car_model"),
   notes: text("notes"),
   rideType: text("ride_type").notNull(),
+  baggageCheckIn: integer("baggage_check_in").default(0).notNull(),
+  baggagePersonal: integer("baggage_personal").default(0).notNull(),
   isStarted: boolean("is_started").default(false),
   startVerificationCode: text("start_verification_code"),
   startedAt: timestamp("started_at"),
@@ -66,6 +68,8 @@ export const rideRequests = pgTable("ride_requests", {
   stripePaymentIntentId: text("stripe_payment_intent_id"), // For holding payment
   paymentAmount: integer("payment_amount"), // Amount in cents
   paymentStatus: text("payment_status").default("pending"), // pending, authorized, captured, failed
+  baggageCheckIn: integer("baggage_check_in").default(0).notNull(),
+  baggagePersonal: integer("baggage_personal").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

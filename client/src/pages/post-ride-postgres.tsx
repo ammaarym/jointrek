@@ -102,6 +102,8 @@ export default function PostRidePostgres() {
   const [price, setPrice] = useState('');
   const [genderPreference, setGenderPreference] = useState('no-preference');
   const [carModel, setCarModel] = useState('');
+  const [baggageCheckIn, setBaggageCheckIn] = useState('0');
+  const [baggagePersonal, setBaggagePersonal] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   

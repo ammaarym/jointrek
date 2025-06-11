@@ -178,6 +178,27 @@ export default function PostRidePostgres() {
       setIsSubmitting(false);
       return;
     }
+
+    // Validate Gainesville requirement
+    if (origin !== 'Gainesville' && destination !== 'Gainesville') {
+      toast({
+        title: "Invalid Route",
+        description: "Rides must be from Gainesville to another city or from another city to Gainesville",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (origin === destination) {
+      toast({
+        title: "Invalid Route",
+        description: "Origin and destination cannot be the same",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
     
     // Validate price range
     const priceNum = parseFloat(price);
@@ -252,7 +273,8 @@ export default function PostRidePostgres() {
         price: price,
         genderPreference,
         carModel: carModel || null,
-
+        baggageCheckIn: parseInt(baggageCheckIn) || 0,
+        baggagePersonal: parseInt(baggagePersonal) || 0,
         rideType
       };
       
@@ -443,7 +465,46 @@ export default function PostRidePostgres() {
                 </div>
               )}
               
-
+              {/* Baggage Options */}
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-3">Baggage Requirements</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="baggageCheckIn">Check-in Bags (Heavy luggage)</Label>
+                      <Select value={baggageCheckIn} onValueChange={setBaggageCheckIn}>
+                        <SelectTrigger id="baggageCheckIn">
+                          <SelectValue placeholder="Number of check-in bags" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[0, 1, 2, 3, 4, 5].map(num => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? 'bag' : 'bags'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500">Large suitcases, duffel bags</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="baggagePersonal">Personal Bags</Label>
+                      <Select value={baggagePersonal} onValueChange={setBaggagePersonal}>
+                        <SelectTrigger id="baggagePersonal">
+                          <SelectValue placeholder="Number of personal bags" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[0, 1, 2, 3, 4, 5].map(num => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num} {num === 1 ? 'bag' : 'bags'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500">Backpacks, smaller bags</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

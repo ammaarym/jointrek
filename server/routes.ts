@@ -1622,7 +1622,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         stripePaymentIntentId: paymentIntent.id,
         paymentAmount: parseFloat(ride.price),
-        paymentStatus: "authorized" // Payment is authorized but not yet captured
+        paymentStatus: "authorized", // Payment is authorized but not yet captured
+        baggageCheckIn: req.body.baggageCheckIn || 0,
+        baggagePersonal: req.body.baggagePersonal || 0
       });
 
       // Send SMS notification to driver

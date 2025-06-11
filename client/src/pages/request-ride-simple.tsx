@@ -15,6 +15,8 @@ export default function RequestRideSimplePage() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [baggageCheckIn, setBaggageCheckIn] = useState('0');
+  const [baggagePersonal, setBaggagePersonal] = useState('0');
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
@@ -36,7 +38,9 @@ export default function RequestRideSimplePage() {
   const confirmRequestMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/confirm-ride-request", {
-        rideId
+        rideId,
+        baggageCheckIn: parseInt(baggageCheckIn) || 0,
+        baggagePersonal: parseInt(baggagePersonal) || 0
       });
       return response.json();
     },
@@ -199,6 +203,52 @@ export default function RequestRideSimplePage() {
                 <p className="text-sm bg-muted p-3 rounded-md">{ride.notes}</p>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Baggage Options */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Baggage Requirements</CardTitle>
+            <CardDescription>
+              Let the driver know how much baggage you'll be bringing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="baggageCheckIn" className="text-sm font-medium">Check-in Bags (Heavy luggage)</label>
+                <select 
+                  id="baggageCheckIn"
+                  value={baggageCheckIn} 
+                  onChange={(e) => setBaggageCheckIn(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {[0, 1, 2, 3, 4, 5].map(num => (
+                    <option key={num} value={num.toString()}>
+                      {num} {num === 1 ? 'bag' : 'bags'}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">Large suitcases, duffel bags</p>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="baggagePersonal" className="text-sm font-medium">Personal Bags</label>
+                <select 
+                  id="baggagePersonal"
+                  value={baggagePersonal} 
+                  onChange={(e) => setBaggagePersonal(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {[0, 1, 2, 3, 4, 5].map(num => (
+                    <option key={num} value={num.toString()}>
+                      {num} {num === 1 ? 'bag' : 'bags'}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">Backpacks, smaller bags</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

@@ -18,7 +18,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(firebaseUid: string, data: Partial<InsertUser>): Promise<User | undefined>;
-  updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string): Promise<User | undefined>;
+  updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string | null): Promise<User | undefined>;
 
   // Ride methods
   getRide(id: number): Promise<Ride | undefined>;

@@ -1705,6 +1705,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete payment method
+  app.delete("/api/payment-methods/:id", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const paymentMethodId = req.params.id;
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      
+      if (!user || !user.stripeCustomerId) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Verify the payment method belongs to this user
+      const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+      if (paymentMethod.customer !== user.stripeCustomerId) {
+        return res.status(403).json({ message: "Payment method does not belong to this user" });
+      }
+
+      // Detach the payment method from the customer
+      await stripe.paymentMethods.detach(paymentMethodId);
+
+      // If this was the default payment method, clear it from user record
+      if (user.defaultPaymentMethodId === paymentMethodId) {
+        await storage.updateUserStripeInfo(user.firebaseUid, user.stripeCustomerId, null);
+      }
+
+      res.json({ success: true, message: "Payment method deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting payment method:", error);
+      res.status(500).json({ message: "Error deleting payment method: " + error.message });
+    }
+  });
+
+  // Delete driver account and reset Stripe Connect account
+  app.delete("/api/driver/account", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If user has a Stripe Connect account, delete it
+      if (user.stripeConnectAccountId) {
+        try {
+          await stripe.accounts.del(user.stripeConnectAccountId);
+        } catch (stripeError: any) {
+          console.error("Error deleting Stripe Connect account:", stripeError);
+          // Continue with local cleanup even if Stripe deletion fails
+        }
+      }
+
+      // Reset the user's Stripe Connect account ID in the database
+      await storage.updateUserStripeConnectAccount(user.id, null);
+
+      res.json({ 
+        success: true, 
+        message: "Driver account deleted successfully. You can now restart the driver setup process." 
+      });
+    } catch (error: any) {
+      console.error("Error deleting driver account:", error);
+      res.status(500).json({ message: "Error deleting driver account: " + error.message });
+    }
+  });
+
   // === Admin Routes ===
   
   // Admin authentication

@@ -62,7 +62,7 @@ export class PostgresStorage implements IStorage {
     return updatedUser;
   }
 
-  async updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string): Promise<User | undefined> {
+  async updateUserStripeInfo(firebaseUid: string, stripeCustomerId: string, defaultPaymentMethodId?: string | null): Promise<User | undefined> {
     const updateData: any = { stripeCustomerId };
     if (defaultPaymentMethodId) {
       updateData.defaultPaymentMethodId = defaultPaymentMethodId;
@@ -992,7 +992,7 @@ export class PostgresStorage implements IStorage {
     return expiredRideIds.length;
   }
 
-  async updateUserStripeConnectAccount(userId: number, accountId: string): Promise<User> {
+  async updateUserStripeConnectAccount(userId: number, accountId: string | null): Promise<User> {
     const [updatedUser] = await db
       .update(users)
       .set({ stripeConnectAccountId: accountId })

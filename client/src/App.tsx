@@ -155,6 +155,9 @@ function AppRoutes() {
           <Route path="/profile/payment">
             {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile/payment" requiresContactInfo={true} />}
           </Route>
+          <Route path="/profile-payment">
+            {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile-payment" requiresContactInfo={true} />}
+          </Route>
           <Route path="/test-payment">
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>

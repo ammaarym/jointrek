@@ -89,14 +89,14 @@ export default function FindRidesPostgres() {
       
       if (response.ok) {
         const userRequests = await response.json();
-        const requestedRideIds = new Set(userRequests.map((req: any) => req.rideId));
+        const requestedRideIds = new Set<number>(userRequests.map((req: any) => req.rideId as number));
         setRequestedRides(requestedRideIds);
         
         // Extract ride IDs that have been approved
         const approvedRideIds = userRequests
           .filter((request: any) => request.status === 'approved')
-          .map((request: any) => request.rideId);
-        setApprovedRides(new Set(approvedRideIds));
+          .map((request: any) => request.rideId as number);
+        setApprovedRides(new Set<number>(approvedRideIds));
       }
     } catch (error) {
       console.error('Error loading user ride requests:', error);
@@ -184,6 +184,11 @@ export default function FindRidesPostgres() {
       
       // Don't show rides with 0 seats available
       if (ride.seatsLeft <= 0) {
+        return false;
+      }
+      
+      // Don't show rides that the user has already been approved for
+      if (approvedRides.has(ride.id)) {
         return false;
       }
       
@@ -306,6 +311,14 @@ export default function FindRidesPostgres() {
                   setQuickFilter('departures');
                   setFrom('Gainesville');
                   setTo('any');
+                  // Auto-apply filters
+                  setAppliedFilters({
+                    from: 'Gainesville',
+                    to: 'any',
+                    date,
+                    passengers,
+                    genderFilter
+                  });
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'departures'
@@ -320,6 +333,14 @@ export default function FindRidesPostgres() {
                   setQuickFilter('arrivals');
                   setFrom('any');
                   setTo('Gainesville');
+                  // Auto-apply filters
+                  setAppliedFilters({
+                    from: 'any',
+                    to: 'Gainesville',
+                    date,
+                    passengers,
+                    genderFilter
+                  });
                 }}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'arrivals'

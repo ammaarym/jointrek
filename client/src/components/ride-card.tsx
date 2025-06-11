@@ -77,24 +77,9 @@ export default function RideCard({
     });
   };
 
-
-
-  // Calculate estimated arrival time
+  // Use the provided arrival time from the ride data
   const getEstimatedArrival = () => {
-    const destinationCity =
-      typeof ride.destination === "string"
-        ? ride.destination
-        : ride.destination?.city || "destination";
-    const cityData =
-      CITY_DISTANCES[destinationCity as keyof typeof CITY_DISTANCES];
-    if (!cityData) return null;
-
-    const departureDate = new Date(ride.departureTime as any);
-    const arrivalDate = new Date(
-      departureDate.getTime() + cityData.hours * 60 * 60 * 1000,
-    );
-
-    return formatTime(arrivalDate);
+    return formatTime(ride.arrivalTime);
   };
 
   return (

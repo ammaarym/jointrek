@@ -280,9 +280,9 @@ export default function ProfilePaymentPage() {
                         size="sm"
                         onClick={() => handleDeletePaymentMethod(pm.id)}
                         disabled={deletePaymentMutation.isPending}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        Delete
                       </Button>
                     </div>
                   </div>

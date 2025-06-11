@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle } from "lucide-react";
-import trekLogo from "@assets/image_1748552578928.png";
+import trekLogo from "@assets/treklogo1_1749600620192.png";
 
 interface HeaderProps {
   onLogin: () => void;

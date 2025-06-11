@@ -648,6 +648,36 @@ export default function MyRidesPostgres() {
                 <FaUserFriends className="text-primary mr-2 flex-shrink-0" />
                 <span>{ride.seatsLeft} available</span>
               </div>
+              
+              {/* Show approved passengers */}
+              {(() => {
+                const approvedPassengers = rideRequests.filter(req => 
+                  req.rideId === ride.id && req.status === 'approved'
+                );
+                
+                if (approvedPassengers.length > 0) {
+                  return (
+                    <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-800 mb-2 text-sm flex items-center gap-1">
+                        <FaCheck className="w-3 h-3" />
+                        Passengers Coming ({approvedPassengers.length})
+                      </h4>
+                      <div className="space-y-2">
+                        {approvedPassengers.map((passenger) => (
+                          <div key={passenger.id} className="text-xs">
+                            <div className="font-medium text-green-800">{passenger.passengerName}</div>
+                            <div className="text-green-600">{passenger.passengerEmail}</div>
+                            {passenger.passengerPhone && (
+                              <div className="text-green-600">📞 {passenger.passengerPhone}</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </>
           )}
           {ride.rideType === 'passenger' && (

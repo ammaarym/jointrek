@@ -444,19 +444,9 @@ export default function ProfilePaymentPage() {
                         size="sm"
                         onClick={async () => {
                           try {
-                            const response = await fetch('/api/driver/dashboard-link', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                            });
-                            
-                            if (response.ok) {
-                              const data = await response.json();
-                              window.open(data.url, '_blank');
-                            } else {
-                              throw new Error('Failed to get dashboard link');
-                            }
+                            const response = await apiRequest('POST', '/api/driver/dashboard-link', {});
+                            const data = await response.json();
+                            window.open(data.url, '_blank');
                           } catch (error) {
                             console.error('Error opening Stripe dashboard:', error);
                             toast({

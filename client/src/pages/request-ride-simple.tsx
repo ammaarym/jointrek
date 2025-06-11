@@ -35,7 +35,7 @@ export default function RequestRideSimplePage() {
     enabled: !!currentUser,
   });
 
-  const ride = rides?.find((r: any) => r.id === rideId);
+  const ride = (rides as any[])?.find((r: any) => r.id === rideId);
 
   // Confirm ride request mutation (new simplified flow)
   const confirmRequestMutation = useMutation({
@@ -107,7 +107,7 @@ export default function RequestRideSimplePage() {
     );
   }
 
-  const paymentMethods = paymentData?.paymentMethods || [];
+  const paymentMethods = (paymentData as any)?.paymentMethods || [];
   const hasPaymentMethod = paymentMethods.length > 0;
 
   return (

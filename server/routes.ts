@@ -1545,10 +1545,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Payment service not available" });
       }
 
-      const { rideId } = req.body;
+      const { rideId, paymentMethodId } = req.body;
       
       if (!rideId) {
         return res.status(400).json({ message: "rideId is required" });
+      }
+
+      if (!paymentMethodId) {
+        return res.status(400).json({ message: "paymentMethodId is required" });
       }
 
       const user = await storage.getUserByFirebaseUid(req.user!.uid);
@@ -1556,7 +1560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please add a payment method to your profile first" });
       }
 
-      // Get user's payment methods to use any available one
+      // Get user's payment methods to verify the selected one exists
       const paymentMethods = await stripe.paymentMethods.list({
         customer: user.stripeCustomerId,
         type: 'card',
@@ -1566,10 +1570,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please add a payment method to your profile first" });
       }
 
-      // Use default if available, otherwise use the first payment method
-      const paymentMethod = user.defaultPaymentMethodId 
-        ? paymentMethods.data.find(pm => pm.id === user.defaultPaymentMethodId) || paymentMethods.data[0]
-        : paymentMethods.data[0];
+      // Use the specifically selected payment method
+      const paymentMethod = paymentMethods.data.find(pm => pm.id === paymentMethodId);
+      if (!paymentMethod) {
+        return res.status(400).json({ message: "Selected payment method not found" });
+      }
 
       // Get ride details
       const ride = await storage.getRideById(rideId);

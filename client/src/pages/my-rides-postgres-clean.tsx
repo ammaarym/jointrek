@@ -404,7 +404,7 @@ export default function MyRidesPostgres() {
           rideId: rideToReview?.id,
           rating,
           revieweeId: rideToReview?.driverId,
-          reviewType: rideToReview?.rideType === 'driver' ? 'driver' : 'passenger',
+          reviewType: 'driver', // Always rating the driver when passenger completes a ride
         }),
       });
 

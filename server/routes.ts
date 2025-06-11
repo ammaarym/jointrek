@@ -1083,6 +1083,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user statistics including ratings and ride counts
+  app.get('/api/users/:userId/stats', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      let stats = await storage.getUserStats(userId);
+      
+      // Create stats if they don't exist
+      if (!stats) {
+        stats = await storage.createUserStats(userId);
+      }
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ message: "Failed to fetch user statistics" });
+    }
+  });
+
   // Payment intent with destination charges for marketplace
   app.post('/api/payment-intent', authenticate, async (req: Request, res: Response) => {
     try {

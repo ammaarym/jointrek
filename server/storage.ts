@@ -1,4 +1,4 @@
-import { users, rides, bookings, messages, conversations, completedRides, reviews } from "@shared/schema";
+import { users, rides, bookings, messages, conversations, completedRides, reviews, userStats } from "@shared/schema";
 import type { 
   User, InsertUser, 
   Ride, InsertRide, 
@@ -6,7 +6,8 @@ import type {
   Message, InsertMessage, 
   Conversation, InsertConversation,
   CompletedRide, InsertCompletedRide,
-  Review, InsertReview
+  Review, InsertReview,
+  UserStats, InsertUserStats
 } from "@shared/schema";
 
 // Define the storage interface
@@ -57,6 +58,12 @@ export interface IStorage {
   getReviewsByReviewee(revieweeId: string): Promise<Review[]>;
   getReviewsByRide(rideId: number): Promise<Review[]>;
   hasUserReviewedRide(reviewerId: string, rideId: number, revieweeId: string): Promise<boolean>;
+
+  // User Statistics methods
+  getUserStats(userId: string): Promise<UserStats | undefined>;
+  createUserStats(userId: string): Promise<UserStats>;
+  updateUserRatingStats(userId: string, reviewType: string, rating: number): Promise<void>;
+  updateUserRideCount(userId: string, rideType: 'driver' | 'passenger'): Promise<void>;
 
   // Ride request methods
   createRideRequest(request: any): Promise<any>;

@@ -457,8 +457,8 @@ export class PostgresStorage implements IStorage {
     }
 
     if (reviewType === 'driver') {
-      const newTotal = stats.totalDriverRatings + 1;
-      const currentSum = stats.driverRating * stats.totalDriverRatings;
+      const newTotal = (stats.totalDriverRatings || 0) + 1;
+      const currentSum = (stats.driverRating || 0) * (stats.totalDriverRatings || 0);
       const newAverage = (currentSum + rating) / newTotal;
 
       await db.update(userStats)
@@ -469,8 +469,8 @@ export class PostgresStorage implements IStorage {
         })
         .where(eq(userStats.userId, userId));
     } else if (reviewType === 'passenger') {
-      const newTotal = stats.totalPassengerRatings + 1;
-      const currentSum = stats.passengerRating * stats.totalPassengerRatings;
+      const newTotal = (stats.totalPassengerRatings || 0) + 1;
+      const currentSum = (stats.passengerRating || 0) * (stats.totalPassengerRatings || 0);
       const newAverage = (currentSum + rating) / newTotal;
 
       await db.update(userStats)
@@ -493,14 +493,14 @@ export class PostgresStorage implements IStorage {
     if (rideType === 'driver') {
       await db.update(userStats)
         .set({
-          ridesAsDriver: stats.ridesAsDriver + 1,
+          ridesAsDriver: (stats.ridesAsDriver || 0) + 1,
           updatedAt: new Date()
         })
         .where(eq(userStats.userId, userId));
     } else {
       await db.update(userStats)
         .set({
-          ridesAsPassenger: stats.ridesAsPassenger + 1,
+          ridesAsPassenger: (stats.ridesAsPassenger || 0) + 1,
           updatedAt: new Date()
         })
         .where(eq(userStats.userId, userId));

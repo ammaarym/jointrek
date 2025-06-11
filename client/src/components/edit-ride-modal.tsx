@@ -85,7 +85,7 @@ const GENDER_PREFERENCES = [
   { label: "Female Only", value: "female" },
 ];
 
-// Validation schema (no price field - automatically calculated)
+// Validation schema
 const editRideSchema = z.object({
   destination: z.string().min(1, { message: "Destination is required" }),
   destinationArea: z
@@ -102,6 +102,7 @@ const editRideSchema = z.object({
   seatsTotal: z.string().min(1, { message: "Number of seats is required" }),
   carType: z.string().min(1, { message: "Car type is required" }),
   genderPreference: z.string().default("no-preference"),
+  price: z.string().min(1, { message: "Price is required" }),
   notes: z.string().optional(),
 });
 
@@ -134,6 +135,7 @@ export default function EditRideModal({
       seatsTotal: "",
       carType: "",
       genderPreference: "no-preference",
+      price: "",
     },
   });
 
@@ -154,6 +156,7 @@ export default function EditRideModal({
           seatsTotal: ride.seatsTotal.toString(),
           carType: carType,
           genderPreference: ride.genderPreference || "no-preference",
+          price: ride.price?.toString() || "25",
         });
       } catch (error) {
         console.log("Error updating form:", error);
@@ -393,6 +396,26 @@ export default function EditRideModal({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price per Seat ($)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min="5"
+                        max="100"
+                        placeholder="Enter price per seat"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

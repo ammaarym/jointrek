@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Clock, DollarSign, Users, CreditCard, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function RequestRideSimplePage() {
   const [, params] = useRoute("/request-ride/:id");
@@ -17,6 +19,7 @@ export default function RequestRideSimplePage() {
   const queryClient = useQueryClient();
   const [baggageCheckIn, setBaggageCheckIn] = useState('0');
   const [baggagePersonal, setBaggagePersonal] = useState('0');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
@@ -40,7 +43,8 @@ export default function RequestRideSimplePage() {
       const response = await apiRequest("POST", "/api/confirm-ride-request", {
         rideId,
         baggageCheckIn: parseInt(baggageCheckIn) || 0,
-        baggagePersonal: parseInt(baggagePersonal) || 0
+        baggagePersonal: parseInt(baggagePersonal) || 0,
+        paymentMethodId: selectedPaymentMethod
       });
       return response.json();
     },
@@ -103,7 +107,8 @@ export default function RequestRideSimplePage() {
     );
   }
 
-  const hasPaymentMethod = paymentData?.hasDefaultPaymentMethod;
+  const paymentMethods = paymentData?.paymentMethods || [];
+  const hasPaymentMethod = paymentMethods.length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -261,18 +266,44 @@ export default function RequestRideSimplePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Payment Method Status */}
+            {/* Payment Method Selection */}
             {hasPaymentMethod ? (
-              <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
-                <CreditCard className="w-5 h-5 text-green-600" />
+              <div className="space-y-4">
                 <div>
-                  <p className="font-medium text-green-800 dark:text-green-200">
-                    Payment Method Ready
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    Your default payment method will be charged ${ride.price} after ride completion
-                  </p>
+                  <Label htmlFor="payment-method">Select Payment Method</Label>
+                  <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose a payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethods.map((method: any) => (
+                        <SelectItem key={method.id} value={method.id}>
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="w-4 h-4" />
+                            <span>**** **** **** {method.card.last4}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {method.card.brand.toUpperCase()} • {method.card.exp_month}/{method.card.exp_year}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+                
+                {selectedPaymentMethod && (
+                  <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-green-800 dark:text-green-200">
+                        Payment Method Selected
+                      </p>
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        Your selected card will be charged ${ride.price} after ride completion
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -309,12 +340,14 @@ export default function RequestRideSimplePage() {
 
             <Button 
               onClick={handleConfirmRequest}
-              disabled={confirmRequestMutation.isPending || !currentUser || !hasPaymentMethod}
+              disabled={confirmRequestMutation.isPending || !currentUser || !hasPaymentMethod || !selectedPaymentMethod}
               className="w-full"
               size="lg"
             >
               {confirmRequestMutation.isPending 
                 ? "Confirming Request..." 
+                : !selectedPaymentMethod && hasPaymentMethod
+                ? "Select Payment Method"
                 : `Confirm Ride Request - $${ride.price}`
               }
             </Button>

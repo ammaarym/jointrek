@@ -394,14 +394,14 @@ export default function RideCard({
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">From</div>
                     <div className="font-medium">
-                      {ride.origin.city}, {ride.origin.area}
+                      {ride.origin.city}
                     </div>
                   </div>
 
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">To</div>
                     <div className="font-medium">
-                      {ride.destination.city}, {ride.destination.area}
+                      {ride.destination.city}
                     </div>
                   </div>
                 </div>

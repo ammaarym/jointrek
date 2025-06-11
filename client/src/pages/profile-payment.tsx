@@ -442,7 +442,30 @@ export default function ProfilePaymentPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open('/driver-onboard', '_blank')}
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/driver/dashboard-link', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                            });
+                            
+                            if (response.ok) {
+                              const data = await response.json();
+                              window.open(data.url, '_blank');
+                            } else {
+                              throw new Error('Failed to get dashboard link');
+                            }
+                          } catch (error) {
+                            console.error('Error opening Stripe dashboard:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to open Stripe dashboard. Please try again.",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                         className="text-blue-600 hover:text-blue-700"
                       >
                         Manage Account

@@ -7,7 +7,18 @@ import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Check, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Check, Plus, Trash2, Building, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface PaymentMethod {
   id: string;
@@ -23,6 +34,14 @@ interface PaymentMethod {
 interface PaymentData {
   paymentMethods: PaymentMethod[];
   defaultPaymentMethodId: string | null;
+}
+
+interface DriverStatus {
+  isOnboarded: boolean;
+  canAcceptRides: boolean;
+  accountId?: string;
+  payoutsEnabled?: boolean;
+  chargesEnabled?: boolean;
 }
 
 const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; onSuccess: () => void }) => {
@@ -118,6 +137,12 @@ export default function ProfilePaymentPage() {
     enabled: !!currentUser,
   });
 
+  // Fetch driver status for bank account management
+  const { data: driverStatus, isLoading: driverLoading } = useQuery<DriverStatus>({
+    queryKey: ["/api/driver/status"],
+    enabled: !!currentUser,
+  });
+
   // Setup payment method mutation
   const setupPaymentMutation = useMutation({
     mutationFn: async () => {
@@ -183,6 +208,28 @@ export default function ProfilePaymentPage() {
     },
   });
 
+  // Delete bank account mutation
+  const deleteBankAccountMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", "/api/driver/account", {});
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Bank Account Deleted",
+        description: "Your driver account and bank information have been removed successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/status"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete bank account.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddPaymentMethod = () => {
     setupPaymentMutation.mutate();
   };
@@ -192,9 +239,11 @@ export default function ProfilePaymentPage() {
   };
 
   const handleDeletePaymentMethod = (paymentMethodId: string) => {
-    if (confirm('Are you sure you want to delete this payment method?')) {
-      deletePaymentMutation.mutate(paymentMethodId);
-    }
+    deletePaymentMutation.mutate(paymentMethodId);
+  };
+
+  const handleDeleteBankAccount = () => {
+    deleteBankAccountMutation.mutate();
   };
 
   const handlePaymentSetupSuccess = () => {

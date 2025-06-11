@@ -1626,13 +1626,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send SMS notification to driver
+      console.log('BEFORE SMS SECTION - About to start SMS notification');
       let smsStatus = { sent: false, reason: 'SMS not attempted' };
-      console.log('=== SMS NOTIFICATION SECTION REACHED ===');
-      console.log('Driver object:', { id: driver.id, email: driver.email, phone: driver.phone, displayName: driver.displayName });
-      console.log('User object:', { id: user.id, email: user.email, displayName: user.displayName });
-      console.log('Ride object:', { id: ride.id, origin: ride.origin, destination: ride.destination });
       
       try {
+        console.log('=== SMS NOTIFICATION SECTION REACHED ===');
+        console.log('Driver object:', { id: driver.id, email: driver.email, phone: driver.phone, displayName: driver.displayName });
+        console.log('User object:', { id: user.id, email: user.email, displayName: user.displayName });
+        console.log('Ride object:', { id: ride.id, origin: ride.origin, destination: ride.destination });
         console.log('=== ATTEMPTING SMS NOTIFICATION ===');
         console.log('Driver phone:', driver.phone);
         console.log('Passenger name:', user.displayName);

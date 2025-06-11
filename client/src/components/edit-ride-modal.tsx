@@ -39,52 +39,6 @@ const CAR_TYPES = [
   { label: "Minivan", value: "minivan", mpg: 28, maxSeats: 8 },
 ];
 
-// Distance data from Gainesville to major Florida cities
-const CITY_DISTANCES = {
-  Orlando: { miles: 113, hours: 2 },
-  Tampa: { miles: 125, hours: 2.5 },
-  Miami: { miles: 350, hours: 5.5 },
-  Jacksonville: { miles: 73, hours: 1.5 },
-  Tallahassee: { miles: 140, hours: 2.5 },
-  "Fort Lauderdale": { miles: 340, hours: 5 },
-  "St. Petersburg": { miles: 135, hours: 2.5 },
-  Pensacola: { miles: 340, hours: 5 },
-  "Daytona Beach": { miles: 125, hours: 2 },
-  "Fort Myers": { miles: 200, hours: 3.5 },
-};
-
-// Enhanced pricing calculation
-function calculateRidePrice(params: {
-  distance: number;
-  mpg: number;
-  gasPrice: number;
-  destination: string;
-  date?: Date;
-}): number {
-  const { distance, mpg, gasPrice, destination, date } = params;
-  const buffer = 0.2; // 20% markup
-  const tollCities = ["Miami", "Tampa"];
-  const tollFee = tollCities.includes(destination) ? 2.5 : 0;
-
-  // Raw cost calculation
-  let baseCost = (distance / mpg) * gasPrice;
-  let total = baseCost * (1 + buffer) + tollFee;
-
-  // Weekend check (Friday = 5, Saturday = 6)
-  if (date) {
-    const day = date.getDay();
-    if (day === 5 || day === 6) {
-      total *= 1.1; // 10% increase on weekends
-    }
-  }
-
-  // Apply floor and ceiling
-  total = Math.max(8, Math.min(total, 60));
-
-  // Round to nearest dollar
-  return Math.round(total);
-}
-
 // List of Florida cities
 const FLORIDA_CITIES = [
   "Gainesville",
@@ -193,8 +147,8 @@ export default function EditRideModal({
         const carType = ride.carModel || "sedan";
         setSelectedCarType(carType);
         form.reset({
-          destination: ride.destination || "",
-          destinationArea: ride.destinationArea || "",
+          destination: typeof ride.destination === 'string' ? ride.destination : ride.destination?.city || "",
+          destinationArea: typeof ride.destination === 'string' ? "" : ride.destination?.area || "",
           departureDate: format(departureDate, "yyyy-MM-dd"),
           departureTime: timeString,
           seatsTotal: ride.seatsTotal.toString(),
@@ -238,26 +192,8 @@ export default function EditRideModal({
       const [hours, minutes] = data.departureTime.split(":").map(Number);
       departureDate.setHours(hours, minutes);
 
-      // Calculate realistic arrival time based on destination
-      const cityData =
-        CITY_DISTANCES[data.destination as keyof typeof CITY_DISTANCES];
-      const travelHours = cityData ? cityData.hours : 2;
-      const arrivalTime = addHours(departureDate, travelHours);
-
-      // Calculate automatic price using enhanced formula
-      let calculatedPrice = "25"; // fallback price
-
-      const carType = CAR_TYPES.find((car) => car.value === data.carType);
-      if (carType && cityData) {
-        const price = calculateRidePrice({
-          distance: cityData.miles,
-          mpg: carType.mpg,
-          gasPrice: 3.45, // fallback gas price
-          destination: data.destination,
-          date: departureDate,
-        });
-        calculatedPrice = price.toString();
-      }
+      // Calculate realistic arrival time (default 2 hours)
+      const arrivalTime = addHours(departureDate, 2);
 
       // Update ride object
       const updatedRide = {
@@ -267,7 +203,7 @@ export default function EditRideModal({
         arrivalTime: arrivalTime,
         seatsTotal: parseInt(data.seatsTotal),
         seatsLeft: parseInt(data.seatsTotal), // Reset available seats
-        price: calculatedPrice,
+        price: data.price || "25",
         genderPreference: data.genderPreference,
         carModel: data.carType,
         notes: data.notes || "",

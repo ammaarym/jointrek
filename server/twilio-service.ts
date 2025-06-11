@@ -24,31 +24,54 @@ class TwilioService {
 
   async sendSMS(data: SMSData): Promise<boolean> {
     try {
+      console.log('=== SMS SEND ATTEMPT ===');
+      console.log('Raw phone number:', data.to);
+      console.log('Message length:', data.message.length);
+      console.log('Twilio client initialized:', !!this.client);
+      console.log('Messaging Service SID:', this.messagingServiceSid ? 'Present' : 'Missing');
+      
       if (!this.client) {
-        console.warn('Twilio client not initialized. Skipping SMS.');
+        console.error('ERROR: Twilio client not initialized. Skipping SMS.');
         return false;
       }
 
       // Clean phone number - remove any non-digits and ensure it starts with +1
       let phoneNumber = data.to.replace(/\D/g, '');
+      console.log('Cleaned phone number (digits only):', phoneNumber);
+      
       if (phoneNumber.length === 10) {
         phoneNumber = '1' + phoneNumber;
+        console.log('Added country code to 10-digit number:', phoneNumber);
       }
       if (!phoneNumber.startsWith('1')) {
         phoneNumber = '1' + phoneNumber;
+        console.log('Ensured country code prefix:', phoneNumber);
       }
       phoneNumber = '+' + phoneNumber;
+      console.log('Final formatted phone number:', phoneNumber);
 
+      console.log('Attempting Twilio API call...');
       const message = await this.client.messages.create({
         body: data.message,
         messagingServiceSid: this.messagingServiceSid,
         to: phoneNumber
       });
 
-      console.log(`SMS sent successfully: ${message.sid} to ${phoneNumber}`);
+      console.log('=== SMS SUCCESS ===');
+      console.log(`Message SID: ${message.sid}`);
+      console.log(`Status: ${message.status}`);
+      console.log(`To: ${phoneNumber}`);
+      console.log('=== SMS END ===');
       return true;
-    } catch (error) {
-      console.error('Failed to send SMS:', error);
+    } catch (error: any) {
+      console.error('=== SMS FAILED ===');
+      console.error('Twilio Error Details:');
+      console.error('- Code:', error.code);
+      console.error('- Message:', error.message);
+      console.error('- Status:', error.status);
+      console.error('- More Info:', error.moreInfo);
+      console.error('- Full Error:', error);
+      console.error('=== SMS ERROR END ===');
       return false;
     }
   }

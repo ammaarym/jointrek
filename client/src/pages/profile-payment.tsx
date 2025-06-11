@@ -324,15 +324,41 @@ export default function ProfilePaymentPage() {
                           Set Default
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeletePaymentMethod(pm.id)}
-                        disabled={deletePaymentMutation.isPending}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                      >
-                        Delete
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={deletePaymentMutation.isPending}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          >
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Payment Method</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this payment method? This action cannot be undone.
+                              {paymentData?.defaultPaymentMethodId === pm.id && (
+                                <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded text-orange-800 dark:text-orange-200 text-sm">
+                                  <AlertTriangle className="w-4 h-4 inline mr-1" />
+                                  This is your default payment method.
+                                </div>
+                              )}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeletePaymentMethod(pm.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete Payment Method
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
@@ -375,6 +401,105 @@ export default function ProfilePaymentPage() {
                   onSuccess={handlePaymentSetupSuccess}
                 />
               </Elements>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Bank Account Management for Drivers */}
+        {driverStatus && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                Driver Bank Account
+              </CardTitle>
+              <CardDescription>
+                Manage your bank account for receiving driver payments
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {driverStatus.isOnboarded ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
+                        <Building className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-green-800 dark:text-green-200">
+                          Bank Account Connected
+                        </div>
+                        <div className="text-sm text-green-600 dark:text-green-300">
+                          {driverStatus.payoutsEnabled ? 'Payouts enabled' : 'Payouts pending approval'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open('/driver-onboard', '_blank')}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Manage Account
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={deleteBankAccountMutation.isPending}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          >
+                            Delete Bank Account
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Driver Bank Account</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete your driver bank account? This will:
+                              <ul className="mt-2 space-y-1 text-sm">
+                                <li>• Remove your ability to receive driver payments</li>
+                                <li>• Delete all your bank account information</li>
+                                <li>• Require you to set up a new account to drive again</li>
+                              </ul>
+                              <div className="mt-3 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded text-red-800 dark:text-red-200 text-sm">
+                                <AlertTriangle className="w-4 h-4 inline mr-1" />
+                                This action cannot be undone.
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDeleteBankAccount}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete Bank Account
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No bank account connected</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Set up your bank account to start driving and receiving payments
+                  </p>
+                  <Button 
+                    onClick={() => window.open('/driver-onboard', '_blank')}
+                    className="mt-4"
+                    variant="outline"
+                  >
+                    Set Up Driver Account
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

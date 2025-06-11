@@ -42,6 +42,7 @@ interface RideCardProps {
   isRequested?: boolean;
   rideTypeFilter?: string;
   isApproved?: boolean; // New prop to show if request is approved
+  isRejected?: boolean; // New prop to show if request is rejected
 }
 
 export default function RideCard({
@@ -55,6 +56,7 @@ export default function RideCard({
   isRequested = false,
   rideTypeFilter = 'driver',
   isApproved = false,
+  isRejected = false,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 

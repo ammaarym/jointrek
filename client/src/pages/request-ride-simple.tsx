@@ -257,52 +257,7 @@ export default function RequestRideSimplePage() {
           </CardContent>
         </Card>
 
-        {/* Baggage Requirements */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Baggage Requirements</CardTitle>
-            <CardDescription>
-              Let the driver know how much baggage you'll be bringing
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="baggage-checkin" className="text-sm font-medium mb-2 block">
-                  Check-in Bags (Heavy luggage)
-                </Label>
-                <select
-                  id="baggage-checkin"
-                  value={baggageCheckIn}
-                  onChange={(e) => setBaggageCheckIn(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  {[0, 1, 2, 3, 4, 5].map(num => (
-                    <option key={num} value={num}>{num} bag{num !== 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">Large suitcases, duffel bags</p>
-              </div>
 
-              <div>
-                <Label htmlFor="baggage-personal" className="text-sm font-medium mb-2 block">
-                  Personal Bags
-                </Label>
-                <select
-                  id="baggage-personal"
-                  value={baggagePersonal}
-                  onChange={(e) => setBaggagePersonal(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  {[0, 1, 2, 3, 4, 5].map(num => (
-                    <option key={num} value={num}>{num} bag{num !== 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">Backpacks, smaller bags</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Confirmation Section */}
         <Card>

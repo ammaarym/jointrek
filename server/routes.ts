@@ -1625,11 +1625,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentStatus: "authorized" // Payment is authorized but not yet captured
       });
 
+      // Send SMS notification to driver
+      let smsStatus = { sent: false, reason: 'SMS not attempted' };
+      try {
+        console.log('=== ATTEMPTING SMS NOTIFICATION ===');
+        console.log('Driver phone:', driver.phone);
+        console.log('Passenger name:', user.displayName);
+        
+        if (driver.phone && user.displayName) {
+          const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+
+          const smsSent = await twilioService.notifyDriverOfRequest(
+            driver.phone,
+            user.displayName || user.email.split('@')[0],
+            {
+              origin: ride.origin,
+              destination: ride.destination,
+              departureTime: departureTime,
+              seats: 1
+            }
+          );
+          
+          if (smsSent) {
+            smsStatus = { sent: true, reason: `SMS sent to driver ${driver.displayName || driver.email.split('@')[0]} at ${driver.phone}` };
+            console.log(`SMS notification sent to driver ${driver.email} for ride request ${rideRequest.id}`);
+          } else {
+            smsStatus = { sent: false, reason: 'Failed to send SMS - Twilio error' };
+          }
+        } else if (!driver.phone) {
+          smsStatus = { sent: false, reason: 'Driver has no phone number' };
+        } else {
+          smsStatus = { sent: false, reason: 'Passenger data not found' };
+        }
+      } catch (smsError: any) {
+        console.error("Error sending SMS notification:", smsError);
+        smsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
+      }
+
       res.json({ 
         success: true,
         rideRequestId: rideRequest.id,
         paymentIntentId: paymentIntent.id,
-        status: paymentIntent.status
+        status: paymentIntent.status,
+        smsStatus
       });
     } catch (error: any) {
       console.error("Error confirming ride request:", error);

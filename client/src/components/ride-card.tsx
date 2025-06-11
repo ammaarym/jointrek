@@ -225,20 +225,24 @@ export default function RideCard({
                     className={`block mt-2 px-4 py-2 rounded-md font-medium transition ${
                       isApproved
                         ? "bg-green-600 text-white hover:bg-green-700" 
+                        : isRejected
+                        ? "bg-red-500 text-white cursor-not-allowed"
                         : isRequested 
                         ? "bg-orange-500 text-white hover:bg-orange-600" 
                         : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested && !isApproved) {
+                      if (onRequestRide && !isRequested && !isApproved && !isRejected) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested || isApproved}
+                    disabled={isRequested || isApproved || isRejected}
                   >
                     {isApproved
                       ? "Ride Approved"
+                      : isRejected
+                      ? "Request Denied"
                       : isRequested 
                       ? "Request Sent" 
                       : rideTypeFilter === 'passenger' 

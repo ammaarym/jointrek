@@ -60,6 +60,8 @@ export default function FindRidesPostgres() {
   const [requestedRides, setRequestedRides] = useState<Set<number>>(new Set());
   // Track approved rides
   const [approvedRides, setApprovedRides] = useState<Set<number>>(new Set());
+  // Track rejected rides
+  const [rejectedRides, setRejectedRides] = useState<Set<number>>(new Set());
   
 
   
@@ -97,6 +99,12 @@ export default function FindRidesPostgres() {
           .filter((request: any) => request.status === 'approved')
           .map((request: any) => request.rideId as number);
         setApprovedRides(new Set<number>(approvedRideIds));
+        
+        // Extract ride IDs that have been rejected
+        const rejectedRideIds = userRequests
+          .filter((request: any) => request.status === 'rejected')
+          .map((request: any) => request.rideId as number);
+        setRejectedRides(new Set<number>(rejectedRideIds));
       }
     } catch (error) {
       console.error('Error loading user ride requests:', error);
@@ -580,6 +588,7 @@ export default function FindRidesPostgres() {
                     onRequestRide={handleRequestRide}
                     isRequested={requestedRides.has(ride.id)}
                     isApproved={approvedRides.has(ride.id)}
+                    isRejected={rejectedRides.has(ride.id)}
                     rideTypeFilter={rideTypeFilter}
                   />
                 );

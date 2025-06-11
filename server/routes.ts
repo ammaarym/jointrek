@@ -381,9 +381,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           smsStatus = { sent: false, reason: 'Ride not found' };
         }
-      } catch (smsError) {
+      } catch (smsError: any) {
         console.error("Error sending SMS notification:", smsError);
-        smsStatus = { sent: false, reason: `SMS error: ${smsError.message || 'Unknown error'}` };
+        smsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
       }
 
       res.status(201).json({
@@ -539,9 +539,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               approvalSmsStatus = { sent: false, reason: 'Request or ride data not found' };
             }
-          } catch (smsError) {
+          } catch (smsError: any) {
             console.error("Error sending SMS approval notification:", smsError);
-            approvalSmsStatus = { sent: false, reason: `SMS error: ${smsError.message || 'Unknown error'}` };
+            approvalSmsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
           }
           
         } catch (error) {

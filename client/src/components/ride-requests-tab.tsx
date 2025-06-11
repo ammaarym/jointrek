@@ -85,10 +85,32 @@ export default function RideRequestsTab() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast({
           title: "Success",
           description: `Request ${status} successfully`,
         });
+        
+        // Show SMS status notification if available
+        if (status === 'approved' && data.smsStatus) {
+          setTimeout(() => {
+            if (data.smsStatus.sent) {
+              toast({
+                title: "📱 SMS Sent!",
+                description: `Notification sent to passenger: ${data.smsStatus.reason}`,
+                duration: 4000,
+              });
+            } else {
+              toast({
+                title: "📱 SMS Not Sent",
+                description: `Could not notify passenger: ${data.smsStatus.reason}`,
+                variant: "destructive",
+                duration: 4000,
+              });
+            }
+          }, 500);
+        }
+        
         // Refresh the requests list
         fetchRequests();
       } else {

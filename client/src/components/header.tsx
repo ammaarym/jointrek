@@ -90,6 +90,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     My Posts
                   </span>
                 </Link>
+                <Link href="/help">
+                  <span
+                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/help" ? "text-primary" : ""}`}
+                  >
+                    Help
+                  </span>
+                </Link>
 
               </>
             )}
@@ -306,13 +313,13 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     </span>
                   </Link>
                   <Link
-                    href="/driver-onboard"
+                    href="/help"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <span
-                      className={`block py-2 px-3 rounded-md ${location === "/driver-onboard" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
+                      className={`block py-2 px-3 rounded-md ${location === "/help" ? "bg-primary/10 text-primary" : "text-neutral-700"}`}
                     >
-                      Driver Setup
+                      Help
                     </span>
                   </Link>
                   <Link

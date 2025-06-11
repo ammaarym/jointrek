@@ -20,6 +20,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
+import Help from "@/pages/help";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
 import { ThemeProvider } from "@/lib/theme";
@@ -161,6 +162,9 @@ function AppRoutes() {
 
           <Route path="/my-rides">
             {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/help">
+            {(params) => <ProtectedRoute component={Help} path="/help" />}
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}

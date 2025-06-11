@@ -20,7 +20,6 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
-import DriverOnboard from "@/pages/driver-onboard";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
 import { ThemeProvider } from "@/lib/theme";
@@ -158,9 +157,7 @@ function AppRoutes() {
           <Route path="/test-payment">
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>
-          <Route path="/driver-onboard">
-            {(params) => <ProtectedRoute component={DriverOnboard} path="/driver-onboard" />}
-          </Route>
+
 
           <Route path="/my-rides">
             {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}

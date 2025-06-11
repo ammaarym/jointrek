@@ -723,6 +723,10 @@ export class PostgresStorage implements IStorage {
         driverPhone: users.phone, // Passenger phone
         driverInstagram: users.instagram, // Passenger instagram
         driverSnapchat: users.snapchat, // Passenger snapchat
+        // Add passenger-specific fields for driver view
+        passengerName: users.displayName, // Passenger name
+        passengerEmail: users.email, // Passenger email
+        passengerPhone: users.phone, // Passenger phone
         rideOrigin: rides.origin,
         rideDestination: rides.destination,
         rideDepartureTime: rides.departureTime,
@@ -743,8 +747,32 @@ export class PostgresStorage implements IStorage {
         eq(rideRequests.status, 'approved')
       ));
 
+    // Helper function to format passenger names from "Last, First" to "First Last"
+    const formatPassengerName = (displayName: string | null): string => {
+      if (!displayName) return '';
+      
+      // Check if name is in "Last, First" format
+      if (displayName.includes(', ')) {
+        const parts = displayName.split(', ');
+        if (parts.length >= 2) {
+          const lastName = parts[0];
+          const firstName = parts[1];
+          return `${firstName} ${lastName}`;
+        }
+      }
+      
+      // Return as-is if not in expected format
+      return displayName;
+    };
+
+    // Format passenger names in driver rides
+    const formattedDriverRides = driverRides.map(ride => ({
+      ...ride,
+      passengerName: formatPassengerName(ride.passengerName)
+    }));
+
     // Combine both result sets
-    const allApprovedRides = [...passengerRides, ...driverRides];
+    const allApprovedRides = [...passengerRides, ...formattedDriverRides];
     
     return allApprovedRides.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }

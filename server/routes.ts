@@ -957,6 +957,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark ride as complete and clear verification code
       const updatedRide = await storage.markRideComplete(rideId);
       await db.update(rides).set({ verificationCode: null }).where(eq(rides.id, rideId));
+
+      // Update user statistics for driver
+      await storage.updateUserRideCount(ride.driverId, 'driver');
+
+      // Update user statistics for each approved passenger
+      for (const request of approvedRequests) {
+        await storage.updateUserRideCount(request.passengerId, 'passenger');
+      }
       
       res.json({
         ride: updatedRide,
@@ -1060,6 +1068,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const review = await storage.createReview(reviewData);
+      
+      // Update user rating statistics
+      await storage.updateUserRatingStats(revieweeId, reviewType, rating);
+      
       res.status(201).json(review);
     } catch (error) {
       if (error instanceof ZodError) {

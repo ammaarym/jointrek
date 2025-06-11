@@ -27,7 +27,9 @@ import {
   Edit,
   Calculator,
   Mail,
+  Star,
 } from "lucide-react";
+import UserProfileModal from "@/components/user-profile-modal";
 import { CAR_TYPE_MPG, CITY_DISTANCES } from "@shared/pricing";
 // Don't rely on useAuth in a component that may appear in both authenticated and unauthenticated contexts
 

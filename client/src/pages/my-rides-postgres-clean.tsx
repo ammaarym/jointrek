@@ -61,6 +61,11 @@ export default function MyRidesPostgres() {
   const [userStrikes, setUserStrikes] = useState(0);
   const [cancelling, setCancelling] = useState(false);
 
+  // Passenger cancellation state
+  const [passengerCancelDialogOpen, setPassengerCancelDialogOpen] = useState(false);
+  const [passengerToCancel, setPassengerToCancel] = useState<any>(null);
+  const [cancellingPassenger, setCancellingPassenger] = useState(false);
+
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
@@ -456,6 +461,62 @@ export default function MyRidesPostgres() {
     return (departure.getTime() - now.getTime()) / (1000 * 60 * 60);
   };
 
+  // Handle individual passenger cancellation by driver
+  const handleCancelPassenger = (passenger: any) => {
+    setPassengerToCancel(passenger);
+    setPassengerCancelDialogOpen(true);
+  };
+
+  // Cancel specific passenger from ride
+  const confirmCancelPassenger = async () => {
+    if (!currentUser || !passengerToCancel) return;
+
+    setCancellingPassenger(true);
+    try {
+      const response = await fetch(`/api/ride-requests/${passengerToCancel.id}/cancel-by-driver`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({
+          reason: 'Driver cancelled passenger'
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        toast({
+          title: "Passenger Cancelled",
+          description: `${passengerToCancel.passengerName} has been removed from this ride. ${result.refundProcessed ? 'Payment has been refunded.' : ''}`,
+        });
+        
+        // Close dialog and reset state
+        setPassengerCancelDialogOpen(false);
+        setPassengerToCancel(null);
+        
+        // Refresh data
+        loadRideRequests();
+        loadApprovedRides();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to cancel passenger');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling passenger:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel passenger. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingPassenger(false);
+    }
+  };
+
 
 
   // Cancel ride request
@@ -777,12 +838,22 @@ export default function MyRidesPostgres() {
                       </h4>
                       <div className="space-y-2">
                         {approvedPassengers.map((passenger) => (
-                          <div key={passenger.id} className="text-xs">
-                            <div className="font-medium text-green-800">{passenger.passengerName}</div>
-                            <div className="text-green-600">{passenger.passengerEmail}</div>
-                            {passenger.passengerPhone && (
-                              <div className="text-green-600">📞 {passenger.passengerPhone}</div>
-                            )}
+                          <div key={passenger.id} className="text-xs flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-green-800">{passenger.passengerName}</div>
+                              <div className="text-green-600">{passenger.passengerEmail}</div>
+                              {passenger.passengerPhone && (
+                                <div className="text-green-600">📞 {passenger.passengerPhone}</div>
+                              )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-2 h-6 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => handleCancelPassenger(passenger)}
+                            >
+                              Cancel
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -1885,6 +1956,41 @@ export default function MyRidesPostgres() {
               className="flex-1"
             >
               {cancelling ? "Cancelling..." : "Cancel Ride"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Passenger Cancellation Dialog */}
+      <Dialog open={passengerCancelDialogOpen} onOpenChange={setPassengerCancelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel Passenger</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove {passengerToCancel?.passengerName} from this ride? 
+              Their payment will be automatically refunded.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setPassengerCancelDialogOpen(false);
+                setPassengerToCancel(null);
+              }}
+              disabled={cancellingPassenger}
+              className="flex-1"
+            >
+              Keep Passenger
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmCancelPassenger}
+              disabled={cancellingPassenger}
+              className="flex-1"
+            >
+              {cancellingPassenger ? "Cancelling..." : "Remove Passenger"}
             </Button>
           </DialogFooter>
         </DialogContent>

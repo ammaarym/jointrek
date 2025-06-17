@@ -889,6 +889,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel individual passenger from ride (driver only)
+  app.post('/api/ride-requests/:id/cancel-by-driver', authenticate, async (req: Request, res: Response) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { reason } = req.body;
+      
+      if (isNaN(requestId)) {
+        return res.status(400).json({ message: "Invalid request ID" });
+      }
+
+      // Get the ride request
+      const rideRequest = await storage.getRideRequestById(requestId);
+      if (!rideRequest) {
+        return res.status(404).json({ message: "Ride request not found" });
+      }
+
+      // Get the ride to verify the user is the driver
+      const ride = await storage.getRideById(rideRequest.rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if user is the driver
+      if (ride.driverId !== req.user!.uid) {
+        return res.status(403).json({ message: "Only the driver can cancel passengers" });
+      }
+
+      // Check if request is approved
+      if (rideRequest.status !== 'approved') {
+        return res.status(400).json({ message: "Can only cancel approved passengers" });
+      }
+
+      // Update the request status to 'canceled'
+      await storage.updateRideRequestStatus(requestId, 'canceled', req.user!.uid);
+
+      // Process refund if payment was authorized
+      let refundProcessed = false;
+      try {
+        if (rideRequest.paymentIntentId) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(rideRequest.paymentIntentId);
+          
+          if (paymentIntent.status === 'requires_capture') {
+            // Cancel the payment intent
+            await stripe.paymentIntents.cancel(rideRequest.paymentIntentId);
+            refundProcessed = true;
+          } else if (paymentIntent.status === 'succeeded') {
+            // Create a refund
+            await stripe.refunds.create({
+              payment_intent: rideRequest.paymentIntentId,
+              reason: 'requested_by_customer'
+            });
+            refundProcessed = true;
+          }
+        }
+      } catch (paymentError: any) {
+        console.error('Error processing refund for cancelled passenger:', paymentError);
+        // Continue with cancellation even if refund fails
+      }
+
+      // Increase available seats on the ride
+      await db
+        .update(rides)
+        .set({ 
+          seatsLeft: sql`${rides.seatsLeft} + 1`
+        })
+        .where(eq(rides.id, rideRequest.rideId));
+
+      res.json({
+        message: "Passenger cancelled successfully",
+        refundProcessed,
+        requestId
+      });
+
+    } catch (error: any) {
+      console.error("Error cancelling passenger:", error);
+      res.status(500).json({ message: error.message || "Failed to cancel passenger" });
+    }
+  });
+
   // Get user cancellation strikes
   app.get('/api/users/:userId/strikes', authenticate, async (req: Request, res: Response) => {
     try {

@@ -190,6 +190,9 @@ export default function MyRidesPostgres() {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Approved rides loaded:', data);
+        console.log('Passenger rides count:', data.filter(ride => ride.userRole === 'passenger').length);
+        console.log('Driver rides count:', data.filter(ride => ride.userRole === 'driver').length);
         setApprovedRides(data || []);
       }
     } catch (error) {

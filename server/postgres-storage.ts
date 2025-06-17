@@ -28,7 +28,7 @@ import {
   type UserStats,
   type InsertUserStats
 } from "@shared/schema";
-import { eq, and, or, desc, gte, sql, lt } from "drizzle-orm";
+import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
 import { IStorage } from "./storage";
 
 export class PostgresStorage implements IStorage {
@@ -705,7 +705,8 @@ export class PostgresStorage implements IStorage {
       .innerJoin(users, eq(rides.driverId, users.firebaseUid))
       .where(and(
         eq(rideRequests.passengerId, userId),
-        eq(rideRequests.status, 'approved')
+        eq(rideRequests.status, 'approved'),
+        sql`${rides.cancelledBy} IS NULL` // Exclude cancelled rides
       ));
 
     // Get rides where user is a driver (with approved passengers)
@@ -744,7 +745,8 @@ export class PostgresStorage implements IStorage {
       .innerJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
       .where(and(
         eq(rides.driverId, userId),
-        eq(rideRequests.status, 'approved')
+        eq(rideRequests.status, 'approved'),
+        sql`${rides.cancelledBy} IS NULL` // Exclude cancelled rides
       ));
 
     // Helper function to format passenger names from "Last, First" to "First Last"

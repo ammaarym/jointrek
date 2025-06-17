@@ -49,7 +49,7 @@ async function cleanupExpiredRides() {
   }
 }
 
-// Function to handle automatic payment processing after 24 hours
+// Function to handle automatic payment processing
 async function processAutomaticPaymentCapture() {
   try {
     const stripe = (await import('stripe')).default;
@@ -66,13 +66,32 @@ async function processAutomaticPaymentCapture() {
       try {
         if (request.stripePaymentIntentId) {
           if (request.status === 'approved') {
-            // Capture payment for approved requests
-            console.log(`Auto-capturing payment for approved request ${request.id}: ${request.stripePaymentIntentId}`);
-            
-            await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
-            await storage.updateRideRequestPaymentStatus(request.id, 'captured');
-            
-            console.log(`Auto-captured payment for request ${request.id}`);
+            // Check if ride is completed for payment capture
+            const ride = await storage.getRide(request.rideId);
+            if (ride?.isCompleted) {
+              console.log(`Auto-capturing payment for completed ride request ${request.id}: ${request.stripePaymentIntentId}`);
+              
+              await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
+              await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+              
+              console.log(`Auto-captured payment for completed request ${request.id}`);
+            } else {
+              // Check if ride should have started but didn't - cancel and refund
+              const currentTime = new Date();
+              const departureTime = new Date(ride?.departureTime || '');
+              const timeSinceDeparture = currentTime.getTime() - departureTime.getTime();
+              const twentyFourHours = 24 * 60 * 60 * 1000;
+              
+              if (timeSinceDeparture > twentyFourHours && !ride?.isStarted) {
+                console.log(`Auto-canceling approved request ${request.id} - ride didn't start within 24 hours of departure: ${request.stripePaymentIntentId}`);
+                
+                await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+                await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+                await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+                
+                console.log(`Auto-canceled and refunded payment for non-started ride request ${request.id}`);
+              }
+            }
           } else if (request.status === 'pending') {
             // Cancel and refund payment for unaccepted requests
             console.log(`Auto-canceling unaccepted request ${request.id}: ${request.stripePaymentIntentId}`);

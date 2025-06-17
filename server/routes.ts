@@ -2085,20 +2085,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           if (request.stripePaymentIntentId) {
             if (request.status === 'approved') {
-              // Capture payment for approved requests
-              console.log(`Capturing payment for approved request ${request.id}: ${request.stripePaymentIntentId}`);
-              
-              await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
-              await storage.updateRideRequestPaymentStatus(request.id, 'captured');
-              
-              results.push({
-                requestId: request.id,
-                action: 'captured',
-                paymentIntentId: request.stripePaymentIntentId,
-                status: 'success'
-              });
-              
-              console.log(`Successfully captured payment for request ${request.id}`);
+              if (request.isCompleted) {
+                // Capture payment for completed rides
+                console.log(`Capturing payment for completed ride request ${request.id}: ${request.stripePaymentIntentId}`);
+                
+                await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
+                await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+                
+                results.push({
+                  requestId: request.id,
+                  action: 'captured',
+                  paymentIntentId: request.stripePaymentIntentId,
+                  status: 'success',
+                  reason: 'ride_completed'
+                });
+                
+                console.log(`Successfully captured payment for completed request ${request.id}`);
+              } else {
+                // Check if ride should have started but didn't - cancel and refund
+                const currentTime = new Date();
+                const departureTime = new Date(request.departureTime);
+                const timeSinceDeparture = currentTime.getTime() - departureTime.getTime();
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+                
+                if (timeSinceDeparture > twentyFourHours && !request.isStarted) {
+                  console.log(`Canceling approved request ${request.id} - ride didn't start within 24 hours of departure: ${request.stripePaymentIntentId}`);
+                  
+                  await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+                  await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+                  await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+                  
+                  results.push({
+                    requestId: request.id,
+                    action: 'canceled_and_refunded',
+                    paymentIntentId: request.stripePaymentIntentId,
+                    status: 'success',
+                    reason: 'ride_not_started_on_time'
+                  });
+                  
+                  console.log(`Successfully canceled and refunded payment for non-started ride request ${request.id}`);
+                }
+              }
             } else if (request.status === 'pending') {
               // Cancel and refund payment for unaccepted requests
               console.log(`Canceling unaccepted request ${request.id}: ${request.stripePaymentIntentId}`);
@@ -2111,7 +2138,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 requestId: request.id,
                 action: 'canceled_and_refunded',
                 paymentIntentId: request.stripePaymentIntentId,
-                status: 'success'
+                status: 'success',
+                reason: 'request_not_accepted'
               });
               
               console.log(`Successfully canceled and refunded payment for unaccepted request ${request.id}`);

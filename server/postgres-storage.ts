@@ -1077,9 +1077,10 @@ export class PostgresStorage implements IStorage {
   }
 
   async getExpiredAuthorizedPayments(cutoffDate: Date): Promise<any[]> {
-    // Get ride requests older than 24 hours with authorized payments that need processing:
-    // 1. Approved requests for started rides - capture payment
-    // 2. Pending requests - cancel and refund payment
+    // Get ride requests with authorized payments that need processing:
+    // 1. Completed rides - capture payment
+    // 2. Approved rides that didn't start within 24h of departure - cancel and refund
+    // 3. Pending requests older than 24h - cancel and refund
     const expiredPayments = await db
       .select({
         id: rideRequests.id,
@@ -1091,7 +1092,10 @@ export class PostgresStorage implements IStorage {
         stripePaymentIntentId: rideRequests.stripePaymentIntentId,
         createdAt: rideRequests.createdAt,
         updatedAt: rideRequests.updatedAt,
-        driverId: rides.driverId
+        driverId: rides.driverId,
+        departureTime: rides.departureTime,
+        isStarted: rides.isStarted,
+        isCompleted: rides.isCompleted
       })
       .from(rideRequests)
       .innerJoin(rides, eq(rideRequests.rideId, rides.id))
@@ -1099,12 +1103,16 @@ export class PostgresStorage implements IStorage {
         eq(rideRequests.paymentStatus, 'authorized'),
         sql`${rideRequests.stripePaymentIntentId} IS NOT NULL`,
         or(
-          // Approved requests for started rides older than 24 hours
+          // Completed rides - capture payment
           and(
             eq(rideRequests.status, 'approved'),
-            eq(rides.isStarted, true),
-            sql`${rides.startedAt} IS NOT NULL`,
-            lt(rides.startedAt, cutoffDate)
+            eq(rides.isCompleted, true)
+          ),
+          // Approved rides that should have started but didn't (24h past departure)
+          and(
+            eq(rideRequests.status, 'approved'),
+            eq(rides.isStarted, false),
+            lt(rides.departureTime, cutoffDate)
           ),
           // Pending requests older than 24 hours (unaccepted)
           and(

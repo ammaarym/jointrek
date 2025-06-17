@@ -27,7 +27,8 @@ import {
   type RideRequest,
   type InsertRideRequest,
   type UserStats,
-  type InsertUserStats
+  type InsertUserStats,
+  insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
 import { IStorage } from "./storage";
@@ -1247,6 +1248,64 @@ export class PostgresStorage implements IStorage {
       ));
     
     return expiredPayments;
+  }
+
+  // Notification methods
+  async createNotification(notificationData: any): Promise<any> {
+    try {
+      const [notification] = await db.insert(notifications).values(notificationData).returning();
+      return notification;
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
+  }
+
+  async getUserNotifications(userId: string): Promise<any[]> {
+    try {
+      const result = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.userId, userId))
+        .orderBy(desc(notifications.createdAt));
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching user notifications:', error);
+      throw error;
+    }
+  }
+
+  async markNotificationAsRead(id: number): Promise<any> {
+    try {
+      const [notification] = await db
+        .update(notifications)
+        .set({ isRead: true })
+        .where(eq(notifications.id, id))
+        .returning();
+      
+      return notification;
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(notifications)
+        .where(and(
+          eq(notifications.userId, userId),
+          eq(notifications.isRead, false)
+        ));
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting unread notification count:', error);
+      return 0;
+    }
   }
 }
 

@@ -62,6 +62,8 @@ export default function FindRidesPostgres() {
   const [approvedRides, setApprovedRides] = useState<Set<number>>(new Set());
   // Track rejected rides
   const [rejectedRides, setRejectedRides] = useState<Set<number>>(new Set());
+  // Track cancelled rides
+  const [cancelledRides, setCancelledRides] = useState<Set<number>>(new Set());
   
 
   
@@ -105,6 +107,12 @@ export default function FindRidesPostgres() {
           .filter((request: any) => request.status === 'rejected')
           .map((request: any) => request.rideId as number);
         setRejectedRides(new Set<number>(rejectedRideIds));
+        
+        // Extract ride IDs that have been cancelled
+        const cancelledRideIds = userRequests
+          .filter((request: any) => request.status === 'cancelled')
+          .map((request: any) => request.rideId as number);
+        setCancelledRides(new Set<number>(cancelledRideIds));
       }
     } catch (error) {
       console.error('Error loading user ride requests:', error);

@@ -43,6 +43,7 @@ interface RideCardProps {
   rideTypeFilter?: string;
   isApproved?: boolean; // New prop to show if request is approved
   isRejected?: boolean; // New prop to show if request is rejected
+  isCancelled?: boolean; // New prop to show if request is cancelled
 }
 
 export default function RideCard({
@@ -57,6 +58,7 @@ export default function RideCard({
   rideTypeFilter = 'driver',
   isApproved = false,
   isRejected = false,
+  isCancelled = false,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -227,22 +229,26 @@ export default function RideCard({
                         ? "bg-green-600 text-white hover:bg-green-700" 
                         : isRejected
                         ? "bg-red-500 text-white cursor-not-allowed"
+                        : isCancelled
+                        ? "bg-gray-500 text-white cursor-not-allowed"
                         : isRequested 
                         ? "bg-orange-500 text-white hover:bg-orange-600" 
                         : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested && !isApproved && !isRejected) {
+                      if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested || isApproved || isRejected}
+                    disabled={isRequested || isApproved || isRejected || isCancelled}
                   >
                     {isApproved
                       ? "Ride Approved"
                       : isRejected
                       ? "Request Denied"
+                      : isCancelled
+                      ? "CANCELLED"
                       : isRequested 
                       ? "Request Sent" 
                       : rideTypeFilter === 'passenger' 

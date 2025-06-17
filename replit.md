@@ -88,7 +88,8 @@ DATABASE_URL
 - Schema location: `shared/schema.ts`
 
 ## Changelog
-- June 17, 2025. Initial setup
+- June 17, 2025: Initial setup
+- June 17, 2025: Fixed automatic payment processing - now cancels and refunds unaccepted ride requests after 24 hours
 
 ## User Preferences
 

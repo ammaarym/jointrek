@@ -705,8 +705,10 @@ export class PostgresStorage implements IStorage {
       .innerJoin(users, eq(rides.driverId, users.firebaseUid))
       .where(and(
         eq(rideRequests.passengerId, userId),
-        eq(rideRequests.status, 'approved'),
-        sql`${rides.cancelledBy} IS NULL` // Exclude cancelled rides
+        or(
+          eq(rideRequests.status, 'approved'),
+          eq(rideRequests.status, 'cancelled')
+        )
       ));
 
     // Get rides where user is a driver (with approved passengers)
@@ -745,8 +747,10 @@ export class PostgresStorage implements IStorage {
       .innerJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
       .where(and(
         eq(rides.driverId, userId),
-        eq(rideRequests.status, 'approved'),
-        sql`${rides.cancelledBy} IS NULL` // Exclude cancelled rides
+        or(
+          eq(rideRequests.status, 'approved'),
+          eq(rideRequests.status, 'cancelled')
+        )
       ));
 
     // Helper function to format passenger names from "Last, First" to "First Last"

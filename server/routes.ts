@@ -875,6 +875,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to cancel ride" });
       }
 
+      // Update all ride requests to cancelled status
+      await db.update(rideRequests)
+        .set({ status: 'cancelled' })
+        .where(eq(rideRequests.rideId, rideId));
+
+      // Send SMS notifications to affected parties
+      let smsResults: any[] = [];
+      try {
+        // Get all approved passengers for this ride
+        const approvedRequests = await db
+          .select()
+          .from(rideRequests)
+          .where(and(
+            eq(rideRequests.rideId, rideId),
+            eq(rideRequests.status, 'cancelled')
+          ));
+
+        const driver = await storage.getUserByFirebaseUid(ride.driverId);
+        const canceller = await storage.getUserByFirebaseUid(req.user!.uid);
+
+        if (userRole === 'passenger') {
+          // Passenger cancelled - notify driver
+          if (driver && driver.phone) {
+            const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+              weekday: 'short', month: 'short', day: 'numeric',
+              hour: 'numeric', minute: '2-digit', hour12: true
+            });
+
+            const smsSent = await twilioService.notifyDriverOfCancellation(
+              driver.phone,
+              canceller?.displayName || canceller?.email.split('@')[0] || 'A passenger',
+              {
+                origin: ride.origin,
+                destination: ride.destination,
+                departureTime: departureTime,
+                reason: cancellationReason
+              }
+            );
+
+            smsResults.push({
+              recipient: 'driver',
+              phone: driver.phone,
+              sent: smsSent,
+              name: driver.displayName || driver.email.split('@')[0]
+            });
+          }
+        } else if (userRole === 'driver') {
+          // Driver cancelled - notify all passengers
+          for (const request of approvedRequests) {
+            const passenger = await storage.getUserByFirebaseUid(request.passengerId);
+            if (passenger && passenger.phone) {
+              const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric',
+                hour: 'numeric', minute: '2-digit', hour12: true
+              });
+
+              const smsSent = await twilioService.notifyPassengerOfCancellation(
+                passenger.phone,
+                driver?.displayName || driver?.email.split('@')[0] || 'The driver',
+                {
+                  origin: ride.origin,
+                  destination: ride.destination,
+                  departureTime: departureTime,
+                  reason: cancellationReason
+                }
+              );
+
+              smsResults.push({
+                recipient: 'passenger',
+                phone: passenger.phone,
+                sent: smsSent,
+                name: passenger.displayName || passenger.email.split('@')[0]
+              });
+            }
+          }
+        }
+      } catch (smsError) {
+        console.error('Error sending cancellation SMS notifications:', smsError);
+      }
+
       // Get updated user strikes count
       const userStrikes = await storage.getUserCancellationStrikes(req.user!.uid);
 
@@ -883,7 +963,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         penaltyApplied: cancellationResult.penaltyApplied || false,
         penaltyAmount: cancellationResult.penaltyAmount || 0,
         strikeCount: userStrikes,
-        cancelled: true
+        cancelled: true,
+        smsNotifications: smsResults
       });
 
     } catch (error: any) {

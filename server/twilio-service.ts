@@ -105,6 +105,38 @@ class TwilioService {
       message
     });
   }
+
+  // Send notification when a passenger cancels a ride
+  async notifyDriverOfCancellation(driverPhone: string, passengerName: string, rideDetails: {
+    origin: string;
+    destination: string;
+    departureTime: string;
+    reason?: string;
+  }): Promise<boolean> {
+    const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
+    const message = `❌ ${passengerName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nYour seat is now available again.`;
+    
+    return this.sendSMS({
+      to: driverPhone,
+      message
+    });
+  }
+
+  // Send notification when a driver cancels a ride
+  async notifyPassengerOfCancellation(passengerPhone: string, driverName: string, rideDetails: {
+    origin: string;
+    destination: string;
+    departureTime: string;
+    reason?: string;
+  }): Promise<boolean> {
+    const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
+    const message = `❌ ${driverName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nYour payment will be refunded. Sorry for the inconvenience!`;
+    
+    return this.sendSMS({
+      to: passengerPhone,
+      message
+    });
+  }
 }
 
 export const twilioService = new TwilioService();

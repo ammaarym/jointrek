@@ -101,6 +101,7 @@ DATABASE_URL
 - June 17, 2025: Added SMS notifications for ride rejections - passengers receive text messages when drivers reject their requests with Trek login links
 - June 17, 2025: Fixed cancelled ride status display - cancelled rides now show "CANCELLED" instead of "Request Sent" on find rides page
 - June 17, 2025: Reset all user reviews and ride counts to zero for fresh start of rating system
+- June 17, 2025: Added SMS notifications for driver-initiated passenger cancellations - passengers now receive text messages when drivers cancel them from rides
 
 ## User Preferences
 

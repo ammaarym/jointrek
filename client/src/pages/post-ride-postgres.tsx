@@ -5,6 +5,7 @@ import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateTime, formatTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
 import { calculateRidePrice, CITY_DISTANCES } from '../../../shared/pricing';
+import { CAR_MAKES, CAR_MODELS, CAR_YEARS, getMaxSeatsForModel, getBaggageCapacity } from '../data/car-data';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,10 +102,18 @@ export default function PostRidePostgres() {
   const [availableSeats, setAvailableSeats] = useState('1');
   const [price, setPrice] = useState('');
   const [genderPreference, setGenderPreference] = useState('no-preference');
+  const [carMake, setCarMake] = useState('');
   const [carModel, setCarModel] = useState('');
+  const [carYear, setCarYear] = useState('');
   const [baggageCheckIn, setBaggageCheckIn] = useState('0');
   const [baggagePersonal, setBaggagePersonal] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Available models for selected make
+  const availableModels = carMake ? CAR_MODELS[carMake] || [] : [];
+  
+  // Maximum seats for selected car
+  const maxSeats = carMake && carModel ? getMaxSeatsForModel(carMake, carModel) : 8;
 
   
   // Auto-calculate price for all requests (COMMENTED OUT - NOW USING FREE MARKET PRICING)

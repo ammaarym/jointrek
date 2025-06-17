@@ -83,7 +83,7 @@ class TwilioService {
     departureTime: string;
     seats: number;
   }): Promise<boolean> {
-    const message = `🚗 New ride request from ${passengerName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nSeats: ${rideDetails.seats}\n\nLog in to Trek to approve or decline.`;
+    const message = `🚗 New ride request from ${passengerName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nSeats: ${rideDetails.seats}\n\nLogin to Trek.com/rides to approve or decline.`;
     
     return this.sendSMS({
       to: driverPhone,
@@ -98,7 +98,7 @@ class TwilioService {
     departureTime: string;
     driverPhone: string;
   }): Promise<boolean> {
-    const message = `✅ Your ride request approved by ${driverName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nDriver: ${driverName} (${rideDetails.driverPhone})\n\nSee you then!`;
+    const message = `✅ Your ride request approved by ${driverName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nDriver: ${driverName} (${rideDetails.driverPhone})\n\nLogin to Trek.com/rides to manage your ride.`;
     
     return this.sendSMS({
       to: passengerPhone,
@@ -114,7 +114,7 @@ class TwilioService {
     reason?: string;
   }): Promise<boolean> {
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
-    const message = `❌ ${passengerName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nYour seat is now available again.`;
+    const message = `❌ ${passengerName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nLogin to Trek.com/rides to manage your rides.`;
     
     return this.sendSMS({
       to: driverPhone,
@@ -130,7 +130,7 @@ class TwilioService {
     reason?: string;
   }): Promise<boolean> {
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
-    const message = `❌ ${driverName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nYour payment will be refunded. Sorry for the inconvenience!`;
+    const message = `❌ ${driverName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nLogin to Trek.com/rides to find another ride.`;
     
     return this.sendSMS({
       to: passengerPhone,

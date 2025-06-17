@@ -597,6 +597,7 @@ export default function FindRidesPostgres() {
                     isRequested={requestedRides.has(ride.id)}
                     isApproved={approvedRides.has(ride.id)}
                     isRejected={rejectedRides.has(ride.id)}
+                    isCancelled={cancelledRides.has(ride.id)}
                     rideTypeFilter={rideTypeFilter}
                   />
                 );

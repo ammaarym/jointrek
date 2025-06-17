@@ -94,6 +94,7 @@ DATABASE_URL
 - June 17, 2025: Added refund protection for incomplete rides - passengers get refunded if rides are started but not completed within 24 hours
 - June 17, 2025: Implemented comprehensive driver cancellation system - individual passenger removal buttons and driver self-cancellation for entire rides
 - June 17, 2025: Added automatic cleanup system - old ride requests auto-removed (12h for cancelled/rejected, 48h for approved)
+- June 17, 2025: Fixed cleanup system - manually removed 8 old requests and ensured daily cleanup runs properly
 
 ## User Preferences
 

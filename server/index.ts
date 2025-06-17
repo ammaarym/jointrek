@@ -149,10 +149,12 @@ function scheduleDailyCleanup() {
   
   setTimeout(() => {
     cleanupExpiredRides();
+    storage.deleteOldRideRequests();
     processAutomaticPaymentCapture();
     // Schedule to run every 24 hours after the first run
     setInterval(() => {
       cleanupExpiredRides();
+      storage.deleteOldRideRequests();
       processAutomaticPaymentCapture();
     }, 24 * 60 * 60 * 1000);
   }, timeUntilNext2AM);

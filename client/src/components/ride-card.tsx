@@ -498,12 +498,15 @@ export default function RideCard({
               {/* Baggage Information */}
               {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                  <div className="text-neutral-500 text-sm mb-2">Baggage Requirements</div>
+                  <div className="text-neutral-500 text-sm mb-2">
+                    {ride.rideType === 'driver' ? 'Available Baggage Space' : 'Baggage Requirements'}
+                  </div>
                   <div className="space-y-1">
                     {(ride.baggageCheckIn || 0) > 0 && (
                       <div className="flex items-center text-sm">
                         <span className="font-medium text-blue-700">
                           {ride.baggageCheckIn} check-in bag{(ride.baggageCheckIn || 0) > 1 ? 's' : ''}
+                          {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
                         </span>
                         <span className="text-neutral-500 ml-2">(large luggage)</span>
                       </div>
@@ -512,6 +515,7 @@ export default function RideCard({
                       <div className="flex items-center text-sm">
                         <span className="font-medium text-blue-700">
                           {ride.baggagePersonal} personal bag{(ride.baggagePersonal || 0) > 1 ? 's' : ''}
+                          {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
                         </span>
                         <span className="text-neutral-500 ml-2">(backpacks, smaller bags)</span>
                       </div>

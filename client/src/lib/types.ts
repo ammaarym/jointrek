@@ -46,7 +46,9 @@ export interface Ride {
   seatsLeft: number;
   price: number;
   genderPreference: string;
+  carMake?: string;
   carModel?: string;
+  carYear?: number;
   notes?: string;
   baggageCheckIn?: number;
   baggagePersonal?: number;

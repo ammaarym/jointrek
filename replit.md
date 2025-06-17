@@ -92,6 +92,8 @@ DATABASE_URL
 - June 17, 2025: Fixed automatic payment processing - now cancels and refunds unaccepted ride requests after 24 hours
 - June 17, 2025: Enhanced payment flow - payments only captured when rides are completed, not when started. Added automatic refunds for rides that don't start within 24 hours of departure time
 - June 17, 2025: Added refund protection for incomplete rides - passengers get refunded if rides are started but not completed within 24 hours
+- June 17, 2025: Implemented comprehensive driver cancellation system - individual passenger removal buttons and driver self-cancellation for entire rides
+- June 17, 2025: Added automatic cleanup system - old ride requests auto-removed (12h for cancelled/rejected, 48h for approved)
 
 ## User Preferences
 

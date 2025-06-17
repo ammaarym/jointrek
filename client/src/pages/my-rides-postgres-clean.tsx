@@ -990,7 +990,15 @@ export default function MyRidesPostgres() {
                       ))}
                     </div>
                   ) : approvedRides.filter(ride => ride.userRole === 'passenger').length > 0 ? (
-                    approvedRides.filter(ride => ride.userRole === 'passenger').map((ride) => (
+                    approvedRides.filter(ride => ride.userRole === 'passenger').map((ride) => {
+                      // Debug log for ride status
+                      console.log('Passenger Ride Debug:', {
+                        rideId: ride.rideId,
+                        isStarted: ride.isStarted,
+                        isCompleted: ride.isCompleted,
+                        shouldShowCancel: !ride.isStarted && !ride.isCompleted
+                      });
+                      return (
                       <Card key={ride.id} className={`p-6 ${ride.isCompleted ? 'border-green-300 bg-green-100' : 'border-green-200 bg-green-50'}`}>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -1059,21 +1067,30 @@ export default function MyRidesPostgres() {
                             {ride.isCompleted ? (
                               <div className="flex items-center gap-1 text-green-600 font-medium">
                                 <FaCheck className="w-5 h-5 text-green-600" />
+                                <span className="text-sm">COMPLETED</span>
                               </div>
                             ) : ride.isStarted ? (
                               // Ride has started - show completion flow
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePassengerVerification({ id: ride.rideId })}
-                                className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
-                              >
-                                <FaCheck className="w-4 h-4" />
-                                Ride Complete
-                              </Button>
+                              <div className="flex flex-col gap-2">
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                  IN PROGRESS
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePassengerVerification({ id: ride.rideId })}
+                                  className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
+                                >
+                                  <FaCheck className="w-4 h-4" />
+                                  Ride Complete
+                                </Button>
+                              </div>
                             ) : (
                               // Ride not started yet - show start flow and cancel option for passenger
                               <div className="flex flex-col gap-2">
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  APPROVED
+                                </span>
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1100,7 +1117,8 @@ export default function MyRidesPostgres() {
                           </div>
                         </div>
                       </Card>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-12">
                       <FaUser className="w-16 h-16 text-muted-foreground mx-auto mb-4" />

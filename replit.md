@@ -104,6 +104,7 @@ DATABASE_URL
 - June 17, 2025: Added SMS notifications for driver-initiated passenger cancellations - passengers now receive text messages when drivers cancel them from rides
 - June 17, 2025: Implemented comprehensive car selection system - added make/model/year dropdowns with 27 major brands, hundreds of models, and years from 1980-2026
 - June 17, 2025: Enhanced baggage labeling - drivers now see "Available Baggage Space" vs passengers see "Baggage Requirements" with intelligent capacity suggestions based on vehicle type
+- June 17, 2025: Added comprehensive baggage information display - baggage requirements/availability now visible on all ride cards, passenger cards, and ride management interfaces with color-coded badges
 
 ## User Preferences
 

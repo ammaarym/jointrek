@@ -451,6 +451,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedRequest = await storage.updateRideRequestStatus(id, status, req.user.uid);
 
+      // Initialize SMS status for approved requests
+      let approvalSmsStatus = { sent: false, reason: 'Unknown error' };
+
       // If approved, decrement available seats and auto-reject other requests if full
       if (status === "approved") {
         try {
@@ -496,14 +499,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Send SMS notification to passenger when approved
-          let approvalSmsStatus = { sent: false, reason: 'Unknown error' };
           try {
-            if (thisRequest && ride) {
+            if (thisRequest) {
+              const rideDetails = await storage.getRide(thisRequest.rideId);
               const passenger = await storage.getUserByFirebaseUid(thisRequest.passengerId);
               const driver = await storage.getUserByFirebaseUid(req.user!.uid);
               
-              if (passenger && passenger.phone && driver) {
-                const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+              if (passenger && passenger.phone && driver && rideDetails) {
+                const departureTime = new Date(rideDetails.departureTime).toLocaleString('en-US', {
                   weekday: 'short',
                   month: 'short', 
                   day: 'numeric',
@@ -516,8 +519,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   passenger.phone,
                   driver.displayName || driver.email.split('@')[0],
                   {
-                    origin: ride.origin,
-                    destination: ride.destination,
+                    origin: rideDetails.origin,
+                    destination: rideDetails.destination,
                     departureTime: departureTime,
                     driverPhone: driver.phone || 'Contact via app'
                   }
@@ -554,7 +557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (status === "approved") {
         res.json({
           ...updatedRequest,
-          smsStatus: approvalSmsStatus
+          smsStatus: approvalSmsStatus || { sent: false, reason: 'SMS status not available' }
         });
       } else {
         res.json(updatedRequest);

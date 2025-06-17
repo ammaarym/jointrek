@@ -1299,30 +1299,41 @@ export default function MyRidesPostgres() {
                                     </span>
                                   </div>
                                   
-                                  {/* Show passenger names in slots */}
+                                  {/* Show passenger details with cancel buttons */}
                                   {(() => {
                                     const passengers = approvedRides
-                                      .filter(r => r.rideId === ride.rideId && r.userRole === 'driver')
-                                      .map(r => r.passengerName);
-                                    
-                                    // Determine the styling based on ride status
-                                    let slotStyles = "px-3 py-1 border rounded-full text-xs font-medium ";
-                                    if (ride.isCompleted) {
-                                      slotStyles += "bg-green-50 border-green-200 text-green-700";
-                                    } else if (ride.isStarted) {
-                                      slotStyles += "bg-gray-50 border-gray-200 text-gray-700";
-                                    } else {
-                                      slotStyles += "bg-blue-50 border-blue-200 text-blue-700";
-                                    }
+                                      .filter(r => r.rideId === ride.rideId && r.userRole === 'driver');
                                     
                                     return (
-                                      <div className="flex flex-wrap gap-2">
-                                        {passengers.map((passengerName, index) => (
+                                      <div className="space-y-2">
+                                        {passengers.map((passenger, index) => (
                                           <div
                                             key={index}
-                                            className={slotStyles}
+                                            className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
                                           >
-                                            {passengerName}
+                                            <div className="flex-1">
+                                              <div className="font-medium text-blue-800 text-sm">
+                                                {passenger.passengerName}
+                                              </div>
+                                              <div className="text-blue-600 text-xs">
+                                                {passenger.passengerEmail}
+                                              </div>
+                                              {passenger.passengerPhone && (
+                                                <div className="text-blue-600 text-xs">
+                                                  📞 {passenger.passengerPhone}
+                                                </div>
+                                              )}
+                                            </div>
+                                            {!ride.isCompleted && !ride.isStarted && (
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-6 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                                onClick={() => handleCancelPassenger(passenger)}
+                                              >
+                                                Cancel
+                                              </Button>
+                                            )}
                                           </div>
                                         ))}
                                       </div>

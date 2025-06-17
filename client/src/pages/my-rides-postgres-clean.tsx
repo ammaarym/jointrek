@@ -397,7 +397,7 @@ export default function MyRidesPostgres() {
     
     setCancelling(true);
     try {
-      const response = await fetch(`/api/rides/${rideToCancel.id}/cancel`, {
+      const response = await fetch(`/api/rides/${rideToCancel.rideId}/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

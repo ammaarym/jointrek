@@ -11,7 +11,7 @@ import crypto from "crypto";
 import Stripe from "stripe";
 import { db } from "./db";
 import { rideRequests, rides } from "@shared/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 // Initialize Stripe
 let stripe: Stripe;
@@ -927,17 +927,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process refund if payment was authorized
       let refundProcessed = false;
       try {
-        if (rideRequest.paymentIntentId) {
-          const paymentIntent = await stripe.paymentIntents.retrieve(rideRequest.paymentIntentId);
+        if (rideRequest.stripePaymentIntentId) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(rideRequest.stripePaymentIntentId);
           
           if (paymentIntent.status === 'requires_capture') {
             // Cancel the payment intent
-            await stripe.paymentIntents.cancel(rideRequest.paymentIntentId);
+            await stripe.paymentIntents.cancel(rideRequest.stripePaymentIntentId);
             refundProcessed = true;
           } else if (paymentIntent.status === 'succeeded') {
             // Create a refund
             await stripe.refunds.create({
-              payment_intent: rideRequest.paymentIntentId,
+              payment_intent: rideRequest.stripePaymentIntentId,
               reason: 'requested_by_customer'
             });
             refundProcessed = true;

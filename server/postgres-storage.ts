@@ -1022,6 +1022,36 @@ export class PostgresStorage implements IStorage {
     return expiredRideIds.length;
   }
 
+  // Delete old ride requests based on their status and age
+  async deleteOldRideRequests(): Promise<number> {
+    const now = new Date();
+    
+    // Delete cancelled/rejected requests older than 12 hours
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    const cancelledRejectedResult = await db
+      .delete(rideRequests)
+      .where(and(
+        or(
+          eq(rideRequests.status, 'canceled'),
+          eq(rideRequests.status, 'rejected')
+        ),
+        lt(rideRequests.createdAt, twelveHoursAgo)
+      ));
+    
+    // Delete approved requests older than 48 hours
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    const approvedResult = await db
+      .delete(rideRequests)
+      .where(and(
+        eq(rideRequests.status, 'approved'),
+        lt(rideRequests.createdAt, fortyEightHoursAgo)
+      ));
+    
+    const totalDeleted = (cancelledRejectedResult.rowCount || 0) + (approvedResult.rowCount || 0);
+    console.log(`Cleaned up ${totalDeleted} old ride requests`);
+    return totalDeleted;
+  }
+
   async updateUserStripeConnectAccount(userId: number, accountId: string | null): Promise<User> {
     const [updatedUser] = await db
       .update(users)

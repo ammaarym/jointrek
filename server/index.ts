@@ -37,12 +37,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Function to clean up expired rides
+// Function to clean up expired rides and old requests
 async function cleanupExpiredRides() {
   try {
-    const deletedCount = await storage.deleteExpiredRides();
-    if (deletedCount > 0) {
-      console.log(`Daily cleanup: Removed ${deletedCount} expired rides`);
+    const deletedRides = await storage.deleteExpiredRides();
+    const deletedRequests = await storage.deleteOldRideRequests();
+    
+    if (deletedRides > 0) {
+      console.log(`Daily cleanup: Removed ${deletedRides} expired rides`);
+    }
+    if (deletedRequests > 0) {
+      console.log(`Daily cleanup: Removed ${deletedRequests} old ride requests`);
     }
   } catch (error) {
     console.error('Error during daily cleanup:', error);

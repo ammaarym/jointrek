@@ -99,6 +99,8 @@ DATABASE_URL
 - June 17, 2025: Fixed cancelled ride status display - cancelled rides now properly show as "CANCELLED" in requests and are removed from approved rides sections
 - June 17, 2025: Implemented dynamic baggage availability tracking - baggage allocations automatically update when passengers are approved/rejected/cancelled
 - June 17, 2025: Added SMS notifications for ride rejections - passengers receive text messages when drivers reject their requests with Trek login links
+- June 17, 2025: Fixed cancelled ride status display - cancelled rides now show "CANCELLED" instead of "Request Sent" on find rides page
+- June 17, 2025: Reset all user reviews and ride counts to zero for fresh start of rating system
 
 ## User Preferences
 

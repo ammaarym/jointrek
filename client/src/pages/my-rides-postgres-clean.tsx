@@ -439,6 +439,8 @@ export default function MyRidesPostgres() {
     return (departure.getTime() - now.getTime()) / (1000 * 60 * 60);
   };
 
+
+
   // Cancel ride request
   const handleCancelRequest = async (requestId: number) => {
     if (!currentUser) return;
@@ -1069,16 +1071,30 @@ export default function MyRidesPostgres() {
                                 Ride Complete
                               </Button>
                             ) : (
-                              // Ride not started yet - show start flow for passenger
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePassengerStartCode({ id: ride.rideId })}
-                                className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
-                              >
-                                <FaKey className="w-4 h-4" />
-                                Enter Start Code
-                              </Button>
+                              // Ride not started yet - show start flow and cancel option for passenger
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePassengerStartCode({ id: ride.rideId })}
+                                  className="flex items-center gap-1 border-purple-600 text-purple-600 hover:bg-purple-50"
+                                >
+                                  <FaKey className="w-4 h-4" />
+                                  Enter Start Code
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setRideToCancel(ride);
+                                    setCancelDialogOpen(true);
+                                  }}
+                                  className="flex items-center gap-1 border-red-600 text-red-600 hover:bg-red-50"
+                                >
+                                  <FaTrash className="w-4 h-4" />
+                                  Cancel Ride
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -1232,16 +1248,30 @@ export default function MyRidesPostgres() {
                                   Generate Code
                                 </Button>
                               ) : (
-                                // Ride not started yet - show start flow for driver
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleDriverStartVerification({ id: ride.rideId })}
-                                  className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
-                                >
-                                  <FaPlay className="w-4 h-4" />
-                                  Start Ride
-                                </Button>
+                                // Ride not started yet - show start flow and cancel option for driver
+                                <div className="flex flex-col gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDriverStartVerification({ id: ride.rideId })}
+                                    className="flex items-center gap-1 border-orange-600 text-orange-600 hover:bg-orange-50"
+                                  >
+                                    <FaPlay className="w-4 h-4" />
+                                    Start Ride
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setRideToCancel(ride);
+                                      setCancelDialogOpen(true);
+                                    }}
+                                    className="flex items-center gap-1 border-red-600 text-red-600 hover:bg-red-50"
+                                  >
+                                    <FaTrash className="w-4 h-4" />
+                                    Cancel Ride
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </div>

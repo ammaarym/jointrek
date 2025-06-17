@@ -1092,13 +1092,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue with cancellation even if refund fails
       }
 
-      // Increase available seats on the ride
+      // Increase available seats and restore baggage on the ride
       await db
         .update(rides)
         .set({ 
-          seatsLeft: sql`${rides.seatsLeft} + 1`
+          seatsLeft: sql`${rides.seatsLeft} + 1`,
+          baggageCheckIn: sql`${rides.baggageCheckIn} + ${rideRequest.baggageCheckIn || 0}`,
+          baggagePersonal: sql`${rides.baggagePersonal} + ${rideRequest.baggagePersonal || 0}`
         })
         .where(eq(rides.id, rideRequest.rideId));
+
+      // Send SMS notification to the cancelled passenger
+      try {
+        const passenger = await storage.getUserByFirebaseUid(rideRequest.passengerId);
+        const driver = await storage.getUserByFirebaseUid(req.user!.uid);
+        
+        if (passenger && passenger.phone && driver) {
+          const departureTime = new Date(ride.departureTime).toLocaleString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric',
+            hour: 'numeric', minute: '2-digit', hour12: true
+          });
+
+          const smsSent = await twilioService.notifyPassengerOfCancellation(
+            passenger.phone,
+            driver.displayName || driver.email.split('@')[0] || 'The driver',
+            {
+              origin: ride.origin,
+              destination: ride.destination,
+              departureTime: departureTime,
+              reason: reason || 'No reason provided'
+            }
+          );
+
+          console.log(`SMS cancellation notification sent to passenger ${passenger.email}: ${smsSent ? 'Success' : 'Failed'}`);
+        }
+      } catch (smsError) {
+        console.error('Error sending SMS notification to cancelled passenger:', smsError);
+      }
 
       res.json({
         message: "Passenger cancelled successfully",

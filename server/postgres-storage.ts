@@ -9,6 +9,7 @@ import {
   reviews,
   rideRequests,
   userStats,
+  notifications,
   type Ride,
   type InsertRide,
   type User,

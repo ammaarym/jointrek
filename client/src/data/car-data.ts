@@ -36,10 +36,10 @@ export const CAR_MODELS: Record<string, string[]> = {
   "Volvo": ["S60", "S90", "V60", "V90", "XC40", "XC60", "XC90", "C40", "EX30"]
 };
 
-// Generate years from 2010 to current year + 1
+// Generate years from 1980 to 2026
 export const CAR_YEARS = Array.from(
-  { length: new Date().getFullYear() - 2009 }, 
-  (_, i) => new Date().getFullYear() + 1 - i
+  { length: 2026 - 1980 + 1 }, 
+  (_, i) => 2026 - i
 );
 
 // Seat capacity mapping for different car types

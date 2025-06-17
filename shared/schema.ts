@@ -121,6 +121,25 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true
 });
 
+// Notifications table schema
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.firebaseUid),
+  type: text("type").notNull(), // "ride_request", "ride_approved", "ride_rejected", "ride_cancelled", "ride_completed"
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  rideId: integer("ride_id"),
+  requestId: integer("request_id"),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Notification insert schema
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true
+});
+
 // User statistics table schema
 export const userStats = pgTable("user_stats", {
   id: serial("id").primaryKey(),

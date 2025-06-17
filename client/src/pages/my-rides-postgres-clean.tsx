@@ -54,6 +54,13 @@ export default function MyRidesPostgres() {
   const [verificationCodeInput, setVerificationCodeInput] = useState('');
   const [currentRideId, setCurrentRideId] = useState<number | null>(null);
 
+  // Cancellation state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [rideToCancel, setRideToCancel] = useState<any>(null);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [userStrikes, setUserStrikes] = useState(0);
+  const [cancelling, setCancelling] = useState(false);
+
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
@@ -192,12 +199,34 @@ export default function MyRidesPostgres() {
     }
   };
 
+  // Load user's strike count
+  const loadUserStrikes = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch('/api/users/strikes', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUserStrikes(data.strikeCount);
+      }
+    } catch (error) {
+      console.error('Error loading user strikes:', error);
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       loadMyRides(currentUser.uid);
       loadRideRequests();
       loadPendingRequests();
       loadApprovedRides();
+      loadUserStrikes();
     }
   }, [currentUser]);
 
@@ -343,6 +372,71 @@ export default function MyRidesPostgres() {
         variant: "destructive",
       });
     }
+  };
+
+  // Handle ride cancellation
+  const handleCancelRide = async () => {
+    if (!currentUser || !rideToCancel) return;
+    
+    setCancelling(true);
+    try {
+      const response = await fetch(`/api/rides/${rideToCancel.id}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({ 
+          cancellationReason: cancellationReason.trim() || undefined 
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        toast({
+          title: "Ride Cancelled",
+          description: result.penaltyApplied 
+            ? `Ride cancelled. Penalty of $${result.penaltyAmount} applied. You now have ${result.strikeCount} strike(s) this month.`
+            : result.strikeCount > 0 
+              ? `Ride cancelled. Warning: You now have ${result.strikeCount} strike(s) this month.`
+              : "Ride cancelled successfully.",
+          variant: result.penaltyApplied ? "destructive" : "default",
+        });
+        
+        // Close dialog and reset state
+        setCancelDialogOpen(false);
+        setRideToCancel(null);
+        setCancellationReason('');
+        
+        // Refresh data
+        loadMyRides(currentUser.uid);
+        loadRideRequests();
+        loadApprovedRides();
+        loadUserStrikes();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to cancel ride');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling ride:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel ride. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Calculate hours until departure for penalty warning
+  const calculateHoursUntilDeparture = (departureTime: string) => {
+    const now = new Date();
+    const departure = new Date(departureTime);
+    return (departure.getTime() - now.getTime()) / (1000 * 60 * 60);
   };
 
   // Cancel ride request

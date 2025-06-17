@@ -2067,6 +2067,201 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel ride with penalty logic
+  app.post("/api/rides/:id/cancel", authenticate, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Payment service not available" });
+      }
+
+      const rideId = parseInt(req.params.id);
+      const { cancellationReason } = req.body;
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      // Get the ride details
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if ride is already cancelled, started, or completed
+      if (ride.isCancelled) {
+        return res.status(400).json({ message: "Ride is already cancelled" });
+      }
+      if (ride.isStarted) {
+        return res.status(400).json({ message: "Cannot cancel a ride that has already started" });
+      }
+      if (ride.isCompleted) {
+        return res.status(400).json({ message: "Cannot cancel a completed ride" });
+      }
+
+      const userId = req.user!.uid;
+      const user = await storage.getUserByFirebaseUid(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Determine if user is driver or has approved ride request
+      const isDriver = ride.driverId === userId;
+      const approvedRequests = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.passengerId, userId),
+          eq(rideRequests.status, 'approved')
+        ));
+      
+      const isApprovedPassenger = approvedRequests.length > 0;
+
+      if (!isDriver && !isApprovedPassenger) {
+        return res.status(403).json({ message: "You can only cancel rides you're involved in" });
+      }
+
+      // Calculate hours until departure
+      const now = new Date();
+      const departureTime = new Date(ride.departureTime);
+      const hoursUntilDeparture = (departureTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      // Get current strike count
+      const currentStrikes = await storage.getUserCancellationStrikes(userId);
+      let penaltyApplied = false;
+      let penaltyAmount = 0;
+
+      // Apply penalty logic if cancelling within 48 hours
+      if (hoursUntilDeparture < 48) {
+        if (currentStrikes === 0) {
+          // First strike - just log warning
+          await storage.updateUserCancellationStrikes(userId);
+          console.log(`First cancellation strike for user ${userId} on ride ${rideId}`);
+        } else {
+          // Second strike or more - apply penalty
+          await storage.updateUserCancellationStrikes(userId);
+          
+          if (isDriver) {
+            // Driver penalty: 20% of ride payout they would have received
+            const ridePrice = parseFloat(ride.price);
+            const driverPayout = ridePrice * 0.93; // Driver gets 93% normally
+            penaltyAmount = Math.round(driverPayout * 0.20 * 100); // 20% penalty in cents
+
+            // Charge driver via Stripe
+            if (user.stripeConnectAccountId) {
+              try {
+                await stripe.transfers.create({
+                  amount: penaltyAmount,
+                  currency: 'usd',
+                  destination: 'acct_1234567890', // Platform account - would need to be configured
+                  source_transaction: user.stripeConnectAccountId,
+                  description: `Cancellation penalty for ride ${rideId}`
+                });
+                penaltyApplied = true;
+              } catch (stripeError) {
+                console.error('Failed to charge driver penalty:', stripeError);
+                // Continue with cancellation even if penalty fails
+              }
+            }
+          } else {
+            // Passenger penalty: 20% of ride cost
+            const ridePrice = parseFloat(ride.price);
+            penaltyAmount = Math.round(ridePrice * 0.20 * 100); // 20% penalty in cents
+
+            // Charge passenger via Stripe
+            if (user.stripeCustomerId) {
+              try {
+                await stripe.paymentIntents.create({
+                  amount: penaltyAmount,
+                  currency: 'usd',
+                  customer: user.stripeCustomerId,
+                  confirm: true,
+                  automatic_payment_methods: {
+                    enabled: true,
+                    allow_redirects: "never"
+                  },
+                  description: `Cancellation penalty for ride ${rideId}`
+                });
+                penaltyApplied = true;
+              } catch (stripeError) {
+                console.error('Failed to charge passenger penalty:', stripeError);
+                // Continue with cancellation even if penalty fails
+              }
+            }
+          }
+        }
+      }
+
+      // Cancel the ride
+      const cancelledBy = isDriver ? 'driver' : 'passenger';
+      await storage.cancelRide(rideId, cancelledBy, cancellationReason);
+
+      // Cancel all approved ride requests and refund payments
+      const allApprovedRequests = await db
+        .select()
+        .from(rideRequests)
+        .where(and(
+          eq(rideRequests.rideId, rideId),
+          eq(rideRequests.status, 'approved')
+        ));
+
+      const refundResults = [];
+      for (const request of allApprovedRequests) {
+        if (request.stripePaymentIntentId) {
+          try {
+            await stripe.paymentIntents.cancel(request.stripePaymentIntentId);
+            await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+            refundResults.push({
+              requestId: request.id,
+              passengerId: request.passengerId,
+              status: 'refunded'
+            });
+          } catch (error) {
+            console.error(`Failed to refund request ${request.id}:`, error);
+            refundResults.push({
+              requestId: request.id,
+              passengerId: request.passengerId,
+              status: 'refund_failed'
+            });
+          }
+        }
+      }
+
+      // Update all ride requests to cancelled
+      await db.update(rideRequests)
+        .set({ status: 'canceled' })
+        .where(eq(rideRequests.rideId, rideId));
+
+      const updatedStrikeCount = await storage.getUserCancellationStrikes(userId);
+
+      res.json({
+        success: true,
+        message: "Ride cancelled successfully",
+        penaltyApplied,
+        penaltyAmount: penaltyAmount / 100, // Convert back to dollars
+        strikeCount: updatedStrikeCount,
+        hoursUntilDeparture: Math.round(hoursUntilDeparture * 10) / 10,
+        refundsProcessed: refundResults.length,
+        refundResults
+      });
+
+    } catch (error: any) {
+      console.error("Error cancelling ride:", error);
+      res.status(500).json({ message: "Error cancelling ride: " + error.message });
+    }
+  });
+
+  // Get user's cancellation strike count
+  app.get("/api/users/strikes", authenticate, async (req, res) => {
+    try {
+      const strikeCount = await storage.getUserCancellationStrikes(req.user!.uid);
+      res.json({ strikeCount });
+    } catch (error: any) {
+      console.error("Error getting strike count:", error);
+      res.status(500).json({ message: "Error getting strike count: " + error.message });
+    }
+  });
+
   // Manual payment processing trigger
   app.post("/api/admin/process-payments", adminAuth, async (req, res) => {
     try {

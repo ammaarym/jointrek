@@ -16,6 +16,8 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   defaultPaymentMethodId: text("default_payment_method_id"),
   stripeConnectAccountId: text("stripe_connect_account_id"),
+  cancellationStrikeCount: integer("cancellation_strike_count").default(0).notNull(),
+  strikeResetDate: timestamp("strike_reset_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -49,6 +51,10 @@ export const rides = pgTable("rides", {
   startedAt: timestamp("started_at"),
   isCompleted: boolean("is_completed").default(false),
   verificationCode: text("verification_code"),
+  isCancelled: boolean("is_cancelled").default(false),
+  cancelledBy: text("cancelled_by"), // "driver" or "passenger"
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

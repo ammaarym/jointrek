@@ -1076,6 +1076,63 @@ export class PostgresStorage implements IStorage {
     return result.rows || [];
   }
 
+  async updateUserCancellationStrikes(userId: string): Promise<void> {
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Check if we need to reset strikes for the new month
+    const user = await this.getUserByFirebaseUid(userId);
+    if (!user) return;
+    
+    if (!user.strikeResetDate || new Date(user.strikeResetDate) < currentMonth) {
+      // Reset strikes for new month
+      await db.update(users)
+        .set({ 
+          cancellationStrikeCount: 1,
+          strikeResetDate: currentMonth
+        })
+        .where(eq(users.firebaseUid, userId));
+    } else {
+      // Increment existing strikes
+      await db.update(users)
+        .set({ 
+          cancellationStrikeCount: sql`${users.cancellationStrikeCount} + 1`
+        })
+        .where(eq(users.firebaseUid, userId));
+    }
+  }
+
+  async getUserCancellationStrikes(userId: string): Promise<number> {
+    const user = await this.getUserByFirebaseUid(userId);
+    if (!user) return 0;
+    
+    const now = new Date();
+    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // If no reset date or it's from a previous month, return 0
+    if (!user.strikeResetDate || new Date(user.strikeResetDate) < currentMonth) {
+      return 0;
+    }
+    
+    return user.cancellationStrikeCount || 0;
+  }
+
+  async cancelRide(rideId: number, cancelledBy: string, cancellationReason?: string): Promise<boolean> {
+    const cancelledAt = new Date();
+    
+    const result = await db.update(rides)
+      .set({
+        isCancelled: true,
+        cancelledBy,
+        cancelledAt,
+        cancellationReason
+      })
+      .where(eq(rides.id, rideId))
+      .returning();
+    
+    return result.length > 0;
+  }
+
   async getExpiredAuthorizedPayments(cutoffDate: Date): Promise<any[]> {
     // Get ride requests with authorized payments that need processing:
     // 1. Completed rides - capture payment

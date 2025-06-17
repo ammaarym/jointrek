@@ -617,7 +617,10 @@ export class PostgresStorage implements IStorage {
   async updateRideRequestStatus(requestId: number, status: string, driverId: string): Promise<RideRequest> {
     // First verify the request belongs to this driver
     const [request] = await db
-      .select()
+      .select({
+        rideRequest: rideRequests,
+        ride: rides
+      })
       .from(rideRequests)
       .innerJoin(rides, eq(rideRequests.rideId, rides.id))
       .where(and(
@@ -637,6 +640,29 @@ export class PostgresStorage implements IStorage {
       })
       .where(eq(rideRequests.id, requestId))
       .returning();
+
+    // Update baggage availability when status changes
+    if (status === 'approved') {
+      // Subtract passenger's baggage from ride availability
+      await db
+        .update(rides)
+        .set({
+          baggageCheckIn: sql`${rides.baggageCheckIn} - ${request.rideRequest.baggageCheckIn}`,
+          baggagePersonal: sql`${rides.baggagePersonal} - ${request.rideRequest.baggagePersonal}`
+        })
+        .where(eq(rides.id, request.rideRequest.rideId));
+    } else if (status === 'rejected' || status === 'cancelled') {
+      // If previously approved, add baggage back to availability
+      if (request.rideRequest.status === 'approved') {
+        await db
+          .update(rides)
+          .set({
+            baggageCheckIn: sql`${rides.baggageCheckIn} + ${request.rideRequest.baggageCheckIn}`,
+            baggagePersonal: sql`${rides.baggagePersonal} + ${request.rideRequest.baggagePersonal}`
+          })
+          .where(eq(rides.id, request.rideRequest.rideId));
+      }
+    }
 
     return updatedRequest;
   }

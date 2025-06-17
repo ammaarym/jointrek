@@ -553,11 +553,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Include SMS status in response for approved requests
+      // Handle SMS notifications for rejections
+      let rejectionSmsStatus = { sent: false, reason: 'Not applicable' };
+      if (status === "rejected") {
+        try {
+          // Get request details for SMS notification
+          const requestDetails = await storage.getRideRequestsForDriver(req.user!.uid);
+          const thisRequest = requestDetails.find(r => r.id === id);
+          
+          if (thisRequest) {
+            const rideDetails = await storage.getRide(thisRequest.rideId);
+            const passenger = await storage.getUserByFirebaseUid(thisRequest.passengerId);
+            const driver = await storage.getUserByFirebaseUid(req.user!.uid);
+            
+            if (passenger && passenger.phone && driver && rideDetails) {
+              const departureTime = new Date(rideDetails.departureTime).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              });
+
+              const smsSent = await twilioService.notifyPassengerOfRejection(
+                passenger.phone,
+                driver.displayName || driver.email.split('@')[0],
+                {
+                  origin: rideDetails.origin,
+                  destination: rideDetails.destination,
+                  departureTime: departureTime
+                }
+              );
+              
+              if (smsSent) {
+                rejectionSmsStatus = { sent: true, reason: `SMS sent to passenger ${passenger.displayName || passenger.email.split('@')[0]} at ${passenger.phone}` };
+                console.log(`SMS rejection notification sent to passenger ${passenger.email}`);
+              } else {
+                rejectionSmsStatus = { sent: false, reason: 'Failed to send SMS - Twilio error' };
+              }
+            } else if (!passenger) {
+              rejectionSmsStatus = { sent: false, reason: 'Passenger not found' };
+            } else if (!passenger.phone) {
+              rejectionSmsStatus = { sent: false, reason: 'Passenger has no phone number' };
+            } else {
+              rejectionSmsStatus = { sent: false, reason: 'Driver or ride data not found' };
+            }
+          } else {
+            rejectionSmsStatus = { sent: false, reason: 'Request data not found' };
+          }
+        } catch (smsError: any) {
+          console.error("Error sending SMS rejection notification:", smsError);
+          rejectionSmsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
+        }
+      }
+
+      // Include SMS status in response
       if (status === "approved") {
         res.json({
           ...updatedRequest,
           smsStatus: approvalSmsStatus || { sent: false, reason: 'SMS status not available' }
+        });
+      } else if (status === "rejected") {
+        res.json({
+          ...updatedRequest,
+          smsStatus: rejectionSmsStatus
         });
       } else {
         res.json(updatedRequest);

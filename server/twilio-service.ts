@@ -137,6 +137,22 @@ class TwilioService {
       message
     });
   }
+
+  // Send notification when a driver rejects a passenger's ride request
+  async notifyPassengerOfRejection(passengerPhone: string, driverName: string, rideDetails: {
+    origin: string;
+    destination: string;
+    departureTime: string;
+    reason?: string;
+  }): Promise<boolean> {
+    const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
+    const message = `❌ Your ride request was rejected by ${driverName}.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nLogin to Trek.com/rides to find another ride.`;
+    
+    return this.sendSMS({
+      to: passengerPhone,
+      message
+    });
+  }
 }
 
 export const twilioService = new TwilioService();

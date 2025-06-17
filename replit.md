@@ -97,6 +97,8 @@ DATABASE_URL
 - June 17, 2025: Fixed cleanup system - manually removed 8 old requests and ensured daily cleanup runs properly
 - June 17, 2025: Implemented complete ride cancellation SMS notifications - drivers and passengers now receive SMS alerts when rides are cancelled by either party
 - June 17, 2025: Fixed cancelled ride status display - cancelled rides now properly show as "CANCELLED" in requests and are removed from approved rides sections
+- June 17, 2025: Implemented dynamic baggage availability tracking - baggage allocations automatically update when passengers are approved/rejected/cancelled
+- June 17, 2025: Added SMS notifications for ride rejections - passengers receive text messages when drivers reject their requests with Trek login links
 
 ## User Preferences
 

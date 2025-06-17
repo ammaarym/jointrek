@@ -386,6 +386,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         smsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
       }
 
+      // Create notification for driver about new ride request
+      try {
+        const ride = await storage.getRide(rideRequest.rideId);
+        const passenger = await storage.getUserByFirebaseUid(req.user!.uid);
+        
+        if (ride && passenger) {
+          await storage.createNotification({
+            userId: ride.driverId,
+            type: 'ride_request',
+            title: 'New Ride Request',
+            message: `${passenger.displayName || passenger.email.split('@')[0]} requested to join your ride from ${ride.origin} to ${ride.destination}`,
+            rideId: ride.id,
+            requestId: rideRequest.id,
+            isRead: false
+          });
+        }
+      } catch (notificationError) {
+        console.error('Error creating ride request notification:', notificationError);
+      }
+
       res.status(201).json({
         ...rideRequest,
         smsStatus
@@ -551,6 +571,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error processing approved request:", error);
           // Don't fail the request if processing fails
         }
+
+        // Create notification for passenger about approval
+        try {
+          const rideRequest = await storage.getRideRequestById(id);
+          const ride = await storage.getRide(rideRequest.rideId);
+          
+          if (rideRequest && ride) {
+            await storage.createNotification({
+              userId: rideRequest.passengerId,
+              type: 'ride_approved',
+              title: 'Ride Request Approved',
+              message: `Your ride request from ${ride.origin} to ${ride.destination} has been approved!`,
+              rideId: ride.id,
+              requestId: id,
+              isRead: false
+            });
+          }
+        } catch (notificationError) {
+          console.error('Error creating approval notification:', notificationError);
+        }
       }
 
       // Handle SMS notifications for rejections
@@ -605,6 +645,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (smsError: any) {
           console.error("Error sending SMS rejection notification:", smsError);
           rejectionSmsStatus = { sent: false, reason: `SMS error: ${smsError?.message || 'Unknown error'}` };
+        }
+
+        // Create notification for passenger about rejection
+        try {
+          const rideRequest = await storage.getRideRequestById(id);
+          const ride = await storage.getRide(rideRequest.rideId);
+          
+          if (rideRequest && ride) {
+            await storage.createNotification({
+              userId: rideRequest.passengerId,
+              type: 'ride_rejected',
+              title: 'Ride Request Rejected',
+              message: `Your ride request from ${ride.origin} to ${ride.destination} was not accepted this time.`,
+              rideId: ride.id,
+              requestId: id,
+              isRead: false
+            });
+          }
+        } catch (notificationError) {
+          console.error('Error creating rejection notification:', notificationError);
         }
       }
 
@@ -1128,6 +1188,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (smsError) {
         console.error('Error sending SMS notification to cancelled passenger:', smsError);
+      }
+
+      // Create notification for cancelled passenger
+      try {
+        await storage.createNotification({
+          userId: rideRequest.passengerId,
+          type: 'ride_cancelled',
+          title: 'Ride Cancelled',
+          message: `You have been removed from the ride from ${ride.origin} to ${ride.destination}. ${reason ? `Reason: ${reason}` : ''}`,
+          rideId: ride.id,
+          requestId: requestId,
+          isRead: false
+        });
+      } catch (notificationError) {
+        console.error('Error creating cancellation notification:', notificationError);
       }
 
       res.json({

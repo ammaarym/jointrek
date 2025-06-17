@@ -76,12 +76,14 @@ async function processAutomaticPaymentCapture() {
               
               console.log(`Auto-captured payment for completed request ${request.id}`);
             } else {
-              // Check if ride should have started but didn't - cancel and refund
+              // Check different scenarios for refunding
               const currentTime = new Date();
               const departureTime = new Date(ride?.departureTime || '');
-              const timeSinceDeparture = currentTime.getTime() - departureTime.getTime();
+              const startedAt = ride?.startedAt ? new Date(ride.startedAt) : null;
               const twentyFourHours = 24 * 60 * 60 * 1000;
               
+              // Scenario 1: Ride should have started but didn't
+              const timeSinceDeparture = currentTime.getTime() - departureTime.getTime();
               if (timeSinceDeparture > twentyFourHours && !ride?.isStarted) {
                 console.log(`Auto-canceling approved request ${request.id} - ride didn't start within 24 hours of departure: ${request.stripePaymentIntentId}`);
                 
@@ -90,6 +92,19 @@ async function processAutomaticPaymentCapture() {
                 await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
                 
                 console.log(`Auto-canceled and refunded payment for non-started ride request ${request.id}`);
+              }
+              // Scenario 2: Ride started but wasn't completed within 24 hours
+              else if (ride?.isStarted && !ride?.isCompleted && startedAt) {
+                const timeSinceStart = currentTime.getTime() - startedAt.getTime();
+                if (timeSinceStart > twentyFourHours) {
+                  console.log(`Auto-canceling approved request ${request.id} - ride started but not completed within 24 hours: ${request.stripePaymentIntentId}`);
+                  
+                  await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+                  await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+                  await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+                  
+                  console.log(`Auto-canceled and refunded payment for incomplete ride request ${request.id}`);
+                }
               }
             }
           } else if (request.status === 'pending') {

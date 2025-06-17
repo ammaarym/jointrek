@@ -2125,6 +2125,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   
                   console.log(`Successfully canceled and refunded payment for non-started ride request ${request.id}`);
                 }
+                // Check if ride started but wasn't completed within 24 hours
+                else if (request.isStarted && !request.isCompleted && request.startedAt) {
+                  const startedAt = new Date(request.startedAt);
+                  const timeSinceStart = currentTime.getTime() - startedAt.getTime();
+                  
+                  if (timeSinceStart > twentyFourHours) {
+                    console.log(`Canceling approved request ${request.id} - ride started but not completed within 24 hours: ${request.stripePaymentIntentId}`);
+                    
+                    await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+                    await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+                    await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+                    
+                    results.push({
+                      requestId: request.id,
+                      action: 'canceled_and_refunded',
+                      paymentIntentId: request.stripePaymentIntentId,
+                      status: 'success',
+                      reason: 'ride_not_completed_on_time'
+                    });
+                    
+                    console.log(`Successfully canceled and refunded payment for incomplete ride request ${request.id}`);
+                  }
+                }
               }
             } else if (request.status === 'pending') {
               // Cancel and refund payment for unaccepted requests

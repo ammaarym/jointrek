@@ -1080,7 +1080,8 @@ export class PostgresStorage implements IStorage {
     // Get ride requests with authorized payments that need processing:
     // 1. Completed rides - capture payment
     // 2. Approved rides that didn't start within 24h of departure - cancel and refund
-    // 3. Pending requests older than 24h - cancel and refund
+    // 3. Started rides that weren't completed within 24h - cancel and refund
+    // 4. Pending requests older than 24h - cancel and refund
     const expiredPayments = await db
       .select({
         id: rideRequests.id,
@@ -1095,7 +1096,8 @@ export class PostgresStorage implements IStorage {
         driverId: rides.driverId,
         departureTime: rides.departureTime,
         isStarted: rides.isStarted,
-        isCompleted: rides.isCompleted
+        isCompleted: rides.isCompleted,
+        startedAt: rides.startedAt
       })
       .from(rideRequests)
       .innerJoin(rides, eq(rideRequests.rideId, rides.id))
@@ -1113,6 +1115,14 @@ export class PostgresStorage implements IStorage {
             eq(rideRequests.status, 'approved'),
             eq(rides.isStarted, false),
             lt(rides.departureTime, cutoffDate)
+          ),
+          // Started rides that weren't completed within 24h - cancel and refund
+          and(
+            eq(rideRequests.status, 'approved'),
+            eq(rides.isStarted, true),
+            eq(rides.isCompleted, false),
+            sql`${rides.startedAt} IS NOT NULL`,
+            lt(rides.startedAt, cutoffDate)
           ),
           // Pending requests older than 24 hours (unaccepted)
           and(

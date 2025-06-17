@@ -845,6 +845,22 @@ export default function MyRidesPostgres() {
                               {passenger.passengerPhone && (
                                 <div className="text-green-600">📞 {passenger.passengerPhone}</div>
                               )}
+                              {/* Show passenger baggage requirements */}
+                              {((passenger.baggageCheckIn || 0) > 0 || (passenger.baggagePersonal || 0) > 0) && (
+                                <div className="mt-1 flex items-center gap-1 text-xs">
+                                  <span className="text-green-600">Baggage:</span>
+                                  {(passenger.baggageCheckIn || 0) > 0 && (
+                                    <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs">
+                                      {passenger.baggageCheckIn} check-in
+                                    </span>
+                                  )}
+                                  {(passenger.baggagePersonal || 0) > 0 && (
+                                    <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs">
+                                      {passenger.baggagePersonal} personal
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             <Button
                               variant="outline"
@@ -1323,6 +1339,22 @@ export default function MyRidesPostgres() {
                                                   📞 {passenger.passengerPhone}
                                                 </div>
                                               )}
+                                              {/* Show passenger baggage requirements */}
+                                              {((passenger.baggageCheckIn || 0) > 0 || (passenger.baggagePersonal || 0) > 0) && (
+                                                <div className="mt-1 flex items-center gap-1 text-xs">
+                                                  <span className="text-blue-600">Baggage:</span>
+                                                  {(passenger.baggageCheckIn || 0) > 0 && (
+                                                    <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs">
+                                                      {passenger.baggageCheckIn} check-in
+                                                    </span>
+                                                  )}
+                                                  {(passenger.baggagePersonal || 0) > 0 && (
+                                                    <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs">
+                                                      {passenger.baggagePersonal} personal
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              )}
                                             </div>
                                             {!ride.isCompleted && !ride.isStarted && (
                                               <Button
@@ -1523,6 +1555,22 @@ export default function MyRidesPostgres() {
                                   <p className="text-sm text-muted-foreground">{request.passengerEmail}</p>
                                   {request.passengerPhone && (
                                     <p className="text-sm font-medium text-green-700">📞 {request.passengerPhone}</p>
+                                  )}
+                                  {/* Show passenger baggage requirements */}
+                                  {((request.baggageCheckIn || 0) > 0 || (request.baggagePersonal || 0) > 0) && (
+                                    <div className="mt-1 flex items-center gap-1 text-xs">
+                                      <span className="text-muted-foreground">Baggage needed:</span>
+                                      {(request.baggageCheckIn || 0) > 0 && (
+                                        <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
+                                          {request.baggageCheckIn} check-in
+                                        </span>
+                                      )}
+                                      {(request.baggagePersonal || 0) > 0 && (
+                                        <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs font-medium">
+                                          {request.baggagePersonal} personal
+                                        </span>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
                               </div>

@@ -202,6 +202,24 @@ export default function RideCard({
                   {ride.seatsLeft} of {ride.seatsTotal} seats available
                 </div>
 
+                {/* Baggage Information - compact display */}
+                {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+                  <div className="text-xs text-neutral-500 text-right mt-1">
+                    <div className="flex items-center justify-end space-x-2">
+                      <span>{ride.rideType === 'driver' ? 'Baggage space:' : 'Baggage needed:'}</span>
+                      {(ride.baggageCheckIn || 0) > 0 && (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">
+                          {ride.baggageCheckIn} check-in
+                        </span>
+                      )}
+                      {(ride.baggagePersonal || 0) > 0 && (
+                        <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">
+                          {ride.baggagePersonal} personal
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
               </div>
 

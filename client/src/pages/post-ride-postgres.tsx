@@ -115,6 +115,26 @@ export default function PostRidePostgres() {
   // Maximum seats for selected car
   const maxSeats = carMake && carModel ? getMaxSeatsForModel(carMake, carModel) : 8;
 
+  // Reset model and year when make changes
+  useEffect(() => {
+    setCarModel('');
+    setCarYear('');
+  }, [carMake]);
+
+  // Reset year when model changes
+  useEffect(() => {
+    setCarYear('');
+  }, [carModel]);
+
+  // Auto-update baggage capacity when car is selected
+  useEffect(() => {
+    if (carMake && carModel && rideType === 'driver') {
+      const capacity = getBaggageCapacity(carMake, carModel);
+      setBaggageCheckIn(capacity.checkIn.toString());
+      setBaggagePersonal(capacity.personal.toString());
+    }
+  }, [carMake, carModel, rideType]);
+
   
   // Auto-calculate price for all requests (COMMENTED OUT - NOW USING FREE MARKET PRICING)
   // useEffect(() => {
@@ -223,10 +243,10 @@ export default function PostRidePostgres() {
     
     // Additional validation for drivers
     if (rideType === 'driver') {
-      if (!availableSeats || !carModel) {
+      if (!availableSeats || !carMake || !carModel || !carYear) {
         toast({
           title: "Missing Information",
-          description: "Please fill in available seats and car model",
+          description: "Please fill in available seats, car make, model, and year",
           variant: "destructive"
         });
         setIsSubmitting(false);
@@ -281,7 +301,9 @@ export default function PostRidePostgres() {
         seatsLeft: rideType === 'passenger' ? 1 : parseInt(availableSeats),
         price: price,
         genderPreference,
+        carMake: carMake || null,
         carModel: carModel || null,
+        carYear: carYear ? parseInt(carYear) : null,
         baggageCheckIn: parseInt(baggageCheckIn) || 0,
         baggagePersonal: parseInt(baggagePersonal) || 0,
         rideType
@@ -435,7 +457,7 @@ export default function PostRidePostgres() {
               </div>
               
               {rideType === 'driver' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="availableSeats">
                       <FaUser className="inline mr-2" />
@@ -449,7 +471,7 @@ export default function PostRidePostgres() {
                         <SelectValue placeholder="Select available seats" />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                        {Array.from({length: maxSeats}, (_, i) => i + 1).map(num => (
                           <SelectItem key={num} value={num.toString()}>
                             {num}
                           </SelectItem>
@@ -457,19 +479,67 @@ export default function PostRidePostgres() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="carModel">Car Model (Required)</Label>
-                    <Select value={carModel} onValueChange={setCarModel}>
-                      <SelectTrigger id="carModel">
-                        <SelectValue placeholder="Select car type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="SUV">SUV</SelectItem>
-                        <SelectItem value="Sedan">Sedan</SelectItem>
-                        <SelectItem value="Truck">Truck</SelectItem>
-                        <SelectItem value="Minivan">Minivan</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  
+                  {/* Car Information */}
+                  <div className="border rounded-lg p-4">
+                    <h3 className="text-lg font-semibold mb-3">Vehicle Information (Required)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="carMake">Car Make</Label>
+                        <Select value={carMake} onValueChange={setCarMake}>
+                          <SelectTrigger id="carMake">
+                            <SelectValue placeholder="Select make" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CAR_MAKES.map(make => (
+                              <SelectItem key={make} value={make}>
+                                {make}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="carModel">Car Model</Label>
+                        <Select 
+                          value={carModel} 
+                          onValueChange={setCarModel}
+                          disabled={!carMake}
+                        >
+                          <SelectTrigger id="carModel">
+                            <SelectValue placeholder={carMake ? "Select model" : "Select make first"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableModels.map(model => (
+                              <SelectItem key={model} value={model}>
+                                {model}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="carYear">Year</Label>
+                        <Select 
+                          value={carYear} 
+                          onValueChange={setCarYear}
+                          disabled={!carModel}
+                        >
+                          <SelectTrigger id="carYear">
+                            <SelectValue placeholder={carModel ? "Select year" : "Select model first"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CAR_YEARS.map(year => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -477,16 +547,25 @@ export default function PostRidePostgres() {
               {/* Baggage Options */}
               <div className="space-y-4">
                 <div className="border rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3">Baggage Requirements</h3>
+                  <h3 className="text-lg font-semibold mb-3">
+                    {rideType === 'driver' ? 'Available Baggage Space' : 'Baggage Requirements'}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {rideType === 'driver' 
+                      ? 'How many bags can you accommodate in your vehicle?' 
+                      : 'How many bags will you be bringing?'}
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="baggageCheckIn">Check-in Bags (Heavy luggage)</Label>
+                      <Label htmlFor="baggageCheckIn">
+                        Check-in Bags {rideType === 'driver' ? '(Can accommodate)' : '(Bringing)'}
+                      </Label>
                       <Select value={baggageCheckIn} onValueChange={setBaggageCheckIn}>
                         <SelectTrigger id="baggageCheckIn">
                           <SelectValue placeholder="Number of check-in bags" />
                         </SelectTrigger>
                         <SelectContent>
-                          {[0, 1, 2, 3, 4, 5].map(num => (
+                          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                             <SelectItem key={num} value={num.toString()}>
                               {num} {num === 1 ? 'bag' : 'bags'}
                             </SelectItem>
@@ -496,13 +575,15 @@ export default function PostRidePostgres() {
                       <p className="text-xs text-gray-500">Large suitcases, duffel bags</p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="baggagePersonal">Personal Bags</Label>
+                      <Label htmlFor="baggagePersonal">
+                        Personal Bags {rideType === 'driver' ? '(Can accommodate)' : '(Bringing)'}
+                      </Label>
                       <Select value={baggagePersonal} onValueChange={setBaggagePersonal}>
                         <SelectTrigger id="baggagePersonal">
                           <SelectValue placeholder="Number of personal bags" />
                         </SelectTrigger>
                         <SelectContent>
-                          {[0, 1, 2, 3, 4, 5].map(num => (
+                          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                             <SelectItem key={num} value={num.toString()}>
                               {num} {num === 1 ? 'bag' : 'bags'}
                             </SelectItem>

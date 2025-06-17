@@ -484,12 +484,13 @@ export default function RideCard({
                 </div>
               </div>
 
-              {ride.carModel && ride.rideType === "driver" && (
+              {((ride.carMake || ride.carModel) && ride.rideType === "driver") && (
                 <div className="mt-3">
-                  <div className="text-neutral-500 text-sm">Car Model</div>
+                  <div className="text-neutral-500 text-sm">Vehicle</div>
                   <div className="font-medium">
-                    {ride.carModel?.charAt(0).toUpperCase() +
-                      ride.carModel?.slice(1)}
+                    {ride.carYear && `${ride.carYear} `}
+                    {ride.carMake && `${ride.carMake} `}
+                    {ride.carModel || ride.carModel?.charAt(0).toUpperCase() + ride.carModel?.slice(1)}
                   </div>
                 </div>
               )}

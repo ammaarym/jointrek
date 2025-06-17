@@ -1077,21 +1077,44 @@ export class PostgresStorage implements IStorage {
   }
 
   async getExpiredAuthorizedPayments(cutoffDate: Date): Promise<any[]> {
-    // Get approved ride requests for started rides older than 24 hours with authorized payments
+    // Get ride requests older than 24 hours with authorized payments that need processing:
+    // 1. Approved requests for started rides - capture payment
+    // 2. Pending requests - cancel and refund payment
     const expiredPayments = await db
-      .select()
+      .select({
+        id: rideRequests.id,
+        rideId: rideRequests.rideId,
+        passengerId: rideRequests.passengerId,
+        status: rideRequests.status,
+        message: rideRequests.message,
+        paymentStatus: rideRequests.paymentStatus,
+        stripePaymentIntentId: rideRequests.stripePaymentIntentId,
+        createdAt: rideRequests.createdAt,
+        updatedAt: rideRequests.updatedAt,
+        driverId: rides.driverId
+      })
       .from(rideRequests)
       .innerJoin(rides, eq(rideRequests.rideId, rides.id))
       .where(and(
-        eq(rideRequests.status, 'approved'),
         eq(rideRequests.paymentStatus, 'authorized'),
-        eq(rides.isStarted, true),
-        sql`${rides.startedAt} IS NOT NULL`,
-        lt(rides.startedAt, cutoffDate),
-        sql`${rideRequests.stripePaymentIntentId} IS NOT NULL`
+        sql`${rideRequests.stripePaymentIntentId} IS NOT NULL`,
+        or(
+          // Approved requests for started rides older than 24 hours
+          and(
+            eq(rideRequests.status, 'approved'),
+            eq(rides.isStarted, true),
+            sql`${rides.startedAt} IS NOT NULL`,
+            lt(rides.startedAt, cutoffDate)
+          ),
+          // Pending requests older than 24 hours (unaccepted)
+          and(
+            eq(rideRequests.status, 'pending'),
+            lt(rideRequests.createdAt, cutoffDate)
+          )
+        )
       ));
     
-    return expiredPayments.map(row => row.ride_requests);
+    return expiredPayments;
   }
 }
 

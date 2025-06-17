@@ -49,7 +49,7 @@ async function cleanupExpiredRides() {
   }
 }
 
-// Function to handle automatic payment capture after 24 hours
+// Function to handle automatic payment processing after 24 hours
 async function processAutomaticPaymentCapture() {
   try {
     const stripe = (await import('stripe')).default;
@@ -57,7 +57,6 @@ async function processAutomaticPaymentCapture() {
       apiVersion: '2025-05-28.basil',
     });
 
-    // Get approved ride requests older than 24 hours with authorized payments
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const expiredAuthorizations = await storage.getExpiredAuthorizedPayments(twentyFourHoursAgo);
     
@@ -66,22 +65,31 @@ async function processAutomaticPaymentCapture() {
     for (const request of expiredAuthorizations) {
       try {
         if (request.stripePaymentIntentId) {
-          console.log(`Auto-capturing expired payment for request ${request.id}: ${request.stripePaymentIntentId}`);
-          
-          // Capture the payment
-          await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
-          
-          // Update payment status
-          await storage.updateRideRequestPaymentStatus(request.id, 'captured');
-          
-          console.log(`Auto-captured payment for request ${request.id}`);
+          if (request.status === 'approved') {
+            // Capture payment for approved requests
+            console.log(`Auto-capturing payment for approved request ${request.id}: ${request.stripePaymentIntentId}`);
+            
+            await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
+            await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+            
+            console.log(`Auto-captured payment for request ${request.id}`);
+          } else if (request.status === 'pending') {
+            // Cancel and refund payment for unaccepted requests
+            console.log(`Auto-canceling unaccepted request ${request.id}: ${request.stripePaymentIntentId}`);
+            
+            await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+            await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+            await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+            
+            console.log(`Auto-canceled and refunded payment for unaccepted request ${request.id}`);
+          }
         }
       } catch (error: any) {
-        console.error(`Failed to auto-capture payment for request ${request.id}:`, error.message);
+        console.error(`Failed to process payment for request ${request.id}:`, error.message);
       }
     }
   } catch (error) {
-    console.error('Error during automatic payment capture:', error);
+    console.error('Error during automatic payment processing:', error);
   }
 }
 

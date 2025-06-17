@@ -2067,5 +2067,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual payment processing trigger
+  app.post("/api/admin/process-payments", adminAuth, async (req, res) => {
+    try {
+      const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2025-05-28.basil',
+      });
+
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const expiredAuthorizations = await storage.getExpiredAuthorizedPayments(twentyFourHoursAgo);
+      
+      console.log(`Processing ${expiredAuthorizations.length} expired payment authorizations`);
+      
+      const results = [];
+      
+      for (const request of expiredAuthorizations) {
+        try {
+          if (request.stripePaymentIntentId) {
+            if (request.status === 'approved') {
+              // Capture payment for approved requests
+              console.log(`Capturing payment for approved request ${request.id}: ${request.stripePaymentIntentId}`);
+              
+              await stripeInstance.paymentIntents.capture(request.stripePaymentIntentId);
+              await storage.updateRideRequestPaymentStatus(request.id, 'captured');
+              
+              results.push({
+                requestId: request.id,
+                action: 'captured',
+                paymentIntentId: request.stripePaymentIntentId,
+                status: 'success'
+              });
+              
+              console.log(`Successfully captured payment for request ${request.id}`);
+            } else if (request.status === 'pending') {
+              // Cancel and refund payment for unaccepted requests
+              console.log(`Canceling unaccepted request ${request.id}: ${request.stripePaymentIntentId}`);
+              
+              await stripeInstance.paymentIntents.cancel(request.stripePaymentIntentId);
+              await storage.updateRideRequestStatus(request.id, 'canceled', request.driverId || '');
+              await storage.updateRideRequestPaymentStatus(request.id, 'canceled');
+              
+              results.push({
+                requestId: request.id,
+                action: 'canceled_and_refunded',
+                paymentIntentId: request.stripePaymentIntentId,
+                status: 'success'
+              });
+              
+              console.log(`Successfully canceled and refunded payment for unaccepted request ${request.id}`);
+            }
+          }
+        } catch (error: any) {
+          console.error(`Failed to process payment for request ${request.id}:`, error.message);
+          results.push({
+            requestId: request.id,
+            action: request.status === 'approved' ? 'capture_failed' : 'cancel_failed',
+            paymentIntentId: request.stripePaymentIntentId,
+            status: 'error',
+            error: error.message
+          });
+        }
+      }
+
+      res.json({
+        message: `Processed ${expiredAuthorizations.length} payment authorizations`,
+        results
+      });
+    } catch (error) {
+      console.error("Admin payment processing error:", error);
+      res.status(500).json({ error: "Payment processing failed: " + (error as Error).message });
+    }
+  });
+
   return httpServer;
 }

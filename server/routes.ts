@@ -2270,6 +2270,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notification routes
+  app.get('/api/notifications', authenticate, async (req: Request, res: Response) => {
+    try {
+      const notifications = await storage.getUserNotifications(req.user!.uid);
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: 'Error fetching notifications' });
+    }
+  });
+
+  app.get('/api/notifications/unread-count', authenticate, async (req: Request, res: Response) => {
+    try {
+      const count = await storage.getUnreadNotificationCount(req.user!.uid);
+      res.json({ count });
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+      res.status(500).json({ count: 0 });
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', authenticate, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(id);
+      res.json(notification);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: 'Error marking notification as read' });
+    }
+  });
+
   // Admin middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

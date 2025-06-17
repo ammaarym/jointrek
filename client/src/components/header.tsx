@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import trekLogo from "@assets/treklogo1_1749600620192.png";
+import NotificationsBell from "@/components/notifications-bell";
 
 interface HeaderProps {
   onLogin: () => void;
@@ -115,8 +116,8 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               </Button>
             </Link>
 
-            {/* Help Button */}
-
+            {/* Notifications Bell - only show when logged in */}
+            {currentUser && <NotificationsBell />}
 
             {currentUser ? (
               <>

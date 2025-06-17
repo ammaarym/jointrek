@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MenuIcon, HelpCircle } from "lucide-react";
+import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import trekLogo from "@assets/treklogo1_1749600620192.png";
 
 interface HeaderProps {
@@ -103,6 +103,18 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Admin Button */}
+            <Link href="/admin-login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+              >
+                <Shield className="h-4 w-4" />
+                Admin
+              </Button>
+            </Link>
+
             {/* Help Button */}
 
 
@@ -198,6 +210,17 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               )}
 
 
+
+              {/* Mobile Admin Button */}
+              <Link href="/admin-login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600 w-full justify-start items-center gap-2 py-2 px-3"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin Access
+                </Button>
+              </Link>
 
               {/* Mobile Help Button */}
               <Dialog>

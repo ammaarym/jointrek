@@ -193,6 +193,19 @@ export default function MyRidesPostgres() {
         console.log('Approved rides loaded:', data);
         console.log('Passenger rides count:', data.filter(ride => ride.userRole === 'passenger').length);
         console.log('Driver rides count:', data.filter(ride => ride.userRole === 'driver').length);
+        
+        // Debug each passenger ride
+        data.filter(ride => ride.userRole === 'passenger').forEach(ride => {
+          console.log('Passenger ride details:', {
+            rideId: ride.rideId,
+            origin: ride.rideOrigin,
+            destination: ride.rideDestination,
+            isStarted: ride.isStarted,
+            isCompleted: ride.isCompleted,
+            shouldShowCancel: !ride.isStarted && !ride.isCompleted
+          });
+        });
+        
         setApprovedRides(data || []);
       }
     } catch (error) {

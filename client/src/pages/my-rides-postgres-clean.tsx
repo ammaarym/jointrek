@@ -1380,13 +1380,13 @@ export default function MyRidesPostgres() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      setRideToCancel(ride);
+                                      setRideToCancel({ ...ride, id: ride.rideId });
                                       setCancelDialogOpen(true);
                                     }}
                                     className="flex items-center gap-1 border-red-600 text-red-600 hover:bg-red-50"
                                   >
                                     <FaTrash className="w-4 h-4" />
-                                    Cancel Ride
+                                    Cancel Entire Ride
                                   </Button>
                                 </div>
                               )}

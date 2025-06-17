@@ -822,6 +822,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel ride with penalty system
+  app.post('/api/rides/:id/cancel', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.id);
+      const { cancellationReason } = req.body;
+      
+      if (isNaN(rideId)) {
+        return res.status(400).json({ message: "Invalid ride ID" });
+      }
+
+      // Get the ride
+      const ride = await storage.getRideById(rideId);
+      if (!ride) {
+        return res.status(404).json({ message: "Ride not found" });
+      }
+
+      // Check if ride is already completed or cancelled
+      if (ride.isCompleted || ride.cancelledBy) {
+        return res.status(400).json({ message: "Cannot cancel a completed or already cancelled ride" });
+      }
+
+      // Check if user is authorized to cancel (driver or approved passenger)
+      let userRole = '';
+      if (ride.driverId === req.user!.uid) {
+        userRole = 'driver';
+      } else {
+        // Check if user is an approved passenger
+        const approvedRequest = await db
+          .select()
+          .from(rideRequests)
+          .where(and(
+            eq(rideRequests.rideId, rideId),
+            eq(rideRequests.passengerId, req.user!.uid),
+            eq(rideRequests.status, 'approved')
+          ))
+          .limit(1);
+
+        if (approvedRequest.length === 0) {
+          return res.status(403).json({ message: "You are not authorized to cancel this ride" });
+        }
+        userRole = 'passenger';
+      }
+
+      // Cancel the ride using the storage method with penalty handling
+      const cancellationResult = await storage.cancelRide(rideId, req.user!.uid, cancellationReason);
+      
+      if (!cancellationResult) {
+        return res.status(500).json({ message: "Failed to cancel ride" });
+      }
+
+      // Get updated user strikes count
+      const userStrikes = await storage.getUserCancellationStrikes(req.user!.uid);
+
+      res.json({
+        message: "Ride cancelled successfully",
+        penaltyApplied: cancellationResult.penaltyApplied || false,
+        penaltyAmount: cancellationResult.penaltyAmount || 0,
+        strikeCount: userStrikes,
+        cancelled: true
+      });
+
+    } catch (error: any) {
+      console.error("Error cancelling ride:", error);
+      res.status(500).json({ message: error.message || "Failed to cancel ride" });
+    }
+  });
+
+  // Get user cancellation strikes
+  app.get('/api/users/:userId/strikes', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Ensure user can only access their own strikes data
+      if (userId !== req.user!.uid) {
+        return res.status(403).json({ message: "You can only access your own strikes data" });
+      }
+
+      const strikes = await storage.getUserCancellationStrikes(userId);
+      
+      res.json({ strikes });
+    } catch (error) {
+      console.error("Error getting user strikes:", error);
+      res.status(500).json({ message: "Failed to get user strikes" });
+    }
+  });
+
   // Generate start verification code for drivers to show passengers
   app.post('/api/rides/:id/generate-start-verification', authenticate, async (req: Request, res: Response) => {
     try {

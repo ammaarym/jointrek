@@ -199,21 +199,22 @@ export default function MyRidesPostgres() {
     }
   };
 
-  // Load user's strike count
+  // Load user strikes count
   const loadUserStrikes = async () => {
     if (!currentUser) return;
     
     try {
-      const response = await fetch('/api/users/strikes', {
+      const response = await fetch(`/api/users/${currentUser.uid}/strikes`, {
         headers: {
           'x-user-id': currentUser.uid,
           'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
         }
       });
       
       if (response.ok) {
         const data = await response.json();
-        setUserStrikes(data.strikeCount);
+        setUserStrikes(data.strikes || 0);
       }
     } catch (error) {
       console.error('Error loading user strikes:', error);
@@ -1745,6 +1746,111 @@ export default function MyRidesPostgres() {
             </Button>
             <Button onClick={handleSubmitReview} disabled={rating === 0} className="flex-1">
               Submit Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ride Cancellation Dialog with Penalty Warning */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Cancel Ride</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this ride? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {rideToCancel && (
+            <div className="space-y-4 py-4">
+              {/* Ride Details */}
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="text-sm font-medium">{rideToCancel.rideOrigin || rideToCancel.origin} → {rideToCancel.rideDestination || rideToCancel.destination}</div>
+                <div className="text-xs text-gray-600">
+                  {rideToCancel.rideDepartureTime ? 
+                    `${formatDate(new Date(rideToCancel.rideDepartureTime))} at ${new Date(rideToCancel.rideDepartureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}` :
+                    `${formatDate(new Date(rideToCancel.departureTime))} at ${new Date(rideToCancel.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
+                  }
+                </div>
+              </div>
+
+              {/* Penalty Warning */}
+              {(() => {
+                const departureTime = rideToCancel.rideDepartureTime || rideToCancel.departureTime;
+                const hoursUntilDeparture = calculateHoursUntilDeparture(departureTime);
+                const willHavePenalty = hoursUntilDeparture < 48 && userStrikes >= 1;
+                
+                if (hoursUntilDeparture < 48) {
+                  return (
+                    <div className={`p-3 rounded-lg border ${willHavePenalty ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                      <div className="flex items-start gap-2">
+                        <FaExclamationTriangle className={`w-5 h-5 mt-0.5 ${willHavePenalty ? 'text-red-600' : 'text-yellow-600'}`} />
+                        <div className="text-sm">
+                          <div className={`font-medium ${willHavePenalty ? 'text-red-800' : 'text-yellow-800'}`}>
+                            {willHavePenalty ? 'Penalty Will Apply' : 'Warning'}
+                          </div>
+                          <div className={willHavePenalty ? 'text-red-700' : 'text-yellow-700'}>
+                            {hoursUntilDeparture > 0 
+                              ? `Departure is in ${Math.round(hoursUntilDeparture)} hours (less than 48 hours).`
+                              : 'This ride has already departed.'
+                            }
+                          </div>
+                          {willHavePenalty && (
+                            <div className="text-red-700 mt-1">
+                              You have {userStrikes} strike(s). A 20% cancellation penalty will be charged.
+                            </div>
+                          )}
+                          {!willHavePenalty && hoursUntilDeparture < 48 && hoursUntilDeparture > 0 && (
+                            <div className="text-yellow-700 mt-1">
+                              This will count as your first strike. Future cancellations within 48 hours will incur a 20% penalty.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Cancellation Reason */}
+              <div className="space-y-2">
+                <Label htmlFor="cancellation-reason">Reason for cancellation (optional)</Label>
+                <textarea
+                  id="cancellation-reason"
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  placeholder="Let others know why you're cancelling..."
+                  className="w-full p-2 border rounded-md resize-none h-20 text-sm"
+                  maxLength={200}
+                />
+                <div className="text-xs text-gray-500 text-right">
+                  {cancellationReason.length}/200
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setCancelDialogOpen(false);
+                setRideToCancel(null);
+                setCancellationReason('');
+              }}
+              disabled={cancelling}
+              className="flex-1"
+            >
+              Keep Ride
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleCancelRide}
+              disabled={cancelling}
+              className="flex-1"
+            >
+              {cancelling ? "Cancelling..." : "Cancel Ride"}
             </Button>
           </DialogFooter>
         </DialogContent>

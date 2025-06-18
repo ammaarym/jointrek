@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting redirect authentication");
+      console.log("Opening authentication in new tab");
       
       // Clear existing auth state
       try {
@@ -158,21 +158,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Ignore errors
       }
       
-      // Clear storage
-      localStorage.clear();
-      sessionStorage.clear();
+      // Store current location to return to after auth
+      sessionStorage.setItem('pre_auth_location', window.location.pathname);
       
-      // Use Firebase's redirect authentication - no popups
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
-      });
-      provider.addScope('email');
-      provider.addScope('profile');
+      // Open auth page in new tab
+      const authTab = window.open('/auth-tab', '_blank', 'width=500,height=600,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
       
-      console.log("Redirecting to Google authentication");
-      await signInWithRedirect(auth, provider);
+      if (!authTab) {
+        console.log("New tab blocked, using redirect");
+        // Fallback to redirect if popup blocked
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          hd: 'ufl.edu'
+        });
+        provider.addScope('email');
+        provider.addScope('profile');
+        await signInWithRedirect(auth, provider);
+      } else {
+        console.log("Auth tab opened successfully");
+        
+        // Listen for auth completion
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          
+          if (event.data.type === 'AUTH_SUCCESS') {
+            console.log("Authentication successful");
+            authTab.close();
+            window.removeEventListener('message', handleMessage);
+            // Reload to update auth state
+            window.location.reload();
+          } else if (event.data.type === 'AUTH_ERROR') {
+            console.error("Authentication failed:", event.data.error);
+            authTab.close();
+            window.removeEventListener('message', handleMessage);
+          }
+        };
+        
+        window.addEventListener('message', handleMessage);
+        
+        // Clean up if tab is closed manually
+        const checkClosed = setInterval(() => {
+          if (authTab.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', handleMessage);
+            console.log("Auth tab closed manually");
+          }
+        }, 1000);
+      }
       
     } catch (error: any) {
       console.error("Authentication error:", error);

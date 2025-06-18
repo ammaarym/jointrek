@@ -8,6 +8,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
+import AuthTab from "@/pages/auth-tab";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 import RequestRidePage from "@/pages/request-ride";
@@ -134,6 +135,7 @@ function AppRoutes() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
+          <Route path="/auth-tab" component={AuthTab} />
           <Route path="/find-rides">
             {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" requiresContactInfo={true} />}
           </Route>

@@ -600,7 +600,7 @@ export default function PostRidePostgres() {
                 <div className="space-y-2">
                   <Label htmlFor="totalPrice" className="text-sm text-gray-600">
                     <FaMoneyBillWave className="inline mr-2" />
-                    Total Price ($5 - $50)
+                    {rideType === 'passenger' ? 'Price willing to pay ($5 - $50)' : 'Total Price ($5 - $50)'}
                   </Label>
                   <Input
                     id="totalPrice"
@@ -610,15 +610,19 @@ export default function PostRidePostgres() {
                     step="1"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Enter total price"
+                    placeholder={rideType === 'passenger' ? 'Enter price' : 'Enter total price'}
                     className="text-lg font-semibold"
                     required
                   />
                   <p className="text-xs text-gray-500">
-                    {price && availableSeats ? (
-                      <>Price per person: ${(parseFloat(price) / parseInt(availableSeats)).toFixed(2)}</>
+                    {rideType === 'passenger' ? (
+                      'Set the price you\'re willing to pay'
                     ) : (
-                      'Set your total trip price (will be divided by available seats)'
+                      price && availableSeats ? (
+                        <>Price per person: ${(parseFloat(price) / parseInt(availableSeats)).toFixed(2)}</>
+                      ) : (
+                        'Set your total trip price (will be divided by available seats)'
+                      )
                     )}
                   </p>
                 </div>

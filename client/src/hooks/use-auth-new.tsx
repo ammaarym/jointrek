@@ -149,66 +149,84 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting Google authentication with new tab");
+      console.log("Opening Google OAuth in new tab");
       
-      // Clear any existing auth state
+      // Clear existing auth state
       try {
         await firebaseSignOut(auth);
       } catch (e) {
-        // Ignore sign out errors
+        // Ignore errors
       }
       
-      // Clear storage to remove cached auth data
+      // Clear storage
       localStorage.clear();
       sessionStorage.clear();
       
-      // Create fresh provider
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
-      });
-      provider.addScope('email');
-      provider.addScope('profile');
+      // Build Google OAuth URL directly with Firebase client ID
+      const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      const clientId = `${projectId}.firebaseapp.com`;
+      const redirectUri = encodeURIComponent(`https://${projectId}.firebaseapp.com/__/auth/handler`);
+      const scope = encodeURIComponent('openid email profile');
+      const state = Math.random().toString(36).substring(2, 15);
       
-      // Open a new tab with authentication
-      const authUrl = window.location.origin + '/login?redirect=true';
-      const newTab = window.open(authUrl, '_blank', 'width=500,height=600,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
+      // Direct Google OAuth URL
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${redirectUri}&` +
+        `response_type=code&` +
+        `scope=${scope}&` +
+        `hd=ufl.edu&` +
+        `prompt=select_account&` +
+        `state=${state}`;
       
-      if (!newTab) {
-        // If popup blocked, redirect current tab
-        console.log("New tab blocked, redirecting current tab");
-        await signInWithRedirect(auth, provider);
+      console.log("Opening auth URL:", authUrl);
+      
+      // Open in new window with specific size
+      const authWindow = window.open(
+        authUrl, 
+        'google_auth',
+        'width=500,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes'
+      );
+      
+      if (!authWindow) {
+        console.log("Popup blocked, redirecting current tab");
+        // Fallback: redirect current tab
+        window.location.href = authUrl;
       } else {
-        console.log("Opened authentication in new tab");
+        console.log("Auth window opened successfully");
         
-        // Wait for auth completion in new tab
-        const checkClosed = setInterval(() => {
-          if (newTab.closed) {
-            clearInterval(checkClosed);
-            console.log("Auth tab closed");
-            // Check if user authenticated by refreshing current tab
-            setTimeout(() => {
-              window.location.reload();
-            }, 500);
+        // Monitor auth window
+        const checkAuth = setInterval(() => {
+          try {
+            if (authWindow.closed) {
+              clearInterval(checkAuth);
+              console.log("Auth window closed, checking auth state");
+              // Refresh to check auth state
+              setTimeout(() => window.location.reload(), 1000);
+            }
+            
+            // Try to detect successful redirect
+            if (authWindow.location && authWindow.location.href.includes('firebase')) {
+              clearInterval(checkAuth);
+              authWindow.close();
+              setTimeout(() => window.location.reload(), 1000);
+            }
+          } catch (e) {
+            // Cross-origin errors are expected during auth flow
           }
         }, 1000);
         
-        // Also monitor for successful auth by listening to storage events
-        const handleStorageChange = (e: StorageEvent) => {
-          if (e.key === 'auth_success' && e.newValue === 'true') {
-            clearInterval(checkClosed);
-            newTab.close();
-            localStorage.removeItem('auth_success');
-            window.removeEventListener('storage', handleStorageChange);
-            window.location.reload();
+        // Auto-close after 5 minutes
+        setTimeout(() => {
+          if (!authWindow.closed) {
+            authWindow.close();
+            clearInterval(checkAuth);
           }
-        };
-        window.addEventListener('storage', handleStorageChange);
+        }, 300000);
       }
       
     } catch (error: any) {
-      console.error("Error starting authentication:", error);
+      console.error("OAuth error:", error);
       throw error;
     }
   };

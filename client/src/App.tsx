@@ -122,7 +122,8 @@ function AppRoutes() {
 
   // This renders after successful login - redirect to profile page
   useEffect(() => {
-    if (currentUser && window.location.pathname === '/') {
+    if (currentUser && (window.location.pathname === '/' || window.location.pathname === '/login')) {
+      console.log("Redirecting authenticated user to profile");
       window.location.href = '/profile';
     }
   }, [currentUser]);

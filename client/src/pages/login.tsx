@@ -12,12 +12,7 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // If user is already logged in, redirect to profile
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/profile");
-    }
-  }, [currentUser, navigate]);
+  // Redirect logic is now handled in App.tsx to prevent conflicts
 
   const handleGoogleSignIn = async () => {
     try {

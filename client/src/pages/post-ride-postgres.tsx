@@ -683,9 +683,9 @@ export default function PostRidePostgres() {
             <Button
               type="submit"
               className="bg-primary hover:bg-primary/90 text-white"
-              disabled={loading || isSubmitting || (rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides)}
+              disabled={loading || isSubmitting || (rideType === 'driver' && driverStatus?.canAcceptRides === false)}
             >
-{(loading || isSubmitting) ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
+              {(loading || isSubmitting) ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
             </Button>
           </div>
         </form>

@@ -4,10 +4,9 @@ import {
   signOut as firebaseSignOut,
   getRedirectResult,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect
 } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 

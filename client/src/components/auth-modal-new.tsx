@@ -1,7 +1,7 @@
 import React from "react";
 import { CarTaxiFront, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth-new";
 import { toast } from "@/hooks/use-toast";
 import { FcGoogle } from "react-icons/fc";
 

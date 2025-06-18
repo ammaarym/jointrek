@@ -54,12 +54,12 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);
-      console.log("Starting Google redirect authentication for Replit production");
+      console.log("Replit: Starting Google redirect authentication with enhanced persistence");
       
-      // Set persistence before sign-in for better Replit compatibility
-      const { setPersistence, browserLocalPersistence } = await import("firebase/auth");
-      await setPersistence(auth, browserLocalPersistence);
-      console.log("Local persistence set for Replit compatibility");
+      // Configure Replit-specific persistence before sign-in
+      const { configureReplitPersistence } = await import("../lib/replit-auth-fix");
+      await configureReplitPersistence();
+      console.log("Replit: Enhanced persistence configured for authentication");
       
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
@@ -69,14 +69,18 @@ export default function Login() {
       provider.addScope('email');
       provider.addScope('profile');
 
-      // Store current URL to handle redirect properly
-      sessionStorage.setItem('authRedirectUrl', window.location.href);
-      console.log("Stored redirect URL for post-auth navigation");
+      // Store pre-auth state for better redirect handling
+      sessionStorage.setItem('trek_auth_in_progress', 'true');
+      sessionStorage.setItem('trek_auth_timestamp', Date.now().toString());
+      console.log("Replit: Auth state markers stored");
 
       await signInWithRedirect(auth, provider);
     } catch (error) {
-      console.error("Google sign-in error:", error);
+      console.error("Replit: Google sign-in error:", error);
       setIsSigningIn(false);
+      // Clear auth markers on error
+      sessionStorage.removeItem('trek_auth_in_progress');
+      sessionStorage.removeItem('trek_auth_timestamp');
     }
   };
 

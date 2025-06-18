@@ -141,8 +141,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = async (): Promise<void> => {
     try {
+      console.log("Replit: Starting complete sign out process");
+      
       // Clear Firebase auth state
       await firebaseSignOut(auth);
+      
+      // Clear Replit-specific auth storage
+      clearReplitAuthState();
       
       // Clear React Query cache
       queryClient.clear();
@@ -164,7 +169,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       });
       
-      console.log("Complete sign out performed");
+      console.log("Replit: Complete sign out performed, redirecting to home");
+      // Force redirect to home page after sign out
+      setTimeout(() => {
+        window.location.replace('/');
+      }, 100);
     } catch (error) {
       console.error("Error signing out:", error);
       throw error;

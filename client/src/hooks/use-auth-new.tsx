@@ -41,7 +41,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log("Initializing Firebase authentication");
     
     const initAuth = async () => {
-      // Check for redirect result first
+      // Check for existing auth state first
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        console.log("Found existing authenticated user:", currentUser.email);
+      }
+      
+      // Check for redirect result
       try {
         console.log("Checking for redirect result...");
         const result = await getRedirectResult(auth);
@@ -62,6 +68,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (user && user.email) {
           if (isUFEmail(user.email)) {
             console.log("ALLOWING ACCESS - Valid UF email:", user.email);
+            console.log("Setting currentUser state to:", user.email);
             setCurrentUser(user);
             
             // Sync user with PostgreSQL
@@ -103,6 +110,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setCurrentUser(null);
         }
         
+        console.log("Auth processing complete, setting loading to false");
         setLoading(false);
       });
 

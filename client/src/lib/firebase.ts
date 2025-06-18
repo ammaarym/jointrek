@@ -35,6 +35,18 @@ try {
 // Initialize Firebase services
 export const auth = getAuth(app);
 
+// Configure auth persistence and settings
+import { setPersistence, browserLocalPersistence } from "firebase/auth";
+
+// Set auth persistence to local storage for session persistence
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Firebase auth persistence set to local storage");
+  })
+  .catch((error) => {
+    console.error("Error setting auth persistence:", error);
+  });
+
 // Configure auth to use redirect flow only
 auth.settings.appVerificationDisabledForTesting = false;
 

@@ -30,7 +30,9 @@ interface HeaderProps {
 export default function Header({ onLogin, onSignup }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location, navigate] = useLocation();
-  const { currentUser, signOut } = useAuth();
+  const { currentUser, signOut, loading } = useAuth();
+
+  // Remove debug logging - authentication working properly
 
   // Check if current user is an admin
   const isAdmin = currentUser && (

@@ -35,18 +35,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
+  // Handle redirect result immediately on app load
   useEffect(() => {
-    console.log("Setting up auth state listener");
-    
-    const handleAuthState = async (user: User | null) => {
-      console.log("Auth state changed:", user?.email || "no user");
-      
-      // Always check for redirect result on app startup
+    const handleRedirectResult = async () => {
       try {
+        console.log("Checking for redirect result...");
         const result = await getRedirectResult(auth);
         if (result) {
           console.log("Processing redirect result for:", result.user.email);
-          // The result.user will be processed below through the normal flow
+          // User will be handled by the auth state listener
+        } else {
+          console.log("No redirect result found");
         }
       } catch (error: any) {
         console.error("Error processing redirect result:", error);
@@ -60,6 +59,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.error("Domain not authorized for authentication");
         }
       }
+    };
+
+    handleRedirectResult();
+  }, []);
+
+  useEffect(() => {
+    console.log("Setting up auth state listener");
+    
+    const handleAuthState = async (user: User | null) => {
+      console.log("Auth state changed:", user?.email || "no user");
       
       if (user && user.email && isUFEmail(user.email)) {
         console.log("ALLOWING ACCESS - Contact info validated successfully");

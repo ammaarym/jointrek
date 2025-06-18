@@ -4,7 +4,9 @@ import {
   signOut as firebaseSignOut,
   getRedirectResult,
   GoogleAuthProvider,
-  signInWithRedirect
+  signInWithRedirect,
+  setPersistence,
+  browserSessionPersistence
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
@@ -35,17 +37,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
-  // Handle redirect result immediately on app load
+  // Handle redirect result immediately on app load - MUST run before onAuthStateChanged
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
-        console.log("Checking for redirect result...");
+        console.log("Checking for redirect result immediately on mount...");
         const result = await getRedirectResult(auth);
         if (result) {
-          console.log("Processing redirect result for:", result.user.email);
-          // User will be handled by the auth state listener
+          console.log("SUCCESS: Processing redirect result for:", result.user.email);
+          console.log("User authenticated successfully via redirect");
+          // Don't set user here - let onAuthStateChanged handle it
         } else {
-          console.log("No redirect result found");
+          console.log("No redirect result found - normal app load");
         }
       } catch (error: any) {
         console.error("Error processing redirect result:", error);
@@ -70,46 +73,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleAuthState = async (user: User | null) => {
       console.log("Auth state changed:", user?.email || "no user");
       
-      if (user && user.email && isUFEmail(user.email)) {
-        console.log("ALLOWING ACCESS - Contact info validated successfully");
-        setCurrentUser(user);
-        
-        // Sync user with PostgreSQL
-        try {
-          const userData = {
-            firebaseUid: user.uid,
-            email: user.email,
-            displayName: user.displayName || "Anonymous User",
-            photoUrl: user.photoURL,
-            emailVerified: user.emailVerified
-          };
+      if (user && user.email) {
+        if (isUFEmail(user.email)) {
+          console.log("ALLOWING ACCESS - Valid UF email:", user.email);
+          setCurrentUser(user);
+          
+          // Sync user with PostgreSQL
+          try {
+            const userData = {
+              firebaseUid: user.uid,
+              email: user.email,
+              displayName: user.displayName || "Anonymous User",
+              photoUrl: user.photoURL,
+              emailVerified: user.emailVerified
+            };
 
-          const response = await fetch(`/api/users/firebase/${user.uid}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          if (response.ok) {
-            console.log("User already exists in PostgreSQL");
-          } else if (response.status === 404) {
-            // Create new user
-            await fetch('/api/users', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(userData)
+            const response = await fetch(`/api/users/firebase/${user.uid}`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
             });
-            console.log("Created new user in PostgreSQL");
+
+            if (response.ok) {
+              console.log("User already exists in PostgreSQL");
+            } else if (response.status === 404) {
+              // Create new user
+              await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+              });
+              console.log("Created new user in PostgreSQL");
+            }
+          } catch (error) {
+            console.error("Error syncing user with PostgreSQL:", error);
           }
-        } catch (error) {
-          console.error("Error syncing user with PostgreSQL:", error);
+        } else {
+          // ONLY sign out if email is clearly invalid (non-UF)
+          console.log("BLOCKING ACCESS - Invalid email domain:", user.email);
+          await firebaseSignOut(auth);
+          setCurrentUser(null);
+          alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
         }
-      } else if (user && user.email && !isUFEmail(user.email)) {
-        // Non-UF email - sign out and show error
-        console.log("BLOCKING ACCESS - Non-UF email detected:", user.email);
-        await firebaseSignOut(auth);
-        setCurrentUser(null);
-        alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
       } else {
+        // No user or no email - normal sign out state
+        console.log("No authenticated user");
         setCurrentUser(null);
       }
       
@@ -158,14 +165,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting Google authentication");
+      console.log("Starting Google authentication with session persistence");
       
-      // Clear existing auth state
-      try {
-        await firebaseSignOut(auth);
-      } catch (e) {
-        // Ignore errors
-      }
+      // Set persistence to session before authentication
+      await setPersistence(auth, browserSessionPersistence);
+      console.log("Session persistence set successfully");
       
       // Create provider and redirect directly
       const provider = new GoogleAuthProvider();

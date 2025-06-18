@@ -8,11 +8,17 @@ import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 export default function Login() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Redirect logic is now handled in App.tsx to prevent conflicts
+  // Navigate to profile once auth is complete and user is loaded
+  useEffect(() => {
+    if (!loading && currentUser) {
+      console.log("Login page: Auth complete, navigating to profile");
+      navigate('/profile');
+    }
+  }, [currentUser, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     try {

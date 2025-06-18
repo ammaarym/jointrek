@@ -120,13 +120,16 @@ function AppRoutes() {
     window.location.href = '/login';
   };
 
+  // Use Wouter for navigation instead of window.location.href
+  const [, setLocation] = useLocation();
+  
   // This renders after successful login - redirect to profile page
   useEffect(() => {
-    if (currentUser && (window.location.pathname === '/' || window.location.pathname === '/login')) {
-      console.log("Redirecting authenticated user to profile");
-      window.location.href = '/profile';
+    if (!loading && currentUser && (window.location.pathname === '/' || window.location.pathname === '/login')) {
+      console.log("Redirecting authenticated user to profile with Wouter");
+      setLocation('/profile');
     }
-  }, [currentUser]);
+  }, [currentUser, loading, setLocation]);
 
   return (
     <div className="min-h-screen flex flex-col">

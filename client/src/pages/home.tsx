@@ -10,9 +10,8 @@ export default function Home() {
 
   // Redirect authenticated users to profile (avoid redirect loops)
   useEffect(() => {
-    if (!loading && currentUser) {
-      console.log("Home page: Authenticated user detected, redirecting to profile");
-      // Use replace to avoid adding to browser history
+    if (!loading && currentUser && window.location.pathname === '/') {
+      console.log("Home page: Authenticated user on home, redirecting to profile");
       window.location.replace('/profile');
     }
   }, [currentUser, loading]);

@@ -56,11 +56,6 @@ export default function Login() {
       setIsSigningIn(true);
       console.log("Starting Google redirect authentication");
       
-      // Set persistence to browserSessionPersistence before sign-in
-      const { setPersistence, browserSessionPersistence } = await import("firebase/auth");
-      await setPersistence(auth, browserSessionPersistence);
-      console.log("Session persistence set to browserSessionPersistence");
-      
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
         prompt: 'select_account',
@@ -69,8 +64,6 @@ export default function Login() {
       provider.addScope('email');
       provider.addScope('profile');
 
-      // Use signInWithRedirect for better compatibility
-      console.log("Initiating signInWithRedirect...");
       await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Google sign-in error:", error);

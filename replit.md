@@ -106,6 +106,7 @@ DATABASE_URL
 - June 17, 2025: Enhanced baggage labeling - drivers now see "Available Baggage Space" vs passengers see "Baggage Requirements" with intelligent capacity suggestions based on vehicle type
 - June 17, 2025: Added comprehensive baggage information display - baggage requirements/availability now visible on all ride cards, passenger cards, and ride management interfaces with color-coded badges
 - June 17, 2025: Fixed critical baggage data bug - resolved database column mapping issue where snake_case columns weren't being converted to camelCase in API responses, ensuring baggage badges display properly
+- June 17, 2025: Restricted admin access - admin button now only visible for specific authorized emails (adnansanaulla@ufl.edu and ammaar.mohammed@ufl.edu)
 
 ## User Preferences
 

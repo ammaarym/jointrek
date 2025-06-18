@@ -32,6 +32,12 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
   const [location, navigate] = useLocation();
   const { currentUser, signOut } = useAuth();
 
+  // Check if current user is an admin
+  const isAdmin = currentUser && (
+    currentUser.email === 'adnansanaulla@ufl.edu' || 
+    currentUser.email === 'ammaar.mohammed@ufl.edu'
+  );
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -104,17 +110,19 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Admin Button */}
-            <Link href="/admin-login">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
-              >
-                <Shield className="h-4 w-4" />
-                Admin
-              </Button>
-            </Link>
+            {/* Admin Button - only show for specific admin emails */}
+            {isAdmin && (
+              <Link href="/admin-login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
 
             {/* Notifications Bell - only show when logged in */}
             {currentUser && <NotificationsBell />}
@@ -212,16 +220,18 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
 
 
 
-              {/* Mobile Admin Button */}
-              <Link href="/admin-login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button
-                  variant="outline"
-                  className="bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600 w-full justify-start items-center gap-2 py-2 px-3"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin Access
-                </Button>
-              </Link>
+              {/* Mobile Admin Button - only show for specific admin emails */}
+              {isAdmin && (
+                <Link href="/admin-login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button
+                    variant="outline"
+                    className="bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600 w-full justify-start items-center gap-2 py-2 px-3"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin Access
+                  </Button>
+                </Link>
+              )}
 
               {/* Mobile Help Button */}
               <Dialog>

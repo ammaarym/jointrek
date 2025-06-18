@@ -4,11 +4,24 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth-new";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Login() {
-  const { currentUser, signInWithGoogle } = useAuth();
+  const { currentUser } = useAuth();
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // Check if this page was opened for authentication
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAuthFlow = urlParams.get('auth') === 'true';
+    
+    if (isAuthFlow && !currentUser) {
+      // Auto-trigger authentication when opened in new tab
+      handleAutoAuth();
+    }
+  }, []);
 
   // If user is already logged in, redirect to profile
   useEffect(() => {
@@ -17,12 +30,40 @@ export default function Login() {
     }
   }, [currentUser, navigate]);
 
+  const handleAutoAuth = async () => {
+    try {
+      setIsSigningIn(true);
+      console.log("Auto-triggering authentication in new tab");
+      
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      await signInWithRedirect(auth, provider);
+    } catch (error) {
+      console.error("Auto auth error:", error);
+      setIsSigningIn(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);
-      console.log("Starting Google sign-in with redirect");
-      await signInWithGoogle();
-      // The page will redirect automatically, so we don't need to reset loading state
+      console.log("Starting Google redirect authentication");
+      
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Google sign-in error:", error);
       setIsSigningIn(false);
@@ -84,7 +125,7 @@ export default function Login() {
         {isSigningIn && (
           <Alert className="mt-4">
             <AlertDescription className="text-center">
-              You'll be redirected to Google to sign in with your UF email. This avoids popup blocking issues.
+              Redirecting to Google for authentication in this tab...
             </AlertDescription>
           </Alert>
         )}

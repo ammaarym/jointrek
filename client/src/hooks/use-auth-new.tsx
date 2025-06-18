@@ -149,40 +149,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting Google sign-in with redirect - no popups");
+      console.log("Opening authentication in new tab");
       
-      // Force clear all auth state
+      // Clear auth state
       try {
         await firebaseSignOut(auth);
       } catch (e) {
-        // Ignore signout errors
+        // Ignore errors
       }
       
-      // Clear all storage completely
+      // Clear storage
       localStorage.clear();
       sessionStorage.clear();
       
-      // Create a completely fresh provider instance
-      const provider = new GoogleAuthProvider();
+      // Open login page in new tab - it will handle authentication
+      const newTab = window.open('/login?auth=true', '_blank');
       
-      // Force account selection and ensure redirect behavior
-      provider.setCustomParameters({
-        prompt: 'select_account consent',
-        hd: 'ufl.edu',
-        access_type: 'online',
-        response_type: 'code',
-        include_granted_scopes: 'false'
-      });
-      
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      // Force redirect - this will never open a popup
-      console.log("Forcing browser redirect to Google");
-      await signInWithRedirect(auth, provider);
+      if (!newTab) {
+        // If new tab blocked, fallback to current tab redirect
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account',
+          hd: 'ufl.edu'
+        });
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        console.log("New tab blocked, using redirect");
+        await signInWithRedirect(auth, provider);
+      } else {
+        console.log("Opened authentication in new tab");
+      }
       
     } catch (error: any) {
-      console.error("Error starting redirect authentication:", error);
+      console.error("Error starting authentication:", error);
       throw error;
     }
   };

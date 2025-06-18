@@ -38,24 +38,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Auth state changed:", user?.email);
+    
+    const handleAuthState = async (user: User | null) => {
+      console.log("Auth state changed:", user?.email || "no user");
+      
+      // Always check for redirect result on app startup
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Processing redirect result for:", result.user.email);
+          // The result.user will be processed below through the normal flow
+        }
+      } catch (error: any) {
+        console.error("Error processing redirect result:", error);
+        
+        // Handle specific errors from redirect
+        if (error.code === 'auth/account-selection-required') {
+          console.log("User needs to select account");
+        } else if (error.code === 'auth/popup-blocked') {
+          console.log("Popup was blocked, but redirect should work");
+        } else if (error.code === 'auth/unauthorized-domain') {
+          console.error("Domain not authorized for authentication");
+        }
+      }
       
       if (user && user.email && isUFEmail(user.email)) {
-        // Check for redirect result
-        console.log("Checking for redirect result...");
-        try {
-          const result = await getRedirectResult(auth);
-          console.log("Redirect result received:", result ? "result found" : "no result");
-          if (result) {
-            console.log("Processing redirect result");
-          } else {
-            console.log("No redirect result found");
-          }
-        } catch (error) {
-          console.error("Error getting redirect result:", error);
-        }
-
+        console.log("ALLOWING ACCESS - Contact info validated successfully");
         setCurrentUser(user);
         
         // Sync user with PostgreSQL
@@ -87,13 +95,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error) {
           console.error("Error syncing user with PostgreSQL:", error);
         }
+      } else if (user && user.email && !isUFEmail(user.email)) {
+        // Non-UF email - sign out and show error
+        console.log("BLOCKING ACCESS - Non-UF email detected:", user.email);
+        await firebaseSignOut(auth);
+        setCurrentUser(null);
+        alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
       } else {
         setCurrentUser(null);
       }
       
       setLoading(false);
-    });
+    };
 
+    const unsubscribe = onAuthStateChanged(auth, handleAuthState);
     return unsubscribe;
   }, []);
 
@@ -135,91 +150,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("DEBUG: Starting comprehensive authentication cleanup");
+      console.log("Starting Google sign-in with redirect");
       
-      // First, check current auth state
-      console.log("DEBUG: Current user before cleanup:", auth.currentUser?.email || "null");
-      
-      // Always sign out first to clear any cached credentials
-      console.log("DEBUG: Signing out from Firebase");
+      // Clear any existing auth state
       await firebaseSignOut(auth);
       
-      // Verify sign out completed
-      console.log("DEBUG: Current user after signOut:", auth.currentUser?.email || "null");
-      
-      // Clear all Firebase-related storage with debugging
-      console.log("DEBUG: Clearing localStorage items");
-      const localStorageItems = Object.keys(localStorage);
-      console.log("DEBUG: localStorage keys before cleanup:", localStorageItems);
-      localStorageItems.forEach(key => {
+      // Clear Firebase-related storage
+      Object.keys(localStorage).forEach(key => {
         if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
-          console.log("DEBUG: Removing localStorage key:", key);
           localStorage.removeItem(key);
         }
       });
       
-      console.log("DEBUG: Clearing sessionStorage items");
-      const sessionStorageItems = Object.keys(sessionStorage);
-      console.log("DEBUG: sessionStorage keys before cleanup:", sessionStorageItems);
-      sessionStorageItems.forEach(key => {
+      Object.keys(sessionStorage).forEach(key => {
         if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
-          console.log("DEBUG: Removing sessionStorage key:", key);
           sessionStorage.removeItem(key);
         }
       });
       
-      // Clear any Google OAuth related cookies by setting them to expire
-      console.log("DEBUG: Attempting to clear Google OAuth cookies");
-      document.cookie = "oauth_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.google.com";
-      document.cookie = "oauth_code_verifier=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.google.com";
-      document.cookie = "session_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.accounts.google.com";
-      
-      // Wait longer for cleanup to complete
-      console.log("DEBUG: Waiting for cleanup to complete...");
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Create a completely fresh provider instance with maximum forcing
-      console.log("DEBUG: Creating fresh GoogleAuthProvider");
-      const freshProvider = new GoogleAuthProvider();
-      freshProvider.setCustomParameters({
-        prompt: 'select_account consent',
-        hd: 'ufl.edu',
-        access_type: 'online',
-        include_granted_scopes: 'false',
-        login_hint: '', // Clear any login hints
-        authuser: '-1' // Force fresh authentication
+      // Create fresh provider for redirect
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
       });
-      freshProvider.addScope('email');
-      freshProvider.addScope('profile');
+      provider.addScope('email');
+      provider.addScope('profile');
       
-      console.log("DEBUG: Provider configuration created");
-      
-      // Try popup-based authentication with enhanced error handling
-      console.log("DEBUG: Attempting signInWithPopup with enhanced configuration");
-      try {
-        const result = await signInWithPopup(auth, freshProvider);
-        console.log("DEBUG: Popup sign-in successful:", result.user.email);
-        console.log("DEBUG: User UID:", result.user.uid);
-      } catch (popupError: any) {
-        console.log("DEBUG: Popup failed, trying alternative approach:", popupError.code);
-        
-        // If popup fails due to blocked popup or other issues, throw a helpful error
-        if (popupError.code === 'auth/popup-blocked' || 
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.code === 'auth/cancelled-popup-request') {
-          
-          throw new Error("ACCOUNT_SWITCHING_ISSUE: To switch UFL accounts, the authentication system is automatically using cached credentials. Please follow these steps:\n\n1. Sign out from Trek completely\n2. Open a new private/incognito browser window\n3. Go to accounts.google.com and sign out of all accounts\n4. Go to login.ufl.edu and sign out\n5. Return to Trek in the private window and sign in with your desired UFL account\n\nThis ensures both Google and UF authentication systems don't use cached credentials.");
-        }
-        
-        // For other errors, re-throw the original error
-        throw popupError;
-      }
+      // Use redirect instead of popup to avoid blocking
+      console.log("Redirecting to Google for authentication");
+      await signInWithRedirect(auth, provider);
       
     } catch (error: any) {
-      console.error("DEBUG: Error signing in with Google:", error);
-      console.error("DEBUG: Error code:", error.code);
-      console.error("DEBUG: Error message:", error.message);
-      console.error("DEBUG: Full error object:", error);
+      console.error("Error starting Google sign-in:", error);
       throw error;
     }
   };

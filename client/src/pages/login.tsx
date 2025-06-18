@@ -12,56 +12,12 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Check if this page was opened for authentication
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isRedirectFlow = urlParams.get('redirect') === 'true';
-    
-    if (isRedirectFlow && !currentUser) {
-      // Auto-trigger authentication when opened in new tab
-      handleAutoAuth();
-    }
-  }, []);
-
-  // If user is already logged in, handle redirect or signal success
+  // If user is already logged in, redirect to profile
   useEffect(() => {
     if (currentUser) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isRedirectFlow = urlParams.get('redirect') === 'true';
-      
-      if (isRedirectFlow) {
-        // Signal successful authentication to parent tab
-        localStorage.setItem('auth_success', 'true');
-        // Close this tab after a brief delay
-        setTimeout(() => {
-          window.close();
-        }, 1000);
-      } else {
-        // Normal navigation to profile
-        navigate("/profile");
-      }
+      navigate("/profile");
     }
   }, [currentUser, navigate]);
-
-  const handleAutoAuth = async () => {
-    try {
-      setIsSigningIn(true);
-      console.log("Auto-triggering authentication in new tab");
-      
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
-      });
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error("Auto auth error:", error);
-      setIsSigningIn(false);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -138,7 +94,7 @@ export default function Login() {
         {isSigningIn && (
           <Alert className="mt-4">
             <AlertDescription className="text-center">
-              Redirecting to Google for authentication in this tab...
+              Redirecting to Google for authentication...
             </AlertDescription>
           </Alert>
         )}

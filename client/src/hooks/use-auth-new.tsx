@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Opening Google OAuth in new tab");
+      console.log("Starting redirect authentication");
       
       // Clear existing auth state
       try {
@@ -162,71 +162,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.clear();
       sessionStorage.clear();
       
-      // Build Google OAuth URL directly with Firebase client ID
-      const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
-      const clientId = `${projectId}.firebaseapp.com`;
-      const redirectUri = encodeURIComponent(`https://${projectId}.firebaseapp.com/__/auth/handler`);
-      const scope = encodeURIComponent('openid email profile');
-      const state = Math.random().toString(36).substring(2, 15);
+      // Use Firebase's redirect authentication - no popups
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
       
-      // Direct Google OAuth URL
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${redirectUri}&` +
-        `response_type=code&` +
-        `scope=${scope}&` +
-        `hd=ufl.edu&` +
-        `prompt=select_account&` +
-        `state=${state}`;
-      
-      console.log("Opening auth URL:", authUrl);
-      
-      // Open in new window with specific size
-      const authWindow = window.open(
-        authUrl, 
-        'google_auth',
-        'width=500,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes'
-      );
-      
-      if (!authWindow) {
-        console.log("Popup blocked, redirecting current tab");
-        // Fallback: redirect current tab
-        window.location.href = authUrl;
-      } else {
-        console.log("Auth window opened successfully");
-        
-        // Monitor auth window
-        const checkAuth = setInterval(() => {
-          try {
-            if (authWindow.closed) {
-              clearInterval(checkAuth);
-              console.log("Auth window closed, checking auth state");
-              // Refresh to check auth state
-              setTimeout(() => window.location.reload(), 1000);
-            }
-            
-            // Try to detect successful redirect
-            if (authWindow.location && authWindow.location.href.includes('firebase')) {
-              clearInterval(checkAuth);
-              authWindow.close();
-              setTimeout(() => window.location.reload(), 1000);
-            }
-          } catch (e) {
-            // Cross-origin errors are expected during auth flow
-          }
-        }, 1000);
-        
-        // Auto-close after 5 minutes
-        setTimeout(() => {
-          if (!authWindow.closed) {
-            authWindow.close();
-            clearInterval(checkAuth);
-          }
-        }, 300000);
-      }
+      console.log("Redirecting to Google authentication");
+      await signInWithRedirect(auth, provider);
       
     } catch (error: any) {
-      console.error("OAuth error:", error);
+      console.error("Authentication error:", error);
       throw error;
     }
   };

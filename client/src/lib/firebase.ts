@@ -34,18 +34,9 @@ try {
 
 // Initialize Firebase services
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
 
-// Configure Google provider for UF email authentication
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
-
-// Set custom parameters to force account selection and clear cache
-googleProvider.setCustomParameters({
-  prompt: 'select_account consent',
-  hd: 'ufl.edu', // This hints Google to show UF accounts first, but doesn't restrict
-  access_type: 'online'
-});
+// Configure auth to use redirect flow only
+auth.settings.appVerificationDisabledForTesting = false;
 
 // Get firestore database reference with improved caching
 import { enableIndexedDbPersistence, initializeFirestore, persistentLocalCache, CACHE_SIZE_UNLIMITED } from "firebase/firestore";

@@ -149,39 +149,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting Google sign-in with redirect");
+      console.log("Starting Google sign-in with redirect - no popups");
       
-      // Clear any existing auth state
-      await firebaseSignOut(auth);
+      // Force clear all auth state
+      try {
+        await firebaseSignOut(auth);
+      } catch (e) {
+        // Ignore signout errors
+      }
       
-      // Clear Firebase-related storage
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
-          localStorage.removeItem(key);
-        }
-      });
+      // Clear all storage completely
+      localStorage.clear();
+      sessionStorage.clear();
       
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('firebase:') || key.includes('firebase') || key.includes('auth') || key.includes('google')) {
-          sessionStorage.removeItem(key);
-        }
-      });
-      
-      // Create fresh provider for redirect
+      // Create a completely fresh provider instance
       const provider = new GoogleAuthProvider();
+      
+      // Force account selection and ensure redirect behavior
       provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
+        prompt: 'select_account consent',
+        hd: 'ufl.edu',
+        access_type: 'online',
+        response_type: 'code',
+        include_granted_scopes: 'false'
       });
+      
       provider.addScope('email');
       provider.addScope('profile');
       
-      // Use redirect instead of popup to avoid blocking
-      console.log("Redirecting to Google for authentication");
+      // Force redirect - this will never open a popup
+      console.log("Forcing browser redirect to Google");
       await signInWithRedirect(auth, provider);
       
     } catch (error: any) {
-      console.error("Error starting Google sign-in:", error);
+      console.error("Error starting redirect authentication:", error);
       throw error;
     }
   };

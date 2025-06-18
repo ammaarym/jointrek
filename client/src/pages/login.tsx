@@ -16,10 +16,14 @@ export default function Login() {
   // Navigate to profile once auth is complete and user is loaded
   useEffect(() => {
     if (!loading && currentUser && !hasRedirected) {
-      console.log("Login page: Auth complete, forcing redirect to profile");
+      console.log("Login page: Authenticated user detected, redirecting to profile");
       setHasRedirected(true);
-      // Use direct window navigation to avoid Wouter conflicts
-      window.location.replace('/profile');
+      
+      // Use a small delay to ensure auth state is fully settled
+      setTimeout(() => {
+        console.log("Executing redirect to /profile");
+        window.location.replace('/profile');
+      }, 100);
     }
   }, [currentUser, loading, hasRedirected]);
 
@@ -52,14 +56,21 @@ export default function Login() {
       setIsSigningIn(true);
       console.log("Starting Google redirect authentication");
       
+      // Set persistence to browserSessionPersistence before sign-in
+      const { setPersistence, browserSessionPersistence } = await import("firebase/auth");
+      await setPersistence(auth, browserSessionPersistence);
+      console.log("Session persistence set to browserSessionPersistence");
+      
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
         prompt: 'select_account',
-        hd: 'ufl.edu'
+        hd: 'ufl.edu'  // Restrict to UF domain
       });
       provider.addScope('email');
       provider.addScope('profile');
-      
+
+      // Use signInWithRedirect for better compatibility
+      console.log("Initiating signInWithRedirect...");
       await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Google sign-in error:", error);

@@ -39,36 +39,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     console.log("Initializing Firebase authentication");
+    let authUnsubscribe: (() => void) | null = null;
     
     const initAuth = async () => {
-      // Check for existing auth state first
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        console.log("Found existing authenticated user:", currentUser.email);
-      }
-      
-      // Check for redirect result
+      // First, handle any pending redirect result
       try {
         console.log("Checking for redirect result...");
         const result = await getRedirectResult(auth);
-        if (result) {
+        if (result && result.user) {
           console.log("SUCCESS: Processing redirect result for:", result.user.email);
+          // The onAuthStateChanged listener will handle the user state update
         } else {
           console.log("No redirect result found");
         }
       } catch (error: any) {
         console.error("Error processing redirect result:", error);
+        setLoading(false);
+        return;
       }
 
       // Set up auth state listener
-      const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+      authUnsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
         console.log("Auth state changed:", user?.email || "no user");
         console.log("Current path:", window.location.pathname);
         
         if (user && user.email) {
           if (isUFEmail(user.email)) {
             console.log("ALLOWING ACCESS - Valid UF email:", user.email);
-            console.log("Setting currentUser state to:", user.email);
             setCurrentUser(user);
             
             // Sync user with PostgreSQL
@@ -110,17 +107,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setCurrentUser(null);
         }
         
-        console.log("Auth processing complete, setting loading to false");
         setLoading(false);
       });
-
-      return unsubscribe;
     };
 
-    const unsubscribe = initAuth();
+    initAuth();
+
+    // Cleanup function
     return () => {
-      if (unsubscribe) {
-        unsubscribe.then(unsub => unsub());
+      if (authUnsubscribe) {
+        authUnsubscribe();
       }
     };
   }, []);

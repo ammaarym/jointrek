@@ -36,12 +36,12 @@ try {
 export const auth = getAuth(app);
 
 // Configure auth persistence and settings
-import { setPersistence, browserLocalPersistence } from "firebase/auth";
+import { setPersistence, browserSessionPersistence } from "firebase/auth";
 
-// Set auth persistence to local storage for session persistence
-setPersistence(auth, browserLocalPersistence)
+// Set auth persistence to session storage for better security
+setPersistence(auth, browserSessionPersistence)
   .then(() => {
-    console.log("Firebase auth persistence set to local storage");
+    console.log("Firebase auth persistence set to session storage");
   })
   .catch((error) => {
     console.error("Error setting auth persistence:", error);

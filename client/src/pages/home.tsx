@@ -8,11 +8,12 @@ export default function Home() {
   const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
 
-  // Redirect authenticated users to profile
+  // Redirect authenticated users to profile (avoid redirect loops)
   useEffect(() => {
     if (!loading && currentUser) {
       console.log("Home page: Authenticated user detected, redirecting to profile");
-      window.location.href = '/profile';
+      // Use replace to avoid adding to browser history
+      window.location.replace('/profile');
     }
   }, [currentUser, loading]);
 

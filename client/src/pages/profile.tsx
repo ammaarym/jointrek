@@ -707,15 +707,27 @@ export default function Profile() {
                 </div>
               </div>
 
-              <Button
-                onClick={openDashboard}
-                disabled={isLoadingDashboard}
-                variant="outline"
-                className="w-full"
-              >
-                <DollarSign className="w-4 h-4 mr-2" />
-                {isLoadingDashboard ? "Loading..." : "Manage Driver Account"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={openDashboard}
+                  disabled={isLoadingDashboard}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  {isLoadingDashboard ? "Loading..." : "Manage Account"}
+                </Button>
+                
+                <Button
+                  onClick={startOnboarding}
+                  disabled={isOnboarding}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <FaEdit className="w-4 h-4 mr-2" />
+                  {isOnboarding ? "Updating..." : "Modify Setup"}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

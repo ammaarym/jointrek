@@ -344,6 +344,15 @@ export default function DriverOnboard() {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      onClick={startOnboarding}
+                      disabled={isOnboarding}
+                      className="w-full"
+                    >
+                      {isOnboarding ? "Updating..." : "Modify Setup"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
                       onClick={deleteDriverAccount}
                       disabled={isLoading}
                       className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"

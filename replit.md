@@ -108,6 +108,7 @@ DATABASE_URL
 - June 17, 2025: Fixed critical baggage data bug - resolved database column mapping issue where snake_case columns weren't being converted to camelCase in API responses, ensuring baggage badges display properly
 - June 17, 2025: Restricted admin access - admin button now only visible for specific authorized emails (adnansanaulla@ufl.edu and ammaar.mohammed@ufl.edu)
 - June 17, 2025: Added driver setup modification options - drivers can now modify their account setup, access Stripe dashboard, or completely delete their driver account for flexibility
+- June 18, 2025: Fixed popup blocking authentication issues - simplified to redirect-only authentication to eliminate browser popup blocking problems in production environment
 
 ## User Preferences
 

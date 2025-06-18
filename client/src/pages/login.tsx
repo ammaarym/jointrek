@@ -20,6 +20,18 @@ export default function Login() {
     }
   }, [currentUser, loading, navigate]);
 
+  // If user is already authenticated, show loading and redirect
+  if (currentUser && !loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);

@@ -15,18 +15,31 @@ export default function Login() {
   // Check if this page was opened for authentication
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const isAuthFlow = urlParams.get('auth') === 'true';
+    const isRedirectFlow = urlParams.get('redirect') === 'true';
     
-    if (isAuthFlow && !currentUser) {
+    if (isRedirectFlow && !currentUser) {
       // Auto-trigger authentication when opened in new tab
       handleAutoAuth();
     }
   }, []);
 
-  // If user is already logged in, redirect to profile
+  // If user is already logged in, handle redirect or signal success
   useEffect(() => {
     if (currentUser) {
-      navigate("/profile");
+      const urlParams = new URLSearchParams(window.location.search);
+      const isRedirectFlow = urlParams.get('redirect') === 'true';
+      
+      if (isRedirectFlow) {
+        // Signal successful authentication to parent tab
+        localStorage.setItem('auth_success', 'true');
+        // Close this tab after a brief delay
+        setTimeout(() => {
+          window.close();
+        }, 1000);
+      } else {
+        // Normal navigation to profile
+        navigate("/profile");
+      }
     }
   }, [currentUser, navigate]);
 

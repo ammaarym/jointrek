@@ -149,36 +149,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Opening authentication in new tab");
+      console.log("Starting Google authentication with new tab");
       
-      // Clear auth state
+      // Clear any existing auth state
       try {
         await firebaseSignOut(auth);
       } catch (e) {
-        // Ignore errors
+        // Ignore sign out errors
       }
       
-      // Clear storage
+      // Clear storage to remove cached auth data
       localStorage.clear();
       sessionStorage.clear();
       
-      // Open login page in new tab - it will handle authentication
-      const newTab = window.open('/login?auth=true', '_blank');
+      // Create fresh provider
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      // Open a new tab with authentication
+      const authUrl = window.location.origin + '/login?redirect=true';
+      const newTab = window.open(authUrl, '_blank', 'width=500,height=600,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
       
       if (!newTab) {
-        // If new tab blocked, fallback to current tab redirect
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({
-          prompt: 'select_account',
-          hd: 'ufl.edu'
-        });
-        provider.addScope('email');
-        provider.addScope('profile');
-        
-        console.log("New tab blocked, using redirect");
+        // If popup blocked, redirect current tab
+        console.log("New tab blocked, redirecting current tab");
         await signInWithRedirect(auth, provider);
       } else {
         console.log("Opened authentication in new tab");
+        
+        // Wait for auth completion in new tab
+        const checkClosed = setInterval(() => {
+          if (newTab.closed) {
+            clearInterval(checkClosed);
+            console.log("Auth tab closed");
+            // Check if user authenticated by refreshing current tab
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          }
+        }, 1000);
+        
+        // Also monitor for successful auth by listening to storage events
+        const handleStorageChange = (e: StorageEvent) => {
+          if (e.key === 'auth_success' && e.newValue === 'true') {
+            clearInterval(checkClosed);
+            newTab.close();
+            localStorage.removeItem('auth_success');
+            window.removeEventListener('storage', handleStorageChange);
+            window.location.reload();
+          }
+        };
+        window.addEventListener('storage', handleStorageChange);
       }
       
     } catch (error: any) {

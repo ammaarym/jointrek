@@ -38,22 +38,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("Setting up Firebase authentication");
+    console.log("Initializing Firebase authentication for Replit environment");
+    let unsubscribe: (() => void) | null = null;
     
-    // Handle redirect result first
+    // Enhanced redirect result handling for Replit production
     getRedirectResult(auth)
       .then((result) => {
         if (result && result.user) {
-          console.log("SUCCESS: Processing redirect result for:", result.user.email);
+          console.log("SUCCESS: Redirect authentication completed for:", result.user.email);
+          
+          // Verify UF email domain immediately
+          if (!result.user.email || !isUFEmail(result.user.email)) {
+            console.log("BLOCKING - Non-UF email from redirect:", result.user.email || "no email");
+            firebaseSignOut(auth);
+            alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
+            setLoading(false);
+            return;
+          }
+          
+          // Navigate to profile after successful redirect authentication
+          console.log("Redirecting authenticated user to profile page");
+          setTimeout(() => {
+            window.location.replace('/profile');
+          }, 100);
+        } else {
+          console.log("No redirect result - checking existing auth state");
         }
       })
       .catch((error) => {
         console.error("Error processing redirect result:", error);
+        setLoading(false);
       });
 
     // Set up auth state listener
-    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+    unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       console.log("Auth state changed:", user?.email || "no user");
+      console.log("Current URL:", window.location.href);
       
       if (user && user.email) {
         if (isUFEmail(user.email)) {
@@ -95,14 +115,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
         }
       } else {
-        console.log("No authenticated user");
+        console.log("No authenticated user found");
         setCurrentUser(null);
       }
       
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const isUFEmail = (email: string): boolean => {

@@ -54,7 +54,12 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);
-      console.log("Starting Google redirect authentication");
+      console.log("Starting Google redirect authentication for Replit production");
+      
+      // Set persistence before sign-in for better Replit compatibility
+      const { setPersistence, browserLocalPersistence } = await import("firebase/auth");
+      await setPersistence(auth, browserLocalPersistence);
+      console.log("Local persistence set for Replit compatibility");
       
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
@@ -63,6 +68,10 @@ export default function Login() {
       });
       provider.addScope('email');
       provider.addScope('profile');
+
+      // Store current URL to handle redirect properly
+      sessionStorage.setItem('authRedirectUrl', window.location.href);
+      console.log("Stored redirect URL for post-auth navigation");
 
       await signInWithRedirect(auth, provider);
     } catch (error) {

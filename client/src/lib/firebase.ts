@@ -35,7 +35,17 @@ try {
 // Initialize Firebase services
 export const auth = getAuth(app);
 
-// Auth persistence will be set in login component before sign-in
+// Configure auth persistence for Replit production environment
+import { setPersistence, browserLocalPersistence, connectAuthEmulator } from "firebase/auth";
+
+// Set persistence to local storage for better Replit compatibility
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Firebase auth persistence set to local storage for Replit compatibility");
+  })
+  .catch((error) => {
+    console.error("Error setting auth persistence:", error);
+  });
 
 // Configure auth to use redirect flow only
 auth.settings.appVerificationDisabledForTesting = false;

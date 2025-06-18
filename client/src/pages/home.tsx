@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CarTaxiFront, User, MapPin, Shield, Lock, Check, LogIn, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth-new";
 
 export default function Home() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
+
+  // Redirect authenticated users to profile
+  useEffect(() => {
+    if (!loading && currentUser) {
+      console.log("Home page: Authenticated user detected, redirecting to profile");
+      window.location.href = '/profile';
+    }
+  }, [currentUser, loading]);
 
   const handleLogin = () => {
     navigate("/login");

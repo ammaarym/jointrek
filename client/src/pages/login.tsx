@@ -11,17 +11,32 @@ export default function Login() {
   const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   // Navigate to profile once auth is complete and user is loaded
   useEffect(() => {
-    if (!loading && currentUser) {
-      console.log("Login page: Auth complete, navigating to profile");
-      navigate('/profile');
+    if (!loading && currentUser && !hasRedirected) {
+      console.log("Login page: Auth complete, forcing redirect to profile");
+      setHasRedirected(true);
+      // Use direct window navigation to avoid Wouter conflicts
+      window.location.replace('/profile');
     }
-  }, [currentUser, loading, navigate]);
+  }, [currentUser, loading, hasRedirected]);
+
+  // Show loading while authentication state is being determined
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If user is already authenticated, show loading and redirect
-  if (currentUser && !loading) {
+  if (currentUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

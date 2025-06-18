@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Set up auth state listener
       const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
         console.log("Auth state changed:", user?.email || "no user");
+        console.log("Current path:", window.location.pathname);
         
         if (user && user.email) {
           if (isUFEmail(user.email)) {

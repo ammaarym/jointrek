@@ -395,13 +395,13 @@ export default function FindRidesPostgres() {
                     genderFilter
                   });
                 }}
-                className={`flex-1 px-2 py-3 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'departures'
                     ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                From Gainesville
+                From
               </button>
               <button
                 onClick={() => {
@@ -417,13 +417,13 @@ export default function FindRidesPostgres() {
                     genderFilter
                   });
                 }}
-                className={`flex-1 px-2 py-3 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
                   quickFilter === 'arrivals'
                     ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                To Gainesville
+                To
               </button>
             </div>
           </div>

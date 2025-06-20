@@ -2406,16 +2406,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
-      // Create notification for the passenger
-      await storage.createNotification({
-        userId: ride.driverId, // This is the passenger who posted the ride request
-        type: 'driver_offer',
-        title: 'New Driver Offer',
-        message: `${driverUser.displayName} offered to drive you for $${price}`,
-        relatedId: offer.id,
-        isRead: false
-      });
-
       // Get passenger info and send SMS notification
       const ride = await storage.getRideById(passengerRideId);
       if (ride) {
@@ -2446,6 +2436,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             
             console.log(`SMS notification sent to passenger ${passenger.email} at ${passenger.phone}`);
+            
+            // Create notification for the passenger
+            try {
+              await storage.createNotification({
+                userId: ride.driverId, // This is the passenger who posted the ride request
+                type: 'driver_offer',
+                title: 'New Driver Offer',
+                message: `${formattedDriverName} offered to drive you for $${price}`,
+                rideId: passengerRideId,
+                isRead: false
+              });
+              console.log(`Notification created for passenger ${passenger.email}`);
+            } catch (notifError) {
+              console.error('Error creating notification:', notifError);
+            }
           } catch (smsError) {
             console.error('Error sending SMS notification:', smsError);
             // Don't fail the offer creation if SMS fails

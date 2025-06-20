@@ -321,6 +321,43 @@ export default function MyRidesPostgres() {
     }
   };
 
+  // Handle driver offer response
+  const handleDriverOfferResponse = async (offerId: number, action: 'accepted' | 'rejected') => {
+    if (!currentUser) return;
+
+    try {
+      const response = await fetch(`/api/driver-offers/${offerId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({ status: action })
+      });
+
+      if (response.ok) {
+        toast({
+          title: action === 'accepted' ? "Offer Accepted" : "Offer Declined",
+          description: `The driver offer has been ${action}.`,
+        });
+        // Refresh the offers
+        loadDriverOffers();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to ${action} offer`);
+      }
+    } catch (error: any) {
+      console.error(`Error ${action} offer:`, error);
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${action} offer. Please try again.`,
+        variant: "destructive",
+      });
+    }
+  };
+
   // Generate verification code
   const generateVerificationCode = async ({ id }: { id: number }) => {
     if (!currentUser) return;
@@ -1075,11 +1112,13 @@ export default function MyRidesPostgres() {
             <span>Ride Requests</span>
             {(() => {
               const pendingCount = rideRequests.filter(req => req.status === 'pending').length;
+              const pendingOffers = driverOffers.filter(offer => offer.status === 'pending').length;
+              const totalPending = pendingCount + pendingOffers;
               console.log('Ride requests with statuses:', rideRequests.map(req => ({ id: req.id, status: req.status })));
-              console.log('Pending requests count:', pendingCount, 'Total requests:', rideRequests.length);
-              return pendingCount > 0 ? (
+              console.log('Pending requests count:', pendingCount, 'Driver offers:', pendingOffers, 'Total:', totalPending);
+              return totalPending > 0 ? (
                 <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg ring-2 ring-yellow-300">
-                  {pendingCount}
+                  {totalPending}
                 </span>
               ) : null;
             })()}
@@ -1666,6 +1705,88 @@ export default function MyRidesPostgres() {
                     </div>
                   )}
                 </div>
+
+                {/* Driver Offers Section */}
+                {driverOffers.length > 0 && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <FaCar className="w-5 h-5" />
+                      Driver Offers ({driverOffers.length})
+                    </h2>
+                    <div className="space-y-4">
+                      {driverOffers.map((offer) => (
+                        <Card key={offer.id} className={`p-6 ${
+                          offer.status === 'accepted' ? 'border-green-200 bg-green-50' : 
+                          offer.status === 'rejected' ? 'border-red-200 bg-red-50' :
+                          'border-blue-200 bg-blue-50'
+                        }`}>
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                  offer.status === 'accepted' ? 'bg-green-100' : 
+                                  offer.status === 'rejected' ? 'bg-red-100' :
+                                  'bg-blue-100'
+                                }`}>
+                                  <FaCar className={`w-6 h-6 ${
+                                    offer.status === 'accepted' ? 'text-green-600' : 
+                                    offer.status === 'rejected' ? 'text-red-600' :
+                                    'text-blue-600'
+                                  }`} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold text-lg">{offer.driverName}</h3>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                      offer.status === 'accepted' ? 'bg-green-600 text-white' : 
+                                      offer.status === 'rejected' ? 'bg-red-600 text-white' :
+                                      'bg-blue-100 text-blue-800'
+                                    }`}>
+                                      ${offer.price}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">{offer.driverEmail}</p>
+                                </div>
+                              </div>
+                              
+                              {offer.message && (
+                                <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                                  <p className="text-sm italic">"{offer.message}"</p>
+                                </div>
+                              )}
+                              
+                              <div className="text-xs text-muted-foreground">
+                                Offered {formatDate(new Date(offer.createdAt))}
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-2">
+                              {offer.status === 'pending' && (
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDriverOfferResponse(offer.id, 'rejected')}
+                                    className="border-red-300 text-red-600 hover:bg-red-50"
+                                  >
+                                    Decline
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleDriverOfferResponse(offer.id, 'accepted')}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    Accept
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Outgoing requests (from user) */}
                 <div>

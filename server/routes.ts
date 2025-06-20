@@ -2406,6 +2406,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
+      // Create notification for the passenger
+      await storage.createNotification({
+        userId: ride.driverId, // This is the passenger who posted the ride request
+        type: 'driver_offer',
+        title: 'New Driver Offer',
+        message: `${driverUser.displayName} offered to drive you for $${price}`,
+        relatedId: offer.id,
+        isRead: false
+      });
+
       // Get passenger info and send SMS notification
       const ride = await storage.getRideById(passengerRideId);
       if (ride) {
@@ -2464,6 +2474,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching driver offers:', error);
       res.status(500).json({ message: 'Failed to fetch driver offers' });
+    }
+  });
+
+  app.get('/api/driver-offers/for-user', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Get all driver offers for rides posted by this user
+      const userRides = await storage.getRidesByDriver(userId);
+      const allOffers = [];
+      
+      for (const ride of userRides) {
+        const offers = await storage.getDriverOffersForRide(ride.id);
+        allOffers.push(...offers);
+      }
+
+      res.json(allOffers);
+    } catch (error) {
+      console.error('Error fetching user driver offers:', error);
+      res.status(500).json({ message: 'Failed to fetch driver offers' });
+    }
+  });
+
+  app.patch('/api/driver-offers/:id/status', authenticate, async (req: Request, res: Response) => {
+    try {
+      const offerId = parseInt(req.params.id);
+      const { status } = req.body;
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const updatedOffer = await storage.updateDriverOfferStatus(offerId, status, userId);
+      res.json(updatedOffer);
+    } catch (error) {
+      console.error('Error updating driver offer status:', error);
+      res.status(500).json({ message: 'Failed to update driver offer status' });
     }
   });
 

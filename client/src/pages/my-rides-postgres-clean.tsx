@@ -88,6 +88,10 @@ export default function MyRidesPostgres() {
   const [approvedRides, setApprovedRides] = useState<any[]>([]);
   const [approvedRidesLoading, setApprovedRidesLoading] = useState(false);
   
+  // Driver offers state
+  const [driverOffers, setDriverOffers] = useState<any[]>([]);
+  const [driverOffersLoading, setDriverOffersLoading] = useState(false);
+  
   // My Posts sub-tab state
   const [myPostsTab, setMyPostsTab] = useState('driver');
   
@@ -242,6 +246,32 @@ export default function MyRidesPostgres() {
     }
   };
 
+  // Load driver offers for user's ride requests
+  const loadDriverOffers = async () => {
+    if (!currentUser) return;
+    
+    setDriverOffersLoading(true);
+    try {
+      const response = await fetch('/api/driver-offers/for-user', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Driver offers loaded:', data);
+        setDriverOffers(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading driver offers:', error);
+    } finally {
+      setDriverOffersLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       loadMyRides(currentUser.uid);
@@ -249,6 +279,7 @@ export default function MyRidesPostgres() {
       loadPendingRequests();
       loadApprovedRides();
       loadUserStrikes();
+      loadDriverOffers();
     }
   }, [currentUser]);
 

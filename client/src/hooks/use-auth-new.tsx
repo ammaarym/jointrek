@@ -5,6 +5,7 @@ import {
   getRedirectResult,
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithPopup,
   setPersistence,
   browserSessionPersistence
 } from 'firebase/auth';
@@ -282,9 +283,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       provider.addScope('email');
       provider.addScope('profile');
       
-      console.log("🔄 [SIGN IN] Opening Google authentication popup...");
+      console.log("🔄 [SIGN IN] Attempting popup authentication...");
       
-      // Use direct Firebase popup
+      // Check if popup can be opened
+      const testPopup = window.open('', '_blank', 'width=1,height=1');
+      if (!testPopup || testPopup.closed) {
+        console.log("⚠️ [SIGN IN] Popup blocked or in iframe - using redirect method");
+        testPopup?.close();
+        
+        // Fall back to redirect
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      testPopup.close();
+      
+      // Use Firebase popup
       const result = await signInWithPopup(auth, provider);
       
       if (result?.user) {

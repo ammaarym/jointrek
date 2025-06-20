@@ -232,3 +232,6 @@ export type InsertRideRequest = z.infer<typeof insertRideRequestSchema>;
 
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+
+export type DriverOffer = typeof driverOffers.$inferSelect;
+export type InsertDriverOffer = z.infer<typeof insertDriverOfferSchema>;

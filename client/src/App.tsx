@@ -13,6 +13,7 @@ import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
 import RequestRidePage from "@/pages/request-ride";
 import RequestRideSimplePage from "@/pages/request-ride-simple";
+import OfferRidePage from "@/pages/offer-ride";
 import ProfilePaymentPage from "@/pages/profile-payment";
 import RideRequestApproval from "@/pages/ride-request-approval";
 import AdminLogin from "@/pages/admin-login";
@@ -148,6 +149,9 @@ function AppRoutes() {
           </Route>
           <Route path="/request-ride-simple/:id">
             {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride-simple/:id" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/offer-ride/:id">
+            {(params) => <ProtectedRoute component={OfferRidePage} path="/offer-ride/:id" requiresContactInfo={true} />}
           </Route>
           <Route path="/profile/payment">
             {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile/payment" requiresContactInfo={true} />}

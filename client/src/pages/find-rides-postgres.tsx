@@ -135,12 +135,17 @@ export default function FindRidesPostgres() {
     }
   };
 
-  // Handle ride request - redirect to payment-enabled request page
+  // Handle ride request - redirect to appropriate page based on ride type
   const handleRequestRide = (rideId: number) => {
     if (!currentUser) return;
     
-    // Redirect to the new request-ride page with the ride ID
-    setLocation(`/request-ride/${rideId}`);
+    // If viewing passenger posts (rideTypeFilter === 'passenger'), driver is offering a ride
+    if (rideTypeFilter === 'passenger') {
+      setLocation(`/offer-ride/${rideId}`);
+    } else {
+      // If viewing driver posts (rideTypeFilter === 'driver'), passenger is requesting a ride
+      setLocation(`/request-ride/${rideId}`);
+    }
   };
 
 

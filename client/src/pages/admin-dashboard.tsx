@@ -48,7 +48,12 @@ interface User {
   email: string;
   displayName: string;
   phone: string;
+  instagram: string;
+  snapchat: string;
   createdAt: string;
+  firebaseUid: string;
+  photoUrl: string;
+  stripeCustomerId: string;
 }
 
 interface Ride {
@@ -59,9 +64,17 @@ interface Ride {
   price: string;
   driverName: string;
   driverEmail: string;
+  driverPhone: string;
+  driverInstagram: string;
+  driverSnapchat: string;
   seatsTotal: number;
   seatsLeft: number;
   isCompleted: boolean;
+  carMake: string;
+  carModel: string;
+  carYear: string;
+  baggageSpace: number;
+  notes: string;
 }
 
 interface RideRequest {
@@ -449,6 +462,95 @@ function ExcelSheets({ users, rides, requests }: { users: User[], rides: Ride[],
   );
 }
 
+// User Edit Form Component
+function UserEditForm({ user, onSuccess }: { user: User, onSuccess: () => void }) {
+  const [formData, setFormData] = useState({
+    displayName: user.displayName || '',
+    phone: user.phone || '',
+    instagram: user.instagram || '',
+    snapchat: user.snapchat || ''
+  });
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        toast({ title: "Success", description: "User updated successfully" });
+        onSuccess();
+      } else {
+        throw new Error('Update failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Display Name</label>
+        <Input
+          value={formData.displayName}
+          onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+          placeholder="Enter display name"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Phone Number</label>
+        <Input
+          value={formData.phone}
+          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+          placeholder="Enter phone number"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Instagram</label>
+        <Input
+          value={formData.instagram}
+          onChange={(e) => setFormData(prev => ({ ...prev, instagram: e.target.value }))}
+          placeholder="Enter Instagram username"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Snapchat</label>
+        <Input
+          value={formData.snapchat}
+          onChange={(e) => setFormData(prev => ({ ...prev, snapchat: e.target.value }))}
+          placeholder="Enter Snapchat username"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={saving} className="flex-1">
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
+        <Button type="button" variant="outline" disabled={saving}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -502,6 +604,31 @@ export default function AdminDashboard() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteUser = async (userId: number) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
+      
+      if (response.ok) {
+        toast({ title: "Success", description: "User deleted successfully" });
+        fetchDashboardData();
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
     }
   };
 

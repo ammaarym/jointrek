@@ -17,8 +17,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <CarTaxiFront className="text-primary h-6 w-6" />
-              <span className="text-xl font-semibold text-primary-blue dark:text-white">
+              <span className="text-xl font-bold text-stone-900 dark:text-white font-satoshi">
                 Trek
               </span>
             </div>

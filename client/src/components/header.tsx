@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
-import trekLogo from "@assets/treklogo1_1749600620192.png";
 import NotificationsBell from "@/components/notifications-bell";
 
 interface HeaderProps {
@@ -64,7 +63,9 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Link href={currentUser ? "/find-rides" : "/"} className="flex items-center">
-              <img src={trekLogo} alt="Trek" className="h-12 w-auto" />
+              <span className="text-2xl font-bold text-stone-900 font-satoshi">
+                Trek
+              </span>
             </Link>
           </div>
 

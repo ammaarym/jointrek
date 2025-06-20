@@ -53,13 +53,18 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
+      console.log("🚀 [LOGIN DEBUG] ===== STARTING GOOGLE SIGN-IN =====");
+      console.log("🚀 [LOGIN DEBUG] Current URL:", window.location.href);
+      console.log("🚀 [LOGIN DEBUG] Current user before sign-in:", auth.currentUser?.email || "null");
+      
       setIsSigningIn(true);
-      console.log("Starting Google redirect authentication");
+      console.log("🚀 [LOGIN DEBUG] isSigningIn state set to true");
       
       // Set session persistence before sign-in
+      console.log("🚀 [LOGIN DEBUG] Setting session persistence...");
       const { setPersistence, browserSessionPersistence } = await import("firebase/auth");
       await setPersistence(auth, browserSessionPersistence);
-      console.log("Session persistence configured for sign-in");
+      console.log("✅ [LOGIN DEBUG] Session persistence configured for sign-in");
       
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
@@ -68,15 +73,19 @@ export default function Login() {
       });
       provider.addScope('email');
       provider.addScope('profile');
+      console.log("🚀 [LOGIN DEBUG] Google provider configured with UF domain restriction");
 
       // Clear any previous auth state to ensure clean redirect
       sessionStorage.removeItem('trek_auth_in_progress');
       sessionStorage.setItem('trek_auth_in_progress', 'true');
-      console.log("Auth state prepared for redirect");
+      console.log("🚀 [LOGIN DEBUG] Auth state markers prepared for redirect");
+      console.log("🚀 [LOGIN DEBUG] About to call signInWithRedirect...");
 
       await signInWithRedirect(auth, provider);
-    } catch (error) {
-      console.error("Google sign-in error:", error);
+      console.log("🚀 [LOGIN DEBUG] signInWithRedirect completed (should not see this if redirect works)");
+    } catch (error: any) {
+      console.error("❌ [LOGIN DEBUG] Google sign-in error:", error);
+      console.log("❌ [LOGIN DEBUG] Error details:", error?.code, error?.message);
       setIsSigningIn(false);
       sessionStorage.removeItem('trek_auth_in_progress');
     }

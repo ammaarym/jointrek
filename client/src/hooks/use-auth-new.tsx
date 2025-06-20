@@ -44,57 +44,96 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("Setting up Firebase authentication");
+    console.log("🔥 [AUTH DEBUG] Setting up Firebase authentication");
+    console.log("🔥 [AUTH DEBUG] Current URL:", window.location.href);
+    console.log("🔥 [AUTH DEBUG] Current pathname:", window.location.pathname);
+    console.log("🔥 [AUTH DEBUG] Initial loading state:", loading);
+    console.log("🔥 [AUTH DEBUG] Initial currentUser:", currentUser?.email || "null");
+    
     let unsubscribe: (() => void) | null = null;
     let redirectProcessed = false;
     
     const initAuth = async () => {
       try {
+        console.log("🔥 [AUTH DEBUG] Starting auth initialization...");
+        
         // Set persistence before any auth operations
+        console.log("🔥 [AUTH DEBUG] Setting session persistence...");
         await setPersistence(auth, browserSessionPersistence);
-        console.log("Session persistence configured");
+        console.log("✅ [AUTH DEBUG] Session persistence configured successfully");
         
         // Handle redirect result first
-        console.log("Checking for redirect result...");
+        console.log("🔥 [AUTH DEBUG] Checking for redirect result...");
+        console.log("🔥 [AUTH DEBUG] Auth current user before getRedirectResult:", auth.currentUser?.email || "null");
+        
         const result = await getRedirectResult(auth);
+        console.log("🔥 [AUTH DEBUG] getRedirectResult completed, result:", result ? "has result" : "no result");
         
         if (result && result.user) {
-          console.log("SUCCESS: Redirect authentication completed for:", result.user.email);
+          console.log("🎉 [AUTH DEBUG] SUCCESS: Redirect authentication completed!");
+          console.log("🔥 [AUTH DEBUG] Redirect user email:", result.user.email);
+          console.log("🔥 [AUTH DEBUG] Redirect user UID:", result.user.uid);
+          console.log("🔥 [AUTH DEBUG] Redirect user verified:", result.user.emailVerified);
           redirectProcessed = true;
           
           // Verify UF email domain immediately
           if (!result.user.email || !isUFEmail(result.user.email)) {
-            console.log("BLOCKING - Non-UF email from redirect:", result.user.email || "no email");
+            console.log("❌ [AUTH DEBUG] BLOCKING - Non-UF email from redirect:", result.user.email || "no email");
             await firebaseSignOut(auth);
             alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
             setLoading(false);
             return;
           }
           
+          console.log("✅ [AUTH DEBUG] UF email verified, setting user state");
           // Set user immediately and redirect
           setCurrentUser(result.user);
-          console.log("Redirecting to profile after successful authentication");
-          window.location.replace('/profile');
+          console.log("🔥 [AUTH DEBUG] User state set, preparing redirect to profile");
+          console.log("🔥 [AUTH DEBUG] Current pathname before redirect:", window.location.pathname);
+          
+          setTimeout(() => {
+            console.log("🚀 [AUTH DEBUG] Executing redirect to /profile");
+            window.location.replace('/profile');
+          }, 100);
           return;
         } else {
-          console.log("No redirect result - checking existing auth state");
+          console.log("🔥 [AUTH DEBUG] No redirect result found - checking existing auth state");
+          console.log("🔥 [AUTH DEBUG] Auth current user after getRedirectResult:", auth.currentUser?.email || "null");
         }
         
         // Set up auth state listener only after redirect check
+        console.log("🔥 [AUTH DEBUG] Setting up onAuthStateChanged listener");
         unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
-          console.log("Auth state changed:", user?.email || "no user");
+          console.log("🔥 [AUTH DEBUG] ===== AUTH STATE CHANGED =====");
+          console.log("🔥 [AUTH DEBUG] User object:", user ? "exists" : "null");
+          console.log("🔥 [AUTH DEBUG] User email:", user?.email || "no email");
+          console.log("🔥 [AUTH DEBUG] User UID:", user?.uid || "no uid");
+          console.log("🔥 [AUTH DEBUG] User verified:", user?.emailVerified || "not verified");
+          console.log("🔥 [AUTH DEBUG] Current pathname:", window.location.pathname);
+          console.log("🔥 [AUTH DEBUG] Redirect processed flag:", redirectProcessed);
           
           if (user && user.email) {
+            console.log("🔥 [AUTH DEBUG] User has email, checking UF domain...");
             if (isUFEmail(user.email)) {
-              console.log("ALLOWING ACCESS - Valid UF email:", user.email);
+              console.log("✅ [AUTH DEBUG] ALLOWING ACCESS - Valid UF email:", user.email);
+              console.log("🔥 [AUTH DEBUG] Setting currentUser state...");
               setCurrentUser(user);
+              console.log("✅ [AUTH DEBUG] CurrentUser state set");
               
               // Only redirect from login/home pages, not if already on profile
               const currentPath = window.location.pathname;
+              console.log("🔥 [AUTH DEBUG] Current path for redirect check:", currentPath);
+              console.log("🔥 [AUTH DEBUG] Should redirect?", !redirectProcessed && (currentPath === '/login' || currentPath === '/'));
+              
               if (!redirectProcessed && (currentPath === '/login' || currentPath === '/')) {
-                console.log("Redirecting authenticated user from", currentPath, "to profile");
-                window.location.replace('/profile');
+                console.log("🚀 [AUTH DEBUG] Redirecting authenticated user from", currentPath, "to profile");
+                setTimeout(() => {
+                  console.log("🚀 [AUTH DEBUG] Executing delayed redirect to /profile");
+                  window.location.replace('/profile');
+                }, 100);
                 return;
+              } else {
+                console.log("🔥 [AUTH DEBUG] No redirect needed - already on correct page or redirect already processed");
               }
               
               // Sync user with PostgreSQL
@@ -161,41 +200,59 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = async (): Promise<void> => {
     try {
-      console.log("Replit: Starting complete sign out process");
+      console.log("🚪 [SIGNOUT DEBUG] ===== STARTING COMPLETE SIGN OUT =====");
+      console.log("🚪 [SIGNOUT DEBUG] Current user before signout:", auth.currentUser?.email || "null");
+      console.log("🚪 [SIGNOUT DEBUG] Current URL:", window.location.href);
       
       // Clear Firebase auth state
+      console.log("🚪 [SIGNOUT DEBUG] Calling Firebase signOut...");
       await firebaseSignOut(auth);
+      console.log("✅ [SIGNOUT DEBUG] Firebase signOut completed");
       
       // Clear Replit-specific auth storage
+      console.log("🚪 [SIGNOUT DEBUG] Clearing Replit auth storage...");
       clearReplitAuthState();
+      console.log("✅ [SIGNOUT DEBUG] Replit auth storage cleared");
       
       // Clear React Query cache
+      console.log("🚪 [SIGNOUT DEBUG] Clearing React Query cache...");
       queryClient.clear();
+      console.log("✅ [SIGNOUT DEBUG] React Query cache cleared");
       
       // Clear local state
+      console.log("🚪 [SIGNOUT DEBUG] Clearing local user state...");
       setCurrentUser(null);
+      console.log("✅ [SIGNOUT DEBUG] Local user state cleared");
       
       // Clear any Firebase-related localStorage items
+      console.log("🚪 [SIGNOUT DEBUG] Clearing Firebase localStorage items...");
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('firebase:') || key.includes('firebase')) {
+          console.log("🚪 [SIGNOUT DEBUG] Removing localStorage key:", key);
           localStorage.removeItem(key);
         }
       });
       
       // Clear sessionStorage as well
+      console.log("🚪 [SIGNOUT DEBUG] Clearing Firebase sessionStorage items...");
       Object.keys(sessionStorage).forEach(key => {
         if (key.startsWith('firebase:') || key.includes('firebase')) {
+          console.log("🚪 [SIGNOUT DEBUG] Removing sessionStorage key:", key);
           sessionStorage.removeItem(key);
         }
       });
       
-      console.log("Replit: Complete sign out performed, redirecting to home");
+      console.log("🚪 [SIGNOUT DEBUG] All cleanup completed, preparing redirect to home");
+      console.log("🚪 [SIGNOUT DEBUG] Auth current user after cleanup:", auth.currentUser?.email || "null");
+      
       // Force redirect to home page after sign out
       setTimeout(() => {
+        console.log("🚀 [SIGNOUT DEBUG] Executing redirect to home page");
         window.location.replace('/');
       }, 100);
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("❌ [SIGNOUT DEBUG] Error signing out:", error);
+      console.log("❌ [SIGNOUT DEBUG] Error details:", error.code, error.message);
       throw error;
     }
   };

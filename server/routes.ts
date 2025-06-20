@@ -2397,7 +2397,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Driver must complete onboarding first' });
       }
 
-      // Create driver offer with duplicate prevention
+      // Check for existing pending offers first
+      const existingOffers = await storage.getDriverOffersForRide(passengerRideId);
+      const hasPendingOffer = existingOffers.some(offer => 
+        offer.driverId === driverId && offer.status === 'pending'
+      );
+
+      if (hasPendingOffer) {
+        return res.status(400).json({ 
+          message: 'You already have a pending offer for this ride. Please wait for the passenger to respond.',
+          error: 'Duplicate offer not allowed'
+        });
+      }
+
+      // Create driver offer
       const offer = await storage.createDriverOffer({
         driverId,
         passengerRideId,

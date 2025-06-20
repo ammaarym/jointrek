@@ -806,8 +806,11 @@ export class PostgresStorage implements IStorage {
       passengerName: formatPassengerName(ride.passengerName)
     }));
 
-    // Combine both result sets
-    const allApprovedRides = [...passengerRides, ...formattedDriverRides];
+    // Combine both result sets and ensure price display
+    const allApprovedRides = [...passengerRides, ...formattedDriverRides].map(ride => ({
+      ...ride,
+      ridePrice: ride.ridePrice || ride.originalPrice // Use counter offer price if available, fallback to original
+    }));
     
     return allApprovedRides.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -1317,26 +1320,6 @@ export class PostgresStorage implements IStorage {
 
   // Driver offers methods
   async createDriverOffer(offerData: InsertDriverOffer): Promise<DriverOffer> {
-    // Check if driver already has a pending offer for this passenger ride
-    const existingOffers = await db
-      .select()
-      .from(driverOffers)
-      .where(
-        and(
-          eq(driverOffers.driverId, offerData.driverId),
-          eq(driverOffers.passengerRideId, offerData.passengerRideId),
-          eq(driverOffers.status, 'pending')
-        )
-      );
-
-    console.log('Checking for existing offers:', existingOffers.length, 'found for driver', offerData.driverId, 'ride', offerData.passengerRideId);
-
-    if (existingOffers.length > 0) {
-      console.log('Blocking duplicate offer - existing pending offer found');
-      throw new Error('You already have a pending offer for this ride. Please wait for the passenger to respond.');
-    }
-
-    console.log('Creating new driver offer - no duplicates found');
     const [offer] = await db.insert(driverOffers).values(offerData).returning();
     return offer;
   }

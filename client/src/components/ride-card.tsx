@@ -44,6 +44,7 @@ interface RideCardProps {
   isApproved?: boolean; // New prop to show if request is approved
   isRejected?: boolean; // New prop to show if request is rejected
   isCancelled?: boolean; // New prop to show if request is cancelled
+  existingDriverOffer?: any; // Driver offer data if exists
 }
 
 export default function RideCard({
@@ -59,6 +60,7 @@ export default function RideCard({
   isApproved = false,
   isRejected = false,
   isCancelled = false,
+  existingDriverOffer = null,
 }: RideCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -249,17 +251,27 @@ export default function RideCard({
                         ? "bg-red-500 text-white cursor-not-allowed"
                         : isCancelled
                         ? "bg-gray-500 text-white cursor-not-allowed"
+                        : existingDriverOffer && rideTypeFilter === 'passenger'
+                        ? existingDriverOffer.status === 'pending'
+                          ? "bg-orange-500 text-white cursor-not-allowed"
+                          : existingDriverOffer.status === 'accepted'
+                          ? "bg-green-600 text-white cursor-not-allowed"
+                          : existingDriverOffer.status === 'rejected'
+                          ? "bg-red-500 text-white cursor-not-allowed"
+                          : "bg-primary text-white hover:bg-primary/90"
                         : isRequested 
                         ? "bg-orange-500 text-white hover:bg-orange-600" 
                         : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled) {
+                      if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled && 
+                          !(existingDriverOffer && rideTypeFilter === 'passenger')) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested || isApproved || isRejected || isCancelled}
+                    disabled={isRequested || isApproved || isRejected || isCancelled || 
+                             (existingDriverOffer && rideTypeFilter === 'passenger')}
                   >
                     {isApproved
                       ? "Ride Approved"
@@ -267,6 +279,14 @@ export default function RideCard({
                       ? "Request Denied"
                       : isCancelled
                       ? "CANCELLED"
+                      : existingDriverOffer && rideTypeFilter === 'passenger'
+                      ? existingDriverOffer.status === 'pending'
+                        ? `Offer Sent ($${existingDriverOffer.price})`
+                        : existingDriverOffer.status === 'accepted'
+                        ? `Offer Accepted ($${existingDriverOffer.price})`
+                        : existingDriverOffer.status === 'rejected'
+                        ? `Offer Rejected ($${existingDriverOffer.price})`
+                        : "Offer a Trek"
                       : isRequested 
                       ? "Request Sent" 
                       : rideTypeFilter === 'passenger' 

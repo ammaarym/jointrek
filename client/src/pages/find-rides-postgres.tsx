@@ -64,7 +64,8 @@ export default function FindRidesPostgres() {
   const [rejectedRides, setRejectedRides] = useState<Set<number>>(new Set());
   // Track cancelled rides
   const [cancelledRides, setCancelledRides] = useState<Set<number>>(new Set());
-  
+  // Track driver offers
+  const [driverOffers, setDriverOffers] = useState<Map<number, any>>(new Map());
 
   
   // Applied filter state (only updated when Apply Filter is clicked)
@@ -75,6 +76,38 @@ export default function FindRidesPostgres() {
     passengers: '1',
     genderFilter: 'no preference'
   });
+
+  // Load existing driver offers for the current user
+  const loadUserDriverOffers = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch('/api/driver-offers/for-user', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+      
+      if (response.ok) {
+        const offers = await response.json();
+        const offerMap = new Map<number, any>();
+        offers.forEach((offer: any) => {
+          // Store the most recent offer for each ride
+          if (!offerMap.has(offer.passengerRideId) || 
+              new Date(offer.createdAt) > new Date(offerMap.get(offer.passengerRideId).createdAt)) {
+            offerMap.set(offer.passengerRideId, offer);
+          }
+        });
+        setDriverOffers(offerMap);
+      }
+    } catch (error) {
+      console.error('Error loading driver offers:', error);
+    }
+  };
 
   // Load existing ride requests for the current user
   const loadUserRideRequests = async () => {
@@ -124,6 +157,7 @@ export default function FindRidesPostgres() {
     if (currentUser) {
       loadAllRides();
       loadUserRideRequests();
+      loadUserDriverOffers();
     }
   }, [currentUser]);
 
@@ -132,6 +166,7 @@ export default function FindRidesPostgres() {
     if (currentUser) {
       loadAllRides();
       loadUserRideRequests();
+      loadUserDriverOffers();
     }
   };
 
@@ -592,6 +627,7 @@ export default function FindRidesPostgres() {
             <div className="space-y-6">
               {filteredRides.map((ride) => {
                 const adaptedRide = adaptPostgresRideToCardFormat(ride);
+                const existingOffer = driverOffers.get(ride.id);
                 
                 return (
                   <RideCard 
@@ -604,6 +640,7 @@ export default function FindRidesPostgres() {
                     isRejected={rejectedRides.has(ride.id)}
                     isCancelled={cancelledRides.has(ride.id)}
                     rideTypeFilter={rideTypeFilter}
+                    existingDriverOffer={existingOffer}
                   />
                 );
               })}

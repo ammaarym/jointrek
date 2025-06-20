@@ -737,14 +737,24 @@ export default function Profile() {
                 <p className="text-muted-foreground mb-6">
                   Set up your driver account to post rides and earn money from passengers. You'll need to provide identity verification and banking information.
                 </p>
-                <Button
-                  onClick={startOnboarding}
-                  disabled={isOnboarding}
-                  className="bg-primary hover:bg-orange-600 text-white"
-                >
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  {isOnboarding ? "Setting up..." : "Start Driver Setup"}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={() => window.location.href = '/stripe-setup-guide'}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Setup Guide
+                  </Button>
+                  <Button
+                    onClick={startOnboarding}
+                    disabled={isOnboarding}
+                    className="bg-primary hover:bg-orange-600 text-white flex-1"
+                  >
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    {isOnboarding ? "Setting up..." : "Start Driver Setup"}
+                  </Button>
+                </div>
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

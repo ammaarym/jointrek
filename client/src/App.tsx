@@ -24,6 +24,7 @@ import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";
 import NotificationsPage from "@/pages/notifications";
+import StripeSetupGuide from "@/pages/stripe-setup-guide";
 import React, { useEffect, useState, Suspense } from "react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
 import { ThemeProvider } from "@/lib/theme";
@@ -173,6 +174,9 @@ function AppRoutes() {
           </Route>
           <Route path="/notifications">
             {(params) => <ProtectedRoute component={NotificationsPage} path="/notifications" />}
+          </Route>
+          <Route path="/stripe-setup-guide">
+            {(params) => <ProtectedRoute component={StripeSetupGuide} path="/stripe-setup-guide" />}
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}

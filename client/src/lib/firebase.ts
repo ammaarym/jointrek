@@ -36,16 +36,35 @@ try {
 export const auth = getAuth(app);
 
 // Configure auth persistence for Replit production environment
-import { setPersistence, browserLocalPersistence, connectAuthEmulator } from "firebase/auth";
+import { setPersistence, browserLocalPersistence } from "firebase/auth";
 
-// Set persistence to local storage for better Replit compatibility
-setPersistence(auth, browserLocalPersistence)
-  .then(() => {
-    console.log("Firebase auth persistence set to local storage for Replit compatibility");
-  })
-  .catch((error) => {
-    console.error("Error setting auth persistence:", error);
-  });
+// Configure multiple persistence layers for Replit compatibility
+async function configureFirebaseAuth() {
+  try {
+    // First, try to set local persistence
+    await setPersistence(auth, browserLocalPersistence);
+    console.log("✅ Firebase auth persistence set to local storage for Replit compatibility");
+    
+    // Additional storage for auth state backup
+    const user = auth.currentUser;
+    if (user) {
+      localStorage.setItem('trek_firebase_auth_backup', JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        emailVerified: user.emailVerified,
+        timestamp: Date.now()
+      }));
+      console.log("✅ Auth state backup stored");
+    }
+  } catch (error) {
+    console.error("❌ Error setting auth persistence:", error);
+  }
+}
+
+// Initialize enhanced persistence
+configureFirebaseAuth();
 
 // Configure auth to use redirect flow only
 auth.settings.appVerificationDisabledForTesting = false;

@@ -11,12 +11,7 @@ import {
 import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  configureReplitPersistence,
-  handleReplitRedirectResult,
-  setupReplitAuthMonitoring,
-  clearReplitAuthState
-} from '../lib/replit-auth-fix';
+import { replitAuthManager } from '../lib/replit-auth-manager';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -61,6 +56,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log("🔥 [AUTH DEBUG] Setting session persistence...");
         await setPersistence(auth, browserSessionPersistence);
         console.log("✅ [AUTH DEBUG] Session persistence configured successfully");
+        
+        // Check for auth state backup first (Replit persistence fix)
+        console.log("🔥 [AUTH DEBUG] Checking for stored auth state...");
+        const shouldBeAuthenticated = replitAuthManager.shouldUserBeAuthenticated();
+        console.log("🔥 [AUTH DEBUG] Should user be authenticated?", shouldBeAuthenticated);
+        
+        if (shouldBeAuthenticated && !auth.currentUser) {
+          console.log("🔥 [AUTH DEBUG] Auth state expected but missing, waiting for restoration...");
+          const restoredUser = await replitAuthManager.waitForAuthRestoration(2000);
+          if (restoredUser) {
+            console.log("✅ [AUTH DEBUG] Auth state restored successfully for:", restoredUser.email);
+          } else {
+            console.log("⚠️ [AUTH DEBUG] Auth restoration timeout, clearing stale backup");
+            replitAuthManager.clearAuthState();
+          }
+        }
         
         // Handle redirect result first
         console.log("🔥 [AUTH DEBUG] Checking for redirect result...");
@@ -119,6 +130,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               console.log("🔥 [AUTH DEBUG] Setting currentUser state...");
               setCurrentUser(user);
               console.log("✅ [AUTH DEBUG] CurrentUser state set");
+              
+              // Store auth backup for Replit persistence
+              replitAuthManager.storeAuthState(user);
               
               // Only redirect from login/home pages, not if already on profile
               const currentPath = window.location.pathname;

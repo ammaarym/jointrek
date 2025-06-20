@@ -126,6 +126,7 @@ DATABASE_URL
 - June 20, 2025: Created comprehensive Stripe driver setup guide page with step-by-step instructions, requirements checklist, timeline, common issues, and help resources - accessible via "Setup Guide" button in driver onboarding section for first-time driver account setup
 - June 20, 2025: Added comprehensive security assurances about Stripe data handling throughout payment sections - clearly communicates that Trek never sees banking/credit card details, data is encrypted, PCI DSS compliant, and only Stripe has access to sensitive financial information
 - June 20, 2025: Enhanced driver setup section with security assurances matching payment methods style - added green notice explaining Trek never sees banking/SSN details, and fixed text overflow in quick filter buttons by reducing font size and adjusting padding
+- June 20, 2025: Completely redesigned home page with beige/orange accent colors throughout - updated hero section with gradient backgrounds, beige Trek logo, orange buttons and icons, enhanced testimonials with better styling, and added comprehensive security FAQ section with collapsible dropdowns covering banking security, scammer prevention, personal safety features, and payment protection
 
 ## User Preferences
 

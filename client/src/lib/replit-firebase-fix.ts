@@ -10,6 +10,7 @@ import {
   User,
   getRedirectResult,
   signInWithRedirect,
+  signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
   setPersistence,
@@ -244,10 +245,10 @@ class ReplitFirebaseManager {
   }
 
   /**
-   * Enhanced Google sign-in with Replit optimizations
+   * Enhanced Google sign-in with popup method (bypasses redirect session issues)
    */
-  async signInWithGoogle(): Promise<void> {
-    console.log("🚀 [REPLIT FIREBASE] Starting enhanced Google sign-in...");
+  async signInWithGoogle(): Promise<User | null> {
+    console.log("🚀 [REPLIT FIREBASE] Starting popup-based Google sign-in...");
     
     try {
       await this.configurePersistence();
@@ -262,11 +263,56 @@ class ReplitFirebaseManager {
       provider.addScope('email');
       provider.addScope('profile');
       
-      console.log("🔄 [REPLIT FIREBASE] Initiating redirect...");
+      console.log("🔄 [REPLIT FIREBASE] Opening authentication popup...");
+      const result = await signInWithPopup(auth, provider);
+      
+      if (result?.user) {
+        console.log("✅ [REPLIT FIREBASE] Popup authentication successful!");
+        console.log("👤 [REPLIT FIREBASE] User:", result.user.email);
+        
+        // Store user data immediately
+        this.storeUserData(result.user);
+        return result.user;
+      } else {
+        console.log("❌ [REPLIT FIREBASE] No user returned from popup");
+        return null;
+      }
+      
+    } catch (error: any) {
+      // Handle popup blocked error gracefully
+      if (error.code === 'auth/popup-blocked') {
+        console.log("⚠️ [REPLIT FIREBASE] Popup blocked - falling back to redirect method");
+        return this.fallbackToRedirect();
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        console.log("ℹ️ [REPLIT FIREBASE] User closed popup");
+        return null;
+      } else {
+        console.error("❌ [REPLIT FIREBASE] Popup sign-in error:", error);
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Fallback to redirect method if popup is blocked
+   */
+  private async fallbackToRedirect(): Promise<User | null> {
+    console.log("🔄 [REPLIT FIREBASE] Using redirect fallback...");
+    
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
+      
       await signInWithRedirect(auth, provider);
+      return null; // Redirect will handle the rest
       
     } catch (error) {
-      console.error("❌ [REPLIT FIREBASE] Sign-in error:", error);
+      console.error("❌ [REPLIT FIREBASE] Redirect fallback error:", error);
       throw error;
     }
   }

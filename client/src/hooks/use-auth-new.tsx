@@ -271,13 +271,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("Starting Google authentication with session persistence");
+      console.log("🚀 [SIGN IN] Starting popup-based Google authentication...");
+      const user = await replitFirebaseManager.signInWithGoogle();
       
-      console.log("🚀 [SIGN IN] Starting enhanced Google authentication...");
-      await replitFirebaseManager.signInWithGoogle();
+      if (user) {
+        console.log("✅ [SIGN IN] Authentication successful, user:", user.email);
+        
+        // Verify UF email domain
+        if (!user.email || !isUFEmail(user.email)) {
+          console.log("❌ [SIGN IN] BLOCKING - Non-UF email:", user.email || "no email");
+          await firebaseSignOut(auth);
+          alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
+          return;
+        }
+        
+        console.log("✅ [SIGN IN] UF email verified, setting user state");
+        setCurrentUser(user);
+        
+        // Redirect to profile page after successful authentication
+        setTimeout(() => {
+          console.log("🚀 [SIGN IN] Redirecting to profile page");
+          window.location.replace('/profile');
+        }, 100);
+      } else {
+        console.log("ℹ️ [SIGN IN] No user returned (popup closed or cancelled)");
+      }
       
     } catch (error: any) {
-      console.error("Authentication error:", error);
+      console.error("❌ [SIGN IN] Authentication error:", error);
+      
+      // Handle specific error cases
+      if (error.code === 'auth/popup-blocked') {
+        alert("Please allow popups for this site and try again. You can also try refreshing the page.");
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        // User cancelled, no action needed
+        console.log("ℹ️ [SIGN IN] User cancelled authentication");
+      } else {
+        alert("Authentication failed. Please try again.");
+      }
+      
       throw error;
     }
   };

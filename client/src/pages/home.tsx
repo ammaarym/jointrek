@@ -23,6 +23,11 @@ export default function Home() {
   }, [currentUser, loading]);
 
   const handleLogin = () => {
+    // Check if mobile and go directly to mobile-friendly auth
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      console.log("📱 [HOME] Mobile detected, redirecting to mobile-optimized login");
+    }
     navigate("/login");
   };
 
@@ -33,7 +38,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-stone-50 to-amber-50 text-black">
+      <section className="bg-white text-black">
         <div className="container mx-auto px-4 py-12 md:py-24">
           <div className="grid md:grid-cols-1 gap-8 items-center text-center">
             <div>
@@ -69,7 +74,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center max-w-2xl mx-auto">
-                  <div className="bg-gradient-to-r from-amber-50 to-stone-50 p-6 rounded-lg mb-6 text-left w-full shadow-md" style={{ borderColor: '#D4C4A8', borderWidth: '1px' }}>
+                  <div className="bg-white p-6 rounded-lg mb-6 text-left w-full shadow-md" style={{ borderColor: '#D4C4A8', borderWidth: '1px' }}>
                     <h3 className="font-semibold text-lg flex items-center mb-2" style={{ color: '#8A6F47' }}>
                       <Lock className="w-5 h-5 mr-2" style={{ color: '#B8956B' }} />
                       Please sign in to continue
@@ -163,58 +168,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-gradient-to-br from-stone-100 to-amber-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-stone-900">
-            What Fellow Gators Say
-          </h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="bg-white p-6 rounded-lg shadow-lg" style={{ borderColor: '#E8DCC6', borderWidth: '1px' }}>
-              <div className="mb-4">
-                <h4 className="font-semibold text-stone-900">Sarah Johnson</h4>
-                <p className="text-sm" style={{ color: '#B8956B' }}>
-                  Senior, Biology
-                </p>
-              </div>
-              <p className="text-stone-700 italic">
-                "Trek has saved me so much money on trips home to Orlando.
-                I've also made some great friends along the way!"
-              </p>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-white p-6 rounded-lg shadow-lg" style={{ borderColor: '#E8DCC6', borderWidth: '1px' }}>
-              <div className="mb-4">
-                <h4 className="font-semibold text-stone-900">Michael Torres</h4>
-                <p className="text-sm" style={{ color: '#B8956B' }}>
-                  Junior, Engineering
-                </p>
-              </div>
-              <p className="text-stone-700 italic">
-                "As a driver, I like that I can offset my gas costs while
-                helping out other Gators. The platform is super easy to use."
-              </p>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-white p-6 rounded-lg shadow-lg" style={{ borderColor: '#E8DCC6', borderWidth: '1px' }}>
-              <div className="mb-4">
-                <h4 className="font-semibold text-stone-900">Jamie Chen</h4>
-                <p className="text-sm" style={{ color: '#B8956B' }}>
-                  Sophomore, Business
-                </p>
-              </div>
-              <p className="text-stone-700 italic">
-                "I feel so much safer knowing I'm riding with verified UF
-                students. The gender preference filter is also a huge plus."
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Security FAQ Section */}
       <section className="py-16 bg-white">

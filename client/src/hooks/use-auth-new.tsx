@@ -19,7 +19,7 @@ interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (forceRedirect?: boolean) => Promise<void>;
   isUFEmail: (email: string) => boolean;
 }
 

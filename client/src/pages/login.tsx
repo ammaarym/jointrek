@@ -54,14 +54,31 @@ export default function Login() {
       console.log("🚀 [LOGIN] Starting Google authentication...");
       setIsSigningIn(true);
       
-      await signInWithGoogle();
+      // Check if we're on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        console.log("📱 [LOGIN] Mobile device detected, using redirect method");
+        // Use redirect for mobile devices
+        await signInWithGoogle(true); // Pass true for redirect mode
+      } else {
+        console.log("💻 [LOGIN] Desktop device detected, using popup method");
+        // Use popup for desktop
+        await signInWithGoogle(false); // Pass false for popup mode
+      }
       
     } catch (error: any) {
       console.error("❌ [LOGIN] Authentication failed:", error);
       setIsSigningIn(false);
       
       if (error.code === 'auth/popup-blocked') {
-        alert("Please allow popups for this site and try again.");
+        // Try redirect as fallback
+        console.log("🔄 [LOGIN] Popup blocked, trying redirect method");
+        try {
+          await signInWithGoogle(true);
+        } catch (redirectError) {
+          alert("Authentication failed. Please try refreshing the page and trying again.");
+        }
       } else if (error.code === 'auth/popup-closed-by-user') {
         // User cancelled, no need to show error
       } else {

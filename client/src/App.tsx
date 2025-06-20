@@ -23,7 +23,7 @@ import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";
 import React, { useEffect, useState, Suspense } from "react";
-import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
+import { AuthProvider, useAuth } from "@/hooks/use-auth-popup";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 

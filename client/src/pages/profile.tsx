@@ -854,15 +854,29 @@ export default function Profile() {
               )}
 
               {/* Add Payment Method Button */}
-              <Button
-                onClick={handleAddPaymentMethod}
-                disabled={setupPaymentMutation.isPending}
-                className="w-full"
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                {setupPaymentMutation.isPending ? "Setting up..." : "Add Payment Method"}
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  onClick={handleAddPaymentMethod}
+                  disabled={setupPaymentMutation.isPending}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {setupPaymentMutation.isPending ? "Setting up..." : "Add Payment Method"}
+                </Button>
+
+                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                  <div className="flex items-start">
+                    <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-green-800 dark:text-green-200 text-sm">Secure Payment Processing</h4>
+                      <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                        Your payment information is encrypted and securely processed by Stripe. Trek never stores or sees your credit card details.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
 

@@ -225,7 +225,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Clear Replit-specific auth storage
       console.log("🚪 [SIGNOUT DEBUG] Clearing Replit auth storage...");
-      clearReplitAuthState();
+      replitAuthManager.clearAuthState();
       console.log("✅ [SIGNOUT DEBUG] Replit auth storage cleared");
       
       // Clear React Query cache
@@ -264,9 +264,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log("🚀 [SIGNOUT DEBUG] Executing redirect to home page");
         window.location.replace('/');
       }, 100);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ [SIGNOUT DEBUG] Error signing out:", error);
-      console.log("❌ [SIGNOUT DEBUG] Error details:", error.code, error.message);
+      console.log("❌ [SIGNOUT DEBUG] Error details:", error?.code, error?.message);
       throw error;
     }
   };

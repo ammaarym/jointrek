@@ -2461,7 +2461,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(offer);
     } catch (error) {
       console.error('Error creating driver offer:', error);
-      res.status(500).json({ message: 'Failed to create driver offer' });
+      console.error('Full error details:', error);
+      res.status(500).json({ message: 'Failed to create driver offer', error: error.message });
     }
   });
 

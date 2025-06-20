@@ -1736,7 +1736,17 @@ export default function MyRidesPostgres() {
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-lg">{offer.driverName}</h3>
+                                    <h3 className="font-semibold text-lg">{(() => {
+                                      // Format name from "Last, First" to "First Last"
+                                      if (offer.driverName && offer.driverName.includes(',')) {
+                                        const parts = offer.driverName.split(',').map(part => part.trim());
+                                        if (parts.length === 2) {
+                                          const [lastName, firstMiddle] = parts;
+                                          return `${firstMiddle} ${lastName}`;
+                                        }
+                                      }
+                                      return offer.driverName;
+                                    })()}</h3>
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                       offer.status === 'accepted' ? 'bg-green-600 text-white' : 
                                       offer.status === 'rejected' ? 'bg-red-600 text-white' :

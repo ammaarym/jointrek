@@ -12,6 +12,7 @@ import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replitAuthManager } from '../lib/replit-auth-manager';
+import { replitFirebaseManager } from '../lib/replit-firebase-fix';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -73,23 +74,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         }
         
-        // Handle redirect result first
-        console.log("🔥 [AUTH DEBUG] Checking for redirect result...");
-        console.log("🔥 [AUTH DEBUG] Auth current user before getRedirectResult:", auth.currentUser?.email || "null");
+        // Use enhanced Firebase manager for redirect handling
+        console.log("🔥 [AUTH DEBUG] Using enhanced redirect handling...");
+        const redirectUser = await replitFirebaseManager.handleRedirectResult();
         
-        const result = await getRedirectResult(auth);
-        console.log("🔥 [AUTH DEBUG] getRedirectResult completed, result:", result ? "has result" : "no result");
-        
-        if (result && result.user) {
-          console.log("🎉 [AUTH DEBUG] SUCCESS: Redirect authentication completed!");
-          console.log("🔥 [AUTH DEBUG] Redirect user email:", result.user.email);
-          console.log("🔥 [AUTH DEBUG] Redirect user UID:", result.user.uid);
-          console.log("🔥 [AUTH DEBUG] Redirect user verified:", result.user.emailVerified);
+        if (redirectUser) {
+          console.log("🎉 [AUTH DEBUG] SUCCESS: Enhanced redirect authentication completed!");
+          console.log("🔥 [AUTH DEBUG] Redirect user email:", redirectUser.email);
+          console.log("🔥 [AUTH DEBUG] Redirect user UID:", redirectUser.uid);
+          console.log("🔥 [AUTH DEBUG] Redirect user verified:", redirectUser.emailVerified);
           redirectProcessed = true;
           
           // Verify UF email domain immediately
-          if (!result.user.email || !isUFEmail(result.user.email)) {
-            console.log("❌ [AUTH DEBUG] BLOCKING - Non-UF email from redirect:", result.user.email || "no email");
+          if (!redirectUser.email || !isUFEmail(redirectUser.email)) {
+            console.log("❌ [AUTH DEBUG] BLOCKING - Non-UF email from redirect:", redirectUser.email || "no email");
             await firebaseSignOut(auth);
             alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
             setLoading(false);
@@ -98,7 +96,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           
           console.log("✅ [AUTH DEBUG] UF email verified, setting user state");
           // Set user immediately and redirect
-          setCurrentUser(result.user);
+          setCurrentUser(redirectUser);
           console.log("🔥 [AUTH DEBUG] User state set, preparing redirect to profile");
           console.log("🔥 [AUTH DEBUG] Current pathname before redirect:", window.location.pathname);
           
@@ -109,7 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           return;
         } else {
           console.log("🔥 [AUTH DEBUG] No redirect result found - checking existing auth state");
-          console.log("🔥 [AUTH DEBUG] Auth current user after getRedirectResult:", auth.currentUser?.email || "null");
+          console.log("🔥 [AUTH DEBUG] Auth current user after enhanced handling:", auth.currentUser?.email || "null");
         }
         
         // Set up auth state listener only after redirect check
@@ -275,21 +273,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log("Starting Google authentication with session persistence");
       
-      // Set persistence to session before authentication
-      await setPersistence(auth, browserSessionPersistence);
-      console.log("Session persistence set successfully");
-      
-      // Create provider and redirect directly
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'
-      });
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      console.log("Redirecting to Google authentication");
-      await signInWithRedirect(auth, provider);
+      console.log("🚀 [SIGN IN] Starting enhanced Google authentication...");
+      await replitFirebaseManager.signInWithGoogle();
       
     } catch (error: any) {
       console.error("Authentication error:", error);

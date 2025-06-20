@@ -727,7 +727,7 @@ export class PostgresStorage implements IStorage {
         rideDestination: rides.destination,
         rideDepartureTime: rides.departureTime,
         rideArrivalTime: rides.arrivalTime,
-        ridePrice: rides.price,
+        ridePrice: sql<string>`COALESCE(${rideRequests.paymentAmount}::text, ${rides.price}::text)`,
         rideCarModel: rides.carModel,
         isCompleted: rides.isCompleted, // Include completion status
         isStarted: rides.isStarted, // Include start status
@@ -766,7 +766,7 @@ export class PostgresStorage implements IStorage {
         rideDestination: rides.destination,
         rideDepartureTime: rides.departureTime,
         rideArrivalTime: rides.arrivalTime,
-        ridePrice: rides.price,
+        ridePrice: sql<string>`COALESCE(${rideRequests.paymentAmount}::text, ${rides.price}::text)`,
         rideCarModel: rides.carModel,
         isCompleted: rides.isCompleted, // Include completion status
         isStarted: rides.isStarted, // Include start status

@@ -2518,6 +2518,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedOffer = await storage.updateDriverOfferStatus(offerId, status, userId);
+      
+      // If offer is accepted, create a ride request with approved status
+      if (status === 'accepted') {
+        try {
+          // Get the driver offer details to create the ride request
+          const driverOffers = await storage.getDriverOffersForRide(updatedOffer.passengerRideId);
+          const acceptedOffer = driverOffers.find(offer => offer.id === offerId);
+          
+          if (acceptedOffer) {
+            // Get the passenger ride details
+            const passengerRide = await storage.getRide(updatedOffer.passengerRideId);
+            
+            if (passengerRide) {
+              // We need to find the actual driver's ride that corresponds to this offer
+              // For now, let's create a ride request that will show in approved rides
+              const rideRequestData = {
+                rideId: updatedOffer.passengerRideId, // Keep the original passenger ride ID for now
+                passengerId: userId,
+                driverId: acceptedOffer.driverId,
+                message: `Accepted driver offer: ${acceptedOffer.message}`,
+                status: 'approved',
+                paymentStatus: 'pending',
+                paymentAmount: acceptedOffer.price
+              };
+              
+              await storage.createRideRequest(rideRequestData);
+              console.log('Created approved ride request for accepted driver offer');
+            }
+          }
+        } catch (requestError) {
+          console.error('Error creating ride request for accepted offer:', requestError);
+          // Don't fail the offer acceptance if ride request creation fails
+        }
+      }
+      
       res.json(updatedOffer);
     } catch (error) {
       console.error('Error updating driver offer status:', error);

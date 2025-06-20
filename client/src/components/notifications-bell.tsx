@@ -54,6 +54,14 @@ export default function NotificationsBell() {
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
+    
+    // Navigate based on notification type
+    if (notification.type === 'driver_offer') {
+      // Navigate to My Rides page with requests tab
+      window.location.href = '/my-rides?tab=requests';
+    }
+    
+    setIsOpen(false);
   };
 
   const getNotificationIcon = (type: string) => {

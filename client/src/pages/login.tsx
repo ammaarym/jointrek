@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth-new";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
 export default function Login() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, signInWithGoogle } = useAuth();
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
@@ -53,41 +51,22 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      console.log("🚀 [LOGIN DEBUG] ===== STARTING GOOGLE SIGN-IN =====");
-      console.log("🚀 [LOGIN DEBUG] Current URL:", window.location.href);
-      console.log("🚀 [LOGIN DEBUG] Current user before sign-in:", auth.currentUser?.email || "null");
-      
+      console.log("🚀 [LOGIN] Starting Google authentication...");
       setIsSigningIn(true);
-      console.log("🚀 [LOGIN DEBUG] isSigningIn state set to true");
       
-      // Set session persistence before sign-in
-      console.log("🚀 [LOGIN DEBUG] Setting session persistence...");
-      const { setPersistence, browserSessionPersistence } = await import("firebase/auth");
-      await setPersistence(auth, browserSessionPersistence);
-      console.log("✅ [LOGIN DEBUG] Session persistence configured for sign-in");
+      await signInWithGoogle();
       
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account',
-        hd: 'ufl.edu'  // Restrict to UF domain
-      });
-      provider.addScope('email');
-      provider.addScope('profile');
-      console.log("🚀 [LOGIN DEBUG] Google provider configured with UF domain restriction");
-
-      // Clear any previous auth state to ensure clean redirect
-      sessionStorage.removeItem('trek_auth_in_progress');
-      sessionStorage.setItem('trek_auth_in_progress', 'true');
-      console.log("🚀 [LOGIN DEBUG] Auth state markers prepared for redirect");
-      console.log("🚀 [LOGIN DEBUG] About to call signInWithRedirect...");
-
-      await signInWithRedirect(auth, provider);
-      console.log("🚀 [LOGIN DEBUG] signInWithRedirect completed (should not see this if redirect works)");
     } catch (error: any) {
-      console.error("❌ [LOGIN DEBUG] Google sign-in error:", error);
-      console.log("❌ [LOGIN DEBUG] Error details:", error?.code, error?.message);
+      console.error("❌ [LOGIN] Authentication failed:", error);
       setIsSigningIn(false);
-      sessionStorage.removeItem('trek_auth_in_progress');
+      
+      if (error.code === 'auth/popup-blocked') {
+        alert("Please allow popups for this site and try again.");
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        // User cancelled, no need to show error
+      } else {
+        alert("Authentication failed. Please try again.");
+      }
     }
   };
 

@@ -395,7 +395,7 @@ export default function FindRidesPostgres() {
                     genderFilter
                   });
                 }}
-                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 px-2 py-3 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   quickFilter === 'departures'
                     ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'
@@ -417,7 +417,7 @@ export default function FindRidesPostgres() {
                     genderFilter
                   });
                 }}
-                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 px-2 py-3 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   quickFilter === 'arrivals'
                     ? 'bg-white shadow text-primary'
                     : 'text-gray-600 hover:text-gray-900'

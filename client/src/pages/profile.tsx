@@ -728,6 +728,18 @@ export default function Profile() {
                   {isOnboarding ? "Updating..." : "Modify Setup"}
                 </Button>
               </div>
+
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3 mt-4">
+                <div className="flex items-start">
+                  <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-green-800 dark:text-green-200 text-sm">Secure Driver Account</h4>
+                    <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                      Your banking and identity information is securely handled by Stripe. Trek never sees your bank account details or SSN.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

@@ -7,7 +7,7 @@ import NotFound from "@/pages/not-found";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Home from "@/pages/home";
-import Login from "@/pages/login";
+import Login from "@/pages/login-popup";
 import AuthTab from "@/pages/auth-tab";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";

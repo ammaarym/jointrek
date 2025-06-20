@@ -122,6 +122,7 @@ DATABASE_URL
 - June 20, 2025: Completed driver offer acceptance flow - passengers can now accept driver offers which automatically creates approved ride requests, moves rides to "Approved Rides" section, and provides clickable notifications that navigate to ride requests tab via URL parameters
 - June 20, 2025: Enhanced driver offer system with duplicate prevention - drivers can only make one pending offer per passenger ride until response received, and approved rides now display counter offer price instead of original ride price
 - June 20, 2025: Fixed duplicate driver offer prevention - implemented robust server-side validation that blocks multiple pending offers from same driver, and fixed counter offer price display to show actual negotiated amount ($35) instead of original ride price ($25)
+- June 20, 2025: Added comprehensive notifications page accessible via "View All Notifications" button - displays all notifications with timestamps, read/unread status, proper navigation to relevant sections, and smart filtering by notification type with visual indicators
 
 ## User Preferences
 

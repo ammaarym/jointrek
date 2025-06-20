@@ -170,7 +170,10 @@ export default function NotificationsBell() {
               variant="ghost" 
               size="sm" 
               className="w-full text-center"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                window.location.href = '/notifications';
+              }}
             >
               View All Notifications
             </Button>

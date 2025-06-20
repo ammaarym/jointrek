@@ -2531,10 +2531,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const passengerRide = await storage.getRide(updatedOffer.passengerRideId);
             
             if (passengerRide) {
-              // We need to find the actual driver's ride that corresponds to this offer
-              // For now, let's create a ride request that will show in approved rides
+              // Create a ride request with the counter offer price
               const rideRequestData = {
-                rideId: updatedOffer.passengerRideId, // Keep the original passenger ride ID for now
+                rideId: updatedOffer.passengerRideId,
                 passengerId: userId,
                 driverId: acceptedOffer.driverId,
                 message: `Accepted driver offer: ${acceptedOffer.message}`,

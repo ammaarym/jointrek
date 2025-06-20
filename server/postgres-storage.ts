@@ -1317,6 +1317,22 @@ export class PostgresStorage implements IStorage {
 
   // Driver offers methods
   async createDriverOffer(offerData: InsertDriverOffer): Promise<DriverOffer> {
+    // Check if driver already has a pending offer for this passenger ride
+    const existingOffer = await db
+      .select()
+      .from(driverOffers)
+      .where(
+        and(
+          eq(driverOffers.driverId, offerData.driverId),
+          eq(driverOffers.passengerRideId, offerData.passengerRideId),
+          eq(driverOffers.status, 'pending')
+        )
+      );
+
+    if (existingOffer.length > 0) {
+      throw new Error('You already have a pending offer for this ride. Please wait for the passenger to respond.');
+    }
+
     const [offer] = await db.insert(driverOffers).values(offerData).returning();
     return offer;
   }

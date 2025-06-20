@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Set persistence before any auth operations
         console.log("🔥 [AUTH DEBUG] Setting session persistence...");
-        await setPersistence(auth, browserSessionPersistence);
+        await setPersistence(auth, browserLocalPersistence);
         console.log("✅ [AUTH DEBUG] Session persistence configured successfully");
         
         // Check for auth state backup first (Replit persistence fix)

@@ -1318,7 +1318,7 @@ export class PostgresStorage implements IStorage {
   // Driver offers methods
   async createDriverOffer(offerData: InsertDriverOffer): Promise<DriverOffer> {
     // Check if driver already has a pending offer for this passenger ride
-    const existingOffer = await db
+    const existingOffers = await db
       .select()
       .from(driverOffers)
       .where(
@@ -1329,10 +1329,14 @@ export class PostgresStorage implements IStorage {
         )
       );
 
-    if (existingOffer.length > 0) {
+    console.log('Checking for existing offers:', existingOffers.length, 'found for driver', offerData.driverId, 'ride', offerData.passengerRideId);
+
+    if (existingOffers.length > 0) {
+      console.log('Blocking duplicate offer - existing pending offer found');
       throw new Error('You already have a pending offer for this ride. Please wait for the passenger to respond.');
     }
 
+    console.log('Creating new driver offer - no duplicates found');
     const [offer] = await db.insert(driverOffers).values(offerData).returning();
     return offer;
   }

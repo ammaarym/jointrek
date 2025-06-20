@@ -121,6 +121,7 @@ DATABASE_URL
 - June 20, 2025: Implemented complete driver offer system - drivers can now offer rides to passengers through dedicated "Offer a Trek" page with 300-character message limit, SMS notifications with proper name formatting (First Middle Last), and direct link to https://jointrek.replit.app/
 - June 20, 2025: Completed driver offer acceptance flow - passengers can now accept driver offers which automatically creates approved ride requests, moves rides to "Approved Rides" section, and provides clickable notifications that navigate to ride requests tab via URL parameters
 - June 20, 2025: Enhanced driver offer system with duplicate prevention - drivers can only make one pending offer per passenger ride until response received, and approved rides now display counter offer price instead of original ride price
+- June 20, 2025: Fixed duplicate driver offer prevention - implemented robust server-side validation that blocks multiple pending offers from same driver, and fixed counter offer price display to show actual negotiated amount ($35) instead of original ride price ($25)
 
 ## User Preferences
 

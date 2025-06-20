@@ -171,6 +171,9 @@ function AppRoutes() {
           <Route path="/help">
             {(params) => <ProtectedRoute component={Help} path="/help" />}
           </Route>
+          <Route path="/notifications">
+            {(params) => <ProtectedRoute component={NotificationsPage} path="/notifications" />}
+          </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}
           </Route>

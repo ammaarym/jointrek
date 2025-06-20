@@ -2406,6 +2406,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
+      // Get passenger info and send SMS notification
+      const ride = await storage.getRideById(passengerRideId);
+      if (ride) {
+        const passenger = await storage.getUserByFirebaseUid(ride.driverId); // This is the passenger who posted the ride request
+        const driverUser = await storage.getUserByFirebaseUid(driverId);
+        
+        if (passenger?.phone && driverUser) {
+          try {
+            const { twilioService } = require('./twilio-service');
+            
+            const smsMessage = `🚗 New driver offer from ${driverUser.displayName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nLogin to Trek to view and respond to this offer.`;
+            
+            await twilioService.sendSMS({
+              to: passenger.phone,
+              message: smsMessage
+            });
+            
+            console.log(`SMS notification sent to passenger ${passenger.email} at ${passenger.phone}`);
+          } catch (smsError) {
+            console.error('Error sending SMS notification:', smsError);
+            // Don't fail the offer creation if SMS fails
+          }
+        }
+      }
+
       res.json(offer);
     } catch (error) {
       console.error('Error creating driver offer:', error);

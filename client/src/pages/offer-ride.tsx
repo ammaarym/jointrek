@@ -322,11 +322,20 @@ export default function OfferRidePage() {
                   <Textarea
                     id="message"
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {
+                      const newMessage = e.target.value;
+                      if (newMessage.length <= 300) {
+                        setMessage(newMessage);
+                      }
+                    }}
                     placeholder="Hi! I can take you on this trip. Looking forward to driving you safely!"
                     className="mt-1"
                     rows={3}
+                    maxLength={300}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {message.length}/300 characters
+                  </p>
                 </div>
 
                 <Button 

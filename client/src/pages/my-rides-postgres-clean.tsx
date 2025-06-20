@@ -98,6 +98,15 @@ export default function MyRidesPostgres() {
   // Approved rides sub-tab state for passenger/driver views
   const [approvedTab, setApprovedTab] = useState('passenger');
 
+  // Check URL params for tab navigation
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'requests') {
+      setActiveTab('requests');
+    }
+  }, [location]);
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'short',

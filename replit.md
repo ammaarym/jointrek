@@ -119,6 +119,7 @@ DATABASE_URL
 - June 20, 2025: Enhanced admin dashboard with comprehensive user management - added full contact information display (phone, Instagram, Snapchat), complete user editing capabilities, user deletion with cascade cleanup, and cleared rides database for fresh start
 - June 20, 2025: Updated branding to use Satoshi font text logo - replaced image logo with clean "Trek" text using Satoshi font, imported font via Google Fonts, and updated header and footer components
 - June 20, 2025: Implemented complete driver offer system - drivers can now offer rides to passengers through dedicated "Offer a Trek" page with 300-character message limit, SMS notifications with proper name formatting (First Middle Last), and direct link to https://jointrek.replit.app/
+- June 20, 2025: Completed driver offer acceptance flow - passengers can now accept driver offers which automatically creates approved ride requests, moves rides to "Approved Rides" section, and provides clickable notifications that navigate to ride requests tab via URL parameters
 
 ## User Preferences
 

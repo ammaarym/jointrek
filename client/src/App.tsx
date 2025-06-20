@@ -7,7 +7,7 @@ import NotFound from "@/pages/not-found";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Home from "@/pages/home";
-import Login from "@/pages/login-popup";
+import Login from "@/pages/login";
 import AuthTab from "@/pages/auth-tab";
 import FindRidesPostgres from "@/pages/find-rides-postgres";
 import PostRidePostgres from "@/pages/post-ride-postgres";
@@ -23,7 +23,7 @@ import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";
 import React, { useEffect, useState, Suspense } from "react";
-import { AuthProvider, useAuth } from "@/hooks/use-auth-popup";
+import { AuthProvider, useAuth } from "@/hooks/use-auth-new";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 

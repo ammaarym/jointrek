@@ -2,10 +2,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { 
   onAuthStateChanged, 
   signOut as firebaseSignOut,
+  getRedirectResult,
   GoogleAuthProvider,
+  signInWithRedirect,
   signInWithPopup,
   setPersistence,
-  browserLocalPersistence
+  browserSessionPersistence
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
@@ -54,7 +56,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // Set persistence before any auth operations
         console.log("🔥 [AUTH DEBUG] Setting session persistence...");
-        await setPersistence(auth, browserLocalPersistence);
+        await setPersistence(auth, browserSessionPersistence);
         console.log("✅ [AUTH DEBUG] Session persistence configured successfully");
         
         // Check for auth state backup first (Replit persistence fix)
@@ -270,9 +272,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("🚀 [SIGN IN] Starting popup-only authentication...");
+      console.log("🚀 [SIGN IN] Starting direct Firebase popup authentication...");
       
-      // Configure provider for popup
+      // Configure provider
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
         prompt: 'select_account',
@@ -281,13 +283,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       provider.addScope('email');
       provider.addScope('profile');
       
-      console.log("🔄 [SIGN IN] Opening Google authentication popup...");
+      console.log("🔄 [SIGN IN] Attempting popup authentication...");
       
-      // Force popup with specific dimensions to work in Replit
+      // Check if popup can be opened
+      const testPopup = window.open('', '_blank', 'width=1,height=1');
+      if (!testPopup || testPopup.closed) {
+        console.log("⚠️ [SIGN IN] Popup blocked or in iframe - using redirect method");
+        testPopup?.close();
+        
+        // Fall back to redirect
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      testPopup.close();
+      
+      // Use Firebase popup
       const result = await signInWithPopup(auth, provider);
       
       if (result?.user) {
-        console.log("✅ [SIGN IN] Popup authentication successful, user:", result.user.email);
+        console.log("✅ [SIGN IN] Authentication successful, user:", result.user.email);
         
         // Verify UF email domain
         if (!result.user.email || !isUFEmail(result.user.email)) {
@@ -309,24 +323,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           window.location.replace('/profile');
         }, 100);
       } else {
-        console.log("ℹ️ [SIGN IN] No user returned from popup authentication");
+        console.log("ℹ️ [SIGN IN] No user returned from authentication");
       }
       
     } catch (error: any) {
-      console.error("❌ [SIGN IN] Popup authentication error:", error);
+      console.error("❌ [SIGN IN] Authentication error:", error);
       
-      // Handle popup-specific errors
+      // Handle specific error cases
       if (error.code === 'auth/popup-blocked') {
-        alert("Popup was blocked. Please allow popups for this site and try again. You may need to adjust your browser settings.");
+        alert("Please allow popups for this site and try again. You can also try refreshing the page.");
       } else if (error.code === 'auth/popup-closed-by-user') {
-        console.log("ℹ️ [SIGN IN] User closed the popup");
-        // User closed popup, no error message needed
+        console.log("ℹ️ [SIGN IN] User cancelled authentication");
       } else if (error.code === 'auth/unauthorized-domain') {
         alert("Authentication failed: This domain is not authorized. Please contact support.");
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        console.log("ℹ️ [SIGN IN] Popup request cancelled");
       } else {
-        alert("Authentication failed. Please try again or check your popup settings.");
+        alert("Authentication failed. Please try again.");
       }
       
       throw error;

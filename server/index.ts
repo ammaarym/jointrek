@@ -37,20 +37,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route for deployment
-app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({ status: "ok", message: "Trek Ride-Sharing Platform is running" });
-});
-
-// Additional health check endpoint
-app.get("/health", (req: Request, res: Response) => {
-  res.status(200).json({ 
-    status: "healthy", 
-    timestamp: new Date().toISOString(),
-    service: "trek-rideshare-api"
-  });
-});
-
 // Function to clean up expired rides and old requests
 async function cleanupExpiredRides() {
   try {

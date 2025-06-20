@@ -271,22 +271,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
-      console.log("🚀 [SIGN IN] Starting popup-based Google authentication...");
-      const user = await replitFirebaseManager.signInWithGoogle();
+      console.log("🚀 [SIGN IN] Starting direct Firebase popup authentication...");
       
-      if (user) {
-        console.log("✅ [SIGN IN] Authentication successful, user:", user.email);
+      // Configure provider
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        hd: 'ufl.edu'
+      });
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      console.log("🔄 [SIGN IN] Opening Google authentication popup...");
+      
+      // Use direct Firebase popup
+      const result = await signInWithPopup(auth, provider);
+      
+      if (result?.user) {
+        console.log("✅ [SIGN IN] Authentication successful, user:", result.user.email);
         
         // Verify UF email domain
-        if (!user.email || !isUFEmail(user.email)) {
-          console.log("❌ [SIGN IN] BLOCKING - Non-UF email:", user.email || "no email");
+        if (!result.user.email || !isUFEmail(result.user.email)) {
+          console.log("❌ [SIGN IN] BLOCKING - Non-UF email:", result.user.email || "no email");
           await firebaseSignOut(auth);
           alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
           return;
         }
         
         console.log("✅ [SIGN IN] UF email verified, setting user state");
-        setCurrentUser(user);
+        
+        // Store auth state immediately
+        replitAuthManager.storeAuthState(result.user);
+        setCurrentUser(result.user);
         
         // Redirect to profile page after successful authentication
         setTimeout(() => {
@@ -294,7 +310,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           window.location.replace('/profile');
         }, 100);
       } else {
-        console.log("ℹ️ [SIGN IN] No user returned (popup closed or cancelled)");
+        console.log("ℹ️ [SIGN IN] No user returned from authentication");
       }
       
     } catch (error: any) {
@@ -304,8 +320,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error.code === 'auth/popup-blocked') {
         alert("Please allow popups for this site and try again. You can also try refreshing the page.");
       } else if (error.code === 'auth/popup-closed-by-user') {
-        // User cancelled, no action needed
         console.log("ℹ️ [SIGN IN] User cancelled authentication");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert("Authentication failed: This domain is not authorized. Please contact support.");
       } else {
         alert("Authentication failed. Please try again.");
       }

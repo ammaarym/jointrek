@@ -245,10 +245,10 @@ class ReplitFirebaseManager {
   }
 
   /**
-   * Enhanced Google sign-in with popup method (bypasses redirect session issues)
+   * Simple Google sign-in using redirect (works reliably in Replit)
    */
   async signInWithGoogle(): Promise<User | null> {
-    console.log("🚀 [REPLIT FIREBASE] Starting popup-based Google sign-in...");
+    console.log("🚀 [REPLIT FIREBASE] Starting Google sign-in with redirect...");
     
     try {
       await this.configurePersistence();
@@ -256,40 +256,21 @@ class ReplitFirebaseManager {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
         prompt: 'select_account',
-        hd: 'ufl.edu' // Hint for UF domain
+        hd: 'ufl.edu'
       });
       
-      // Add required scopes
       provider.addScope('email');
       provider.addScope('profile');
       
-      console.log("🔄 [REPLIT FIREBASE] Opening authentication popup...");
-      const result = await signInWithPopup(auth, provider);
+      console.log("🔄 [REPLIT FIREBASE] Initiating redirect to Google...");
+      await signInWithRedirect(auth, provider);
       
-      if (result?.user) {
-        console.log("✅ [REPLIT FIREBASE] Popup authentication successful!");
-        console.log("👤 [REPLIT FIREBASE] User:", result.user.email);
-        
-        // Store user data immediately
-        this.storeUserData(result.user);
-        return result.user;
-      } else {
-        console.log("❌ [REPLIT FIREBASE] No user returned from popup");
-        return null;
-      }
+      // Redirect method doesn't return a user directly
+      return null;
       
-    } catch (error: any) {
-      // Handle popup blocked error gracefully
-      if (error.code === 'auth/popup-blocked') {
-        console.log("⚠️ [REPLIT FIREBASE] Popup blocked - falling back to redirect method");
-        return this.fallbackToRedirect();
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        console.log("ℹ️ [REPLIT FIREBASE] User closed popup");
-        return null;
-      } else {
-        console.error("❌ [REPLIT FIREBASE] Popup sign-in error:", error);
-        throw error;
-      }
+    } catch (error) {
+      console.error("❌ [REPLIT FIREBASE] Redirect sign-in error:", error);
+      throw error;
     }
   }
 

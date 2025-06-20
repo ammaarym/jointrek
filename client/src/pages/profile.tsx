@@ -768,6 +768,19 @@ export default function Profile() {
                   <li>• Business information (if applicable)</li>
                 </ul>
               </div>
+
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2 text-sm flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Your Data is Secure
+                </h3>
+                <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
+                  <li>• All banking information is securely handled by Stripe</li>
+                  <li>• Trek never sees your bank account or SSN details</li>
+                  <li>• Your data is encrypted and PCI DSS compliant</li>
+                  <li>• Only you and Stripe have access to your financial data</li>
+                </ul>
+              </div>
             </div>
           )}
         </CardContent>

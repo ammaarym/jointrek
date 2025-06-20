@@ -174,6 +174,56 @@ export default function StripeSetupGuide() {
         </CardContent>
       </Card>
 
+      {/* Security Assurance */}
+      <Card className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <CardHeader>
+          <CardTitle className="flex items-center text-green-800">
+            <Shield className="w-6 h-6 mr-2" />
+            Your Financial Data is Protected
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-green-800">Trek Never Sees Your Data</h4>
+                  <p className="text-sm text-gray-600">Your bank account, SSN, and identity documents are only visible to Stripe, never to Trek.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-green-800">Bank-Level Encryption</h4>
+                  <p className="text-sm text-gray-600">All data is encrypted in transit and at rest using industry-standard security protocols.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-green-800">PCI DSS Compliant</h4>
+                  <p className="text-sm text-gray-600">Stripe maintains the highest level of payment security certification available.</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-green-800">Regulated Financial Institution</h4>
+                  <p className="text-sm text-gray-600">Stripe is a licensed money transmitter and follows strict financial regulations.</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-green-100 border border-green-300 rounded-lg p-4">
+              <p className="text-sm text-green-800">
+                <strong>Privacy Guarantee:</strong> Trek only receives confirmation that your account is verified and ready to receive payments. 
+                We never have access to your banking details, social security number, or identity documents.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Requirements */}
       <Card className="mb-8">
         <CardHeader>

@@ -190,15 +190,15 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteRide(id: number): Promise<boolean> {
-    // First delete any associated ride requests
-    await db.delete(rideRequests).where(eq(rideRequests.rideId, id));
-    
-    // Then delete any associated reviews
-    await db.delete(reviews).where(eq(reviews.rideId, id));
-    
-    // Finally delete the ride
-    await db.delete(rides).where(eq(rides.id, id));
-    return true;
+    try {
+      // With CASCADE DELETE constraints, we can delete the ride directly
+      // and all related records (driver_offers, ride_requests, reviews, etc.) will be deleted automatically
+      const result = await db.delete(rides).where(eq(rides.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting ride:', error);
+      throw error;
+    }
   }
 
   async getRidesByLocation(origin: string, destination?: string): Promise<any[]> {

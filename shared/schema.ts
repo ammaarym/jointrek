@@ -159,6 +159,25 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   updatedAt: true
 });
 
+// Driver offers table (for drivers offering rides to passengers)
+export const driverOffers = pgTable("driver_offers", {
+  id: serial("id").primaryKey(),
+  driverId: text("driver_id").notNull().references(() => users.firebaseUid),
+  passengerRideId: integer("passenger_ride_id").notNull().references(() => rides.id),
+  price: real("price").notNull(),
+  message: text("message"),
+  status: text("status").notNull().default("pending"), // pending, accepted, rejected, expired
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Driver offers insert schema
+export const insertDriverOfferSchema = createInsertSchema(driverOffers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Booking table schema
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),

@@ -10,6 +10,7 @@ import {
   rideRequests,
   userStats,
   notifications,
+  driverOffers,
   type Ride,
   type InsertRide,
   type User,
@@ -28,6 +29,8 @@ import {
   type InsertRideRequest,
   type UserStats,
   type InsertUserStats,
+  type DriverOffer,
+  type InsertDriverOffer,
   insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
@@ -1310,6 +1313,71 @@ export class PostgresStorage implements IStorage {
       console.error('Error getting unread notification count:', error);
       return 0;
     }
+  }
+
+  // Driver offers methods
+  async createDriverOffer(offerData: InsertDriverOffer): Promise<DriverOffer> {
+    const [offer] = await db.insert(driverOffers).values(offerData).returning();
+    return offer;
+  }
+
+  async getDriverOffersForRide(rideId: number): Promise<any[]> {
+    const result = await db
+      .select({
+        id: driverOffers.id,
+        driverId: driverOffers.driverId,
+        price: driverOffers.price,
+        message: driverOffers.message,
+        status: driverOffers.status,
+        createdAt: driverOffers.createdAt,
+        driverName: users.displayName,
+        driverEmail: users.email,
+        driverPhone: users.phone,
+        driverPhotoUrl: users.photoUrl
+      })
+      .from(driverOffers)
+      .leftJoin(users, eq(driverOffers.driverId, users.firebaseUid))
+      .where(eq(driverOffers.passengerRideId, rideId))
+      .orderBy(desc(driverOffers.createdAt));
+
+    return result;
+  }
+
+  async updateDriverOfferStatus(offerId: number, status: string, userId: string): Promise<DriverOffer> {
+    const [updatedOffer] = await db
+      .update(driverOffers)
+      .set({ 
+        status, 
+        updatedAt: new Date() 
+      })
+      .where(eq(driverOffers.id, offerId))
+      .returning();
+
+    return updatedOffer;
+  }
+
+  async getDriverOffersByDriver(driverId: string): Promise<any[]> {
+    const result = await db
+      .select({
+        id: driverOffers.id,
+        passengerRideId: driverOffers.passengerRideId,
+        price: driverOffers.price,
+        message: driverOffers.message,
+        status: driverOffers.status,
+        createdAt: driverOffers.createdAt,
+        rideOrigin: rides.origin,
+        rideDestination: rides.destination,
+        rideDepartureTime: rides.departureTime,
+        passengerName: users.displayName,
+        passengerEmail: users.email
+      })
+      .from(driverOffers)
+      .leftJoin(rides, eq(driverOffers.passengerRideId, rides.id))
+      .leftJoin(users, eq(rides.driverId, users.firebaseUid))
+      .where(eq(driverOffers.driverId, driverId))
+      .orderBy(desc(driverOffers.createdAt));
+
+    return result;
   }
 }
 

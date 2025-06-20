@@ -2397,7 +2397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Driver must complete onboarding first' });
       }
 
-      // Create driver offer (with duplicate prevention built into storage method)
+      // Create driver offer with duplicate prevention
       const offer = await storage.createDriverOffer({
         driverId,
         passengerRideId,

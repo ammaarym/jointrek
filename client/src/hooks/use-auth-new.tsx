@@ -44,90 +44,110 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log("Initializing Firebase authentication with Replit production fixes");
+    console.log("Setting up Firebase authentication");
     let unsubscribe: (() => void) | null = null;
+    let redirectProcessed = false;
     
-    const initializeReplitAuth = async () => {
-      // Configure Replit-specific persistence
-      await configureReplitPersistence();
-      
-      // Enhanced redirect result handling
-      const redirectUser = await handleReplitRedirectResult();
-      if (redirectUser) {
-        // Verify UF email domain immediately
-        if (!redirectUser.email || !isUFEmail(redirectUser.email)) {
-          console.log("BLOCKING - Non-UF email from redirect:", redirectUser.email || "no email");
-          await firebaseSignOut(auth);
-          clearReplitAuthState();
-          alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
-          setLoading(false);
+    const initAuth = async () => {
+      try {
+        // Set persistence before any auth operations
+        await setPersistence(auth, browserSessionPersistence);
+        console.log("Session persistence configured");
+        
+        // Handle redirect result first
+        console.log("Checking for redirect result...");
+        const result = await getRedirectResult(auth);
+        
+        if (result && result.user) {
+          console.log("SUCCESS: Redirect authentication completed for:", result.user.email);
+          redirectProcessed = true;
+          
+          // Verify UF email domain immediately
+          if (!result.user.email || !isUFEmail(result.user.email)) {
+            console.log("BLOCKING - Non-UF email from redirect:", result.user.email || "no email");
+            await firebaseSignOut(auth);
+            alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
+            setLoading(false);
+            return;
+          }
+          
+          // Set user immediately and redirect
+          setCurrentUser(result.user);
+          console.log("Redirecting to profile after successful authentication");
+          window.location.replace('/profile');
           return;
+        } else {
+          console.log("No redirect result - checking existing auth state");
         }
         
-        // Navigate to profile after successful redirect authentication
-        console.log("Replit: Redirecting authenticated user to profile page");
-        setTimeout(() => {
-          window.location.replace('/profile');
-        }, 100);
-      }
-
-      // Set up enhanced auth state monitoring for Replit
-      unsubscribe = setupReplitAuthMonitoring(async (user: User | null) => {
-        console.log("Replit: Auth state changed:", user?.email || "no user");
-        console.log("Current URL:", window.location.href);
-        
-        if (user && user.email) {
-          if (isUFEmail(user.email)) {
-            console.log("ALLOWING ACCESS - Valid UF email:", user.email);
-            setCurrentUser(user);
-            
-            // Sync user with PostgreSQL
-            try {
-              const userData = {
-                firebaseUid: user.uid,
-                email: user.email,
-                displayName: user.displayName || "Anonymous User",
-                photoUrl: user.photoURL,
-                emailVerified: user.emailVerified
-              };
-
-              const response = await fetch(`/api/users/firebase/${user.uid}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-              });
-
-              if (response.ok) {
-                console.log("User already exists in PostgreSQL");
-              } else if (response.status === 404) {
-                await fetch('/api/users', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(userData)
-                });
-                console.log("Created new user in PostgreSQL");
+        // Set up auth state listener only after redirect check
+        unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+          console.log("Auth state changed:", user?.email || "no user");
+          
+          if (user && user.email) {
+            if (isUFEmail(user.email)) {
+              console.log("ALLOWING ACCESS - Valid UF email:", user.email);
+              setCurrentUser(user);
+              
+              // Only redirect from login/home pages, not if already on profile
+              const currentPath = window.location.pathname;
+              if (!redirectProcessed && (currentPath === '/login' || currentPath === '/')) {
+                console.log("Redirecting authenticated user from", currentPath, "to profile");
+                window.location.replace('/profile');
+                return;
               }
-            } catch (error) {
-              console.error("Error syncing user with PostgreSQL:", error);
+              
+              // Sync user with PostgreSQL
+              try {
+                const userData = {
+                  firebaseUid: user.uid,
+                  email: user.email,
+                  displayName: user.displayName || "Anonymous User",
+                  photoUrl: user.photoURL,
+                  emailVerified: user.emailVerified
+                };
+
+                const response = await fetch(`/api/users/firebase/${user.uid}`, {
+                  method: 'GET',
+                  headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                  console.log("User already exists in PostgreSQL");
+                } else if (response.status === 404) {
+                  await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                  });
+                  console.log("Created new user in PostgreSQL");
+                }
+              } catch (error) {
+                console.error("Error syncing user with PostgreSQL:", error);
+              }
+            } else {
+              console.log("BLOCKING ACCESS - Invalid email domain:", user.email);
+              await firebaseSignOut(auth);
+              setCurrentUser(null);
+              alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
             }
           } else {
-            console.log("BLOCKING ACCESS - Invalid email domain:", user.email);
-            await firebaseSignOut(auth);
-            clearReplitAuthState();
+            console.log("No authenticated user found");
             setCurrentUser(null);
-            alert("Access restricted to University of Florida students only. Please use your @ufl.edu email address.");
           }
-        } else {
-          console.log("No authenticated user found");
-          clearReplitAuthState();
-          setCurrentUser(null);
-        }
+          
+          setLoading(false);
+        });
         
+      } catch (error) {
+        console.error("Error in auth initialization:", error);
         setLoading(false);
-      });
+      }
     };
 
-    initializeReplitAuth();
+    initAuth();
 
+    // Proper cleanup function
     return () => {
       if (unsubscribe) {
         unsubscribe();

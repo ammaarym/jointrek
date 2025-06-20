@@ -2414,8 +2414,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (passenger?.phone && driverUser) {
           try {
-            const { twilioService } = require('./twilio-service');
-            
             const smsMessage = `🚗 New driver offer from ${driverUser.displayName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nLogin to Trek to view and respond to this offer.`;
             
             await twilioService.sendSMS({

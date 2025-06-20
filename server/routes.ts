@@ -2414,7 +2414,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (passenger?.phone && driverUser) {
           try {
-            const smsMessage = `🚗 New driver offer from ${driverUser.displayName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nLogin to Trek to view and respond to this offer.`;
+            // Format driver name from "Last, First" to "First Last"
+            const formatName = (displayName: string): string => {
+              if (!displayName) return displayName;
+              if (displayName.includes(',')) {
+                const parts = displayName.split(',').map(part => part.trim());
+                if (parts.length === 2) {
+                  const [lastName, firstMiddle] = parts;
+                  return `${firstMiddle} ${lastName}`;
+                }
+              }
+              return displayName;
+            };
+            
+            const formattedDriverName = formatName(driverUser.displayName);
+            const smsMessage = `🚗 New driver offer from ${formattedDriverName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nView and respond: https://jointrek.replit.app/`;
             
             await twilioService.sendSMS({
               to: passenger.phone,

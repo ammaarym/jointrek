@@ -118,6 +118,7 @@ DATABASE_URL
 - June 20, 2025: Fixed Firebase authentication redirect session state loss issue - implemented popup-based authentication with fallback to redirect, enhanced debugging system, and Replit-specific auth state persistence to resolve OAuth redirect failures in production environment
 - June 20, 2025: Enhanced admin dashboard with comprehensive user management - added full contact information display (phone, Instagram, Snapchat), complete user editing capabilities, user deletion with cascade cleanup, and cleared rides database for fresh start
 - June 20, 2025: Updated branding to use Satoshi font text logo - replaced image logo with clean "Trek" text using Satoshi font, imported font via Google Fonts, and updated header and footer components
+- June 20, 2025: Implemented complete driver offer system - drivers can now offer rides to passengers through dedicated "Offer a Trek" page with 300-character message limit, SMS notifications with proper name formatting (First Middle Last), and direct link to https://jointrek.replit.app/
 
 ## User Preferences
 

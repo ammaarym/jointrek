@@ -2418,6 +2418,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin update user
+  app.patch("/api/admin/users/:id", adminAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { displayName, phone, instagram, snapchat } = req.body;
+
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const updateData: any = {};
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (phone !== undefined) updateData.phone = phone;
+      if (instagram !== undefined) updateData.instagram = instagram;
+      if (snapchat !== undefined) updateData.snapchat = snapchat;
+
+      const updatedUser = await storage.updateUser(user.firebaseUid, updateData);
+      
+      if (updatedUser) {
+        res.json(updatedUser);
+      } else {
+        res.status(500).json({ error: "Failed to update user" });
+      }
+    } catch (error) {
+      console.error("Admin update user error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin delete user
+  app.delete("/api/admin/users/:id", adminAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Delete user's data in cascade order
+      await storage.executeSQL(`DELETE FROM ride_requests WHERE passenger_id = '${user.firebaseUid}' OR driver_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM bookings WHERE passenger_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM rides WHERE driver_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM messages WHERE sender_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM reviews WHERE reviewer_id = '${user.firebaseUid}' OR reviewee_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM user_stats WHERE user_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM notifications WHERE user_id = '${user.firebaseUid}'`);
+      await storage.executeSQL(`DELETE FROM users WHERE id = ${userId}`);
+      
+      res.json({ success: true, message: "User and all associated data deleted successfully" });
+    } catch (error) {
+      console.error("Admin delete user error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Admin rides list
   app.get("/api/admin/rides", adminAuth, async (req, res) => {
     try {
@@ -2484,6 +2549,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Admin delete ${req.params.tableName}/${req.params.id} error:`, error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Database management - Execute SQL
+  app.post("/api/admin/sql", adminAuth, async (req, res) => {
+    try {
+      const { query } = req.body;
+
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: "SQL query is required" });
+      }
+
+      // Basic security check - prevent dangerous operations
+      const lowerQuery = query.toLowerCase().trim();
+      const dangerousCommands = ['drop', 'truncate', 'alter', 'create', 'grant', 'revoke'];
+      
+      if (dangerousCommands.some(cmd => lowerQuery.startsWith(cmd))) {
+        return res.status(403).json({ error: "Dangerous SQL operations are not allowed" });
+      }
+
+      const result = await storage.executeSQL(query);
+      res.json(result);
+    } catch (error) {
+      console.error("Admin SQL execution error:", error);
+      res.status(500).json({ error: "SQL execution failed: " + (error as Error).message });
     }
   });
 

@@ -1083,24 +1083,104 @@ export default function AdminDashboard() {
           <TabsContent value="users">
             <Card>
               <CardHeader>
-                <CardTitle>Users</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  All Users
+                  <Button onClick={() => fetchDashboardData()} size="sm" variant="outline">
+                    Refresh Users
+                  </Button>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {users.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border border-stone-200 rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium">{user.displayName}</div>
-                        <div className="text-sm text-stone-600">{user.email}</div>
-                        {user.phone && (
-                          <div className="text-sm text-stone-600 flex items-center gap-2 mt-1">
-                            <Phone className="w-4 h-4" />
-                            {user.phone}
+                    <div key={user.id} className="border border-stone-200 rounded-lg p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-medium text-stone-900">{user.displayName}</h3>
+                            <Badge variant="outline" className="text-xs">ID: {user.id}</Badge>
                           </div>
-                        )}
+                          <p className="text-stone-600 font-medium">{user.email}</p>
+                          <p className="text-sm text-stone-500">Joined: {formatDate(user.createdAt)}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Edit User: {user.displayName}</DialogTitle>
+                              </DialogHeader>
+                              <UserEditForm user={user} onSuccess={() => fetchDashboardData()} />
+                            </DialogContent>
+                          </Dialog>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => deleteUser(user.id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </div>
-                      <div className="text-right text-sm text-stone-600">
-                        Joined {formatDate(user.createdAt)}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-stone-50 rounded-lg p-4">
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-2">Contact Information</h4>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-3 h-3 text-stone-500" />
+                              <span className="text-stone-600">{user.phone || 'No phone'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <MessageSquare className="w-3 h-3 text-stone-500" />
+                              <span className="text-stone-600">{user.instagram || 'No Instagram'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <MessageSquare className="w-3 h-3 text-stone-500" />
+                              <span className="text-stone-600">{user.snapchat || 'No Snapchat'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-2">Account Details</h4>
+                          <div className="space-y-1">
+                            <div className="text-xs text-stone-500">
+                              Firebase UID: <span className="font-mono">{user.firebaseUid?.substring(0, 16)}...</span>
+                            </div>
+                            {user.stripeCustomerId && (
+                              <div className="text-xs text-stone-500">
+                                Stripe Customer: <span className="font-mono">{user.stripeCustomerId.substring(0, 16)}...</span>
+                              </div>
+                            )}
+                            {user.photoUrl && (
+                              <div className="text-xs text-stone-500">
+                                Has Profile Photo: Yes
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-2">Quick Actions</h4>
+                          <div className="space-y-1">
+                            <Button size="sm" variant="ghost" className="w-full justify-start text-xs h-6">
+                              View User Rides
+                            </Button>
+                            <Button size="sm" variant="ghost" className="w-full justify-start text-xs h-6">
+                              View Requests
+                            </Button>
+                            <Button size="sm" variant="ghost" className="w-full justify-start text-xs h-6">
+                              Contact User
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

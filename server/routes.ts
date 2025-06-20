@@ -2377,6 +2377,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Driver offers endpoints
+  app.post('/api/driver-offers', authenticate, async (req: Request, res: Response) => {
+    try {
+      const { passengerRideId, price, message } = req.body;
+      const driverId = req.user?.uid;
+
+      if (!driverId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      if (!passengerRideId || !price) {
+        return res.status(400).json({ message: 'Passenger ride ID and price are required' });
+      }
+
+      // Check if driver is onboarded (has Stripe Connect account)
+      const driver = await storage.getUserByFirebaseUid(driverId);
+      if (!driver || !driver.stripeConnectAccountId) {
+        return res.status(400).json({ message: 'Driver must complete onboarding first' });
+      }
+
+      // Create driver offer
+      const offer = await storage.createDriverOffer({
+        driverId,
+        passengerRideId,
+        price,
+        message: message?.trim() || null,
+        status: 'pending'
+      });
+
+      res.json(offer);
+    } catch (error) {
+      console.error('Error creating driver offer:', error);
+      res.status(500).json({ message: 'Failed to create driver offer' });
+    }
+  });
+
+  app.get('/api/driver-offers/received/:rideId', authenticate, async (req: Request, res: Response) => {
+    try {
+      const rideId = parseInt(req.params.rideId);
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const offers = await storage.getDriverOffersForRide(rideId);
+      res.json(offers);
+    } catch (error) {
+      console.error('Error fetching driver offers:', error);
+      res.status(500).json({ message: 'Failed to fetch driver offers' });
+    }
+  });
+
   // Admin middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

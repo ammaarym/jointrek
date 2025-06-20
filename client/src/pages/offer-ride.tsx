@@ -38,7 +38,7 @@ export default function OfferRidePage() {
     enabled: !!currentUser,
   });
 
-  const isDriverOnboarded = driverStatus?.onboarded === true;
+  const isDriverOnboarded = driverStatus?.isOnboarded === true;
 
   // Driver onboarding mutation
   const startOnboardingMutation = useMutation({

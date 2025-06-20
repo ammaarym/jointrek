@@ -1372,6 +1372,11 @@ export class PostgresStorage implements IStorage {
     return updatedOffer;
   }
 
+  async getDriverOfferById(offerId: number): Promise<DriverOffer | undefined> {
+    const [offer] = await db.select().from(driverOffers).where(eq(driverOffers.id, offerId));
+    return offer;
+  }
+
   async getDriverOffersByDriver(driverId: string): Promise<any[]> {
     const result = await db
       .select({

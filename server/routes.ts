@@ -2397,7 +2397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Driver must complete onboarding first' });
       }
 
-      // Create driver offer
+      // Create driver offer (with duplicate prevention built into storage method)
       const offer = await storage.createDriverOffer({
         driverId,
         passengerRideId,
@@ -2522,9 +2522,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If offer is accepted, create a ride request with approved status
       if (status === 'accepted') {
         try {
-          // Get the driver offer details to create the ride request
-          const driverOffers = await storage.getDriverOffersForRide(updatedOffer.passengerRideId);
-          const acceptedOffer = driverOffers.find(offer => offer.id === offerId);
+          // Get the accepted offer directly
+          const acceptedOffer = await storage.getDriverOfferById(offerId);
           
           if (acceptedOffer) {
             // Get the passenger ride details

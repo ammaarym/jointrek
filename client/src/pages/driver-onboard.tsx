@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/use-auth-simple';
+import { useAuth } from '@/hooks/use-auth-fixed';
 import { CheckCircle, AlertCircle, DollarSign, Shield, Clock } from 'lucide-react';
 import StripeConnectOnboarding from '@/components/StripeConnectOnboarding';
 

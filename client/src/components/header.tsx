@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "./ui/button";
-import { useAuth } from "@/hooks/use-auth-simple";
+import { useAuth } from "@/hooks/use-auth-fixed";
 import {
   DropdownMenu,
   DropdownMenuContent,

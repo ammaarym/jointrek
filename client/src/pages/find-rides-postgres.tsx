@@ -14,6 +14,7 @@ import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorToast } from '@/hooks/use-error-toast';
 import GasPriceEstimate from '@/components/gas-price-estimate';
 import RideCard from '@/components/ride-card';
 
@@ -44,6 +45,7 @@ export default function FindRidesPostgres() {
   const { rides, loading, error, loadAllRides } = usePostgresRides();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { showErrorFromException, showError } = useErrorToast();
 
   // Form state
   const [from, setFrom] = useState('Gainesville');

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorToast } from '@/hooks/use-error-toast';
 import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
 import { Plus, Star, CheckCircle, DollarSign, Clock } from 'lucide-react';
@@ -117,6 +118,7 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
 export default function Profile() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const { showErrorFromException, showError } = useErrorToast();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -275,6 +277,7 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      showErrorFromException(error, 'profile');
     } finally {
       setLoading(false);
     }

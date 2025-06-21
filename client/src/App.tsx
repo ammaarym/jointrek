@@ -199,9 +199,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
+          <AppRoutes />
         </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>

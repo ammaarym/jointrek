@@ -28,6 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user && user.email && isUFEmail(user.email)) {
         console.log('[AUTH] Valid UF user');
         setCurrentUser(user);
+        
+        // Handle redirects for authenticated users
+        const currentPath = window.location.pathname;
+        if (currentPath === '/login' || currentPath === '/') {
+          console.log('[AUTH] Redirecting to profile');
+          setTimeout(() => {
+            window.location.replace('/profile');
+          }, 100);
+        }
       } else {
         console.log('[AUTH] No valid user');
         setCurrentUser(null);

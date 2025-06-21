@@ -26,7 +26,7 @@ import Help from "@/pages/help";
 import NotificationsPage from "@/pages/notifications";
 import StripeSetupGuide from "@/pages/stripe-setup-guide";
 import React, { useEffect, useState, Suspense } from "react";
-import { useAuth } from "@/hooks/use-auth-fixed";
+import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
@@ -204,13 +204,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ThemeProvider>
-          <AppRoutes />
-        </ThemeProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <AppRoutes />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -144,7 +144,7 @@ DATABASE_URL
 - June 21, 2025: Simplified header and profile UI - removed "Switch Account" option from user dropdown menu and removed "Modify Setup" button from driver setup section, keeping only essential logout and account management functionality
 - June 21, 2025: Removed persistent toast demo panel - contextual error toasts now only appear when actual events occur, eliminating the always-visible development testing panel
 - June 21, 2025: Fixed first-time user white screen issue - corrected authentication timing problems by fixing duplicate setLoading calls, adding proper currentUser null checks, and fixing profile page useEffect dependencies to properly react to authentication state changes
-- June 21, 2025: Removed contact info requirements from basic navigation pages - users can now browse find-rides and my-rides pages without contact information, keeping requirements only for actual ride actions (posting, requesting, offering rides) that need contact info for safety
+- June 21, 2025: Restored contact info requirements for safety - users must add contact information (phone/Instagram/Snapchat) before accessing find-rides and my-rides pages to ensure safe communication between drivers and passengers
 
 ## User Preferences
 

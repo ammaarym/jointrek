@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +22,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log('[AUTH] Setting up listener...');
+    
+    // Check for redirect result first
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result && result.user) {
+          console.log('[AUTH] Redirect result found:', result.user.email);
+          if (!isUFEmail(result.user.email || '')) {
+            firebaseSignOut(auth);
+            throw new Error('Please use your @ufl.edu email address');
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('[AUTH] Redirect result error:', error);
+      });
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log('[AUTH] State change - user:', user?.email || 'none');
@@ -53,10 +69,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentUser(null);
   };
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    
+    try {
+      // Try popup first, fallback to redirect if blocked
+      const result = await signInWithPopup(auth, provider);
+      if (result.user && result.user.email && !isUFEmail(result.user.email)) {
+        await firebaseSignOut(auth);
+        throw new Error('Please use your @ufl.edu email address');
+      }
+    } catch (error: any) {
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+        // Fallback to redirect for mobile/blocked popups
+        await signInWithRedirect(auth, provider);
+      } else {
+        throw error;
+      }
+    }
+  };
+
   const value = {
     currentUser,
     loading,
-    signOut
+    signOut,
+    signInWithGoogle
   };
 
   return (

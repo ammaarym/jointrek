@@ -113,14 +113,10 @@ function AppRoutes() {
       </div>;
     }
 
-    // If route requires contact info and user doesn't have any, redirect to profile
+    // If route requires contact info and user doesn't have phone number, redirect to profile
     const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
-    const hasValidInstagram = userContactInfo?.instagram && userContactInfo.instagram.trim().length > 0;
-    const hasValidSnapchat = userContactInfo?.snapchat && userContactInfo.snapchat.trim().length > 0;
     
-
-    
-    if (requiresContactInfo && userContactInfo && !hasValidPhone && !hasValidInstagram && !hasValidSnapchat) {
+    if (requiresContactInfo && userContactInfo && !hasValidPhone) {
       console.log('REDIRECTING TO PROFILE - Contact info missing');
       setTimeout(() => {
         setLocation("/profile");
@@ -128,8 +124,8 @@ function AppRoutes() {
       
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="mb-4 text-orange-600 font-semibold">Profile completion required</p>
-          <p>Please add contact information to access ride features...</p>
+          <p className="mb-4 text-orange-600 font-semibold">Phone number required</p>
+          <p>Please add your phone number to access ride features for safety...</p>
         </div>
       </div>;
     }

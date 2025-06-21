@@ -272,9 +272,9 @@ export default function Profile() {
         setPhone(userData.phone || '');
         setInstagram(userData.instagram || '');
         setSnapchat(userData.snapchat || '');
-        // If no contact info exists, start in edit mode
-        if (!userData.phone && !userData.instagram && !userData.snapchat) {
-          console.log('[PROFILE] No contact info found, enabling edit mode');
+        // If no phone number exists, start in edit mode
+        if (!userData.phone) {
+          console.log('[PROFILE] No phone number found, enabling edit mode');
           setIsEditing(true);
         }
         setDataLoaded(true);
@@ -434,8 +434,9 @@ export default function Profile() {
     );
   }
 
-  // Check if user has any contact information
-  const hasContactInfo = phone || instagram || snapchat;
+  // Check if user has phone number (required) and any additional contact information
+  const hasRequiredContactInfo = phone && phone.trim().length > 0;
+  const hasAdditionalContactInfo = instagram || snapchat;
 
   // Show loading spinner while data is being loaded or no user
   if (!currentUser || (loading && !dataLoaded)) {
@@ -454,8 +455,8 @@ export default function Profile() {
 
   return (
     <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">
-      {/* Contact Info Required Banner */}
-      {!hasContactInfo && (
+      {/* Phone Number Required Banner */}
+      {!hasRequiredContactInfo && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -465,12 +466,10 @@ export default function Profile() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-orange-800">
-                Contact Information Required
+                Phone Number Required
               </h3>
               <div className="mt-2 text-sm text-orange-700">
-                <p>
-                  You must add at least one contact method (phone, Instagram, or Snapchat) before you can access ride features. This helps other students connect with you for rides.
-                </p>
+                <p>Please add your phone number to access ride features. This is required for safe communication between drivers and passengers.</p>
               </div>
             </div>
           </div>
@@ -630,14 +629,14 @@ export default function Profile() {
                 </div>
               )}
 
-              {!phone && !instagram && !snapchat && (
+              {!phone && (
                 <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">No contact information added yet</p>
+                  <p className="text-gray-500 mb-4">Phone number required</p>
                   <Button 
                     onClick={() => setIsEditing(true)}
                     className="bg-primary hover:bg-orange-600 text-white"
                   >
-                    Add Contact Information
+                    Add Phone Number
                   </Button>
                 </div>
               )}

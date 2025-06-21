@@ -145,6 +145,7 @@ DATABASE_URL
 - June 21, 2025: Removed persistent toast demo panel - contextual error toasts now only appear when actual events occur, eliminating the always-visible development testing panel
 - June 21, 2025: Fixed first-time user white screen issue - corrected authentication timing problems by fixing duplicate setLoading calls, adding proper currentUser null checks, and fixing profile page useEffect dependencies to properly react to authentication state changes
 - June 21, 2025: Restored contact info requirements for safety - users must add contact information (phone/Instagram/Snapchat) before accessing find-rides and my-rides pages to ensure safe communication between drivers and passengers
+- June 21, 2025: Made phone number mandatory while keeping Instagram/Snapchat optional - users must provide phone number to access ride features, with social media contacts as additional optional information
 
 ## User Preferences
 

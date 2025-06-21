@@ -719,20 +719,10 @@ export default function Profile() {
                   onClick={openDashboard}
                   disabled={isLoadingDashboard}
                   variant="outline"
-                  className="flex-1"
+                  className="w-full"
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
                   {isLoadingDashboard ? "Loading..." : "Manage Account"}
-                </Button>
-                
-                <Button
-                  onClick={startOnboarding}
-                  disabled={isOnboarding}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <FaEdit className="w-4 h-4 mr-2" />
-                  {isOnboarding ? "Updating..." : "Modify Setup"}
                 </Button>
               </div>
 

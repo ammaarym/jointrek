@@ -338,14 +338,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           alert("Authentication failed. Please try refreshing the page and trying again.");
         }
       } else if (error.code === 'auth/popup-closed-by-user') {
-        console.log("ℹ️ [SIGN IN] User cancelled authentication");
+        console.log("[DEBUG] User cancelled authentication - popup closed");
+        // Don't throw error for user cancellation, just return silently
       } else if (error.code === 'auth/unauthorized-domain') {
         alert("Authentication failed: This domain is not authorized. Please contact support.");
       } else {
         alert("Authentication failed. Please try again.");
+        throw error;
       }
       
-      throw error;
+      // Only throw error if it's not a user cancellation
+      if (error.code !== 'auth/popup-closed-by-user') {
+        throw error;
+      }
     }
   };
 

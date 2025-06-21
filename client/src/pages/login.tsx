@@ -62,10 +62,14 @@ export default function Login() {
       setIsSigningIn(false);
       
       if (error.code === 'auth/popup-closed-by-user') {
-        // User cancelled, no need to show error
+        console.log("[DEBUG] User cancelled authentication - resetting button state");
+        // User cancelled, no need to show error, just reset state
       } else {
         alert("Authentication failed. Please try again.");
       }
+    } finally {
+      // Always reset the signing in state so button is clickable again
+      setIsSigningIn(false);
     }
   };
 

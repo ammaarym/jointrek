@@ -139,12 +139,7 @@ export function useErrorToast() {
     toast({
       variant: config.variant,
       duration: config.duration,
-      title: (
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4" />
-          {config.title}
-        </div>
-      ),
+      title: config.title,
       description: customMessage || config.defaultMessage + (details ? ` ${details}` : ''),
     });
   };

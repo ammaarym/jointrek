@@ -74,6 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     provider.addScope('email');
     provider.addScope('profile');
     
+    // Configure provider to only allow UF domain
+    provider.setCustomParameters({
+      'hd': 'ufl.edu', // Hosted domain - restricts to UF emails only
+      'prompt': 'select_account'
+    });
+    
     try {
       // Try popup first, fallback to redirect if blocked
       const result = await signInWithPopup(auth, provider);

@@ -115,7 +115,9 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
 };
 
 export default function Profile() {
+  console.log('[PROFILE] Component mounting...');
   const { currentUser } = useAuth();
+  console.log('[PROFILE] Current user from hook:', currentUser?.email || 'none');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
@@ -260,10 +262,13 @@ export default function Profile() {
 
   const loadUserProfile = async () => {
     try {
+      console.log('[PROFILE] Loading user profile for UID:', currentUser?.uid);
       setLoading(true);
       const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
+      console.log('[PROFILE] API response status:', response.status);
       if (response.ok) {
         const userData = await response.json();
+        console.log('[PROFILE] User data loaded:', userData);
         setPhone(userData.phone || '');
         setInstagram(userData.instagram || '');
         setSnapchat(userData.snapchat || '');
@@ -272,11 +277,15 @@ export default function Profile() {
           setIsEditing(true);
         }
         setDataLoaded(true);
+        console.log('[PROFILE] Data loaded successfully, dataLoaded set to true');
+      } else {
+        console.error('[PROFILE] Failed to load user data, status:', response.status);
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('[PROFILE] Error loading profile:', error);
     } finally {
       setLoading(false);
+      console.log('[PROFILE] Loading finished, loading set to false');
     }
   };
 
@@ -420,6 +429,7 @@ export default function Profile() {
   };
 
   if (!currentUser) {
+    console.log('[PROFILE] No current user - showing sign in message');
     return (
       <div className="container px-4 py-6 mx-auto">
         <div className="text-center">
@@ -434,6 +444,7 @@ export default function Profile() {
 
   // Show loading spinner while data is being loaded
   if (loading && !dataLoaded) {
+    console.log('[PROFILE] Showing loading spinner - loading:', loading, 'dataLoaded:', dataLoaded);
     return (
       <div className="container px-4 py-6 mx-auto max-w-2xl">
         <div className="flex items-center justify-center py-12">
@@ -444,6 +455,8 @@ export default function Profile() {
     );
   }
 
+  console.log('[PROFILE] Rendering main profile component - hasContactInfo:', hasContactInfo, 'loading:', loading, 'dataLoaded:', dataLoaded);
+  
   return (
     <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">
       {/* Contact Info Required Banner */}

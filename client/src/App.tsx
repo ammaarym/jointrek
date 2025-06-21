@@ -80,13 +80,16 @@ function AppRoutes() {
     };
 
     if (loading || (requiresContactInfo && (contactInfoLoading || !userContactInfo))) {
+      console.log('[PROTECTED] Loading state - auth loading:', loading, 'contact loading:', contactInfoLoading, 'has contact info:', !!userContactInfo, 'requires contact:', requiresContactInfo);
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
+        <span className="ml-3 text-gray-600">Loading...</span>
       </div>;
     }
 
     // If not authenticated, redirect to login page
     if (!currentUser) {
+      console.log('[PROTECTED] No current user, redirecting to login');
       // Use timeout to avoid immediate redirect issues
       setTimeout(() => {
         setLocation("/login");
@@ -122,6 +125,7 @@ function AppRoutes() {
     }
 
     console.log('ALLOWING ACCESS - Contact info validated successfully');
+    console.log('[PROTECTED] Rendering component for path:', rest.path, 'user:', currentUser?.email);
 
     return <Component {...rest} />;
   };
@@ -187,7 +191,10 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={StripeSetupGuide} path="/stripe-setup-guide" />}
           </Route>
           <Route path="/profile">
-            {(params) => <ProtectedRoute component={Profile} path="/profile" />}
+            {(params) => {
+              console.log('[APP] Profile route accessed, currentUser:', currentUser?.email || 'none', 'loading:', loading);
+              return <ProtectedRoute component={Profile} path="/profile" />;
+            }}
           </Route>
           <Route path="/requests/:requestId">
             {(params) => <ProtectedRoute component={RideRequestApproval} path="/requests/:requestId" />}

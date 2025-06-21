@@ -14,12 +14,14 @@ export default function Login() {
   // Navigate to profile once auth is complete and user is loaded
   useEffect(() => {
     if (!loading && currentUser && !hasRedirected) {
-      console.log("Login page: Authenticated user detected, redirecting to profile");
+      console.log("[DEBUG] Login page: Authenticated user detected, redirecting to profile");
+      console.log("[DEBUG] User email:", currentUser.email);
+      console.log("[DEBUG] User UID:", currentUser.uid);
       setHasRedirected(true);
       
       // Use a small delay to ensure auth state is fully settled
       setTimeout(() => {
-        console.log("Executing redirect to /profile");
+        console.log("[DEBUG] Executing redirect to /profile");
         window.location.replace('/profile');
       }, 100);
     }

@@ -266,6 +266,7 @@ export default function Profile() {
       setLoading(true);
       const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
       console.log('[PROFILE] Profile API response status:', response.status);
+      
       if (response.ok) {
         const userData = await response.json();
         console.log('[PROFILE] Loaded user data:', userData);
@@ -279,12 +280,52 @@ export default function Profile() {
         }
         setDataLoaded(true);
         console.log('[PROFILE] Profile loaded successfully');
+      } else if (response.status === 404) {
+        // User doesn't exist in database - create them
+        console.log('[PROFILE] User not found, creating new user');
+        await createNewUser();
+      } else {
+        throw new Error(`Failed to load profile: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('[PROFILE] Error loading profile:', error);
       showErrorFromException(error, 'profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createNewUser = async () => {
+    try {
+      console.log('[PROFILE] Creating new user in database');
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firebaseUid: currentUser?.uid,
+          email: currentUser?.email || '',
+          displayName: currentUser?.displayName || 'Trek User',
+          photoUrl: currentUser?.photoURL || null,
+          emailVerified: currentUser?.emailVerified || false
+        })
+      });
+
+      if (response.ok) {
+        console.log('[PROFILE] User created successfully');
+        // Set default empty values and enable edit mode for new users
+        setPhone('');
+        setInstagram('');
+        setSnapchat('');
+        setIsEditing(true);
+        setDataLoaded(true);
+      } else {
+        throw new Error(`Failed to create user: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('[PROFILE] Error creating user:', error);
+      showErrorFromException(error, 'profile');
     }
   };
 

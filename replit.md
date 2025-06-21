@@ -146,6 +146,7 @@ DATABASE_URL
 - June 21, 2025: Fixed first-time user white screen issue - corrected authentication timing problems by fixing duplicate setLoading calls, adding proper currentUser null checks, and fixing profile page useEffect dependencies to properly react to authentication state changes
 - June 21, 2025: Restored contact info requirements for safety - users must add contact information (phone/Instagram/Snapchat) before accessing find-rides and my-rides pages to ensure safe communication between drivers and passengers
 - June 21, 2025: Made phone number mandatory while keeping Instagram/Snapchat optional - users must provide phone number to access ride features, with social media contacts as additional optional information
+- June 21, 2025: Fixed first-time user 404 error crash - implemented automatic user creation in PostgreSQL database when new UF users sign in, preventing profile page crashes and ensuring seamless onboarding experience
 
 ## User Preferences
 

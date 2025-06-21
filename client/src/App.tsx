@@ -81,15 +81,25 @@ function AppRoutes() {
       }
     };
 
-    if (loading || (requiresContactInfo && (contactInfoLoading || !userContactInfo))) {
+    if (loading) {
+      console.log('[PROTECTED] Auth still loading');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
         <span className="ml-3 text-gray-600">Loading...</span>
       </div>;
     }
 
+    if (requiresContactInfo && contactInfoLoading) {
+      console.log('[PROTECTED] Contact info loading');
+      return <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
+        <span className="ml-3 text-gray-600">Loading contact info...</span>
+      </div>;
+    }
+
     // If not authenticated, redirect to login page
     if (!currentUser) {
+      console.log('[PROTECTED] No current user, redirecting to login');
       // Use timeout to avoid immediate redirect issues
       setTimeout(() => {
         setLocation("/login");
@@ -124,7 +134,7 @@ function AppRoutes() {
       </div>;
     }
 
-    console.log('ALLOWING ACCESS - Contact info validated successfully');
+    console.log('[PROTECTED] ALLOWING ACCESS - user:', currentUser?.email, 'hasContactInfo:', !!userContactInfo, 'requiresContactInfo:', requiresContactInfo);
 
     return <Component {...rest} />;
   };

@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (user && user.email && isUFEmail(user.email)) {
         console.log('[AUTH] Valid UF user');
         setCurrentUser(user);
+        setLoading(false);
         
         // Handle redirects for authenticated users
         const currentPath = window.location.pathname;

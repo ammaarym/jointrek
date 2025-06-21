@@ -262,21 +262,26 @@ export default function Profile() {
 
   const loadUserProfile = async () => {
     try {
+      console.log('[PROFILE] Loading user profile for:', currentUser?.uid);
       setLoading(true);
       const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
+      console.log('[PROFILE] Profile API response status:', response.status);
       if (response.ok) {
         const userData = await response.json();
+        console.log('[PROFILE] Loaded user data:', userData);
         setPhone(userData.phone || '');
         setInstagram(userData.instagram || '');
         setSnapchat(userData.snapchat || '');
         // If no contact info exists, start in edit mode
         if (!userData.phone && !userData.instagram && !userData.snapchat) {
+          console.log('[PROFILE] No contact info found, enabling edit mode');
           setIsEditing(true);
         }
         setDataLoaded(true);
+        console.log('[PROFILE] Profile loaded successfully');
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('[PROFILE] Error loading profile:', error);
       showErrorFromException(error, 'profile');
     } finally {
       setLoading(false);
@@ -434,6 +439,7 @@ export default function Profile() {
 
   // Show loading spinner while data is being loaded
   if (loading && !dataLoaded) {
+    console.log('[PROFILE] Showing loading spinner - loading:', loading, 'dataLoaded:', dataLoaded);
     return (
       <div className="container px-4 py-6 mx-auto max-w-2xl">
         <div className="flex items-center justify-center py-12">
@@ -443,6 +449,8 @@ export default function Profile() {
       </div>
     );
   }
+
+  console.log('[PROFILE] Rendering profile page - loading:', loading, 'dataLoaded:', dataLoaded, 'currentUser:', currentUser?.email);
 
   return (
     <div className="container px-4 py-6 mx-auto max-w-2xl space-y-6">

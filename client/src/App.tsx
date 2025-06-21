@@ -158,10 +158,10 @@ function AppRoutes() {
           <Route path="/login" component={Login} />
           <Route path="/auth-tab" component={AuthTab} />
           <Route path="/find-rides">
-            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" requiresContactInfo={true} />}
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" />}
           </Route>
           <Route path="/find-rides-postgres">
-            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides-postgres" requiresContactInfo={true} />}
+            {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides-postgres" />}
           </Route>
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" requiresContactInfo={true} />}
@@ -188,7 +188,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>
           <Route path="/my-rides">
-            {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
+            {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" />}
           </Route>
           <Route path="/help">
             {(params) => <ProtectedRoute component={Help} path="/help" />}

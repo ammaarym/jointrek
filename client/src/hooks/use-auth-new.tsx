@@ -59,8 +59,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         await setPersistence(auth, browserSessionPersistence);
         console.log("✅ [AUTH DEBUG] Session persistence configured successfully");
         
-        // Check for auth state backup first (Replit persistence fix)
+        // Check for mobile redirect flag and auth state backup
         console.log("🔥 [AUTH DEBUG] Checking for stored auth state...");
+        const mobileRedirectFlag = localStorage.getItem('trek_mobile_auth_redirect');
+        const mobileRedirectTime = localStorage.getItem('trek_mobile_auth_timestamp');
+        const isMobileRedirectRecent = mobileRedirectTime && (Date.now() - parseInt(mobileRedirectTime)) < 30000; // 30 seconds
+        
+        console.log("📱 [AUTH DEBUG] Mobile redirect flag:", mobileRedirectFlag);
+        console.log("📱 [AUTH DEBUG] Mobile redirect recent:", isMobileRedirectRecent);
+        
         const shouldBeAuthenticated = replitAuthManager.shouldUserBeAuthenticated();
         console.log("🔥 [AUTH DEBUG] Should user be authenticated?", shouldBeAuthenticated);
         
@@ -86,6 +93,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.log("🔥 [AUTH DEBUG] Redirect user verified:", redirectUser.emailVerified);
           redirectProcessed = true;
           
+          // Clear mobile redirect flags
+          localStorage.removeItem('trek_mobile_auth_redirect');
+          localStorage.removeItem('trek_mobile_auth_timestamp');
+          console.log("📱 [AUTH DEBUG] Cleared mobile redirect flags");
+          
           // Verify UF email domain immediately
           if (!redirectUser.email || !isUFEmail(redirectUser.email)) {
             console.log("❌ [AUTH DEBUG] BLOCKING - Non-UF email from redirect:", redirectUser.email || "no email");
@@ -96,15 +108,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
           
           console.log("✅ [AUTH DEBUG] UF email verified, setting user state");
-          // Set user immediately and redirect
+          
+          // Store auth state for persistence BEFORE setting user
+          replitAuthManager.storeAuthState(redirectUser);
+          console.log("📱 [AUTH DEBUG] Stored auth state for redirect user");
+          
+          // Sync user with PostgreSQL before setting state
+          try {
+            const userData = {
+              firebaseUid: redirectUser.uid,
+              email: redirectUser.email,
+              displayName: redirectUser.displayName || "Anonymous User",
+              photoUrl: redirectUser.photoURL,
+              emailVerified: redirectUser.emailVerified
+            };
+
+            console.log("📱 [AUTH DEBUG] Syncing user with PostgreSQL...");
+            const response = await fetch(`/api/users/firebase/${redirectUser.uid}`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+              console.log("✅ [AUTH DEBUG] User already exists in PostgreSQL");
+            } else if (response.status === 404) {
+              await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+              });
+              console.log("✅ [AUTH DEBUG] Created new user in PostgreSQL");
+            }
+          } catch (error) {
+            console.error("❌ [AUTH DEBUG] Error syncing user with PostgreSQL:", error);
+          }
+          
+          // Set user state
           setCurrentUser(redirectUser);
+          setLoading(false);
           console.log("🔥 [AUTH DEBUG] User state set, preparing redirect to profile");
           console.log("🔥 [AUTH DEBUG] Current pathname before redirect:", window.location.pathname);
           
           setTimeout(() => {
             console.log("🚀 [AUTH DEBUG] Executing redirect to /profile");
             window.location.replace('/profile');
-          }, 100);
+          }, 500); // Longer delay to ensure state is set
           return;
         } else {
           console.log("🔥 [AUTH DEBUG] No redirect result found - checking existing auth state");
@@ -290,6 +338,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (useRedirect) {
         console.log("[DEBUG] Mobile device detected — using redirect");
+        console.log("[DEBUG] Setting mobile redirect flag for persistence");
+        
+        // Store a flag to indicate mobile redirect is in progress
+        localStorage.setItem('trek_mobile_auth_redirect', 'true');
+        localStorage.setItem('trek_mobile_auth_timestamp', Date.now().toString());
+        
         await signInWithRedirect(auth, provider);
         return; // Redirect will complete on page reload
       }

@@ -270,9 +270,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signInWithGoogle = async (): Promise<void> => {
+  const signInWithGoogle = async (forceRedirect: boolean = false): Promise<void> => {
     try {
-      console.log("🚀 [SIGN IN] Starting direct Firebase popup authentication...");
+      console.log("[DEBUG] Sign-in button clicked");
+      console.log("[DEBUG] Force redirect:", forceRedirect);
       
       // Configure provider
       const provider = new GoogleAuthProvider();
@@ -283,25 +284,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       provider.addScope('email');
       provider.addScope('profile');
       
-      console.log("🔄 [SIGN IN] Attempting popup authentication...");
+      // Mobile device detection
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const useRedirect = forceRedirect || isMobile;
       
-      // Check if popup can be opened
-      const testPopup = window.open('', '_blank', 'width=1,height=1');
-      if (!testPopup || testPopup.closed) {
-        console.log("⚠️ [SIGN IN] Popup blocked or in iframe - using redirect method");
-        testPopup?.close();
-        
-        // Fall back to redirect
+      if (useRedirect) {
+        console.log("[DEBUG] Mobile device detected — using redirect");
         await signInWithRedirect(auth, provider);
-        return;
+        return; // Redirect will complete on page reload
       }
-      testPopup.close();
       
-      // Use Firebase popup
+      console.log("[DEBUG] Desktop device detected — using popup");
+      
+      // Use Firebase popup for desktop
       const result = await signInWithPopup(auth, provider);
       
       if (result?.user) {
-        console.log("✅ [SIGN IN] Authentication successful, user:", result.user.email);
+        console.log("[DEBUG] Popup sign-in successful:", result.user.email);
         
         // Verify UF email domain
         if (!result.user.email || !isUFEmail(result.user.email)) {
@@ -327,11 +326,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
     } catch (error: any) {
-      console.error("❌ [SIGN IN] Authentication error:", error);
+      console.error("[ERROR] Authentication error:", error);
       
       // Handle specific error cases
       if (error.code === 'auth/popup-blocked') {
-        alert("Please allow popups for this site and try again. You can also try refreshing the page.");
+        console.log("[DEBUG] Popup blocked - trying redirect as fallback");
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirectError) {
+          console.error("[ERROR] Redirect sign-in error:", redirectError);
+          alert("Authentication failed. Please try refreshing the page and trying again.");
+        }
       } else if (error.code === 'auth/popup-closed-by-user') {
         console.log("ℹ️ [SIGN IN] User cancelled authentication");
       } else if (error.code === 'auth/unauthorized-domain') {

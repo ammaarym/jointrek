@@ -23,11 +23,7 @@ export default function Home() {
   }, [currentUser, loading]);
 
   const handleLogin = () => {
-    // Check if mobile and go directly to mobile-friendly auth
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) {
-      console.log("📱 [HOME] Mobile detected, redirecting to mobile-optimized login");
-    }
+    console.log("[DEBUG] Home page login clicked");
     navigate("/login");
   };
 

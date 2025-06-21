@@ -128,6 +128,7 @@ DATABASE_URL
 - June 20, 2025: Enhanced driver setup section with security assurances matching payment methods style - added green notice explaining Trek never sees banking/SSN details, and fixed text overflow in quick filter buttons by reducing font size and adjusting padding
 - June 20, 2025: Completely redesigned home page with beige/orange accent colors throughout - updated hero section with gradient backgrounds, beige Trek logo, orange buttons and icons, enhanced testimonials with better styling, and added comprehensive security FAQ section with collapsible dropdowns covering banking security, scammer prevention, personal safety features, and payment protection
 - June 21, 2025: Fixed mobile authentication redirect loop - enhanced redirect result handling with proper user state persistence, PostgreSQL sync before redirect, and improved button state management for cancelled popup authentication
+- June 21, 2025: Resolved critical application loading issues - simplified authentication system with proper state management, fixed App.tsx structure, and created 8 demo rides from Gainesville with generic names, varying destinations ($20-50 prices), and mixed gender preferences for marketing screenshots
 
 ## User Preferences
 

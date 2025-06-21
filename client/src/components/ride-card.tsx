@@ -160,15 +160,15 @@ export default function RideCard({
                     
                     {/* Gender preference badge aligned with upper city */}
                     <div className="ml-4">
-                      {ride.genderPreference === "female" ? (
-                        <div className="flex items-center px-4 py-2 rounded-full bg-pink-50 border border-pink-200">
-                          <User className="w-4 h-4 mr-2 text-pink-600" />
-                          <span className="text-sm font-medium text-pink-700">Female riders only</span>
+                      {ride.genderPreference === "female_only" ? (
+                        <div className="flex items-center px-3 py-1 rounded-full bg-pink-50 border border-pink-200">
+                          <User className="w-3 h-3 mr-1 text-pink-600" />
+                          <span className="text-xs font-medium text-pink-700">Female only</span>
                         </div>
-                      ) : ride.genderPreference === "male" ? (
-                        <div className="flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200">
-                          <User className="w-4 h-4 mr-2 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-700">Male riders only</span>
+                      ) : ride.genderPreference === "male_only" ? (
+                        <div className="flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
+                          <User className="w-3 h-3 mr-1 text-blue-600" />
+                          <span className="text-xs font-medium text-blue-700">Male only</span>
                         </div>
                       ) : null}
                     </div>
@@ -513,9 +513,9 @@ export default function RideCard({
                     Gender Preference
                   </div>
                   <div className="font-medium">
-                    {ride.genderPreference === "female"
+                    {ride.genderPreference === "female_only"
                       ? "Female riders only"
-                      : ride.genderPreference === "male"
+                      : ride.genderPreference === "male_only"
                         ? "Male riders only"
                         : "No preference"}
                   </div>

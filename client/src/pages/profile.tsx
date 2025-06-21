@@ -14,7 +14,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
 
-// Helper function to format display name (remove commas)
+// Helper function to format display name (remove commas) 
 const formatDisplayName = (displayName: string | null | undefined): string => {
   if (!displayName) return '';
   // Remove commas and extra spaces, then clean up spacing

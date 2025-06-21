@@ -24,7 +24,7 @@ import NotificationsBell from "@/components/notifications-bell";
 // Helper function to format display name (remove commas)
 const formatDisplayName = (displayName: string | null | undefined): string => {
   if (!displayName) return '';
-  // Remove commas and extra spaces, then clean up spacing
+  // Remove commas and extra spaces, then clean up spacing  
   return displayName.replace(/,/g, '').replace(/\s+/g, ' ').trim();
 };
 

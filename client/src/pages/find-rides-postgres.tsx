@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/use-auth-new';
+import { useAuth } from '../hooks/use-auth-simple';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 
 import { formatDate } from '../lib/date-utils';

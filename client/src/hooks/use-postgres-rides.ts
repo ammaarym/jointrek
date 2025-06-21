@@ -173,11 +173,9 @@ export function usePostgresRides() {
     }
   };
 
-  const loadAllRides = async (forceReload = false, origin = 'Gainesville', destination?: string) => {
-    // If we already have rides and are not in an error state, don't reload unless forced
-    if (rides.length > 0 && !error && !forceReload) {
-      return;
-    }
+  const loadAllRides = async (forceReload = true, origin = 'Gainesville', destination?: string) => {
+    // Always reload to ensure fresh data
+    console.log('Loading all rides from:', origin, 'to:', destination || 'any destination');
     
     setLoading(true);
     setError(null);

@@ -90,6 +90,7 @@ export default function PostRidePostgres() {
       }
     } catch (error) {
       console.error('Error checking driver status:', error);
+      showErrorFromException(error, 'driver_onboarding');
     } finally {
       setCheckingDriverStatus(false);
     }

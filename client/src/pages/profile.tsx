@@ -258,7 +258,7 @@ export default function Profile() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, []);
+  }, [currentUser]);
 
   const loadUserProfile = async () => {
     try {
@@ -437,9 +437,9 @@ export default function Profile() {
   // Check if user has any contact information
   const hasContactInfo = phone || instagram || snapchat;
 
-  // Show loading spinner while data is being loaded
-  if (loading && !dataLoaded) {
-    console.log('[PROFILE] Showing loading spinner - loading:', loading, 'dataLoaded:', dataLoaded);
+  // Show loading spinner while data is being loaded or no user
+  if (!currentUser || (loading && !dataLoaded)) {
+    console.log('[PROFILE] Showing loading spinner - currentUser:', !!currentUser, 'loading:', loading, 'dataLoaded:', dataLoaded);
     return (
       <div className="container px-4 py-6 mx-auto max-w-2xl">
         <div className="flex items-center justify-center py-12">

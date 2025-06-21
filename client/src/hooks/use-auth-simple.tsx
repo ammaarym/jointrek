@@ -140,7 +140,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       }
     };
 
-    init();
+    const cleanup = init();
+    
+    // Return cleanup function for useEffect
+    return () => {
+      if (cleanup && typeof cleanup === 'function') {
+        cleanup();
+      }
+    };
   }, []);
 
   const signInWithGoogle = async () => {

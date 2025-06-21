@@ -97,15 +97,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
           }
           
           setLoading(false);
-          
-          // Redirect to profile if on login/home page
-          const currentPath = window.location.pathname;
-          if (currentPath === '/login' || currentPath === '/') {
-            console.log('[AUTH] 🚀 Redirecting authenticated user to profile');
-            setTimeout(() => {
-              window.location.replace('/profile');
-            }, 500);
-          }
           return;
         }
 

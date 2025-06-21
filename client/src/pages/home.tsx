@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { CarTaxiFront, User, MapPin, Shield, Lock, Check, LogIn, UserPlus, ChevronDown, ChevronUp, CreditCard, UserCheck, AlertTriangle } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth-new";
+import { useAuth } from "@/hooks/use-auth-simple";
 import {
   Collapsible,
   CollapsibleContent,

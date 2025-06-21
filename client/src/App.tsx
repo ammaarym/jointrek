@@ -30,93 +30,21 @@ import { useAuth } from "@/hooks/use-auth-simple";
 import { ThemeProvider } from "@/lib/theme";
 import { toast } from "@/hooks/use-toast";
 
+// Navigation handlers
+const openLogin = () => {
+  window.location.href = '/login';
+};
+
+const openSignup = () => {
+  window.location.href = '/login';
+};
+
 // This component will be used inside the AuthProvider
 function AppRoutes() {
   const { currentUser, loading } = useAuth();
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   console.log('[APP] Current user:', currentUser?.email || 'none');
   console.log('[APP] Loading state:', loading);
-  
-  // Set a timeout to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) {
-        console.log('[APP] Loading timeout reached, forcing render');
-        setLoadingTimeout(true);
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [loading]);
-  
-  // If loading has timed out or auth is complete, show the app
-  if (!loading || loadingTimeout) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header onLogin={openLogin} onSignup={openSignup} />
-        <main className="flex-grow">
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/login" component={Login} />
-            <Route path="/auth-tab" component={AuthTab} />
-            <Route path="/find-rides">
-              {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/find-rides-postgres">
-              {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides-postgres" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/post-ride">
-              {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/request-ride">
-              {(params) => <ProtectedRoute component={PostRidePostgres} path="/request-ride" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/request-ride/:id">
-              {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride/:id" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/request-ride-simple/:id">
-              {(params) => <ProtectedRoute component={RequestRideSimplePage} path="/request-ride-simple/:id" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/offer-ride/:id">
-              {(params) => <ProtectedRoute component={OfferRidePage} path="/offer-ride/:id" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/profile/payment">
-              {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile/payment" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/profile-payment">
-              {(params) => <ProtectedRoute component={ProfilePaymentPage} path="/profile-payment" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/test-payment">
-              {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
-            </Route>
-            <Route path="/my-rides">
-              {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
-            </Route>
-            <Route path="/help">
-              {(params) => <ProtectedRoute component={Help} path="/help" />}
-            </Route>
-            <Route path="/notifications">
-              {(params) => <ProtectedRoute component={NotificationsPage} path="/notifications" />}
-            </Route>
-            <Route path="/stripe-setup-guide">
-              {(params) => <ProtectedRoute component={StripeSetupGuide} path="/stripe-setup-guide" />}
-            </Route>
-            <Route path="/profile">
-              {(params) => <ProtectedRoute component={Profile} path="/profile" />}
-            </Route>
-            <Route path="/requests/:requestId">
-              {(params) => <ProtectedRoute component={RideRequestApproval} path="/requests/:requestId" />}
-            </Route>
-            <Route path="/admin-login" component={AdminLogin} />
-            <Route path="/admin-dashboard" component={AdminDashboard} />
-            <Route component={NotFound} />
-          </Switch>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
   
   // Protected route component that redirects to login page if not authenticated
   const ProtectedRoute = ({ component: Component, requiresContactInfo = false, ...rest }: { component: React.ComponentType<any>, path: string, requiresContactInfo?: boolean }) => {
@@ -198,16 +126,14 @@ function AppRoutes() {
     return <Component {...rest} />;
   };
 
-  // Header navigation handlers that redirect to login page
-  const openLogin = () => {
-    window.location.href = '/login';
-  };
-
-  const openSignup = () => {
-    window.location.href = '/login';
-  };
-
-  // Navigation is now handled in individual pages to avoid conflicts
+  // Show loading or main app
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -248,8 +174,6 @@ function AppRoutes() {
           <Route path="/test-payment">
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>
-
-
           <Route path="/my-rides">
             {(params) => <ProtectedRoute component={MyRidesPostgresClean} path="/my-rides" requiresContactInfo={true} />}
           </Route>

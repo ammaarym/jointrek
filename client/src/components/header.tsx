@@ -21,6 +21,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import NotificationsBell from "@/components/notifications-bell";
 
+// Helper function to format display name (remove commas)
+const formatDisplayName = (displayName: string | null | undefined): string => {
+  if (!displayName) return '';
+  // Remove commas and extra spaces, then clean up spacing
+  return displayName.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+};
+
 interface HeaderProps {
   onLogin: () => void;
   onSignup: () => void;
@@ -156,7 +163,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                       <div className="flex items-center justify-start gap-2 p-2">
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium">
-                            {currentUser.displayName}
+                            {formatDisplayName(currentUser.displayName)}
                           </p>
                           <p className="text-xs text-neutral-500">
                             {currentUser.email}
@@ -195,20 +202,12 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               </>
             ) : null}
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={toggleMobileMenu}
-            >
-              <MenuIcon className="h-6 w-6 text-black" />
-            </Button>
+            {/* Mobile menu button - removed per user request */}
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
+        {/* Mobile Menu - removed per user request */}
+        {false && (
           <div className="md:hidden py-4 border-t border-neutral-200">
             <div className="flex flex-col space-y-3">
               {!currentUser && (

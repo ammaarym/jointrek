@@ -14,6 +14,13 @@ import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
 
+// Helper function to format display name (remove commas)
+const formatDisplayName = (displayName: string | null | undefined): string => {
+  if (!displayName) return '';
+  // Remove commas and extra spaces, then clean up spacing
+  return displayName.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+};
+
 // Driver Status Interface
 interface DriverStatus {
   isOnboarded: boolean;
@@ -495,7 +502,7 @@ export default function Profile() {
               )}
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">{currentUser.displayName || 'User'}</h3>
+              <h3 className="font-semibold text-gray-900">{formatDisplayName(currentUser.displayName) || 'User'}</h3>
               <p className="text-sm text-gray-600">{currentUser.email}</p>
               <p className="text-xs text-gray-500">University of Florida Email</p>
             </div>

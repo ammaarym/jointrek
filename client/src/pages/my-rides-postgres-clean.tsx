@@ -11,6 +11,7 @@ import { FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaCar, FaTrash, FaEdit, F
 import { BiMessageDetail } from 'react-icons/bi';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorToast } from '@/hooks/use-error-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
 import { Star } from 'lucide-react';
@@ -68,6 +69,7 @@ export default function MyRidesPostgres() {
 
   const [completedRides, setCompletedRides] = useState<Set<number>>(new Set());
   const { toast } = useToast();
+  const { showErrorFromException } = useErrorToast();
 
   const [myRides, setMyRides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/use-auth-new';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateTime, formatTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
+import { useErrorToast } from '@/hooks/use-error-toast';
 import { calculateRidePrice, CITY_DISTANCES } from '../../../shared/pricing';
 import { CAR_MAKES, CAR_MODELS, CAR_YEARS, getMaxSeatsForModel, getBaggageCapacity } from '../data/car-data';
 import { Button } from "@/components/ui/button";

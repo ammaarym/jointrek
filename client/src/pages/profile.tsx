@@ -319,11 +319,8 @@ export default function Profile() {
         throw new Error('Failed to update profile');
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update your profile. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error updating profile:', error);
+      showErrorFromException(error, 'profile');
     } finally {
       setLoading(false);
     }

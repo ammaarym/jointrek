@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
-import { Plus, Star, CheckCircle, DollarSign, Clock } from 'lucide-react';
+import { Plus, Star, CheckCircle, DollarSign, Clock, FileText } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';

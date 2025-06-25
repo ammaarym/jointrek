@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
-  CardElement,
+  PaymentElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
@@ -108,17 +108,13 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
 
     setIsLoading(true);
 
-    const card = elements.getElement(CardElement);
-    if (!card) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: card,
-        }
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/my-rides`,
+        },
+        redirect: "if_required",
       });
 
       if (error) {
@@ -131,8 +127,8 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
         onPaymentError?.(error.message || "Payment failed");
       } else if (paymentIntent?.status === 'succeeded') {
         toast({
-          title: "Payment Successful",
-          description: `Payment of $${(amount / 100).toFixed(2)} completed successfully!`,
+          title: "Payment Authorized",
+          description: `Authorization of $${amount.toFixed(2)} completed successfully!`,
         });
         onPaymentSuccess?.(paymentIntent.id);
       }
@@ -166,29 +162,44 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
       <CardHeader>
         <CardTitle>Payment Details</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Amount: ${(amount / 100).toFixed(2)}
+          Amount: ${amount.toFixed(2)}
+          {paymentDetails && (
+            <span className="block text-xs mt-1">
+              Platform fee: ${paymentDetails.platformFee.toFixed(2)} • Driver receives: ${paymentDetails.driverAmount.toFixed(2)}
+            </span>
+          )}
         </p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="p-3 border rounded-md">
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#424770',
-                    '::placeholder': {
-                      color: '#aab7c4',
-                    },
-                  },
-                  invalid: {
-                    color: '#9e2146',
-                  },
-                },
-              }}
-            />
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Payment Method</p>
+            <p className="text-xs text-muted-foreground">
+              Credit card, Apple Pay, and Google Pay are supported
+            </p>
           </div>
+          
+          <PaymentElement 
+            options={{
+              layout: 'tabs',
+              wallets: {
+                applePay: 'auto',
+                googlePay: 'auto'
+              },
+              fields: {
+                billingDetails: {
+                  name: 'auto',
+                  email: 'auto',
+                  address: 'never'
+                }
+              },
+              terms: {
+                applePay: 'never',
+                googlePay: 'never',
+                card: 'never'
+              }
+            }}
+          />
           <Button
             type="submit"
             disabled={!stripe || isLoading || disabled}
@@ -200,7 +211,7 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
                 Processing...
               </>
             ) : (
-              `Pay $${(amount / 100).toFixed(2)}`
+              `Authorize $${amount.toFixed(2)}`
             )}
           </Button>
         </form>
@@ -210,8 +221,15 @@ const CheckoutForm: React.FC<PaymentFormProps> = ({
 };
 
 const PaymentForm: React.FC<PaymentFormProps> = (props) => {
+  const options = {
+    clientSecret: '', // Will be set after creation
+    appearance: {
+      theme: 'stripe' as const,
+    },
+  };
+  
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={stripePromise} options={options}>
       <CheckoutForm {...props} />
     </Elements>
   );

@@ -270,7 +270,9 @@ export default function FindRidesPostgres() {
       }
 
       // Gainesville requirement: rides must be from or to Gainesville
-      if (ride.origin !== 'Gainesville' && ride.destination !== 'Gainesville') {
+      const originCity = typeof ride.origin === 'object' ? ride.origin.city : ride.origin;
+      const destinationCity = typeof ride.destination === 'object' ? ride.destination.city : ride.destination;
+      if (originCity !== 'Gainesville' && destinationCity !== 'Gainesville') {
         return false;
       }
       
@@ -289,13 +291,13 @@ export default function FindRidesPostgres() {
       // If only to is selected, show rides going to that city
       if (appliedFilters.from && appliedFilters.from !== 'any' && appliedFilters.to && appliedFilters.to !== 'any') {
         // Both from and to selected - exact route match
-        if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase() || 
-            ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
+        if (originCity.toLowerCase() !== appliedFilters.from.toLowerCase() || 
+            destinationCity.toLowerCase() !== appliedFilters.to.toLowerCase()) {
           return false;
         }
       } else if (appliedFilters.from && appliedFilters.from !== 'any' && (!appliedFilters.to || appliedFilters.to === 'any')) {
         // Only from selected - show rides starting from that city
-        if (ride.origin.toLowerCase() !== appliedFilters.from.toLowerCase()) {
+        if (originCity.toLowerCase() !== appliedFilters.from.toLowerCase()) {
           return false;
         }
       } else if (appliedFilters.to && appliedFilters.to !== 'any') {

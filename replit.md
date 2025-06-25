@@ -147,6 +147,7 @@ DATABASE_URL
 - June 21, 2025: Restored contact info requirements for safety - users must add contact information (phone/Instagram/Snapchat) before accessing find-rides and my-rides pages to ensure safe communication between drivers and passengers
 - June 21, 2025: Made phone number mandatory while keeping Instagram/Snapchat optional - users must provide phone number to access ride features, with social media contacts as additional optional information
 - June 21, 2025: Fixed first-time user 404 error crash - implemented automatic user creation in PostgreSQL database when new UF users sign in, preventing profile page crashes and ensuring seamless onboarding experience
+- June 25, 2025: Added comprehensive Apple Pay and Google Pay support - updated all payment forms to use PaymentElement with wallet integration, enabling mobile users to pay seamlessly via Apple Pay on iOS devices and Google Pay on Android devices
 
 ## User Preferences
 

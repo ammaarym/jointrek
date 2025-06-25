@@ -155,27 +155,16 @@ export default function FindRidesPostgres() {
   };
 
   // Load all rides and user requests when component mounts
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
+  
   useEffect(() => {
-    let isMounted = true;
-    
-    if (currentUser && isMounted) {
-      console.log('[FIND-RIDES] Loading data for user:', currentUser.email);
-      
-      // Add a small delay to prevent rapid re-calls
-      const timeoutId = setTimeout(() => {
-        if (isMounted) {
-          loadAllRides();
-          loadUserRideRequests();
-          loadUserDriverOffers();
-        }
-      }, 100);
-      
-      return () => {
-        isMounted = false;
-        clearTimeout(timeoutId);
-      };
+    if (currentUser && !hasLoadedInitialData) {
+      loadAllRides();
+      loadUserRideRequests();
+      loadUserDriverOffers();
+      setHasLoadedInitialData(true);
     }
-  }, [currentUser?.uid]); // Only depend on user ID to prevent unnecessary calls
+  }, [currentUser?.uid, hasLoadedInitialData]);
 
   // Only refresh when user performs actions that might change data
   const refreshData = () => {
@@ -261,7 +250,6 @@ export default function FindRidesPostgres() {
       
       // Don't show user's own rides
       if (currentUser && ride.driverId === currentUser.uid) {
-        console.log('[FIND-RIDES] Ride filtered out - users own ride');
         return false;
       }
       
@@ -281,9 +269,7 @@ export default function FindRidesPostgres() {
       }
       
       // Filter by ride type (driver or passenger)
-      console.log('[FIND-RIDES] Ride type check - ride type:', ride.rideType, 'filter:', rideTypeFilter);
       if (ride.rideType !== rideTypeFilter) {
-        console.log('[FIND-RIDES] Ride filtered out by ride type');
         return false;
       }
 
@@ -376,7 +362,6 @@ export default function FindRidesPostgres() {
         }
       }
       
-      console.log('[FIND-RIDES] Ride', ride.id, 'passed all filters');
       return true;
     })
     .sort((a, b) => {
@@ -618,7 +603,7 @@ export default function FindRidesPostgres() {
             </div>
           )}
           
-          {(console.log('[FIND-RIDES] Render check - loading:', loading, 'filteredRides.length:', filteredRides.length), loading) ? (
+          {loading ? (
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, index) => (
                 <Card key={index} className="animate-pulse border-0 shadow-sm">
@@ -654,7 +639,7 @@ export default function FindRidesPostgres() {
                 </Card>
               ))}
             </div>
-          ) : (console.log('[FIND-RIDES] Filtered rides length:', filteredRides.length, 'rides:', filteredRides.map(r => r.id)), filteredRides.length === 0) ? (
+          ) : filteredRides.length === 0 ? (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
               <h3 className="text-lg font-medium mb-2">No rides found</h3>
               <p className="text-gray-500">Try adjusting your filters or check back later for new rides.</p>

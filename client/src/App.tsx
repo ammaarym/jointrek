@@ -53,19 +53,30 @@ function AppRoutes() {
     const [, setLocation] = useLocation();
     const [userContactInfo, setUserContactInfo] = useState<any>(null);
     const [contactInfoLoading, setContactInfoLoading] = useState(true);
+    const [authChecked, setAuthChecked] = useState(false);
 
     // Load user contact info when component mounts and user is available
     useEffect(() => {
-      if (currentUser) {
-        if (requiresContactInfo) {
-          loadUserContactInfo();
+      const checkAuth = async () => {
+        // Wait for auth loading to complete
+        if (loading) {
+          return;
+        }
+        
+        if (currentUser) {
+          if (requiresContactInfo) {
+            await loadUserContactInfo();
+          } else {
+            setContactInfoLoading(false);
+          }
         } else {
           setContactInfoLoading(false);
         }
-      } else {
-        setContactInfoLoading(false);
-      }
-    }, [currentUser, requiresContactInfo]);
+        setAuthChecked(true);
+      };
+      
+      checkAuth();
+    }, [currentUser, requiresContactInfo, loading]);
 
     const loadUserContactInfo = async () => {
       try {
@@ -81,14 +92,16 @@ function AppRoutes() {
       }
     };
 
-    if (loading) {
-      console.log('[PROTECTED] Auth still loading');
+    // Show loading while auth is being determined
+    if (loading || !authChecked) {
+      console.log('[PROTECTED] Auth still loading or not checked');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
         <span className="ml-3 text-gray-600">Loading...</span>
       </div>;
     }
 
+    // Show loading while contact info is being fetched
     if (requiresContactInfo && contactInfoLoading) {
       console.log('[PROTECTED] Contact info loading');
       return <div className="flex items-center justify-center min-h-screen">
@@ -97,18 +110,20 @@ function AppRoutes() {
       </div>;
     }
 
-    // If not authenticated, redirect to login page
+    // If not authenticated, show authentication required message
     if (!currentUser) {
-      console.log('[PROTECTED] No current user, redirecting to login');
-      // Use timeout to avoid immediate redirect issues
-      setTimeout(() => {
-        setLocation("/login");
-      }, 100);
-      
+      console.log('[PROTECTED] No current user, showing auth required');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="mb-4 text-orange-600 font-semibold">Access restricted</p>
-          <p>Redirecting to login page...</p>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>
+          <p className="mb-6 text-gray-600">You need to be logged in to access this page.</p>
+          <button 
+            onClick={() => setLocation("/login")}
+            className="px-6 py-3 text-white rounded-lg font-medium"
+            style={{ backgroundColor: '#B8956B' }}
+          >
+            Log In
+          </button>
         </div>
       </div>;
     }
@@ -117,7 +132,7 @@ function AppRoutes() {
     const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
     
     if (requiresContactInfo && userContactInfo && !hasValidPhone) {
-      console.log('REDIRECTING TO PROFILE - Contact info missing');
+      console.log('[PROTECTED] Contact info missing, redirecting to profile');
       setTimeout(() => {
         setLocation("/profile");
       }, 100);

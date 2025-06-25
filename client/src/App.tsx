@@ -45,8 +45,7 @@ const openSignup = () => {
 function AppRoutes() {
   const { currentUser, loading } = useAuth();
   
-  console.log('[APP] Current user:', currentUser?.email || 'none');
-  console.log('[APP] Loading state:', loading);
+
   
   // Protected route component that redirects to login page if not authenticated
   const ProtectedRoute = ({ component: Component, requiresContactInfo = false, ...rest }: { component: React.ComponentType<any>, path: string, requiresContactInfo?: boolean }) => {
@@ -84,7 +83,6 @@ function AppRoutes() {
     useEffect(() => {
       const handleWindowFocus = () => {
         if (currentUser && requiresContactInfo && !contactInfoLoading && hasLoadedContactInfo) {
-          console.log('[PROTECTED] Window focus - refreshing contact info');
           loadUserContactInfo();
         }
       };
@@ -92,7 +90,6 @@ function AppRoutes() {
       // Add storage event listener for profile updates
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'profile_updated' && currentUser && requiresContactInfo) {
-          console.log('[PROTECTED] Profile update detected - refreshing contact info');
           setTimeout(() => {
             loadUserContactInfo();
             setHasLoadedContactInfo(true);
@@ -120,7 +117,6 @@ function AppRoutes() {
         });
         if (response.ok) {
           const userData = await response.json();
-          console.log('[PROTECTED] Loaded fresh user contact info:', userData);
           setUserContactInfo(userData);
         }
       } catch (error) {

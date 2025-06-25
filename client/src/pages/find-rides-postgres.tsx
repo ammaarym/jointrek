@@ -41,11 +41,17 @@ const FLORIDA_CITIES = [
 ];
 
 export default function FindRidesPostgres() {
+  console.log('[FIND-RIDES] Component rendering started');
   const { currentUser } = useAuth();
   const { rides, loading, error, loadAllRides } = usePostgresRides();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { showErrorFromException, showError } = useErrorToast();
+  
+  console.log('[FIND-RIDES] Current user:', currentUser?.email);
+  console.log('[FIND-RIDES] Rides data:', rides);
+  console.log('[FIND-RIDES] Loading state:', loading);
+  console.log('[FIND-RIDES] Error state:', error);
 
   // Form state
   const [from, setFrom] = useState('Gainesville');
@@ -242,10 +248,13 @@ export default function FindRidesPostgres() {
   // Filter rides using applied filters
   const filteredRides = rides
     .filter(ride => {
+      console.log('[FIND-RIDES] Filtering ride:', ride.id, 'from', ride.origin?.city || ride.origin, 'to', ride.destination?.city || ride.destination);
+      console.log('[FIND-RIDES] Applied filters:', appliedFilters);
       if (!ride) return false;
       
       // Don't show user's own rides
       if (currentUser && ride.driverId === currentUser.uid) {
+        console.log('[FIND-RIDES] Ride filtered out - users own ride');
         return false;
       }
       
@@ -265,7 +274,9 @@ export default function FindRidesPostgres() {
       }
       
       // Filter by ride type (driver or passenger)
+      console.log('[FIND-RIDES] Ride type check - ride type:', ride.rideType, 'filter:', rideTypeFilter);
       if (ride.rideType !== rideTypeFilter) {
+        console.log('[FIND-RIDES] Ride filtered out by ride type');
         return false;
       }
 
@@ -358,6 +369,7 @@ export default function FindRidesPostgres() {
         }
       }
       
+      console.log('[FIND-RIDES] Ride', ride.id, 'passed all filters');
       return true;
     })
     .sort((a, b) => {

@@ -1236,6 +1236,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send SMS verification code to phone number
+  app.post('/api/verify-phone/send', async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber } = req.body;
+      
+      if (!phoneNumber) {
+        return res.status(400).json({ error: "Phone number is required" });
+      }
+
+      // Validate phone number format (basic US format)
+      const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+      if (!phoneRegex.test(phoneNumber)) {
+        return res.status(400).json({ error: "Invalid phone number format. Please use (XXX) XXX-XXXX format" });
+      }
+
+      // Generate 6-digit verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Store verification code temporarily (expires in 10 minutes)
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      
+      // For now, store in memory (in production, use Redis or database)
+      global.phoneVerifications = global.phoneVerifications || new Map();
+      global.phoneVerifications.set(phoneNumber, {
+        code: verificationCode,
+        expiresAt: expiresAt,
+        attempts: 0
+      });
+
+      // Send SMS using Twilio
+      try {
+        await twilioService.sendSms(phoneNumber, `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`);
+        
+        res.json({ 
+          message: "Verification code sent successfully",
+          expiresAt: expiresAt 
+        });
+      } catch (smsError) {
+        console.error('SMS sending error:', smsError);
+        res.status(500).json({ error: "Failed to send verification code. Please try again." });
+      }
+    } catch (error) {
+      console.error("Error sending verification code:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Verify SMS code
+  app.post('/api/verify-phone/verify', async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber, verificationCode } = req.body;
+      
+      if (!phoneNumber || !verificationCode) {
+        return res.status(400).json({ error: "Phone number and verification code are required" });
+      }
+
+      // Get stored verification data
+      global.phoneVerifications = global.phoneVerifications || new Map();
+      const storedData = global.phoneVerifications.get(phoneNumber);
+      
+      if (!storedData) {
+        return res.status(400).json({ error: "No verification code found for this phone number" });
+      }
+
+      // Check if code has expired
+      if (new Date() > storedData.expiresAt) {
+        global.phoneVerifications.delete(phoneNumber);
+        return res.status(400).json({ error: "Verification code has expired. Please request a new one." });
+      }
+
+      // Check attempt limit
+      if (storedData.attempts >= 3) {
+        global.phoneVerifications.delete(phoneNumber);
+        return res.status(400).json({ error: "Too many failed attempts. Please request a new verification code." });
+      }
+
+      // Verify code
+      if (storedData.code !== verificationCode) {
+        storedData.attempts++;
+        return res.status(400).json({ error: "Invalid verification code" });
+      }
+
+      // Code is valid - clean up and return success
+      global.phoneVerifications.delete(phoneNumber);
+      
+      res.json({ 
+        message: "Phone number verified successfully",
+        verified: true 
+      });
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Generate start verification code for drivers to show passengers
   app.post('/api/rides/:id/generate-start-verification', authenticate, async (req: Request, res: Response) => {
     try {

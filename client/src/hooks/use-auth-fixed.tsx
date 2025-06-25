@@ -21,13 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    console.log('[AUTH] Setting up listener...');
+  
     
     // Check for redirect result first
     getRedirectResult(auth)
       .then((result) => {
         if (result && result.user) {
-          console.log('[AUTH] Redirect result found:', result.user.email);
+  
           if (!isUFEmail(result.user.email || '')) {
             firebaseSignOut(auth);
             throw new Error('Please use your @ufl.edu email address');
@@ -35,27 +35,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((error) => {
-        console.error('[AUTH] Redirect result error:', error);
+
       });
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('[AUTH] State change - user:', user?.email || 'none');
-      
       if (user && user.email && isUFEmail(user.email)) {
-        console.log('[AUTH] Valid UF user');
         setCurrentUser(user);
         setLoading(false);
         
         // Handle redirects for authenticated users
         const currentPath = window.location.pathname;
         if (currentPath === '/login' || currentPath === '/') {
-          console.log('[AUTH] Redirecting to profile');
           setTimeout(() => {
             window.location.replace('/profile');
           }, 100);
         }
       } else {
-        console.log('[AUTH] No valid user');
         setCurrentUser(null);
       }
       

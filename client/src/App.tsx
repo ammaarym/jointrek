@@ -128,7 +128,6 @@ function AppRoutes() {
 
     // Show loading while auth is being determined
     if (loading || !authChecked) {
-      console.log('[PROTECTED] Auth still loading or not checked');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
         <span className="ml-3 text-gray-600">Loading...</span>
@@ -137,7 +136,6 @@ function AppRoutes() {
 
     // Show loading while contact info is being fetched
     if (requiresContactInfo && contactInfoLoading) {
-      console.log('[PROTECTED] Contact info loading');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
         <span className="ml-3 text-gray-600">Loading contact info...</span>
@@ -146,7 +144,6 @@ function AppRoutes() {
 
     // If not authenticated, show authentication required message
     if (!currentUser) {
-      console.log('[PROTECTED] No current user, showing auth required');
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>
@@ -166,7 +163,6 @@ function AppRoutes() {
     const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
     
     if (requiresContactInfo && userContactInfo && !hasValidPhone) {
-      console.log('[PROTECTED] Contact info missing, redirecting to profile');
       setTimeout(() => {
         setLocation("/profile");
       }, 100);
@@ -178,8 +174,6 @@ function AppRoutes() {
         </div>
       </div>;
     }
-
-    console.log('[PROTECTED] ALLOWING ACCESS - user:', currentUser?.email, 'hasContactInfo:', !!userContactInfo, 'requiresContactInfo:', requiresContactInfo);
 
     return <Component {...rest} />;
   };

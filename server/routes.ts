@@ -30,6 +30,11 @@ declare global {
       user?: admin.auth.DecodedIdToken;
     }
   }
+  var phoneVerifications: Map<string, {
+    code: string;
+    expiresAt: Date;
+    attempts: number;
+  }>;
 }
 
 // We'll use a simple dummy implementation since we're primarily using client-side auth
@@ -1267,7 +1272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send SMS using Twilio
       try {
-        await twilioService.sendSms(phoneNumber, `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`);
+        await twilioService.sendSMS(phoneNumber, `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`);
         
         res.json({ 
           message: "Verification code sent successfully",

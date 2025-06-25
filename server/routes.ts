@@ -1782,6 +1782,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user payment status
+  app.get('/api/users/payment-status', authenticate, async (req: Request, res: Response) => {
+    try {
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const hasPaymentMethod = !!user.defaultPaymentMethodId;
+      
+      res.json({
+        hasPaymentMethod,
+        stripeCustomerId: user.stripeCustomerId
+      });
+    } catch (error) {
+      console.error('Error getting payment status:', error);
+      res.status(500).json({ error: 'Failed to get payment status' });
+    }
+  });
+
   // Driver Stripe Connect Express onboarding
   app.post('/api/driver/onboard', authenticate, async (req: Request, res: Response) => {
     try {

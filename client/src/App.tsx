@@ -27,6 +27,7 @@ import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";
 import NotificationsPage from "@/pages/notifications";
 import StripeSetupGuide from "@/pages/stripe-setup-guide";
+import SetupCheck from "@/pages/setup-check";
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
 import { ThemeProvider } from "@/lib/theme";
@@ -201,6 +202,12 @@ function AppRoutes() {
           </Route>
           <Route path="/find-rides-postgres">
             {(params) => <ProtectedRoute component={FindRidesPostgres} path="/find-rides-postgres" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/setup-post-ride">
+            {(params) => <ProtectedRoute component={() => <SetupCheck mode="post" />} path="/setup-post-ride" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/setup-request-ride">
+            {(params) => <ProtectedRoute component={() => <SetupCheck mode="request" />} path="/setup-request-ride" requiresContactInfo={true} />}
           </Route>
           <Route path="/post-ride">
             {(params) => <ProtectedRoute component={PostRidePostgres} path="/post-ride" requiresContactInfo={true} />}

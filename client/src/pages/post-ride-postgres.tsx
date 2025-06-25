@@ -51,6 +51,7 @@ export default function PostRidePostgres() {
   const [location, setLocation] = useLocation();
   const { currentUser } = useAuth();
   const { createRide, loading, error } = usePostgresRides();
+  const { showErrorFromException } = useErrorToast();
   const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
   const [checkingDriverStatus, setCheckingDriverStatus] = useState(false);
   
@@ -346,20 +347,8 @@ export default function PostRidePostgres() {
         {rideType === 'passenger' ? 'Request a Ride' : 'Post a Ride'}
       </h1>
       
-      {!currentUser ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Authentication Required</CardTitle>
-            <CardDescription>You need to be logged in to post a ride.</CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button onClick={() => setLocation('/login')}>Log In</Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          
-          <Card className="mb-6">
+      <form onSubmit={handleSubmit}>
+        <Card className="mb-6">
             <CardHeader>
               <CardTitle>Route Information</CardTitle>
               <CardDescription>Tell us about your journey</CardDescription>
@@ -691,7 +680,6 @@ export default function PostRidePostgres() {
             </Button>
           </div>
         </form>
-      )}
     </div>
   );
 }

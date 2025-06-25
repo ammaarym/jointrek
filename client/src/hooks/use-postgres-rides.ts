@@ -200,7 +200,147 @@ export function usePostgresRides() {
       
       const allRides = await response.json();
       console.log('Loaded all rides:', allRides);
-      setRides(allRides);
+      
+      // If no real rides found, add mock data for demonstration
+      if (allRides.length === 0) {
+        const mockRides = [
+          {
+            id: 1001,
+            driverName: "Sarah Chen",
+            driverFirebaseUid: "mock_driver_1",
+            driverPhotoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b1c0?w=100&h=100&fit=crop&crop=face",
+            driverPhone: "(352) 555-0101",
+            driverEmail: "sarah.chen@ufl.edu",
+            origin: "Gainesville",
+            destination: "Orlando",
+            departureTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
+            arrivalTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString(), // +2 hours
+            seatsTotal: 4,
+            seatsLeft: 2,
+            price: 25,
+            genderPreference: "Any",
+            carMake: "Honda",
+            carModel: "Civic",
+            carYear: 2020,
+            carColor: "Blue",
+            notes: "Comfortable ride to Orlando! Clean car with AC.",
+            createdAt: new Date().toISOString(),
+            rideType: "driver",
+            baggageCapacity: 2,
+            averageRating: 4.8,
+            totalRides: 15
+          },
+          {
+            id: 1002,
+            driverName: "Marcus Johnson",
+            driverFirebaseUid: "mock_driver_2",
+            driverPhotoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+            driverPhone: "(352) 555-0102",
+            driverEmail: "marcus.johnson@ufl.edu",
+            origin: "Gainesville",
+            destination: "Miami",
+            departureTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+            arrivalTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(), // +4 hours
+            seatsTotal: 3,
+            seatsLeft: 1,
+            price: 45,
+            genderPreference: "Any",
+            carMake: "Toyota",
+            carModel: "Camry",
+            carYear: 2019,
+            carColor: "Silver",
+            notes: "Direct route to Miami. Good music and conversation!",
+            createdAt: new Date().toISOString(),
+            rideType: "driver",
+            baggageCapacity: 3,
+            averageRating: 4.9,
+            totalRides: 23
+          },
+          {
+            id: 1003,
+            driverName: "Emily Rodriguez",
+            driverFirebaseUid: "mock_driver_3",
+            driverPhotoUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+            driverPhone: "(352) 555-0103",
+            driverEmail: "emily.rodriguez@ufl.edu",
+            origin: "Gainesville",
+            destination: "Tampa",
+            departureTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days from now
+            arrivalTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000 + 2.5 * 60 * 60 * 1000).toISOString(), // +2.5 hours
+            seatsTotal: 4,
+            seatsLeft: 3,
+            price: 35,
+            genderPreference: "Female Only",
+            carMake: "Mazda",
+            carModel: "CX-5",
+            carYear: 2021,
+            carColor: "Red",
+            notes: "Safe ride for female students. Non-smoking vehicle.",
+            createdAt: new Date().toISOString(),
+            rideType: "driver",
+            baggageCapacity: 4,
+            averageRating: 4.7,
+            totalRides: 18
+          },
+          {
+            id: 1004,
+            driverName: "Alex Thompson",
+            driverFirebaseUid: "mock_driver_4",
+            driverPhotoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+            driverPhone: "(352) 555-0104",
+            driverEmail: "alex.thompson@ufl.edu",
+            origin: "Gainesville",
+            destination: "Jacksonville",
+            departureTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
+            arrivalTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000 + 1.5 * 60 * 60 * 1000).toISOString(), // +1.5 hours
+            seatsTotal: 4,
+            seatsLeft: 2,
+            price: 30,
+            genderPreference: "Male Only",
+            carMake: "Ford",
+            carModel: "Focus",
+            carYear: 2018,
+            carColor: "Black",
+            notes: "Quick trip to Jacksonville for the weekend.",
+            createdAt: new Date().toISOString(),
+            rideType: "driver",
+            baggageCapacity: 2,
+            averageRating: 4.6,
+            totalRides: 12
+          },
+          {
+            id: 1005,
+            driverName: "Jessica Park",
+            driverFirebaseUid: "mock_driver_5",
+            driverPhotoUrl: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop&crop=face",
+            driverPhone: "(352) 555-0105",
+            driverEmail: "jessica.park@ufl.edu",
+            origin: "Gainesville",
+            destination: "Fort Lauderdale",
+            departureTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+            arrivalTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 4.5 * 60 * 60 * 1000).toISOString(), // +4.5 hours
+            seatsTotal: 3,
+            seatsLeft: 1,
+            price: 50,
+            genderPreference: "Any",
+            carMake: "Nissan",
+            carModel: "Altima",
+            carYear: 2022,
+            carColor: "White",
+            notes: "Heading to Fort Lauderdale for spring break. Reliable driver!",
+            createdAt: new Date().toISOString(),
+            rideType: "driver",
+            baggageCapacity: 3,
+            averageRating: 4.9,
+            totalRides: 27
+          }
+        ];
+        
+        console.log('No real rides found, displaying mock rides for demonstration');
+        setRides(mockRides);
+      } else {
+        setRides(allRides);
+      }
     } catch (err: any) {
       console.error('Error loading all rides:', err);
       setError(err.message || 'Failed to load rides');

@@ -41,17 +41,11 @@ const FLORIDA_CITIES = [
 ];
 
 export default function FindRidesPostgres() {
-  console.log('[FIND-RIDES] Component rendering started');
   const { currentUser } = useAuth();
   const { rides, loading, error, loadAllRides } = usePostgresRides();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { showErrorFromException, showError } = useErrorToast();
-  
-  console.log('[FIND-RIDES] Current user:', currentUser?.email);
-  console.log('[FIND-RIDES] Rides data:', rides);
-  console.log('[FIND-RIDES] Loading state:', loading);
-  console.log('[FIND-RIDES] Error state:', error);
 
   // Form state
   const [from, setFrom] = useState('Gainesville');
@@ -162,12 +156,26 @@ export default function FindRidesPostgres() {
 
   // Load all rides and user requests when component mounts
   useEffect(() => {
-    if (currentUser) {
-      loadAllRides();
-      loadUserRideRequests();
-      loadUserDriverOffers();
+    let isMounted = true;
+    
+    if (currentUser && isMounted) {
+      console.log('[FIND-RIDES] Loading data for user:', currentUser.email);
+      
+      // Add a small delay to prevent rapid re-calls
+      const timeoutId = setTimeout(() => {
+        if (isMounted) {
+          loadAllRides();
+          loadUserRideRequests();
+          loadUserDriverOffers();
+        }
+      }, 100);
+      
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+      };
     }
-  }, [currentUser]);
+  }, [currentUser?.uid]); // Only depend on user ID to prevent unnecessary calls
 
   // Only refresh when user performs actions that might change data
   const refreshData = () => {
@@ -248,8 +256,7 @@ export default function FindRidesPostgres() {
   // Filter rides using applied filters
   const filteredRides = rides
     .filter(ride => {
-      console.log('[FIND-RIDES] Filtering ride:', ride.id, 'from', ride.origin?.city || ride.origin, 'to', ride.destination?.city || ride.destination);
-      console.log('[FIND-RIDES] Applied filters:', appliedFilters);
+
       if (!ride) return false;
       
       // Don't show user's own rides
@@ -611,7 +618,7 @@ export default function FindRidesPostgres() {
             </div>
           )}
           
-          {loading ? (
+          {(console.log('[FIND-RIDES] Render check - loading:', loading, 'filteredRides.length:', filteredRides.length), loading) ? (
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, index) => (
                 <Card key={index} className="animate-pulse border-0 shadow-sm">
@@ -647,7 +654,7 @@ export default function FindRidesPostgres() {
                 </Card>
               ))}
             </div>
-          ) : filteredRides.length === 0 ? (
+          ) : (console.log('[FIND-RIDES] Filtered rides length:', filteredRides.length, 'rides:', filteredRides.map(r => r.id)), filteredRides.length === 0) ? (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
               <h3 className="text-lg font-medium mb-2">No rides found</h3>
               <p className="text-gray-500">Try adjusting your filters or check back later for new rides.</p>

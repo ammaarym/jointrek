@@ -150,7 +150,7 @@ export default function FindRidesPostgres() {
         setCancelledRides(new Set<number>(cancelledRideIds));
       }
     } catch (error) {
-      console.error('Error loading user ride requests:', error);
+
     }
   };
 

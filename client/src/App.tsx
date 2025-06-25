@@ -54,6 +54,7 @@ function AppRoutes() {
     const [userContactInfo, setUserContactInfo] = useState<any>(null);
     const [contactInfoLoading, setContactInfoLoading] = useState(true);
     const [authChecked, setAuthChecked] = useState(false);
+    const [hasLoadedContactInfo, setHasLoadedContactInfo] = useState(false);
 
     // Load user contact info when component mounts and user is available
     useEffect(() => {
@@ -64,9 +65,10 @@ function AppRoutes() {
         }
         
         if (currentUser) {
-          if (requiresContactInfo) {
+          if (requiresContactInfo && !hasLoadedContactInfo) {
             await loadUserContactInfo();
-          } else {
+            setHasLoadedContactInfo(true);
+          } else if (!requiresContactInfo) {
             setContactInfoLoading(false);
           }
         } else {
@@ -76,12 +78,12 @@ function AppRoutes() {
       };
       
       checkAuth();
-    }, [currentUser, requiresContactInfo, loading]);
+    }, [currentUser?.uid, requiresContactInfo, loading, hasLoadedContactInfo]);
 
     // Add window focus event listener to refresh contact info when user comes back
     useEffect(() => {
       const handleWindowFocus = () => {
-        if (currentUser && requiresContactInfo && !contactInfoLoading) {
+        if (currentUser && requiresContactInfo && !contactInfoLoading && hasLoadedContactInfo) {
           console.log('[PROTECTED] Window focus - refreshing contact info');
           loadUserContactInfo();
         }
@@ -91,7 +93,10 @@ function AppRoutes() {
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'profile_updated' && currentUser && requiresContactInfo) {
           console.log('[PROTECTED] Profile update detected - refreshing contact info');
-          setTimeout(() => loadUserContactInfo(), 500); // Small delay to ensure backend update
+          setTimeout(() => {
+            loadUserContactInfo();
+            setHasLoadedContactInfo(true);
+          }, 500); // Small delay to ensure backend update
           localStorage.removeItem('profile_updated'); // Clean up
         }
       };
@@ -103,7 +108,7 @@ function AppRoutes() {
         window.removeEventListener('focus', handleWindowFocus);
         window.removeEventListener('storage', handleStorageChange);
       };
-    }, [currentUser, requiresContactInfo, contactInfoLoading]);
+    }, [currentUser, requiresContactInfo, contactInfoLoading, hasLoadedContactInfo]);
 
     const loadUserContactInfo = async () => {
       try {

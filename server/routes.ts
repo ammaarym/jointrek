@@ -1790,7 +1790,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const hasPaymentMethod = !!user.defaultPaymentMethodId;
+      let hasPaymentMethod = false;
+      
+      // Check Stripe directly for payment methods if user has a Stripe customer ID
+      if (user.stripeCustomerId && stripe) {
+        try {
+          const paymentMethods = await stripe.paymentMethods.list({
+            customer: user.stripeCustomerId,
+            type: 'card',
+          });
+          hasPaymentMethod = paymentMethods.data.length > 0;
+        } catch (stripeError) {
+          console.error('Error fetching payment methods from Stripe:', stripeError);
+          // Fallback to database field if Stripe query fails
+          hasPaymentMethod = !!user.defaultPaymentMethodId;
+        }
+      }
       
       res.json({
         hasPaymentMethod,

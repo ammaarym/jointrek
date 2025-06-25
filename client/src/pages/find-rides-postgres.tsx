@@ -192,12 +192,12 @@ export default function FindRidesPostgres() {
     return {
       id: ride.id,
       origin: {
-        city: ride.origin,
-        area: ride.originArea || ''
+        city: typeof ride.origin === 'object' ? ride.origin.city : ride.origin,
+        area: typeof ride.origin === 'object' ? ride.origin.area : (ride.originArea || '')
       },
       destination: {
-        city: ride.destination,
-        area: ride.destinationArea || ''
+        city: typeof ride.destination === 'object' ? ride.destination.city : ride.destination,
+        area: typeof ride.destination === 'object' ? ride.destination.area : (ride.destinationArea || '')
       },
       departureTime: {
         toDate: () => new Date(ride.departureTime),
@@ -220,7 +220,7 @@ export default function FindRidesPostgres() {
       isCompleted: ride.isCompleted,
       baggageCheckIn: ride.baggageCheckIn || 0,
       baggagePersonal: ride.baggagePersonal || 0,
-      driver: {
+      driver: ride.driver || {
         name: ride.driverName || 'Unknown Driver',
         email: ride.driverEmail || '',
         photoUrl: ride.driverPhoto || '',
@@ -228,8 +228,8 @@ export default function FindRidesPostgres() {
         instagram: ride.driverInstagram || '',
         snapchat: ride.driverSnapchat || '',
         id: ride.driverId,
-        rating: 4.8,
-        totalRides: 15
+        rating: ride.driverRating || 4.8,
+        totalRides: ride.driverTotalRides || 15
       },
       createdAt: {
         toDate: () => new Date(ride.createdAt),
@@ -270,8 +270,21 @@ export default function FindRidesPostgres() {
       }
 
       // Gainesville requirement: rides must be from or to Gainesville
-      const originCity = typeof ride.origin === 'object' ? ride.origin.city : ride.origin;
-      const destinationCity = typeof ride.destination === 'object' ? ride.destination.city : ride.destination;
+      let originCity: string;
+      let destinationCity: string;
+      
+      if (typeof ride.origin === 'object' && ride.origin !== null) {
+        originCity = (ride.origin as any).city;
+      } else {
+        originCity = ride.origin as string;
+      }
+      
+      if (typeof ride.destination === 'object' && ride.destination !== null) {
+        destinationCity = (ride.destination as any).city;
+      } else {
+        destinationCity = ride.destination as string;
+      }
+      
       if (originCity !== 'Gainesville' && destinationCity !== 'Gainesville') {
         return false;
       }
@@ -302,7 +315,7 @@ export default function FindRidesPostgres() {
         }
       } else if (appliedFilters.to && appliedFilters.to !== 'any') {
         // Only to selected - show rides going to that city
-        if (ride.destination.toLowerCase() !== appliedFilters.to.toLowerCase()) {
+        if (destinationCity.toLowerCase() !== appliedFilters.to.toLowerCase()) {
           return false;
         }
       }

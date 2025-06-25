@@ -86,16 +86,16 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     Find Rides
                   </span>
                 </Link>
-                <Link href="/post-ride">
+                <Link href="/setup-post-ride">
                   <span
-                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/post-ride" ? "text-primary" : ""}`}
+                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/setup-post-ride" || location === "/post-ride" ? "text-primary" : ""}`}
                   >
                     Post a Ride
                   </span>
                 </Link>
-                <Link href="/request-ride">
+                <Link href="/setup-request-ride">
                   <span
-                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/request-ride" ? "text-primary" : ""}`}
+                    className={`text-neutral-700 hover:text-primary cursor-pointer ${location === "/setup-request-ride" || location === "/request-ride" ? "text-primary" : ""}`}
                   >
                     Request a Ride
                   </span>

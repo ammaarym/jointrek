@@ -67,7 +67,7 @@ export default function Home() {
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#8A6F47'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#9B7F56'}
                   >
-                    <Link href="/post-ride">Offer a Ride</Link>
+                    <Link href="/setup-post-ride">Offer a Ride</Link>
                   </Button>
                 </div>
               ) : (

@@ -642,7 +642,24 @@ export default function FindRidesPostgres() {
           ) : filteredRides.length === 0 ? (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
               <h3 className="text-lg font-medium mb-2">No rides found</h3>
-              <p className="text-gray-500">Try adjusting your filters or check back later for new rides.</p>
+              <p className="text-gray-500 mb-6">Try adjusting your filters or check back later for new rides.</p>
+              
+              {/* Action buttons for creating rides */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => setLocation('/setup-post-ride')}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  Post a Ride
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/setup-request-ride')}
+                  variant="outline"
+                  className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                >
+                  Request a Ride
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">

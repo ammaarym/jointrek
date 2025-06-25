@@ -21,27 +21,29 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
       if (!currentUser) return;
 
       try {
-        // Check payment method status
-        const paymentResponse = await fetch('/api/users/payment-status', {
-          headers: {
-            'user-uid': currentUser.uid,
-            'user-email': currentUser.email || '',
-            'user-name': currentUser.displayName || ''
+        // Check payment method status (only needed for requesting rides)
+        if (mode === 'request') {
+          const paymentResponse = await fetch('/api/users/payment-status', {
+            headers: {
+              'x-user-id': currentUser.uid,
+              'x-user-email': currentUser.email || '',
+              'x-user-name': currentUser.displayName || ''
+            }
+          });
+          
+          if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json();
+            setHasPaymentMethod(!!paymentData.hasPaymentMethod);
           }
-        });
-        
-        if (paymentResponse.ok) {
-          const paymentData = await paymentResponse.json();
-          setHasPaymentMethod(!!paymentData.hasPaymentMethod);
         }
 
         // Check driver setup status (only needed for posting rides)
         if (mode === 'post') {
           const driverResponse = await fetch('/api/driver/status', {
             headers: {
-              'user-uid': currentUser.uid,
-              'user-email': currentUser.email || '',
-              'user-name': currentUser.displayName || ''
+              'x-user-id': currentUser.uid,
+              'x-user-email': currentUser.email || '',
+              'x-user-name': currentUser.displayName || ''
             }
           });
           
@@ -60,7 +62,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
     checkUserSetup();
   }, [currentUser, mode]);
 
-  const canProceed = mode === 'request' ? hasPaymentMethod : (hasPaymentMethod && hasDriverSetup);
+  const canProceed = mode === 'request' ? hasPaymentMethod : hasDriverSetup;
 
   const handleProceed = () => {
     if (mode === 'request') {
@@ -91,36 +93,38 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
       </div>
 
       <div className="space-y-6">
-        {/* Payment Method Card */}
-        <Card className={`${hasPaymentMethod ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              {hasPaymentMethod ? (
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              ) : (
-                <AlertCircle className="w-6 h-6 text-orange-600" />
+        {/* Payment Method Card (only for requesting rides) */}
+        {mode === 'request' && (
+          <Card className={`${hasPaymentMethod ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                {hasPaymentMethod ? (
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-orange-600" />
+                )}
+                <CreditCard className="w-6 h-6" />
+                Payment Method
+              </CardTitle>
+              <CardDescription>
+                {hasPaymentMethod 
+                  ? 'You have a payment method set up and ready to use.'
+                  : 'Add a payment method to pay for rides securely.'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!hasPaymentMethod && (
+                <Button 
+                  onClick={() => setLocation('/profile#payment')}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  Add Payment Method
+                </Button>
               )}
-              <CreditCard className="w-6 h-6" />
-              Payment Method
-            </CardTitle>
-            <CardDescription>
-              {hasPaymentMethod 
-                ? 'You have a payment method set up and ready to use.'
-                : 'Add a payment method to pay for rides securely.'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!hasPaymentMethod && (
-              <Button 
-                onClick={() => setLocation('/profile#payment')}
-                className="bg-orange-600 hover:bg-orange-700"
-              >
-                Add Payment Method
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Driver Setup Card (only for posting rides) */}
         {mode === 'post' && (
@@ -138,7 +142,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
               <CardDescription>
                 {hasDriverSetup 
                   ? 'Your driver account is set up and verified.'
-                  : 'Set up your driver account to receive payments for rides.'
+                  : 'Add your bank account information to receive payments from passengers.'
                 }
               </CardDescription>
             </CardHeader>

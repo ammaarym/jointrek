@@ -361,6 +361,13 @@ export default function Profile() {
           description: "Your contact information has been saved successfully.",
         });
         setIsEditing(false);
+        
+        // Signal other components that profile was updated
+        localStorage.setItem('profile_updated', Date.now().toString());
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'profile_updated',
+          newValue: Date.now().toString()
+        }));
       } else {
         throw new Error('Failed to update profile');
       }

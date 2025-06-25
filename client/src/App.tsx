@@ -78,11 +78,44 @@ function AppRoutes() {
       checkAuth();
     }, [currentUser, requiresContactInfo, loading]);
 
+    // Add window focus event listener to refresh contact info when user comes back
+    useEffect(() => {
+      const handleWindowFocus = () => {
+        if (currentUser && requiresContactInfo && !contactInfoLoading) {
+          console.log('[PROTECTED] Window focus - refreshing contact info');
+          loadUserContactInfo();
+        }
+      };
+
+      // Add storage event listener for profile updates
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'profile_updated' && currentUser && requiresContactInfo) {
+          console.log('[PROTECTED] Profile update detected - refreshing contact info');
+          setTimeout(() => loadUserContactInfo(), 500); // Small delay to ensure backend update
+          localStorage.removeItem('profile_updated'); // Clean up
+        }
+      };
+
+      window.addEventListener('focus', handleWindowFocus);
+      window.addEventListener('storage', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('focus', handleWindowFocus);
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    }, [currentUser, requiresContactInfo, contactInfoLoading]);
+
     const loadUserContactInfo = async () => {
       try {
-        const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
+        const response = await fetch(`/api/users/firebase/${currentUser?.uid}`, {
+          cache: 'no-cache', // Always fetch fresh data
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (response.ok) {
           const userData = await response.json();
+          console.log('[PROTECTED] Loaded fresh user contact info:', userData);
           setUserContactInfo(userData);
         }
       } catch (error) {

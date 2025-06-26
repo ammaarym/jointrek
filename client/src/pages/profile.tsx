@@ -133,6 +133,16 @@ export default function Profile() {
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
 
+  // Handle automatic scrolling to payment section
+  useEffect(() => {
+    if (window.location.hash === '#payment' && dataLoaded) {
+      const paymentSection = document.getElementById('payment-methods-section');
+      if (paymentSection) {
+        paymentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [dataLoaded]);
+
   // Fetch user's payment methods
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
     queryKey: ["/api/payment-methods"],
@@ -215,6 +225,29 @@ export default function Profile() {
     },
   });
 
+  // Delete driver account mutation
+  const deleteDriverMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", "/api/driver/account", {});
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Bank Account Deleted",
+        description: "Your bank account setup has been successfully removed.",
+      });
+      setDriverStatus(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/driver/status"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete bank account setup.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddPaymentMethod = () => {
     setupPaymentMutation.mutate();
   };
@@ -231,6 +264,10 @@ export default function Profile() {
 
   const handleDeletePaymentMethod = (paymentMethodId: string) => {
     deletePaymentMutation.mutate(paymentMethodId);
+  };
+
+  const handleDeleteDriverAccount = () => {
+    deleteDriverMutation.mutate();
   };
 
   const loadDriverStatus = async () => {
@@ -730,15 +767,27 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Driver Setup Section */}
+      {/* Bank Account Setup Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FaCar className="w-5 h-5" />
-            Driver Setup
+          <CardTitle className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <FaCar className="w-5 h-5" />
+              Bank Account Setup
+            </div>
+            {driverStatus?.isOnboarded && (
+              <button
+                onClick={handleDeleteDriverAccount}
+                disabled={deleteDriverMutation.isPending}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded p-1 disabled:opacity-50"
+                title="Delete bank account setup"
+              >
+                ×
+              </button>
+            )}
           </CardTitle>
           <CardDescription>
-            Set up your driver account to post rides and receive payments from passengers
+            Set up your bank account to post rides and receive payments from passengers
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -888,7 +937,7 @@ export default function Profile() {
       </Card>
 
       {/* Payment Methods Section */}
-      <Card>
+      <Card id="payment-methods-section">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FaCreditCard className="w-5 h-5" />

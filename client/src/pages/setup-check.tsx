@@ -34,6 +34,12 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
           if (paymentResponse.ok) {
             const paymentData = await paymentResponse.json();
             setHasPaymentMethod(!!paymentData.hasPaymentMethod);
+            
+            // Auto-redirect if setup is complete
+            if (paymentData.hasPaymentMethod) {
+              setLocation('/request-ride');
+              return;
+            }
           }
         }
 
@@ -50,6 +56,12 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
           if (driverResponse.ok) {
             const driverData = await driverResponse.json();
             setHasDriverSetup(driverData.isOnboarded);
+            
+            // Auto-redirect if setup is complete
+            if (driverData.isOnboarded) {
+              setLocation('/post-ride');
+              return;
+            }
           }
         }
       } catch (error) {
@@ -60,7 +72,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
     };
 
     checkUserSetup();
-  }, [currentUser, mode]);
+  }, [currentUser, mode, setLocation]);
 
   const canProceed = mode === 'request' ? hasPaymentMethod : hasDriverSetup;
 

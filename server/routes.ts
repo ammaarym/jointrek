@@ -1799,6 +1799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             customer: user.stripeCustomerId,
             type: 'card',
           });
+          console.log('Payment methods from Stripe:', paymentMethods.data.length, 'methods found');
           hasPaymentMethod = paymentMethods.data.length > 0;
         } catch (stripeError) {
           console.error('Error fetching payment methods from Stripe:', stripeError);

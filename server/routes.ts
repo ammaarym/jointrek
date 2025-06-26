@@ -1272,12 +1272,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send SMS using Twilio
       try {
-        await twilioService.sendSMS(phoneNumber, `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`);
-        
-        res.json({ 
-          message: "Verification code sent successfully",
-          expiresAt: expiresAt 
+        const smsResult = await twilioService.sendSMS({
+          to: phoneNumber,
+          message: `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`
         });
+        
+        if (smsResult) {
+          res.json({ 
+            message: "Verification code sent successfully",
+            expiresAt: expiresAt 
+          });
+        } else {
+          res.status(500).json({ error: "Failed to send verification code. Please try again." });
+        }
       } catch (smsError) {
         console.error('SMS sending error:', smsError);
         res.status(500).json({ error: "Failed to send verification code. Please try again." });
@@ -1337,7 +1344,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send welcome SMS
         try {
           const welcomeMessage = `Welcome to Trek! 🚗 Your phone number has been verified successfully. You can now safely request and offer rides with other UF students. Have a great day!`;
-          await twilioService.sendSMS(phoneNumber, welcomeMessage);
+          await twilioService.sendSMS({
+            to: phoneNumber,
+            message: welcomeMessage
+          });
         } catch (smsError) {
           console.error('Welcome SMS error:', smsError);
           // Don't fail the verification if welcome SMS fails

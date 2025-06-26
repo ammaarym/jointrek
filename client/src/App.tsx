@@ -63,13 +63,10 @@ function AppRoutes() {
         console.log('🔒 [PROTECTED_ROUTE] Auth check started', {
           loading,
           currentUser: currentUser?.email || 'null',
-          currentUserUid: currentUser?.uid || 'null',
           requiresContactInfo,
           hasLoadedContactInfo,
           authChecked,
-          authStateStable,
-          path: rest.path,
-          timestamp: new Date().toISOString()
+          path: rest.path
         });
         
         // Wait for auth loading to complete

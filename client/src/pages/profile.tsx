@@ -816,7 +816,7 @@ export default function Profile() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="(XXX) XXX-XXXX"
+                    placeholder="Phone number (any format)"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="flex-1"

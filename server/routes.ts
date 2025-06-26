@@ -1282,7 +1282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For now, store in memory (in production, use Redis or database)
       global.phoneVerifications = global.phoneVerifications || new Map();
-      global.phoneVerifications.set(phoneNumber, {
+      global.phoneVerifications.set(normalizedPhone, {
         code: verificationCode,
         expiresAt: expiresAt,
         attempts: 0
@@ -1291,13 +1291,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send SMS using Twilio
       try {
         const smsResult = await twilioService.sendSMS({
-          to: phoneNumber,
+          to: normalizedPhone,
           message: `Your Trek verification code is: ${verificationCode}. This code expires in 10 minutes.`
         });
         
         if (smsResult) {
           res.json({ 
             message: "Verification code sent successfully",
+            normalizedPhone: normalizedPhone,
             expiresAt: expiresAt 
           });
         } else {
@@ -1322,9 +1323,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Phone number and verification code are required" });
       }
 
+      // Normalize the phone number for verification
+      const normalizedPhone = normalizePhoneNumber(phoneNumber);
+      if (!normalizedPhone) {
+        return res.status(400).json({ error: "Invalid phone number format" });
+      }
+
       // Get stored verification data
       global.phoneVerifications = global.phoneVerifications || new Map();
-      const storedData = global.phoneVerifications.get(phoneNumber);
+      const storedData = global.phoneVerifications.get(normalizedPhone);
       
       if (!storedData) {
         return res.status(400).json({ error: "No verification code found for this phone number" });
@@ -1332,13 +1339,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if code has expired
       if (new Date() > storedData.expiresAt) {
-        global.phoneVerifications.delete(phoneNumber);
+        global.phoneVerifications.delete(normalizedPhone);
         return res.status(400).json({ error: "Verification code has expired. Please request a new one." });
       }
 
       // Check attempt limit
       if (storedData.attempts >= 3) {
-        global.phoneVerifications.delete(phoneNumber);
+        global.phoneVerifications.delete(normalizedPhone);
         return res.status(400).json({ error: "Too many failed attempts. Please request a new verification code." });
       }
 
@@ -1349,13 +1356,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Code is valid - update user's phone verification status in database
-      global.phoneVerifications.delete(phoneNumber);
+      global.phoneVerifications.delete(normalizedPhone);
       
       const user = await storage.getUserByFirebaseUid(req.user!.uid);
       if (user) {
-        // Update user with verified phone number
+        // Update user with verified phone number (always store in normalized format)
         await storage.updateUser(user.firebaseUid, {
-          phone: phoneNumber,
+          phone: normalizedPhone,
           phoneVerified: true
         });
 
@@ -1363,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const welcomeMessage = `Welcome to Trek! 🚗 Your phone number has been verified successfully. You can now safely request and offer rides with other UF students. Have a great day!`;
           await twilioService.sendSMS({
-            to: phoneNumber,
+            to: normalizedPhone,
             message: welcomeMessage
           });
         } catch (smsError) {

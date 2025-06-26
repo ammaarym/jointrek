@@ -44,6 +44,22 @@ export default function Help() {
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <span>Provides direct contact method between riders and drivers</span>
               </li>
+            </ul>
+            
+            <h3 className="font-semibold text-gray-900 mt-4">Phone Number Format:</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span>Enter your phone number in any format - we'll automatically format it correctly</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span>Examples: (813) 555-1234, 813-555-1234, 8135551234, +1 813 555 1234</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span>Must be a valid 10-digit US phone number</span>
+              </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <span>Prevents spam and fake accounts</span>

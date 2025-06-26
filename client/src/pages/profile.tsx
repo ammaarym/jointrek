@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
@@ -137,6 +138,17 @@ export default function Profile() {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+
+  // Fetch user profile data
+  const { data: userData, refetch: refetchUser } = useQuery({
+    queryKey: ["/api/users/firebase", currentUser?.uid],
+    enabled: !!currentUser?.uid,
+    queryFn: async () => {
+      const response = await fetch(`/api/users/firebase/${currentUser?.uid}`);
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      return response.json();
+    }
+  });
 
   // Handle automatic scrolling to payment section
   useEffect(() => {
@@ -360,7 +372,7 @@ export default function Profile() {
           description: data.welcomeMessage || "Your phone has been verified successfully!",
         });
         // Refresh user data to get updated phone verification status
-        loadUserProfile();
+        refetchUser();
       } else {
         toast({
           title: "Verification Failed",
@@ -779,7 +791,7 @@ export default function Profile() {
                     className="flex-1"
                     required
                   />
-                  {phone && phone !== userData?.phone && (
+                  {phone && phone.length > 0 && (
                     <Button
                       type="button"
                       onClick={sendVerificationCode}
@@ -845,10 +857,25 @@ export default function Profile() {
               {phone && (
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <FaPhone className="text-primary w-5 h-5" />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-gray-900">Phone Number</p>
                     <p className="text-gray-600">{phone}</p>
                   </div>
+                  {userData?.phoneVerified ? (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm font-medium">Verified</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-orange-600">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm font-medium">Not Verified</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1196,6 +1223,72 @@ export default function Profile() {
           </Card>
         </CardContent>
       </Card>
+
+      {/* Phone Verification Dialog */}
+      <Dialog open={showPhoneVerification} onOpenChange={setShowPhoneVerification}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FaPhone className="text-orange-500" />
+              Verify Phone Number
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">
+                We've sent a 6-digit verification code to:
+              </p>
+              <p className="font-medium text-lg">{phone}</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="verification-code">Verification Code</Label>
+              <Input
+                id="verification-code"
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="text-center text-lg tracking-widest"
+                maxLength={6}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={verifyPhoneNumber}
+                disabled={isVerifying || verificationCode.length !== 6}
+                className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
+              >
+                {isVerifying ? 'Verifying...' : 'Verify Phone'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPhoneVerification(false);
+                  setVerificationCode('');
+                  setIsCodeSent(false);
+                }}
+                disabled={isVerifying}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={sendVerificationCode}
+                disabled={isSendingCode}
+                className="text-sm text-orange-600 hover:text-orange-700"
+              >
+                {isSendingCode ? 'Sending...' : 'Resend Code'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

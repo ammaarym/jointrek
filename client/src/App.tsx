@@ -127,24 +127,18 @@ function AppRoutes() {
       }
     };
 
-    // Show loading while auth is being determined
-    if (loading || !authChecked) {
+    // Show loading while auth is being determined or while contact info is being fetched
+    if (loading || !authChecked || (requiresContactInfo && contactInfoLoading)) {
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
-        <span className="ml-3 text-gray-600">Loading...</span>
+        <span className="ml-3 text-gray-600">
+          {loading || !authChecked ? 'Loading...' : 'Loading contact info...'}
+        </span>
       </div>;
     }
 
-    // Show loading while contact info is being fetched
-    if (requiresContactInfo && contactInfoLoading) {
-      return <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
-        <span className="ml-3 text-gray-600">Loading contact info...</span>
-      </div>;
-    }
-
-    // If not authenticated, show authentication required message
-    if (!currentUser) {
+    // Only show authentication required if we're certain auth is loaded and user is null
+    if (!loading && authChecked && !currentUser) {
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>

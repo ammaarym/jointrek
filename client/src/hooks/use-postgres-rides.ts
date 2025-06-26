@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Ride } from '@shared/schema';
+import sarahChenPhoto from '@assets/sahara_1750977162888.png';
+import alexJohnsonPhoto from '@assets/alex_1750977185241.png';
+import marcusJohnsonPhoto from '@assets/marcus_1750976723565.png';
 
 // Helper function to make API requests
 async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -227,7 +230,7 @@ export function usePostgresRides() {
             driver: {
               name: "Sarah Chen",
               email: "sarah.chen@ufl.edu",
-              photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b1c0?w=100&h=100&fit=crop&crop=face",
+              photoUrl: sarahChenPhoto,
               phone: "(352) 555-0101",
               instagram: "",
               snapchat: "",
@@ -247,7 +250,7 @@ export function usePostgresRides() {
             createdAt: new Date(),
             driverId: "mock_driver_2",
             origin: { city: "Gainesville", area: "University of Florida" },
-            destination: { city: "Miami", area: "South Beach" },
+            destination: { city: "Miami", area: "The Underline" },
             departureTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             arrivalTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000),
             seatsTotal: 3,
@@ -339,9 +342,9 @@ export function usePostgresRides() {
             baggagePersonal: 2,
             isCompleted: false,
             driver: {
-              name: "Alex Thompson",
-              email: "alex.thompson@ufl.edu",
-              photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+              name: "Alex Johnson",
+              email: "alex.johnson@ufl.edu",
+              photoUrl: alexJohnsonPhoto,
               phone: "(352) 555-0104",
               instagram: "",
               snapchat: "",

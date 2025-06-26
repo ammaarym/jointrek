@@ -163,6 +163,8 @@ DATABASE_URL
 - June 26, 2025: Renamed "Driver Setup" to "Bank Account Setup" throughout application for clearer terminology and added delete functionality for bank account setup with consistent UI design
 - June 26, 2025: Implemented comprehensive SMS phone verification system - users must verify phone numbers via 6-digit SMS codes before accessing ride features, includes welcome message upon successful verification, verification status badges, and protected route enforcement requiring both phone number and verification
 - June 26, 2025: Enhanced phone verification to accept flexible input formats - system now accepts phone numbers in any format (813-555-1234, 8135551234, +1 813 555 1234) and automatically normalizes to (XXX) XXX-XXXX standard for SMS delivery and database storage
+- June 26, 2025: Fixed authentication timing issue in ProtectedRoute component - resolved recurring bug where verified users received "You must be logged in" errors when accessing post/request ride pages
+- June 26, 2025: Enhanced phone verification UI - disabled phone input and verify button once verified, added verify button next to unverified numbers in both edit and display modes for better user experience
 
 ## User Preferences
 

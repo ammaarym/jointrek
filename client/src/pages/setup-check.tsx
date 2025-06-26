@@ -95,7 +95,10 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
       <div className="space-y-6">
         {/* Payment Method Card (only for requesting rides) */}
         {mode === 'request' && (
-          <Card className={`${hasPaymentMethod ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
+          <Card 
+            className={`${hasPaymentMethod ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors'}`}
+            onClick={!hasPaymentMethod ? () => setLocation('/profile#payment') : undefined}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 {hasPaymentMethod ? (
@@ -105,30 +108,39 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                 )}
                 <CreditCard className="w-6 h-6" />
                 Payment Method
+                {!hasPaymentMethod && (
+                  <span className="ml-auto text-sm text-orange-600 font-normal">Click to setup →</span>
+                )}
               </CardTitle>
               <CardDescription>
                 {hasPaymentMethod 
                   ? 'You have a payment method set up and ready to use.'
-                  : 'Add a payment method to pay for rides securely.'
+                  : 'Add a payment method to pay for rides securely. Click anywhere on this card to get started.'
                 }
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {!hasPaymentMethod && (
+            {!hasPaymentMethod && (
+              <CardContent>
                 <Button 
-                  onClick={() => setLocation('/profile#payment')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLocation('/profile#payment');
+                  }}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   Add Payment Method
                 </Button>
-              )}
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         )}
 
         {/* Driver Setup Card (only for posting rides) */}
         {mode === 'post' && (
-          <Card className={`${hasDriverSetup ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
+          <Card 
+            className={`${hasDriverSetup ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors'}`}
+            onClick={!hasDriverSetup ? () => setLocation('/driver-onboard') : undefined}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 {hasDriverSetup ? (
@@ -138,24 +150,30 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                 )}
                 <Car className="w-6 h-6" />
                 Driver Account
+                {!hasDriverSetup && (
+                  <span className="ml-auto text-sm text-orange-600 font-normal">Click to setup →</span>
+                )}
               </CardTitle>
               <CardDescription>
                 {hasDriverSetup 
                   ? 'Your driver account is set up and verified.'
-                  : 'Add your bank account information to receive payments from passengers.'
+                  : 'Add your bank account information to receive payments from passengers. Click anywhere on this card to get started.'
                 }
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {!hasDriverSetup && (
+            {!hasDriverSetup && (
+              <CardContent>
                 <Button 
-                  onClick={() => setLocation('/driver-onboard')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLocation('/driver-onboard');
+                  }}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   Set Up Driver Account
                 </Button>
-              )}
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         )}
 

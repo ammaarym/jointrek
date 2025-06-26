@@ -193,6 +193,28 @@ export default function Profile() {
     },
   });
 
+  // Delete payment method mutation
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest("DELETE", `/api/payment-methods/${paymentMethodId}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Method Deleted",
+        description: "Your payment method has been successfully removed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete payment method.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddPaymentMethod = () => {
     setupPaymentMutation.mutate();
   };
@@ -205,6 +227,10 @@ export default function Profile() {
 
   const handleSetDefault = (paymentMethodId: string) => {
     setDefaultMutation.mutate(paymentMethodId);
+  };
+
+  const handleDeletePaymentMethod = (paymentMethodId: string) => {
+    deletePaymentMutation.mutate(paymentMethodId);
   };
 
   const loadDriverStatus = async () => {
@@ -888,7 +914,7 @@ export default function Profile() {
                       key={method.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-1">
                         <FaCreditCard className="w-5 h-5 text-gray-400" />
                         <div>
                           <p className="font-medium">
@@ -905,16 +931,27 @@ export default function Profile() {
                           </div>
                         )}
                       </div>
-                      {(paymentData as any).defaultPaymentMethodId !== method.id && (
+                      <div className="flex items-center gap-2">
+                        {(paymentData as any).defaultPaymentMethodId !== method.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetDefault(method.id)}
+                            disabled={setDefaultMutation.isPending}
+                          >
+                            Set as Default
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleSetDefault(method.id)}
-                          disabled={setDefaultMutation.isPending}
+                          onClick={() => handleDeletePaymentMethod(method.id)}
+                          disabled={deletePaymentMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          Set as Default
+                          ×
                         </Button>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -159,6 +159,8 @@ DATABASE_URL
 - June 25, 2025: Enhanced setup verification cards with clickable interface - cards now have hover effects and "Click to setup →" indicators when financial setup is incomplete, making it easier for users to navigate directly to payment method or driver account setup pages
 - June 26, 2025: Fixed setup verification system - users with complete financial setup are automatically redirected to forms, setup verification only appears when users lack required payment methods or driver accounts
 - June 26, 2025: Fixed profile page payment methods display bug - corrected React Query authentication headers to properly fetch and display existing payment methods from Stripe API
+- June 26, 2025: Added payment method deletion with clean red × buttons and enhanced UX with automatic scrolling to payment section when users click setup verification cards
+- June 26, 2025: Renamed "Driver Setup" to "Bank Account Setup" throughout application for clearer terminology and added delete functionality for bank account setup with consistent UI design
 
 ## User Preferences
 

@@ -161,14 +161,14 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                   <AlertCircle className="w-6 h-6 text-orange-600" />
                 )}
                 <Car className="w-6 h-6" />
-                Driver Account
+                Bank Account Setup
                 {!hasDriverSetup && (
                   <span className="ml-auto text-sm text-orange-600 font-normal">Click to setup →</span>
                 )}
               </CardTitle>
               <CardDescription>
                 {hasDriverSetup 
-                  ? 'Your driver account is set up and verified.'
+                  ? 'Your bank account is set up and ready to receive payments.'
                   : 'Add your bank account information to receive payments from passengers. Click anywhere on this card to get started.'
                 }
               </CardDescription>
@@ -182,7 +182,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                   }}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
-                  Set Up Driver Account
+                  Set Up Bank Account
                 </Button>
               </CardContent>
             )}

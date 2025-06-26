@@ -166,6 +166,8 @@ DATABASE_URL
 - June 26, 2025: Fixed authentication timing issue in ProtectedRoute component - resolved recurring bug where verified users received "You must be logged in" errors when accessing post/request ride pages
 - June 26, 2025: Enhanced phone verification UI - disabled phone input and verify button once verified, added verify button next to unverified numbers in both edit and display modes for better user experience
 - June 26, 2025: Fixed authentication race condition causing "You must be logged in" errors - resolved timing issues in ProtectedRoute component with enhanced state management and authentication flow stabilization, ensuring reliable access to ride request functionality
+- June 26, 2025: Fixed ride form authentication bug by standardizing auth hook usage - PostRidePostgres now uses use-auth-fixed instead of use-auth-new, eliminating race condition where currentUser was null during form submission despite successful authentication
+- June 26, 2025: Added mobile hamburger menu for navigation when tabs are cramped - three-bar menu icon appears on mobile devices in header with all navigation options (Find Rides, Post a Ride, Request a Ride, My Posts, Help) accessible via dropdown
 
 ## User Preferences
 

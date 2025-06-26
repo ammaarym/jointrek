@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { useAuth } from '../hooks/use-auth-new';
+import { useAuth } from '../hooks/use-auth-fixed';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateTime, formatTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
@@ -183,13 +183,6 @@ export default function PostRidePostgres() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🚀 [RIDE_FORM] Form submission started', {
-      currentUser: currentUser?.email || 'null',
-      currentUserType: typeof currentUser,
-      rideType,
-      timestamp: new Date().toISOString()
-    });
-    
     // Prevent multiple submissions
     if (isSubmitting || loading) {
       return;
@@ -199,12 +192,6 @@ export default function PostRidePostgres() {
     
     // Validate form
     if (!currentUser) {
-      console.log('❌ [RIDE_FORM] Authentication validation failed', {
-        currentUser,
-        currentUserType: typeof currentUser,
-        rideType,
-        timestamp: new Date().toISOString()
-      });
       toast({
         title: "Error",
         description: rideType === 'passenger' ? "You must be logged in to request a ride" : "You must be logged in to post a ride",
@@ -213,12 +200,6 @@ export default function PostRidePostgres() {
       setIsSubmitting(false);
       return;
     }
-    
-    console.log('✅ [RIDE_FORM] Authentication validation passed', {
-      currentUser: currentUser.email,
-      rideType,
-      timestamp: new Date().toISOString()
-    });
     
     if (!origin || !destination || !departureDate || !departureTime || !price) {
       toast({

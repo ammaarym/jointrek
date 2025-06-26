@@ -130,7 +130,60 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Admin Button - only show for specific admin emails */}
+            {/* Mobile Menu Button - only show when logged in */}
+            {currentUser && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="md:hidden p-2"
+                  >
+                    <MenuIcon className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/find-rides" className="w-full">
+                      Find Rides
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/setup-post-ride" className="w-full">
+                      Post a Ride
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/setup-request-ride" className="w-full">
+                      Request a Ride
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-rides" className="w-full">
+                      My Posts
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/help" className="w-full">
+                      Help
+                    </Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin-login" className="w-full">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Admin Button - only show for specific admin emails on desktop */}
             {isAdmin && (
               <Link href="/admin-login">
                 <Button

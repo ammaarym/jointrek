@@ -137,6 +137,17 @@ export default function Profile() {
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
     queryKey: ["/api/payment-methods"],
     enabled: !!currentUser,
+    queryFn: async () => {
+      const response = await fetch('/api/payment-methods', {
+        headers: {
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || ''
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch payment methods');
+      return response.json();
+    }
   });
 
   // Setup payment method mutation
@@ -869,8 +880,6 @@ export default function Profile() {
             </div>
           ) : (
             <>
-              {/* Debug payment data */}
-              {console.log('Payment data:', paymentData, 'Has methods:', (paymentData as any)?.paymentMethods?.length)}
               {/* Existing Payment Methods */}
               {(paymentData as any)?.paymentMethods?.length > 0 ? (
                 <div className="space-y-3">

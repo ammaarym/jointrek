@@ -268,7 +268,7 @@ export function usePostgresRides() {
             driver: {
               name: "Marcus Johnson",
               email: "marcus.johnson@ufl.edu",
-              photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+              photoUrl: marcusJohnsonPhoto,
               phone: "(352) 555-0102",
               instagram: "",
               snapchat: "",

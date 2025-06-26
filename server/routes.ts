@@ -1241,6 +1241,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to normalize phone numbers
+  const normalizePhoneNumber = (phone: string): string | null => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // Handle US numbers with or without country code
+    if (digits.length === 10) {
+      // Format as (XXX) XXX-XXXX
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    } else if (digits.length === 11 && digits.startsWith('1')) {
+      // Remove US country code and format
+      const usNumber = digits.slice(1);
+      return `(${usNumber.slice(0, 3)}) ${usNumber.slice(3, 6)}-${usNumber.slice(6)}`;
+    }
+    
+    return null; // Invalid number
+  };
+
   // Send SMS verification code to phone number
   app.post('/api/verify-phone/send', async (req: Request, res: Response) => {
     try {
@@ -1250,10 +1268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Phone number is required" });
       }
 
-      // Validate phone number format (basic US format)
-      const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
-      if (!phoneRegex.test(phoneNumber)) {
-        return res.status(400).json({ error: "Invalid phone number format. Please use (XXX) XXX-XXXX format" });
+      // Normalize phone number to standard format
+      const normalizedPhone = normalizePhoneNumber(phoneNumber);
+      if (!normalizedPhone) {
+        return res.status(400).json({ error: "Invalid phone number. Please enter a valid 10-digit US phone number." });
       }
 
       // Generate 6-digit verification code

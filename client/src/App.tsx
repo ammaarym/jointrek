@@ -55,6 +55,7 @@ function AppRoutes() {
     const [contactInfoLoading, setContactInfoLoading] = useState(true);
     const [authChecked, setAuthChecked] = useState(false);
     const [hasLoadedContactInfo, setHasLoadedContactInfo] = useState(false);
+    const [authStateStable, setAuthStateStable] = useState(false);
 
     // Load user contact info when component mounts and user is available
     useEffect(() => {
@@ -95,22 +96,26 @@ function AppRoutes() {
       checkAuth();
     }, [currentUser?.uid, requiresContactInfo, loading, hasLoadedContactInfo]);
 
-    // Add window focus event listener to refresh contact info when user comes back
+    // Add delay to prevent race condition and window event listeners
     useEffect(() => {
+      // Set auth state as stable after initial load
+      const timer = setTimeout(() => {
+        setAuthStateStable(true);
+      }, 300);
+
       const handleWindowFocus = () => {
         if (currentUser && requiresContactInfo && !contactInfoLoading && hasLoadedContactInfo) {
           loadUserContactInfo();
         }
       };
 
-      // Add storage event listener for profile updates
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'profile_updated' && currentUser && requiresContactInfo) {
           setTimeout(() => {
             loadUserContactInfo();
             setHasLoadedContactInfo(true);
-          }, 500); // Small delay to ensure backend update
-          localStorage.removeItem('profile_updated'); // Clean up
+          }, 500);
+          localStorage.removeItem('profile_updated');
         }
       };
 
@@ -118,6 +123,7 @@ function AppRoutes() {
       window.addEventListener('storage', handleStorageChange);
       
       return () => {
+        clearTimeout(timer);
         window.removeEventListener('focus', handleWindowFocus);
         window.removeEventListener('storage', handleStorageChange);
       };
@@ -159,12 +165,13 @@ function AppRoutes() {
       </div>;
     }
 
-    // Only show authentication required if we're certain auth is loaded and user is null
-    if (!loading && authChecked && !currentUser) {
+    // Only show authentication required if we're certain auth is loaded, stable, and user is null
+    if (!loading && authChecked && !currentUser && authStateStable) {
       console.log('🔒 [PROTECTED_ROUTE] Authentication required - showing login prompt', {
         loading,
         authChecked,
         currentUser: currentUser?.email || 'null',
+        authStateStable,
         path: rest.path
       });
       return <div className="flex items-center justify-center min-h-screen">

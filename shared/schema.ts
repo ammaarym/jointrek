@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   photoUrl: text("photo_url"),
   emailVerified: boolean("email_verified").default(false),
   phone: text("phone"),
+  phoneVerified: boolean("phone_verified").default(false),
   instagram: text("instagram"),
   snapchat: text("snapchat"),
   stripeCustomerId: text("stripe_customer_id"),

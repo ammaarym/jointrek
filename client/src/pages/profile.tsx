@@ -132,6 +132,11 @@ export default function Profile() {
   const [isDriverLoading, setIsDriverLoading] = useState(false);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
   // Handle automatic scrolling to payment section
   useEffect(() => {
@@ -268,6 +273,110 @@ export default function Profile() {
 
   const handleDeleteDriverAccount = () => {
     deleteDriverMutation.mutate();
+  };
+
+  const sendVerificationCode = async () => {
+    if (!phone) {
+      toast({
+        title: "Phone Required",
+        description: "Please enter a phone number first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingCode(true);
+    try {
+      const response = await fetch('/api/verify-phone/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber: phone }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setIsCodeSent(true);
+        setShowPhoneVerification(true);
+        toast({
+          title: "Verification Code Sent",
+          description: "Please check your phone for the verification code.",
+        });
+      } else {
+        toast({
+          title: "Failed to Send Code",
+          description: data.error || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send verification code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const verifyPhoneNumber = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter the 6-digit verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const response = await fetch('/api/verify-phone/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.uid || '',
+          'x-user-email': currentUser?.email || '',
+          'x-user-name': currentUser?.displayName || ''
+        },
+        body: JSON.stringify({ 
+          phoneNumber: phone,
+          verificationCode: verificationCode 
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setShowPhoneVerification(false);
+        setIsCodeSent(false);
+        setVerificationCode('');
+        setIsEditing(false);
+        toast({
+          title: "Welcome to Trek!",
+          description: data.welcomeMessage || "Your phone has been verified successfully!",
+        });
+        // Refresh user data to get updated phone verification status
+        loadUserProfile();
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: data.error || "Invalid verification code.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to verify phone number. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const loadDriverStatus = async () => {
@@ -660,16 +769,28 @@ export default function Profile() {
                   <FaPhone className="text-primary" />
                   Phone Number (Required)
                 </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">Required for SMS ride notifications</p>
+                <div className="flex gap-2">
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="(XXX) XXX-XXXX"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="flex-1"
+                    required
+                  />
+                  {phone && phone !== userData?.phone && (
+                    <Button
+                      type="button"
+                      onClick={sendVerificationCode}
+                      disabled={isSendingCode}
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      {isSendingCode ? 'Sending...' : 'Verify'}
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Required for SMS ride notifications and safety</p>
               </div>
 
               <div>

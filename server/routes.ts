@@ -1289,7 +1289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify SMS code
-  app.post('/api/verify-phone/verify', async (req: Request, res: Response) => {
+  app.post('/api/verify-phone/verify', authenticate, async (req: Request, res: Response) => {
     try {
       const { phoneNumber, verificationCode } = req.body;
       
@@ -1323,12 +1323,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid verification code" });
       }
 
-      // Code is valid - clean up and return success
+      // Code is valid - update user's phone verification status in database
       global.phoneVerifications.delete(phoneNumber);
       
+      const user = await storage.getUserByFirebaseUid(req.user!.uid);
+      if (user) {
+        // Update user with verified phone number
+        await storage.updateUser(user.firebaseUid, {
+          phone: phoneNumber,
+          phoneVerified: true
+        });
+
+        // Send welcome SMS
+        try {
+          const welcomeMessage = `Welcome to Trek! 🚗 Your phone number has been verified successfully. You can now safely request and offer rides with other UF students. Have a great day!`;
+          await twilioService.sendSMS(phoneNumber, welcomeMessage);
+        } catch (smsError) {
+          console.error('Welcome SMS error:', smsError);
+          // Don't fail the verification if welcome SMS fails
+        }
+      }
+      
       res.json({ 
-        message: "Phone number verified successfully",
-        verified: true 
+        message: "Phone number verified successfully! Welcome to Trek!",
+        verified: true,
+        welcomeMessage: "Welcome to Trek! Your phone has been verified and you're ready to start using the platform."
       });
     } catch (error) {
       console.error("Error verifying code:", error);

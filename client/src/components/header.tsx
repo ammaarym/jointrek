@@ -129,7 +129,24 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
             )}
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            {/* Admin Button - only show for specific admin emails on desktop */}
+            {isAdmin && (
+              <Link href="/admin-login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
+
+            {/* Notifications Bell - only show when logged in */}
+            {currentUser && <NotificationsBell />}
+
             {/* Mobile Menu Button - only show when logged in */}
             {currentUser && (
               <DropdownMenu>
@@ -182,23 +199,6 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-
-            {/* Admin Button - only show for specific admin emails on desktop */}
-            {isAdmin && (
-              <Link href="/admin-login">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
-            )}
-
-            {/* Notifications Bell - only show when logged in */}
-            {currentUser && <NotificationsBell />}
 
             {currentUser ? (
               <>

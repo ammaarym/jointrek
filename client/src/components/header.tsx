@@ -21,11 +21,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import NotificationsBell from "@/components/notifications-bell";
 
-// Helper function to format display name (remove commas)
+// Helper function to format display name (convert "Last, First" to "First Last")
 const formatDisplayName = (displayName: string | null | undefined): string => {
   if (!displayName) return '';
-  // Remove commas and extra spaces, then clean up spacing  
-  return displayName.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+  
+  // Check if name contains a comma (indicating "Last, First" format)
+  if (displayName.includes(',')) {
+    const parts = displayName.split(',').map(part => part.trim());
+    if (parts.length === 2) {
+      const [lastName, firstMiddle] = parts;
+      return `${firstMiddle} ${lastName}`;
+    }
+  }
+  
+  // If no comma, return as-is with cleaned spacing
+  return displayName.replace(/\s+/g, ' ').trim();
 };
 
 interface HeaderProps {

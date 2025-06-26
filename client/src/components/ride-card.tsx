@@ -99,11 +99,11 @@ export default function RideCard({
             {/* Driver info */}
             <div className="md:w-1/4">
               <div className="flex items-center">
-                <Avatar className="w-12 h-12 mr-3">
+                <Avatar className="w-12 h-12 mr-3 ring-2 ring-gray-200">
                   <AvatarImage
                     src={ride.driver.photoUrl}
                     alt={ride.driver.name}
-                    className="object-cover w-full h-full"
+                    className="object-cover object-center w-full h-full"
                   />
                   <AvatarFallback className="bg-primary text-white">
                     {ride.driver.name

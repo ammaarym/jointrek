@@ -3,6 +3,7 @@ import { Ride } from '@shared/schema';
 import sarahChenPhoto from '@assets/sahara_1750977162888.png';
 import alexJohnsonPhoto from '@assets/alex_1750977185241.png';
 import marcusJohnsonPhoto from '@assets/marcus_1750976723565.png';
+import emilyRodriguezPhoto from '@assets/emily_1750977859226.png';
 
 // Helper function to make API requests
 async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -306,7 +307,7 @@ export function usePostgresRides() {
             driver: {
               name: "Emily Rodriguez",
               email: "emily.rodriguez@ufl.edu",
-              photoUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+              photoUrl: emilyRodriguezPhoto,
               phone: "(352) 555-0103",
               instagram: "",
               snapchat: "",

@@ -63,10 +63,13 @@ function AppRoutes() {
         console.log('🔒 [PROTECTED_ROUTE] Auth check started', {
           loading,
           currentUser: currentUser?.email || 'null',
+          currentUserUid: currentUser?.uid || 'null',
           requiresContactInfo,
           hasLoadedContactInfo,
           authChecked,
-          path: rest.path
+          authStateStable,
+          path: rest.path,
+          timestamp: new Date().toISOString()
         });
         
         // Wait for auth loading to complete
@@ -86,11 +89,25 @@ function AppRoutes() {
             setContactInfoLoading(false);
           }
         } else {
-          console.log('🔒 [PROTECTED_ROUTE] No current user found');
+          console.log('🔒 [PROTECTED_ROUTE] ❌ RACE CONDITION DETECTED - No current user found', {
+            loadingState: loading,
+            authCheckedState: authChecked,
+            authStateStable,
+            currentUserType: typeof currentUser,
+            currentUserValue: currentUser,
+            timestamp: new Date().toISOString(),
+            path: rest.path,
+            stackTrace: new Error().stack
+          });
           setContactInfoLoading(false);
         }
         setAuthChecked(true);
-        console.log('🔒 [PROTECTED_ROUTE] Auth check completed');
+        console.log('🔒 [PROTECTED_ROUTE] Auth check completed', {
+          finalCurrentUser: currentUser?.email || 'null',
+          authChecked: true,
+          authStateStable,
+          timestamp: new Date().toISOString()
+        });
       };
       
       checkAuth();
@@ -167,12 +184,15 @@ function AppRoutes() {
 
     // Only show authentication required if we're certain auth is loaded, stable, and user is null
     if (!loading && authChecked && !currentUser && authStateStable) {
-      console.log('🔒 [PROTECTED_ROUTE] Authentication required - showing login prompt', {
+      console.log('🔒 [PROTECTED_ROUTE] ❌ AUTHENTICATION REQUIRED - showing login prompt', {
         loading,
         authChecked,
         currentUser: currentUser?.email || 'null',
+        currentUserType: typeof currentUser,
         authStateStable,
-        path: rest.path
+        path: rest.path,
+        timestamp: new Date().toISOString(),
+        possibleRaceCondition: 'User was authenticated but now appears null'
       });
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

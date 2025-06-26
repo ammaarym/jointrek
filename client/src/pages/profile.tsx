@@ -719,6 +719,27 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Phone Verification Required Banner */}
+      {hasRequiredContactInfo && userData && !userData.phoneVerified && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Phone Verification Required
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>Your phone number must be verified via SMS before you can access ride features. Please verify your phone number below.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Contact Information Section */}
       <Card>
         <CardHeader>

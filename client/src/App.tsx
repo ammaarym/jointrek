@@ -160,10 +160,11 @@ function AppRoutes() {
       </div>;
     }
 
-    // If route requires contact info and user doesn't have phone number, redirect to profile
+    // If route requires contact info and user doesn't have phone number or phone not verified, redirect to profile
     const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
+    const isPhoneVerified = userContactInfo?.phoneVerified === true;
     
-    if (requiresContactInfo && userContactInfo && !hasValidPhone) {
+    if (requiresContactInfo && userContactInfo && (!hasValidPhone || !isPhoneVerified)) {
       setTimeout(() => {
         setLocation("/profile");
       }, 100);

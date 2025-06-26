@@ -59,22 +59,37 @@ function AppRoutes() {
     // Load user contact info when component mounts and user is available
     useEffect(() => {
       const checkAuth = async () => {
+        console.log('🔒 [PROTECTED_ROUTE] Auth check started', {
+          loading,
+          currentUser: currentUser?.email || 'null',
+          requiresContactInfo,
+          hasLoadedContactInfo,
+          authChecked,
+          path: rest.path
+        });
+        
         // Wait for auth loading to complete
         if (loading) {
+          console.log('🔒 [PROTECTED_ROUTE] Auth still loading, waiting...');
           return;
         }
         
         if (currentUser) {
+          console.log('🔒 [PROTECTED_ROUTE] User authenticated:', currentUser.email);
           if (requiresContactInfo && !hasLoadedContactInfo) {
+            console.log('🔒 [PROTECTED_ROUTE] Loading contact info for user');
             await loadUserContactInfo();
             setHasLoadedContactInfo(true);
           } else if (!requiresContactInfo) {
+            console.log('🔒 [PROTECTED_ROUTE] No contact info required, setting not loading');
             setContactInfoLoading(false);
           }
         } else {
+          console.log('🔒 [PROTECTED_ROUTE] No current user found');
           setContactInfoLoading(false);
         }
         setAuthChecked(true);
+        console.log('🔒 [PROTECTED_ROUTE] Auth check completed');
       };
       
       checkAuth();
@@ -129,6 +144,13 @@ function AppRoutes() {
 
     // Show loading while auth is being determined or while contact info is being fetched
     if (loading || !authChecked || (requiresContactInfo && contactInfoLoading)) {
+      console.log('🔒 [PROTECTED_ROUTE] Showing loading state', {
+        loading,
+        authChecked,
+        requiresContactInfo,
+        contactInfoLoading,
+        path: rest.path
+      });
       return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-600"></div>
         <span className="ml-3 text-gray-600">
@@ -139,6 +161,12 @@ function AppRoutes() {
 
     // Only show authentication required if we're certain auth is loaded and user is null
     if (!loading && authChecked && !currentUser) {
+      console.log('🔒 [PROTECTED_ROUTE] Authentication required - showing login prompt', {
+        loading,
+        authChecked,
+        currentUser: currentUser?.email || 'null',
+        path: rest.path
+      });
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>
@@ -158,7 +186,20 @@ function AppRoutes() {
     const hasValidPhone = userContactInfo?.phone && userContactInfo.phone.trim().length > 0;
     const isPhoneVerified = userContactInfo?.phoneVerified === true;
     
+    console.log('🔒 [PROTECTED_ROUTE] Contact info validation', {
+      requiresContactInfo,
+      userContactInfo: userContactInfo ? {
+        hasPhone: !!userContactInfo.phone,
+        phoneLength: userContactInfo.phone?.length || 0,
+        phoneVerified: userContactInfo.phoneVerified
+      } : 'null',
+      hasValidPhone,
+      isPhoneVerified,
+      path: rest.path
+    });
+    
     if (requiresContactInfo && userContactInfo && (!hasValidPhone || !isPhoneVerified)) {
+      console.log('🔒 [PROTECTED_ROUTE] Redirecting to profile - missing contact info');
       setTimeout(() => {
         setLocation("/profile");
       }, 100);
@@ -171,6 +212,10 @@ function AppRoutes() {
       </div>;
     }
 
+    console.log('🔒 [PROTECTED_ROUTE] All checks passed - rendering component', {
+      path: rest.path,
+      userEmail: currentUser?.email
+    });
     return <Component {...rest} />;
   };
 

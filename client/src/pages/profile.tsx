@@ -869,6 +869,8 @@ export default function Profile() {
             </div>
           ) : (
             <>
+              {/* Debug payment data */}
+              {console.log('Payment data:', paymentData, 'Has methods:', (paymentData as any)?.paymentMethods?.length)}
               {/* Existing Payment Methods */}
               {(paymentData as any)?.paymentMethods?.length > 0 ? (
                 <div className="space-y-3">

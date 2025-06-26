@@ -4,6 +4,7 @@ import sarahChenPhoto from '@assets/sahara_1750977162888.png';
 import alexJohnsonPhoto from '@assets/alex_1750977185241.png';
 import marcusJohnsonPhoto from '@assets/marcus_1750976723565.png';
 import emilyRodriguezPhoto from '@assets/emily_1750977859226.png';
+import vanessaRamirezPhoto from '@assets/vanesa_1750978625848.png';
 
 // Helper function to make API requests
 async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -225,7 +226,7 @@ export function usePostgresRides() {
             carYear: 2020,
             notes: "Comfortable ride to Orlando! Clean car with AC.",
             rideType: "driver",
-            baggageCheckIn: 0,
+            baggageCheckIn: 1,
             baggagePersonal: 2,
             isCompleted: false,
             driver: {
@@ -263,7 +264,7 @@ export function usePostgresRides() {
             carYear: 2019,
             notes: "Direct route to Miami. Good music and conversation!",
             rideType: "driver",
-            baggageCheckIn: 0,
+            baggageCheckIn: 2,
             baggagePersonal: 3,
             isCompleted: false,
             driver: {
@@ -333,13 +334,13 @@ export function usePostgresRides() {
             seatsTotal: 4,
             seatsLeft: 2,
             price: "30",
-            genderPreference: "male_only",
+            genderPreference: "any",
             carMake: "Ford",
             carModel: "Focus",
             carYear: 2018,
             notes: "Quick trip to Jacksonville for the weekend.",
             rideType: "driver",
-            baggageCheckIn: 0,
+            baggageCheckIn: 1,
             baggagePersonal: 2,
             isCompleted: false,
             driver: {
@@ -371,19 +372,19 @@ export function usePostgresRides() {
             seatsTotal: 3,
             seatsLeft: 1,
             price: "50",
-            genderPreference: "female_only",
+            genderPreference: "any",
             carMake: "Nissan",
             carModel: "Altima",
             carYear: 2022,
             notes: "Heading to Fort Lauderdale for spring break. Reliable driver!",
             rideType: "driver",
-            baggageCheckIn: 0,
+            baggageCheckIn: 2,
             baggagePersonal: 3,
             isCompleted: false,
             driver: {
-              name: "Jessica Park",
-              email: "jessica.park@ufl.edu",
-              photoUrl: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop&crop=face",
+              name: "Vanessa Ramirez",
+              email: "vanessa.ramirez@ufl.edu",
+              photoUrl: vanessaRamirezPhoto,
               phone: "(352) 555-0105",
               instagram: "",
               snapchat: "",

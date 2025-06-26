@@ -942,15 +942,13 @@ export default function Profile() {
                             Set as Default
                           </Button>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <button
                           onClick={() => handleDeletePaymentMethod(method.id)}
                           disabled={deletePaymentMutation.isPending}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded p-1 disabled:opacity-50"
                         >
                           ×
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ))}

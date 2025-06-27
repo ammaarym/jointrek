@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth-fixed';
+import { auth } from '@/lib/firebase';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
 import { combineDateTime, formatTime, calculateArrivalTime } from '../lib/date-utils';
 import { toast } from '../hooks/use-toast';
@@ -112,6 +113,12 @@ export default function PostRidePostgres() {
   const [baggagePersonal, setBaggagePersonal] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Debug Firebase configuration
+  useEffect(() => {
+    console.log("authDomain:", auth.config.authDomain);
+    console.log("window.location:", window.location.href);
+  }, []);
+
   // Available models for selected make
   const availableModels = carMake ? CAR_MODELS[carMake] || [] : [];
   
@@ -183,6 +190,9 @@ export default function PostRidePostgres() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("Current user:", auth.currentUser);
+    console.log("Context currentUser:", currentUser);
+    
     // Prevent multiple submissions
     if (isSubmitting || loading) {
       return;
@@ -190,8 +200,12 @@ export default function PostRidePostgres() {
     
     setIsSubmitting(true);
     
-    // Validate form
-    if (!currentUser) {
+    // Use Firebase auth directly to avoid context race conditions
+    const firebaseUser = auth.currentUser;
+    
+    if (!firebaseUser || !currentUser) {
+      console.log("Auth validation failed - currentUser:", currentUser);
+      console.log("Firebase auth.currentUser:", firebaseUser);
       toast({
         title: "Error",
         description: rideType === 'passenger' ? "You must be logged in to request a ride" : "You must be logged in to post a ride",
@@ -293,7 +307,7 @@ export default function PostRidePostgres() {
       // Create ride data object - Note: We need to convert dates to ISO strings 
       // for proper transmission over API and then server will parse them
       const rideData = {
-        driverId: currentUser.uid,
+        driverId: firebaseUser.uid,
         origin,
         originArea,
         destination,

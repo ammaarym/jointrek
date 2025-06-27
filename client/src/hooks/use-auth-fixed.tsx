@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('👤 User detected:', user);
       if (user && user.email && isUFEmail(user.email)) {
         setCurrentUser(user);
         setLoading(false);

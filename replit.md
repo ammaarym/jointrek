@@ -169,6 +169,8 @@ DATABASE_URL
 - June 26, 2025: Fixed ride form authentication bug by standardizing auth hook usage - PostRidePostgres now uses use-auth-fixed instead of use-auth-new, eliminating race condition where currentUser was null during form submission despite successful authentication
 - June 26, 2025: Added mobile hamburger menu for navigation when tabs are cramped - three-bar menu icon appears on mobile devices in header with all navigation options (Find Rides, Post a Ride, Request a Ride, My Posts, Help) accessible via dropdown
 - June 28, 2025: Fixed mobile authentication popup failure - resolved Firebase network request errors by implementing direct Firebase auth usage instead of React context during form submission, eliminating race conditions and enabling reliable mobile login
+- June 28, 2025: Implemented mobile-first Find Rides layout - moved filters to popup modal on mobile while keeping sidebar on desktop, ensuring rides display first on mobile with filter button for better user experience
+- June 28, 2025: Standardized mobile layout consistency throughout help page - unified all icon sizes to w-5 h-5, added responsive text sizing (text-sm sm:text-base), and improved spacing for consistent mobile experience
 
 ## User Preferences
 

@@ -93,19 +93,7 @@ export default function RequestRideSimplePage() {
     );
   }
 
-  if (!currentUser) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Login Required</h1>
-          <p className="text-muted-foreground mb-4">Please log in to request rides.</p>
-          <Button onClick={() => setLocation("/login")}>
-            Go to Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
+
 
   const paymentMethods = (paymentData as any)?.paymentMethods || [];
   const hasPaymentMethod = paymentMethods.length > 0;

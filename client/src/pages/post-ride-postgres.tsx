@@ -198,10 +198,10 @@ export default function PostRidePostgres() {
     // Use Firebase auth directly to avoid context race conditions
     const firebaseUser = auth.currentUser;
     
-    if (!firebaseUser || !currentUser) {
+    if (!firebaseUser) {
       toast({
         title: "Error",
-        description: rideType === 'passenger' ? "You must be logged in to request a ride" : "You must be logged in to post a ride",
+        description: "Authentication required. Please refresh the page and try again.",
         variant: "destructive"
       });
       setIsSubmitting(false);

@@ -1893,8 +1893,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Create new account link for existing incomplete account
             const accountLink = await stripe.accountLinks.create({
               account: user.stripeConnectAccountId,
-              refresh_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?refresh=true`,
-              return_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?success=true`,
+              refresh_url: `${req.headers.origin || 'http://localhost:5000'}/profile?refresh=true`,
+              return_url: `${req.headers.origin || 'http://localhost:5000'}/profile?success=true`,
               type: 'account_onboarding',
             });
             
@@ -1946,8 +1946,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create account link for onboarding
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?refresh=true`,
-        return_url: `${req.headers.origin || 'http://localhost:5000'}/driver-onboard?success=true`,
+        refresh_url: `${req.headers.origin || 'http://localhost:5000'}/profile?refresh=true`,
+        return_url: `${req.headers.origin || 'http://localhost:5000'}/profile?success=true`,
         type: 'account_onboarding',
       });
 

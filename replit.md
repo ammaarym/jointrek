@@ -172,6 +172,7 @@ DATABASE_URL
 - June 28, 2025: Implemented mobile-first Find Rides layout - moved filters to popup modal on mobile while keeping sidebar on desktop, ensuring rides display first on mobile with filter button for better user experience
 - June 28, 2025: Standardized mobile layout consistency throughout help page - unified all icon sizes to w-5 h-5, added responsive text sizing (text-sm sm:text-base), and improved spacing for consistent mobile experience
 - June 28, 2025: Removed redundant authentication checks from ride request and post ride forms - eliminated "You must be logged in" errors on form submission since users have already completed verification to access these pages
+- June 28, 2025: Fixed Stripe bank account setup redirect URLs - updated return_url and refresh_url to redirect to profile page instead of non-existent driver-onboard page, eliminating 404 errors after completing Stripe Connect onboarding
 
 ## User Preferences
 

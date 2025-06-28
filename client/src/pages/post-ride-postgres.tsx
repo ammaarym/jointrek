@@ -263,17 +263,7 @@ export default function PostRidePostgres() {
         return;
       }
       
-      // Check if driver has completed Stripe Connect setup
-      if (driverStatus && !driverStatus.canAcceptRides) {
-        toast({
-          title: "Driver Setup Required",
-          description: "Please complete driver payment setup before offering rides",
-          variant: "destructive"
-        });
-        setIsSubmitting(false);
-        setLocation('/driver-onboard');
-        return;
-      }
+      // Driver verification handled at routing level - users can only reach this page if verified
     }
     
     console.log('Form submission started with data:', {
@@ -658,30 +648,13 @@ export default function PostRidePostgres() {
             </div>
           )}
           
-          {rideType === 'driver' && driverStatus && !driverStatus.canAcceptRides && (
-            <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <FaCarSide className="text-orange-600" />
-                <span className="font-medium text-orange-800">Driver Setup Required</span>
-              </div>
-              <p className="text-sm text-orange-700 mb-3">
-                You need to complete driver payment setup before offering rides. This allows you to receive payments from passengers.
-              </p>
-              <Button 
-                type="button"
-                onClick={() => setLocation('/driver-onboard')}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                Complete Driver Setup
-              </Button>
-            </div>
-          )}
+
           
           <div className="flex justify-end">
             <Button
               type="submit"
               className="bg-primary hover:bg-primary/90 text-white"
-              disabled={loading || isSubmitting || (rideType === 'driver' && driverStatus?.canAcceptRides === false)}
+              disabled={loading || isSubmitting}
             >
               {(loading || isSubmitting) ? (rideType === 'passenger' ? "Requesting..." : "Posting...") : (rideType === 'passenger' ? "Request Ride" : "Post Ride")}
             </Button>

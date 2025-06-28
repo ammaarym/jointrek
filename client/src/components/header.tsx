@@ -130,33 +130,16 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Admin Button - only show for specific admin emails on desktop */}
-            {isAdmin && (
-              <Link href="/admin-login">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
-            )}
-
-            {/* Notifications Bell - only show when logged in */}
-            {currentUser && <NotificationsBell />}
-
-            {/* Mobile Menu Button - only show when logged in */}
+            {/* Mobile Menu Button - show first on mobile for better visibility */}
             {currentUser && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="md:hidden p-2"
+                    className="md:hidden flex items-center justify-center p-2 border-2 border-gray-300 bg-white hover:bg-gray-50"
                   >
-                    <MenuIcon className="h-5 w-5" />
+                    <MenuIcon className="h-5 w-5 text-gray-700" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -199,6 +182,23 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
+
+            {/* Admin Button - only show for specific admin emails on desktop */}
+            {isAdmin && (
+              <Link href="/admin-login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
+
+            {/* Notifications Bell - only show when logged in */}
+            {currentUser && <NotificationsBell />}
 
             {currentUser ? (
               <>

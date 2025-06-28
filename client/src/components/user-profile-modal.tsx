@@ -126,7 +126,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
           ) : stats ? (
             <div className="space-y-4">
               {/* Driver Stats */}
-              {stats.totalDriverRatings > 0 && (
+              {stats.ridesAsDriver > 0 && (
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -138,7 +138,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                         {stats.ridesAsDriver} ride{stats.ridesAsDriver !== 1 ? 's' : ''}
                       </Badge>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <div className="flex">{renderStars(stats.driverRating)}</div>
                       <span className="text-sm font-medium">
                         {stats.driverRating.toFixed(1)}
@@ -146,13 +146,13 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                       <span className="text-xs text-muted-foreground">
                         ({stats.totalDriverRatings} review{stats.totalDriverRatings !== 1 ? 's' : ''})
                       </span>
-                    </div>
+                    </div> */}
                   </CardContent>
                 </Card>
               )}
 
               {/* Passenger Stats */}
-              {stats.totalPassengerRatings > 0 && (
+              {stats.ridesAsPassenger > 0 && (
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -164,7 +164,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                         {stats.ridesAsPassenger} ride{stats.ridesAsPassenger !== 1 ? 's' : ''}
                       </Badge>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <div className="flex">{renderStars(stats.passengerRating)}</div>
                       <span className="text-sm font-medium">
                         {stats.passengerRating.toFixed(1)}
@@ -172,15 +172,15 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                       <span className="text-xs text-muted-foreground">
                         ({stats.totalPassengerRatings} review{stats.totalPassengerRatings !== 1 ? 's' : ''})
                       </span>
-                    </div>
+                    </div> */}
                   </CardContent>
                 </Card>
               )}
 
-              {/* No ratings yet */}
-              {stats.totalDriverRatings === 0 && stats.totalPassengerRatings === 0 && (
+              {/* No rides yet */}
+              {stats.ridesAsDriver === 0 && stats.ridesAsPassenger === 0 && (
                 <div className="text-center py-4">
-                  <p className="text-sm text-muted-foreground">No ratings yet</p>
+                  <p className="text-sm text-muted-foreground">No rides yet</p>
                 </div>
               )}
             </div>

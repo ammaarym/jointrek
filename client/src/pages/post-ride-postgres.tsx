@@ -113,11 +113,7 @@ export default function PostRidePostgres() {
   const [baggagePersonal, setBaggagePersonal] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Debug Firebase configuration
-  useEffect(() => {
-    console.log("authDomain:", auth.config.authDomain);
-    console.log("window.location:", window.location.href);
-  }, []);
+
 
   // Available models for selected make
   const availableModels = carMake ? CAR_MODELS[carMake] || [] : [];
@@ -190,8 +186,7 @@ export default function PostRidePostgres() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log("Current user:", auth.currentUser);
-    console.log("Context currentUser:", currentUser);
+
     
     // Prevent multiple submissions
     if (isSubmitting || loading) {
@@ -204,8 +199,6 @@ export default function PostRidePostgres() {
     const firebaseUser = auth.currentUser;
     
     if (!firebaseUser || !currentUser) {
-      console.log("Auth validation failed - currentUser:", currentUser);
-      console.log("Firebase auth.currentUser:", firebaseUser);
       toast({
         title: "Error",
         description: rideType === 'passenger' ? "You must be logged in to request a ride" : "You must be logged in to post a ride",

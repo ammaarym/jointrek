@@ -168,6 +168,7 @@ DATABASE_URL
 - June 26, 2025: Fixed authentication race condition causing "You must be logged in" errors - resolved timing issues in ProtectedRoute component with enhanced state management and authentication flow stabilization, ensuring reliable access to ride request functionality
 - June 26, 2025: Fixed ride form authentication bug by standardizing auth hook usage - PostRidePostgres now uses use-auth-fixed instead of use-auth-new, eliminating race condition where currentUser was null during form submission despite successful authentication
 - June 26, 2025: Added mobile hamburger menu for navigation when tabs are cramped - three-bar menu icon appears on mobile devices in header with all navigation options (Find Rides, Post a Ride, Request a Ride, My Posts, Help) accessible via dropdown
+- June 28, 2025: Fixed mobile authentication popup failure - resolved Firebase network request errors by implementing direct Firebase auth usage instead of React context during form submission, eliminating race conditions and enabling reliable mobile login
 
 ## User Preferences
 

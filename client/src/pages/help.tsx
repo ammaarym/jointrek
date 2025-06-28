@@ -196,37 +196,37 @@ export default function Help() {
       {/* Passenger Payment Methods Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FaCreditCard className="w-5 h-5 text-purple-600" />
-            Passenger Payment Methods
+          <CardTitle className="flex items-center gap-3">
+            <FaCreditCard className="w-5 h-5 text-purple-600 flex-shrink-0" />
+            <span className="text-base sm:text-lg">Passenger Payment Methods</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <CreditCard className="h-4 w-4" />
-            <AlertDescription>
+            <CreditCard className="h-5 w-5 flex-shrink-0" />
+            <AlertDescription className="text-sm sm:text-base">
               Passengers must add a payment method to request rides and make payments.
             </AlertDescription>
           </Alert>
           
           <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">Accepted Payment Methods:</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>Credit Cards (Visa, Mastercard, American Express, Discover)</span>
+            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Accepted Payment Methods:</h3>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Credit Cards (Visa, Mastercard, American Express, Discover)</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>Debit Cards</span>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Debit Cards</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>Apple Pay</span>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Apple Pay</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>Google Pay</span>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Google Pay</span>
               </li>
             </ul>
           </div>

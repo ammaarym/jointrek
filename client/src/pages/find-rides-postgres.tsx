@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import GasPriceEstimate from '@/components/gas-price-estimate';
 import RideCard from '@/components/ride-card';
+import { Filter } from 'lucide-react';
 
 // List of major Florida cities
 const FLORIDA_CITIES = [
@@ -57,6 +58,7 @@ export default function FindRidesPostgres() {
 
   const [quickFilter, setQuickFilter] = useState('departures'); // 'departures' or 'arrivals'
   const [rideTypeFilter, setRideTypeFilter] = useState('driver'); // 'driver' or 'passenger'
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   
   // Track requested rides
   const [requestedRides, setRequestedRides] = useState<Set<number>>(new Set());
@@ -392,162 +394,186 @@ export default function FindRidesPostgres() {
     });
   };
 
+  const FilterContent = () => (
+    <>
+      {/* Quick Filter Toggle */}
+      <div className="mb-6">
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => {
+              setQuickFilter('departures');
+              setFrom('Gainesville');
+              setTo('any');
+            }}
+            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
+              quickFilter === 'departures'
+                ? 'bg-white shadow text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            From
+          </button>
+          <button
+            onClick={() => {
+              setQuickFilter('arrivals');
+              setFrom('any');
+              setTo('Gainesville');
+            }}
+            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
+              quickFilter === 'arrivals'
+                ? 'bg-white shadow text-primary'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            To
+          </button>
+        </div>
+      </div>
+
+      {/* Form Fields */}
+      <div className="space-y-6">
+        <div>
+          <Label htmlFor="from" className="block mb-3 text-sm font-medium">From</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-gray-400">
+              <FaLocationArrow />
+            </div>
+            <Select value={from} onValueChange={setFrom}>
+              <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
+                <SelectValue placeholder={quickFilter === 'arrivals' ? "Any city" : "Select city"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any city</SelectItem>
+                {FLORIDA_CITIES.map(city => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="to" className="block mb-3 text-sm font-medium">To</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-gray-400">
+              <FaMapMarkerAlt />
+            </div>
+            <Select value={to} onValueChange={setTo}>
+              <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
+                <SelectValue placeholder="Any destination" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any destination</SelectItem>
+                {FLORIDA_CITIES.map(city => (
+                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="date" className="block mb-3 text-sm font-medium">Date</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-gray-400">
+              <FaCalendar />
+            </div>
+            <Input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="pl-10 h-12 rounded-md border-gray-200"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="passengers" className="block mb-3 text-sm font-medium">Seats Needed</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-gray-400">
+              <FaUserFriends />
+            </div>
+            <Select value={passengers} onValueChange={setPassengers}>
+              <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
+                <SelectValue placeholder="1 seat" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 seat</SelectItem>
+                <SelectItem value="2">2 seats</SelectItem>
+                <SelectItem value="3">3 seats</SelectItem>
+                <SelectItem value="4">4 seats</SelectItem>
+                <SelectItem value="5">5 seats</SelectItem>
+                <SelectItem value="6">6 seats</SelectItem>
+                <SelectItem value="7">7 seats</SelectItem>
+                <SelectItem value="8">8 seats</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="gender" className="block mb-3 text-sm font-medium">Gender Preference</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-gray-400">
+              <FaUser />
+            </div>
+            <Select value={genderFilter} onValueChange={setGenderFilter}>
+              <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
+                <SelectValue placeholder="No preference" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no preference">No preference</SelectItem>
+                <SelectItem value="male">Male only</SelectItem>
+                <SelectItem value="female">Female only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="container px-4 py-8 mx-auto">
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden mb-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Find Your Ride</h1>
+        <Dialog open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Filter Rides</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <FilterContent />
+            </div>
+            <DialogFooter>
+              <Button onClick={() => {
+                applyFilters();
+                setMobileFilterOpen(false);
+              }}>
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar with filters */}
-        <div className="lg:col-span-1 bg-white rounded-lg shadow p-6">
+        {/* Desktop Sidebar with filters */}
+        <div className="hidden lg:block lg:col-span-1 bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-4">Find Your Ride</h2>
           
-          {/* Quick Filter Toggle */}
-          <div className="mb-6">
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => {
-                  setQuickFilter('departures');
-                  setFrom('Gainesville');
-                  setTo('any');
-                  // Auto-apply filters
-                  setAppliedFilters({
-                    from: 'Gainesville',
-                    to: 'any',
-                    date,
-                    passengers,
-                    genderFilter
-                  });
-                }}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
-                  quickFilter === 'departures'
-                    ? 'bg-white shadow text-primary'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                From
-              </button>
-              <button
-                onClick={() => {
-                  setQuickFilter('arrivals');
-                  setFrom('any');
-                  setTo('Gainesville');
-                  // Auto-apply filters
-                  setAppliedFilters({
-                    from: 'any',
-                    to: 'Gainesville',
-                    date,
-                    passengers,
-                    genderFilter
-                  });
-                }}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
-                  quickFilter === 'arrivals'
-                    ? 'bg-white shadow text-primary'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                To
-              </button>
-            </div>
-          </div>
+          <FilterContent />
           
-          <div className="space-y-8">
-            <div>
-              <Label htmlFor="from" className="block mb-3 text-sm font-medium">From</Label>
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-gray-400">
-                  <FaLocationArrow />
-                </div>
-                <Select value={from} onValueChange={setFrom}>
-                  <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder={quickFilter === 'arrivals' ? "Any city" : "Select city"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any city</SelectItem>
-                    {FLORIDA_CITIES.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="to" className="block mb-3 text-sm font-medium">To</Label>
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-gray-400">
-                  <FaMapMarkerAlt />
-                </div>
-                <Select value={to} onValueChange={setTo}>
-                  <SelectTrigger className="pl-10 h-12 rounded-md border-gray-200">
-                    <SelectValue placeholder="Any destination" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any destination</SelectItem>
-                    {FLORIDA_CITIES.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="date" className="block mb-3 text-sm font-medium">Date</Label>
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-gray-400">
-                  <FaCalendar />
-                </div>
-                <Input
-                  id="date"
-                  type="date"
-                  className="pl-10 h-12 rounded-md border-gray-200"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="passengers" className="block mb-3 text-sm font-medium">Seats Needed</Label>
-              <Select value={passengers} onValueChange={setPassengers}>
-                <SelectTrigger className="h-12 rounded-md border-gray-200">
-                  <SelectValue placeholder="Any number" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any number</SelectItem>
-                  <SelectItem value="1">1 seat</SelectItem>
-                  <SelectItem value="2">2 seats</SelectItem>
-                  <SelectItem value="3">3 seats</SelectItem>
-                  <SelectItem value="4">4 seats</SelectItem>
-                  <SelectItem value="5">5 seats</SelectItem>
-                  <SelectItem value="6">6 seats</SelectItem>
-                  <SelectItem value="7">7 seats</SelectItem>
-                  <SelectItem value="8">8 seats</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="gender" className="block mb-3 text-sm font-medium">Gender Preference</Label>
-              <Select value={genderFilter} onValueChange={setGenderFilter}>
-                <SelectTrigger className="h-12 rounded-md border-gray-200">
-                  <SelectValue placeholder="No preference" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no preference">No preference</SelectItem>
-                  <SelectItem value="male">Male riders only</SelectItem>
-                  <SelectItem value="female">Female riders only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Button 
-              className="w-full h-12 bg-primary hover:bg-primary/90 font-medium" 
-              onClick={applyFilters}
-              disabled={loading}
-            >
-              {loading ? (
-                <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
+          <div className="mt-6">
+            <Button onClick={applyFilters} className="w-full">
               Apply Filters
             </Button>
           </div>

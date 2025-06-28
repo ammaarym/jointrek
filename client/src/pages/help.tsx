@@ -16,53 +16,53 @@ export default function Help() {
       {/* Phone Number Verification Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FaPhone className="w-5 h-5 text-blue-600" />
-            Phone Number Verification
+          <CardTitle className="flex items-center gap-3">
+            <FaPhone className="w-5 h-5 text-blue-600 flex-shrink-0" />
+            <span className="text-base sm:text-lg">Phone Number Verification</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <Phone className="h-4 w-4" />
-            <AlertDescription>
+            <Phone className="h-5 w-5 flex-shrink-0" />
+            <AlertDescription className="text-sm sm:text-base">
               A verified phone number is required to use Trek's ride-sharing features.
             </AlertDescription>
           </Alert>
           
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900">Why Phone Verification is Required:</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Ensures safety and accountability for all users</span>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Ensures safety and accountability for all users</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Enables SMS notifications for ride updates and coordination</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Enables SMS notifications for ride updates and coordination</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Provides direct contact method between riders and drivers</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Provides direct contact method between riders and drivers</span>
               </li>
             </ul>
             
             <h3 className="font-semibold text-gray-900 mt-4">Phone Number Format:</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <span>Enter your phone number in any format - we'll automatically format it correctly</span>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Enter your phone number in any format - we'll automatically format it correctly</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <span>Examples: (813) 555-1234, 813-555-1234, 8135551234, +1 813 555 1234</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Examples: (813) 555-1234, 813-555-1234, 8135551234, +1 813 555 1234</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <span>Must be a valid 10-digit US phone number</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Must be a valid 10-digit US phone number</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Prevents spam and fake accounts</span>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-sm sm:text-base">Prevents spam and fake accounts</span>
               </li>
             </ul>
           </div>
@@ -82,29 +82,29 @@ export default function Help() {
       {/* UFL Email Verification Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FaUniversity className="w-5 h-5 text-orange-600" />
-            University of Florida Email Verification
+          <CardTitle className="flex items-center gap-3">
+            <FaUniversity className="w-5 h-5 text-orange-600 flex-shrink-0" />
+            <span className="text-base sm:text-lg">University of Florida Email Verification</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+            <Info className="h-5 w-5 flex-shrink-0" />
+            <AlertDescription className="text-sm sm:text-base">
               Trek is exclusively for University of Florida students, staff, and faculty.
             </AlertDescription>
           </Alert>
           
           <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">Accepted Email Domains:</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>@ufl.edu (Students and Faculty)</span>
+            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Accepted Email Domains:</h3>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">@ufl.edu (Students and Faculty)</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>@shands.ufl.edu (Medical Center Staff)</span>
+              <li className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-base">@shands.ufl.edu (Medical Center Staff)</span>
               </li>
             </ul>
           </div>
@@ -120,8 +120,8 @@ export default function Help() {
           </div>
 
           <Alert className="border-yellow-200 bg-yellow-50">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
+            <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+            <AlertDescription className="text-yellow-800 text-sm sm:text-base">
               Only verified UFL email addresses can access the platform. Personal emails (Gmail, Yahoo, etc.) are not accepted.
             </AlertDescription>
           </Alert>
@@ -131,25 +131,25 @@ export default function Help() {
       {/* Driver Setup Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FaCar className="w-5 h-5 text-green-600" />
-            Driver Setup & Bank Account Verification
+          <CardTitle className="flex items-center gap-3">
+            <FaCar className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <span className="text-base sm:text-lg">Driver Setup & Bank Account Verification</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <DollarSign className="h-4 w-4" />
-            <AlertDescription>
+            <DollarSign className="h-5 w-5 flex-shrink-0" />
+            <AlertDescription className="text-sm sm:text-base">
               Driver setup includes identity verification and bank account connection for secure payments.
             </AlertDescription>
           </Alert>
           
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">What You'll Need for Driver Setup:</h3>
+            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">What You'll Need for Driver Setup:</h3>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="p-4 border rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                  <FaShieldAlt className="w-4 h-4 text-blue-600" />
+                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-3 text-sm sm:text-base">
+                  <FaShieldAlt className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   Identity Verification
                 </h4>
                 <ul className="text-sm text-gray-600 space-y-1">
@@ -159,8 +159,8 @@ export default function Help() {
                 </ul>
               </div>
               <div className="p-4 border rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                  <FaDollarSign className="w-4 h-4 text-green-600" />
+                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-3 text-sm sm:text-base">
+                  <FaDollarSign className="w-5 h-5 text-green-600 flex-shrink-0" />
                   Banking Information
                 </h4>
                 <ul className="text-sm text-gray-600 space-y-1">
@@ -185,8 +185,8 @@ export default function Help() {
           </div>
 
           <Alert className="border-green-200 bg-green-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+            <AlertDescription className="text-green-800 text-sm sm:text-base">
               All driver information is securely processed through Stripe Connect, a trusted payment platform used by millions of businesses worldwide.
             </AlertDescription>
           </Alert>

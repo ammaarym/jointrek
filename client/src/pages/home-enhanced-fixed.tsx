@@ -385,7 +385,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#FCFAF7]">
-      {/* Sticky Header with Get Started Button */}
+      {/* Sticky Header with Coming Soon Badge */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
@@ -394,13 +394,9 @@ export default function Home() {
             </span>
           </Link>
           
-          <Button
-            onClick={handleLogin}
-            className="text-white px-6 py-2 text-sm font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            style={{ backgroundColor: '#B8956B' }}
-          >
-            Get Started
-          </Button>
+          <div className="inline-flex items-center px-6 py-2 text-sm font-semibold rounded-lg" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+            Coming Soon
+          </div>
         </div>
       </div>
 
@@ -515,15 +511,14 @@ export default function Home() {
                     Trek is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
                   </p>
                   <div className="flex justify-center">
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button 
-                        className="text-white px-4 py-2 sm:px-8 sm:py-3 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                        style={{ backgroundColor: '#B8956B' }}
-                        onClick={handleLogin}
-                      >
-                        Get Started
-                      </Button>
-                    </motion.div>
+                    <div className="text-center">
+                      <div className="inline-flex items-center px-4 py-2 sm:px-8 sm:py-3 rounded-lg font-semibold text-sm sm:text-lg mb-2 sm:mb-3" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+                        Coming Soon
+                      </div>
+                      <p className="text-xs sm:text-sm text-stone-600">
+                        Trek is launching soon for UF students. Stay tuned!
+                      </p>
+                    </div>
                   </div>
                 </EnhancedCard>
                 

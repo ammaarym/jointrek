@@ -669,11 +669,11 @@ export default function Home() {
       </section>
 
       {/* FAQ Section with Enhanced Effects */}
-      <section className="py-4 sm:py-8 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
+      <section className="py-3 sm:py-6 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2
-            className="text-xl sm:text-4xl font-bold text-center mb-4 sm:mb-16 text-stone-900"
+            className="text-lg sm:text-3xl font-bold text-center mb-3 sm:mb-10 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -763,10 +763,10 @@ export default function Home() {
       </section>
 
       {/* Final Section */}
-      <div className="relative h-[300px] sm:h-[500px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative h-[200px] sm:h-[350px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
         <motion.span
-          className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-[#B8956B] to-[#B8956B] bg-clip-text text-center text-4xl sm:text-8xl font-semibold leading-none text-transparent relative z-10"
+          className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-[#B8956B] to-[#B8956B] bg-clip-text text-center text-3xl sm:text-6xl font-semibold leading-none text-transparent relative z-10"
           animate={{
             scale: [1, 1.05, 1],
           }}

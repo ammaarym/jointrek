@@ -743,14 +743,14 @@ export default function Home() {
                       </Button>
                     </motion.div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="px-2 pb-1 sm:px-6 sm:pb-6">
+                  <CollapsibleContent className="px-2 pb-1 sm:px-3 sm:pb-3">
                     <motion.div
-                      className="pt-1 sm:pt-4 border-t border-stone-100"
+                      className="pt-1 sm:pt-2 border-t border-stone-100"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <p className="text-stone-700 leading-tight text-[10px] sm:text-base">
+                      <p className="text-stone-700 leading-tight text-[10px] sm:text-sm">
                         {faq.answer}
                       </p>
                     </motion.div>

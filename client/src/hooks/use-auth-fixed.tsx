@@ -77,17 +77,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     
     try {
-      // Try popup first, fallback to redirect if blocked
-      const result = await signInWithPopup(auth, provider);
-      if (result.user && result.user.email && !isUFEmail(result.user.email)) {
-        await firebaseSignOut(auth);
-        throw new Error('Please use your @ufl.edu email address');
-      }
-    } catch (error: any) {
-      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-        // Fallback to redirect for mobile/blocked popups
+      console.log('🚀 Starting Google sign-in process...');
+      
+      // Check if we're in mobile environment
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      console.log('📱 Mobile device detected:', isMobile);
+      
+      if (isMobile) {
+        // Use redirect for mobile devices to avoid popup issues
+        console.log('📱 Using redirect authentication for mobile');
         await signInWithRedirect(auth, provider);
       } else {
+        // Try popup for desktop
+        console.log('🖥️ Using popup authentication for desktop');
+        const result = await signInWithPopup(auth, provider);
+        
+        if (result.user && result.user.email) {
+          console.log('✅ Popup authentication successful:', result.user.email);
+          if (!isUFEmail(result.user.email)) {
+            console.log('❌ Non-UF email detected, signing out');
+            await firebaseSignOut(auth);
+            throw new Error('Please use your @ufl.edu email address');
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('❌ Authentication error:', error);
+      
+      if (error.code === 'auth/popup-blocked' || 
+          error.code === 'auth/popup-closed-by-user' || 
+          error.code === 'auth/cancelled-popup-request') {
+        console.log('🔄 Popup blocked/cancelled, falling back to redirect');
+        await signInWithRedirect(auth, provider);
+      } else if (error.code === 'auth/network-request-failed') {
+        console.log('🌐 Network error, retrying with redirect');
+        await signInWithRedirect(auth, provider);
+      } else {
+        console.error('🚨 Unhandled authentication error:', error);
         throw error;
       }
     }

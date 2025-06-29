@@ -147,7 +147,7 @@ const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
     },
     {
       id: 3,
-      icon: <Bank className="w-5 h-5" />,
+      icon: <Landmark className="w-5 h-5" />,
       title: "Bank Account Details",
       description: "Enter your bank account information for payouts",
       tips: "Double-check your routing and account numbers"
@@ -537,9 +537,9 @@ export default function Profile() {
 
   const loadDriverStatus = async () => {
     if (!currentUser) return;
-
+    
+    setIsDriverLoading(true);
     try {
-      setIsDriverLoading(true);
       const response = await fetch('/api/driver/status', {
         headers: {
           'x-user-id': currentUser.uid,
@@ -552,11 +552,10 @@ export default function Profile() {
         const status = await response.json();
         setDriverStatus(status);
       } else {
-        throw new Error('Failed to load driver status');
+        console.error('Failed to load driver status');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading driver status:', error);
-      // Don't show error toast for driver status - it's optional
     } finally {
       setIsDriverLoading(false);
     }
@@ -1486,6 +1485,9 @@ export default function Profile() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Visual Setup Guide - appears when Stripe popup is open */}
+      <StripeSetupGuide isVisible={showSetupGuide} />
     </div>
   );
 }

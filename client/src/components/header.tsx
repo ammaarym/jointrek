@@ -197,60 +197,57 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               </Link>
             )}
 
-            {/* Notifications Bell - only show when logged in */}
-            {currentUser && <NotificationsBell />}
-
-            {currentUser ? (
+            {/* Notifications Bell and Profile Picture - show on both mobile and desktop when logged in */}
+            {currentUser && (
               <>
-                <div className="hidden md:block">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative rounded-full h-8 w-8 p-0 border border-neutral-300"
-                      >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={currentUser.photoURL || ""}
-                            alt={currentUser.displayName || "User"}
-                          />
-                          <AvatarFallback>
-                            {currentUser.displayName
-                              ? getInitials(currentUser.displayName)
-                              : "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <div className="flex items-center justify-start gap-2 p-2">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium">
-                            {formatDisplayName(currentUser.displayName)}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            {currentUser.email}
-                          </p>
-                        </div>
+                <NotificationsBell />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative rounded-full h-8 w-8 p-0 border border-neutral-300"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={currentUser.photoURL || ""}
+                          alt={currentUser.displayName || "User"}
+                        />
+                        <AvatarFallback>
+                          {currentUser.displayName
+                            ? getInitials(currentUser.displayName)
+                            : "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">
+                          {formatDisplayName(currentUser.displayName)}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {currentUser.email}
+                        </p>
                       </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile" className="cursor-pointer w-full">
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="cursor-pointer"
-                      >
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer w-full">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer"
+                    >
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
-            ) : null}
+            )}
 
             {/* Mobile menu button - removed per user request */}
           </div>

@@ -93,12 +93,9 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="text-neutral-600 dark:text-neutral-400 hover:text-primary"
-                >
+                <Link href="/terms-of-service" className="text-neutral-600 dark:text-neutral-400 hover:text-primary">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
                 <a

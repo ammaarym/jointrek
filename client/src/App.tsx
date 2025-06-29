@@ -28,6 +28,7 @@ import Help from "@/pages/help";
 import NotificationsPage from "@/pages/notifications";
 import StripeSetupGuide from "@/pages/stripe-setup-guide";
 import SetupCheck from "@/pages/setup-check";
+import TermsOfService from "@/pages/terms-of-service";
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
 import { ThemeProvider } from "@/lib/theme";
@@ -317,6 +318,7 @@ function AppRoutes() {
           </Route>
           <Route path="/admin-login" component={AdminLogin} />
           <Route path="/admin-dashboard" component={AdminDashboard} />
+          <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>
       </main>

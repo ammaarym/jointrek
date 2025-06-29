@@ -1896,6 +1896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               refresh_url: `${req.headers.origin || 'http://localhost:5000'}/profile?refresh=true`,
               return_url: `${req.headers.origin || 'http://localhost:5000'}/profile?success=true`,
               type: 'account_onboarding',
+              collect: 'eventually_due'
             });
             
             return res.json({ 
@@ -1916,7 +1917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Create new Stripe Express account
+      // Create new Stripe Express account with prefilled information
       const account = await stripe.accounts.create({
         type: 'express',
         country: 'US',
@@ -1926,10 +1927,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           transfers: { requested: true },
         },
         business_type: 'individual',
+        business_profile: {
+          mcc: '4121', // Taxicabs/Limousines category
+          product_description: 'Ridesharing and transportation services for university students',
+          url: 'https://jointrek.com'
+        },
+        company: {
+          name: 'Trek Transportation Services'
+        },
         individual: {
           email: user.email,
           first_name: user.displayName?.split(' ')[0] || '',
           last_name: user.displayName?.split(' ').slice(1).join(' ') || '',
+          phone: user.phone || undefined
         },
         settings: {
           payouts: {
@@ -1943,12 +1953,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save the account ID to user record
       await storage.updateUserStripeConnectAccount(user.id, account.id);
 
-      // Create account link for onboarding
+      // Create account link for onboarding with prefill parameters
       const accountLink = await stripe.accountLinks.create({
         account: account.id,
         refresh_url: `${req.headers.origin || 'http://localhost:5000'}/profile?refresh=true`,
         return_url: `${req.headers.origin || 'http://localhost:5000'}/profile?success=true`,
         type: 'account_onboarding',
+        collect: 'eventually_due'
       });
 
       res.json({ 

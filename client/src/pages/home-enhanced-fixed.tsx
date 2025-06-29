@@ -499,26 +499,13 @@ export default function Home() {
                 className="flex flex-col items-center max-w-2xl mx-auto px-4"
               >
                 <EnhancedCard className="w-full mb-4 sm:mb-8">
-                  <div className="flex items-center justify-center mb-3 sm:mb-4">
-                    <div className="rounded-full p-2 sm:p-3 mr-2 sm:mr-3" style={{ backgroundColor: '#F0E6D6' }}>
-                      <Lock className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
+                  <div className="text-center py-4 sm:py-8">
+                    <div className="inline-flex items-center px-6 py-3 sm:px-12 sm:py-6 rounded-xl font-bold text-xl sm:text-3xl mb-3 sm:mb-4" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+                      Coming Soon
                     </div>
-                    <h3 className="text-lg sm:text-xl font-semibold" style={{ color: '#8A6F47' }}>
-                      Please sign in to continue
-                    </h3>
-                  </div>
-                  <p className="text-stone-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
-                    Trek is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
-                  </p>
-                  <div className="flex justify-center">
-                    <div className="text-center">
-                      <div className="inline-flex items-center px-4 py-2 sm:px-8 sm:py-3 rounded-lg font-semibold text-sm sm:text-lg mb-2 sm:mb-3" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
-                        Coming Soon
-                      </div>
-                      <p className="text-xs sm:text-sm text-stone-600">
-                        Trek is launching soon for UF students. Stay tuned!
-                      </p>
-                    </div>
+                    <p className="text-sm sm:text-lg text-stone-600 max-w-md mx-auto">
+                      Trek is launching soon for University of Florida students. Stay tuned!
+                    </p>
                   </div>
                 </EnhancedCard>
                 

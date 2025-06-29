@@ -189,6 +189,7 @@ DATABASE_URL
 - June 29, 2025: Fixed ride data fetching in request-ride page - changed from fetching all rides and filtering to direct individual ride API calls (/api/rides/${rideId}), resolving authentication timing issues and ensuring reliable ride lookup for "Request a Trek" functionality
 - June 29, 2025: Converted home page to "coming soon" landing page - replaced all "Get Started" buttons with "Coming Soon" messaging and removed footer section with Quick Links/Support/Contact for pre-launch marketing
 - June 29, 2025: Fixed "Coming Soon" implementation - corrected home-enhanced-fixed.tsx file to properly replace both sticky header and main card "Get Started" buttons with "Coming Soon" badges and messaging
+- June 29, 2025: Simplified coming soon landing page - removed "Please sign in to continue" section entirely and replaced with clean, prominent "Coming Soon" card focusing solely on launch messaging
 
 ## User Preferences
 

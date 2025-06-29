@@ -40,9 +40,28 @@ export default function Home() {
 
   return (
     <div className={`transition-opacity duration-1000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Sticky Header with Get Started Button */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center">
+            <span className="text-2xl font-bold font-satoshi transition-colors" style={{ color: '#B8956B' }}>
+              Trek
+            </span>
+          </Link>
+          
+          <Button
+            onClick={handleLogin}
+            className="text-white px-6 py-2 text-sm font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            style={{ backgroundColor: '#B8956B' }}
+          >
+            Get Started
+          </Button>
+        </div>
+      </div>
+
       {/* Hero Section with Screenshot */}
-      <section className="bg-white text-black min-h-screen">
-        <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-24">
+      <section className="bg-white text-black min-h-screen pt-16">
+        <div className="container mx-auto px-4 pt-4 pb-12 md:pt-6 md:pb-24">
           <div className="max-w-6xl mx-auto">
             <div className={`transform transition-all duration-1000 ease-out delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               <div className="text-center mb-4 md:mb-8">

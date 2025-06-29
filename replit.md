@@ -180,6 +180,8 @@ DATABASE_URL
 - June 29, 2025: Added Find Rides interface screenshot to home page hero section and removed bottom call-to-action section - integrated actual platform interface image with elegant styling to showcase functionality immediately after headline
 - June 29, 2025: Optimized home page for mobile devices - reduced text sizes throughout (2xl vs 4xl+ headlines, sm vs lg body text), compressed section spacing (py-8 vs py-20), resized screenshot for mobile viewports, and made buttons/icons more compact while maintaining desktop experience
 - June 29, 2025: Fixed mobile FAQ section display issues - implemented ultra-compact text sizes (11px/10px vs lg/base), shortened question text to prevent truncation, reduced padding and spacing significantly, and ensured all FAQ questions display properly on mobile without cutoff
+- June 29, 2025: Added visual step-by-step driver setup guide that appears when Stripe popup opens - includes 5 comprehensive steps with icons, descriptions, and tips for business information, identity verification, bank details, tax information, and review/submit with security notices and automatic closing when popup closes
+- June 29, 2025: Added sticky "Get Started" button to landing page header - positioned in top right aligned with Trek logo, stays visible while scrolling, includes hover effects and links to sign-in page for improved user accessibility
 
 ## User Preferences
 

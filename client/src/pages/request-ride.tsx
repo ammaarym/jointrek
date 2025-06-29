@@ -33,22 +33,7 @@ export default function RequestRidePage() {
     enabled: !!rideId,
   });
   
-  // Debug logging
-  console.log('DEBUG Request-ride params:', { params, rideId, rideIdType: typeof rideId });
-  console.log('DEBUG Request-ride state:', { 
-    ridesLoading, 
-    ridesError: ridesError?.message, 
-    rideData: ride,
-    hasRide: !!ride
-  });
-  if (ride) {
-    console.log('DEBUG Request-ride found:', {
-      rideId: ride.id,
-      origin: ride.origin,
-      destination: ride.destination,
-      driverName: ride.driverName || 'N/A'
-    });
-  }
+
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({

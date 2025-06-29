@@ -27,6 +27,17 @@ export default function RequestRidePage() {
   });
 
   const ride = Array.isArray(rides) ? rides.find((r: any) => r.id === rideId) : null;
+  
+  // Debug logging
+  if (rideId && rides) {
+    console.log('DEBUG Request-ride:', {
+      rideId,
+      rideIdType: typeof rideId,
+      ridesCount: rides.length,
+      availableIds: rides.map(r => ({ id: r.id, type: typeof r.id })),
+      foundRide: !!ride
+    });
+  }
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({

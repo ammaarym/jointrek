@@ -424,12 +424,7 @@ export default function Home() {
             </span>
           </Link>
 
-          <div
-            className="inline-flex items-center px-6 py-2 text-sm font-semibold rounded-lg"
-            style={{ backgroundColor: "#F0E6D6", color: "#8A6F47" }}
-          >
-            Coming Soon
-          </div>
+
         </div>
       </div>
 

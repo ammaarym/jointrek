@@ -427,7 +427,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 flex items-center justify-center">
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-20 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 

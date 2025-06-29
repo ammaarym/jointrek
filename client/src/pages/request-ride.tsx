@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
-import { useAuth } from "@/hooks/use-auth-new";
+import { useAuth } from "@/hooks/use-auth-fixed";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,13 @@ export default function RequestRidePage() {
   });
 
   const ride = Array.isArray(rides) ? rides.find((r: any) => r.id === rideId) : null;
+  
+  // Add debugging
+  console.log("Request ride page - rideId:", rideId, "type:", typeof rideId, "rides loaded:", !!rides, "ride found:", !!ride);
+  if (rides && Array.isArray(rides)) {
+    console.log("Available ride IDs:", rides.map(r => r.id));
+    console.log("Looking for ride ID:", rideId);
+  }
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({

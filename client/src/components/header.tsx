@@ -74,6 +74,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
     navigate("/");
   };
 
+  // Hide header on home page since it has its own custom header
+  if (location === '/') {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md border-b border-neutral-200">
       <div className="container mx-auto px-4">

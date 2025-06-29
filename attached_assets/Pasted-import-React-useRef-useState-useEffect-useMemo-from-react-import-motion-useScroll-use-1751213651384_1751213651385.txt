@@ -1,0 +1,1080 @@
+import React, { useRef, useState, useEffect, useMemo } from "react";
+import { motion, useScroll, useTransform, useAnimation, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { Button } from "@/components/ui/button"; // Assuming Button is a shadcn/ui component
+import { Input } from "@/components/ui/input"; // Assuming Input is a shadcn/ui component
+import { Mail, ShieldCheck, Car, Users, CheckCircle, CreditCard, BellRing, Flag } from "lucide-react"; // Icons from lucide-react
+
+// Container Scroll Animation Component
+const ContainerScroll = ({
+  titleComponent,
+  children,
+}: {
+  titleComponent: string | React.ReactNode;
+  children: React.ReactNode;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+  });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
+
+  const scaleDimensions = () => {
+    return isMobile ? [0.7, 0.9] : [1.05, 1];
+  };
+
+  const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
+  const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+  return (
+    <div
+      className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
+      ref={containerRef}
+    >
+      <div
+        className="py-10 md:py-40 w-full relative"
+        style={{
+          perspective: "1000px",
+        }}
+      >
+        <Header translate={translate} titleComponent={titleComponent} />
+        <Card rotate={rotate} translate={translate} scale={scale}>
+          {children}
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+const Header = ({ translate, titleComponent }: any) => {
+  return (
+    <motion.div
+      style={{
+        translateY: translate,
+      }}
+      className="div max-w-5xl mx-auto text-center"
+    >
+      {titleComponent}
+    </motion.div>
+  );
+};
+
+const Card = ({
+  rotate,
+  scale,
+  children,
+}: {
+  rotate: any;
+  scale: any;
+  translate: any;
+  children: React.ReactNode;
+}) => {
+  return (
+    <motion.div
+      style={{
+        rotateX: rotate,
+        scale,
+        boxShadow:
+          "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
+      }}
+      className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-border p-2 md:p-6 bg-background rounded-[30px] shadow-2xl"
+    >
+      <div className="h-full w-full overflow-hidden rounded-2xl bg-muted md:rounded-2xl md:p-4">
+        {children}
+      </div>
+    </motion.div>
+  );
+};
+
+// Aurora Background Component
+interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
+  children: React.ReactNode;
+  showRadialGradient?: boolean;
+}
+
+const AuroraBackground = ({
+  className,
+  children,
+  showRadialGradient = true,
+  ...props
+}: AuroraBackgroundProps) => {
+  return (
+    <main>
+      <div
+        className={cn(
+          "relative flex flex-col h-[100vh] items-center justify-center bg-[#FCFAF7] text-foreground transition-bg",
+          className
+        )}
+        {...props}
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className={cn(
+              `
+            [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
+            [--dark-gradient:repeating-linear-gradient(100deg,var(--black)_0%,var(--black)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--black)_16%)]
+            [--aurora:repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)]
+            [background-image:var(--white-gradient),var(--aurora)]
+            dark:[background-image:var(--dark-gradient),var(--aurora)]
+            [background-size:300%,_200%]
+            [background-position:50%_50%,50%_50%]
+            filter blur-[10px] invert dark:invert-0
+            after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
+            after:dark:[background-image:var(--dark-gradient),var(--aurora)]
+            after:[background-size:200%,_100%] 
+            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
+            pointer-events-none
+            absolute -inset-[10px] opacity-50 will-change-transform`,
+
+              showRadialGradient &&
+                `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
+            )}
+          ></div>
+        </div>
+        {children}
+      </div>
+    </main>
+  );
+};
+
+// Particles Component
+interface MousePosition {
+  x: number;
+  y: number;
+}
+
+function useMousePosition(): MousePosition {
+  const [mousePosition, setMousePosition] = useState<MousePosition>({
+    x: 0,
+    y: 0,
+  });
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      setMousePosition({ x: event.clientX, y: event.clientY });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
+  return mousePosition;
+}
+
+interface ParticlesProps {
+  className?: string;
+  quantity?: number;
+  staticity?: number;
+  ease?: number;
+  size?: number;
+  refresh?: boolean;
+  color?: string;
+  vx?: number;
+  vy?: number;
+}
+
+function hexToRgb(hex: string): number[] {
+  hex = hex.replace("#", "");
+
+  if (hex.length === 3) {
+    hex = hex
+      .split("")
+      .map((char) => char + char)
+      .join("");
+  }
+
+  const hexInt = parseInt(hex, 16);
+  const red = (hexInt >> 16) & 255;
+  const green = (hexInt >> 8) & 255;
+  const blue = hexInt & 255;
+  return [red, green, blue];
+}
+
+const Particles: React.FC<ParticlesProps> = ({
+  className = "",
+  quantity = 100,
+  staticity = 50,
+  ease = 50,
+  size = 0.4,
+  refresh = false,
+  color = "#ffffff",
+  vx = 0,
+  vy = 0,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const context = useRef<CanvasRenderingContext2D | null>(null);
+  const circles = useRef<Circle[]>([]);
+  const mousePosition = useMousePosition();
+  const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      context.current = canvasRef.current.getContext("2d");
+    }
+    initCanvas();
+    animate();
+    window.addEventListener("resize", initCanvas);
+
+    return () => {
+      window.removeEventListener("resize", initCanvas);
+    };
+  }, [color]);
+
+  useEffect(() => {
+    onMouseMove();
+  }, [mousePosition.x, mousePosition.y]);
+
+  useEffect(() => {
+    initCanvas();
+  }, [refresh]);
+
+  const initCanvas = () => {
+    resizeCanvas();
+    drawParticles();
+  };
+
+  const onMouseMove = () => {
+    if (canvasRef.current) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const { w, h } = canvasSize.current;
+      const x = mousePosition.x - rect.left - w / 2;
+      const y = mousePosition.y - rect.top - h / 2;
+      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
+      if (inside) {
+        mouse.current.x = x;
+        mouse.current.y = y;
+      }
+    }
+  };
+
+  type Circle = {
+    x: number;
+    y: number;
+    translateX: number;
+    translateY: number;
+    size: number;
+    alpha: number;
+    targetAlpha: number;
+    dx: number;
+    dy: number;
+    magnetism: number;
+  };
+
+  const resizeCanvas = () => {
+    if (canvasContainerRef.current && canvasRef.current && context.current) {
+      circles.current.length = 0;
+      canvasSize.current.w = canvasContainerRef.current.offsetWidth;
+      canvasSize.current.h = canvasContainerRef.current.offsetHeight;
+      canvasRef.current.width = canvasSize.current.w * dpr;
+      canvasRef.current.height = canvasSize.current.h * dpr;
+      canvasRef.current.style.width = `${canvasSize.current.w}px`;
+      canvasRef.current.style.height = `${canvasSize.current.h}px`;
+      context.current.scale(dpr, dpr);
+    }
+  };
+
+  const circleParams = (): Circle => {
+    const x = Math.floor(Math.random() * canvasSize.current.w);
+    const y = Math.floor(Math.random() * canvasSize.current.h);
+    const translateX = 0;
+    const translateY = 0;
+    const pSize = Math.floor(Math.random() * 2) + size;
+    const alpha = 0;
+    const targetAlpha = parseFloat((Math.random() * 0.6 + 0.1).toFixed(1));
+    const dx = (Math.random() - 0.5) * 0.1;
+    const dy = (Math.random() - 0.5) * 0.1;
+    const magnetism = 0.1 + Math.random() * 4;
+    return {
+      x,
+      y,
+      translateX,
+      translateY,
+      size: pSize,
+      alpha,
+      targetAlpha,
+      dx,
+      dy,
+      magnetism,
+    };
+  };
+
+  const rgb = hexToRgb(color);
+
+  const drawCircle = (circle: Circle, update = false) => {
+    if (context.current) {
+      const { x, y, translateX, translateY, size, alpha } = circle;
+      context.current.translate(translateX, translateY);
+      context.current.beginPath();
+      context.current.arc(x, y, size, 0, 2 * Math.PI);
+      context.current.fillStyle = `rgba(${rgb.join(", ")}, ${alpha})`;
+      context.current.fill();
+      context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (!update) {
+        circles.current.push(circle);
+      }
+    }
+  };
+
+  const clearContext = () => {
+    if (context.current) {
+      context.current.clearRect(
+        0,
+        0,
+        canvasSize.current.w,
+        canvasSize.current.h
+      );
+    }
+  };
+
+  const drawParticles = () => {
+    clearContext();
+    const particleCount = quantity;
+    for (let i = 0; i < particleCount; i++) {
+      const circle = circleParams();
+      drawCircle(circle);
+    }
+  };
+
+  const remapValue = (
+    value: number,
+    start1: number,
+    end1: number,
+    start2: number,
+    end2: number
+  ): number => {
+    const remapped =
+      ((value - start1) * (end2 - start2)) / (end1 - start1) + start2;
+    return remapped > 0 ? remapped : 0;
+  };
+
+  const animate = () => {
+    clearContext();
+    circles.current.forEach((circle: Circle, i: number) => {
+      const edge = [
+        circle.x + circle.translateX - circle.size,
+        canvasSize.current.w - circle.x - circle.translateX - circle.size,
+        circle.y + circle.translateY - circle.size,
+        canvasSize.current.h - circle.y - circle.translateY - circle.size,
+      ];
+      const closestEdge = edge.reduce((a, b) => Math.min(a, b));
+      const remapClosestEdge = parseFloat(
+        remapValue(closestEdge, 0, 20, 0, 1).toFixed(2)
+      );
+      if (remapClosestEdge > 1) {
+        circle.alpha += 0.02;
+        if (circle.alpha > circle.targetAlpha) {
+          circle.alpha = circle.targetAlpha;
+        }
+      } else {
+        circle.alpha = circle.targetAlpha * remapClosestEdge;
+      }
+      circle.x += circle.dx + vx;
+      circle.y += circle.dy + vy;
+      circle.translateX +=
+        (mouse.current.x / (staticity / circle.magnetism) - circle.translateX) /
+        ease;
+      circle.translateY +=
+        (mouse.current.y / (staticity / circle.magnetism) - circle.translateY) /
+        ease;
+
+      drawCircle(circle, true);
+
+      if (
+        circle.x < -circle.size ||
+        circle.x > canvasSize.current.w + circle.size ||
+        circle.y < -circle.size ||
+        circle.y > canvasSize.current.h + circle.size
+      ) {
+        circles.current.splice(i, 1);
+        const newCircle = circleParams();
+        drawCircle(newCircle);
+      }
+    });
+    window.requestAnimationFrame(animate);
+  };
+
+  return (
+    <div
+      className={cn("pointer-events-none", className)}
+      ref={canvasContainerRef}
+      aria-hidden="true"
+    >
+      <canvas ref={canvasRef} className="size-full" />
+    </div>
+  );
+};
+
+// Feature Steps Component
+interface Feature {
+  step: string;
+  title?: string;
+  content: string;
+  image?: string; // Image is now optional
+  icon?: React.ReactNode; // Added icon prop
+}
+
+interface FeatureStepsProps {
+  features: Feature[];
+  className?: string;
+  title?: string;
+  autoPlayInterval?: number;
+  imageHeight?: string;
+}
+
+const FeatureSteps = ({
+  features,
+  className,
+  title = "How to get Started",
+  autoPlayInterval = 3000,
+  imageHeight = "h-[400px]",
+}: FeatureStepsProps) => {
+  const [currentFeature, setCurrentFeature] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (progress < 100) {
+        setProgress((prev) => prev + 100 / (autoPlayInterval / 100));
+      } else {
+        setCurrentFeature((prev) => (prev + 1) % features.length);
+        setProgress(0);
+      }
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, [progress, features.length, autoPlayInterval]);
+
+  return (
+    <div className={cn("p-8 md:p-12", className)}>
+      <div className="max-w-7xl mx-auto w-full">
+        <motion.h2 
+          className="text-3xl md:text-4xl lg:text-5xl font-bold mb-10 text-[#B48A5C] text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          {title}
+        </motion.h2>
+
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-6 md:gap-10">
+          <div className="order-2 md:order-1 space-y-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="flex items-center gap-6 md:gap-8"
+                initial={{ opacity: 0.3, x: -20 }}
+                animate={{ 
+                  opacity: index === currentFeature ? 1 : 0.3,
+                  x: index === currentFeature ? 0 : -20
+                }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ scale: 1.02, x: 5 }}
+              >
+                <motion.div
+                  className={cn(
+                    "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
+                    index === currentFeature
+                      ? "bg-[#B48A5C] border-[#B48A5C] text-white scale-110 shadow-lg"
+                      : "bg-[#FCFAF7] border-[#B48A5C] text-[#B48A5C]"
+                  )}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  {feature.icon ? (
+                    <span className="text-lg">{feature.icon}</span>
+                  ) : index <= currentFeature ? (
+                    <span className="text-lg font-bold">✓</span>
+                  ) : (
+                    <span className="text-lg font-semibold">{index + 1}</span>
+                  )}
+                </motion.div>
+
+                <div className="flex-1">
+                  <h3 className="text-xl md:text-2xl font-semibold text-[#B48A5C]">
+                    {feature.title || feature.step}
+                  </h3>
+                  <p className="text-sm md:text-lg text-[#5F5F5F]">
+                    {feature.content}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="order-1 md:order-2 relative h-[200px] md:h-[300px] lg:h-[400px] overflow-hidden rounded-lg">
+            <AnimatePresence mode="wait">
+              {features.map(
+                (feature, index) =>
+                  index === currentFeature && feature.image && (
+                    <motion.div
+                      key={index}
+                      className="absolute inset-0 rounded-lg overflow-hidden"
+                      initial={{ y: 100, opacity: 0, rotateX: -20 }}
+                      animate={{ y: 0, opacity: 1, rotateX: 0 }}
+                      exit={{ y: -100, opacity: 0, rotateX: 20 }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    >
+                      <Image
+                        src={feature.image}
+                        alt={feature.step}
+                        className="w-full h-full object-cover transition-transform transform"
+                        width={1000}
+                        height={500}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                    </motion.div>
+                  )
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// FAQ Component
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface FAQProps {
+  faqs: FAQItem[];
+  className?: string;
+  title?: string;
+}
+
+const FAQ = ({ faqs, className, title = "Frequently Asked Questions" }: FAQProps) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggleFAQ = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  return (
+    <section className={cn("py-12 md:py-20", className)}>
+      <div className="max-w-4xl mx-auto px-4">
+        <motion.h2 
+          className="text-3xl md:text-4xl font-bold text-center mb-10 text-[#B48A5C]"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          {title}
+        </motion.h2>
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <motion.div 
+              key={index} 
+              className="border border-[#B48A5C] rounded-lg bg-gradient-to-r from-[#FCFAF7] to-[#FCFAF7] shadow-sm hover:shadow-md transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={{ scale: 1.01 }}
+            >
+              <motion.button
+                className="flex justify-between items-center w-full p-4 text-left font-semibold text-lg text-[#B48A5C] hover:text-[#B48A5C] transition-colors duration-200"
+                onClick={() => toggleFAQ(index)}
+                whileHover={{ x: 5 }}
+              >
+                {faq.question}
+                <motion.span
+                  animate={{ rotate: openIndex === index ? 45 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-[#B48A5C]"
+                >
+                  {openIndex === index ? "−" : "+"}
+                </motion.span>
+              </motion.button>
+              <AnimatePresence>
+                {openIndex === index && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <p className="p-4 pt-0 text-[#5F5F5F]">
+                      {faq.answer}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Footer Component
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
+
+interface FooterProps {
+  sections: FooterSection[];
+  contactInfo: {
+    email: string;
+    address: string;
+  };
+  copyright: string;
+  className?: string;
+}
+
+const Footer = ({ sections, contactInfo, copyright, className }: FooterProps) => {
+  return (
+    <footer className={cn("py-10 md:py-16", className)}>
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <motion.div 
+          className="col-span-1 md:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h3 className="text-2xl font-bold mb-4 text-[#B48A5C]">Trek</h3>
+          <p className="text-[#5F5F5F]">
+            The safe, convenient ride-sharing platform exclusively for University of Florida students.
+          </p>
+        </motion.div>
+
+        {sections.map((section, index) => (
+          <motion.div 
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+          >
+            <h4 className="font-semibold text-lg mb-4 text-[#B48A5C]">{section.title}</h4>
+            <ul className="space-y-2">
+              {section.links.map((link, linkIndex) => (
+                <li key={linkIndex}>
+                  <motion.a 
+                    href={link.href} 
+                    className="text-[#5F5F5F] hover:text-[#B48A5C] transition-colors duration-200"
+                    whileHover={{ x: 3 }}
+                  >
+                    {link.label}
+                  </motion.a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ))}
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <h4 className="font-semibold text-lg mb-4 text-[#B48A5C]">Contact</h4>
+          <p className="text-[#5F5F5F] flex items-center gap-2 mb-2">
+            <Mail className="size-4" /> {contactInfo.email}
+          </p>
+          <p className="text-[#5F5F5F]">{contactInfo.address}</p>
+        </motion.div>
+      </div>
+      <div className="mt-10 pt-6 border-t border-[#B48A5C] text-center text-sm text-[#5F5F5F]">
+        {copyright}
+      </div>
+    </footer>
+  );
+};
+
+
+// Floating Elements Component
+const FloatingElements = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-4 h-4 bg-gradient-to-r from-[#B48A5C] to-[#B48A5C] rounded-full opacity-20"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 8 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 1.5,
+          }}
+          style={{
+            left: `${10 + i * 15}%`,
+            top: `${20 + i * 10}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Morphing Shape Component
+const MorphingShape = ({ className }: { className?: string }) => {
+  return (
+    <motion.div
+      className={cn("absolute bg-gradient-to-br from-[#B48A5C] to-[#B48A5C] rounded-full opacity-10", className)}
+      animate={{
+        borderRadius: ["50%", "30%", "50%"],
+        scale: [1, 1.2, 1],
+        rotate: [0, 180, 360],
+      }}
+      transition={{
+        duration: 12,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+  );
+};
+
+// Enhanced Card Component with Hover Effects
+const EnhancedCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+  return (
+    <motion.div
+      className={cn("bg-gradient-to-br from-[#FCFAF7] to-[#FCFAF7] p-8 rounded-xl shadow-lg border border-[#B48A5C]", className)}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: "0 20px 40px rgba(180, 138, 92, 0.1)",
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// Main Landing Page Component
+const LandingPageEffects = () => {
+  const howTrekWorksFeatures = [
+    {
+      step: "Sign Up",
+      title: "Sign Up",
+      content: "Create an account using your UF email to join the Gator community.",
+      icon: <Mail className="size-5" />,
+    },
+    {
+      step: "Find or Post Rides",
+      title: "Find or Post Rides",
+      content: "Browse available rides or offer a ride to fellow students.",
+      icon: <Car className="size-5" />,
+    },
+    {
+      step: "Travel Safe",
+      title: "Travel Safe",
+      content: "Connect with verified students and enjoy secure, convenient transportation.",
+      icon: <ShieldCheck className="size-5" />,
+    },
+  ];
+
+  const safetyFeatures = [
+    {
+      step: "Verified Students",
+      title: "Verified Students",
+      content: "All users must verify with UF email addresses",
+      icon: <Users className="size-5" />,
+    },
+    {
+      step: "Secure Payments",
+      title: "Secure Payments",
+      content: "Banking details protected by Stripe encryption",
+      icon: <CreditCard className="size-5" />,
+    },
+    {
+      step: "Ride Tracking",
+      title: "Ride Tracking",
+      content: "SMS notifications and ride verification codes",
+      icon: <BellRing className="size-5" />,
+    },
+    {
+      step: "Report System",
+      title: "Report System",
+      content: "Easy reporting for safety concerns",
+      icon: <Flag className="size-5" />,
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "How does Trek protect my banking and personal information?",
+      answer: "Trek uses industry-standard encryption and partners with secure payment processors like Stripe to protect all banking and personal information. Your data is never shared with third parties without your consent.",
+    },
+    {
+      question: "How does Trek prevent scammers and fake accounts?",
+      answer: "All users are required to verify their University of Florida email addresses. This ensures that only current UF students can access the platform, significantly reducing the risk of scammers and fake accounts. We also have a robust reporting system.",
+    },
+    {
+      question: "What safety features does Trek provide?",
+      answer: "Trek offers several safety features including mandatory UF email verification, secure in-app payments, ride tracking with SMS notifications, and unique ride verification codes. There's also an easy-to-use reporting system for any concerns.",
+    },
+    {
+      question: "How do payments work and when am I charged?",
+      answer: "Payments are processed securely through the app. As a rider, you are charged when your ride is confirmed. Drivers receive payment after the ride is completed, ensuring a smooth and reliable transaction process for everyone.",
+    },
+  ];
+
+  const footerSections = [
+    {
+      title: "Quick Links",
+      links: [
+        { label: "Home", href: "#" },
+        { label: "Find Rides", href: "#" },
+        { label: "Post a Ride", href: "#" },
+        { label: "My Account", href: "#" },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { label: "Help Center", href: "#" },
+        { label: "Safety Guidelines", href: "#" },
+        { label: "Terms of Service", href: "#" },
+        { label: "Privacy Policy", href: "#" },
+      ],
+    },
+  ];
+
+  const footerContactInfo = {
+    email: "support@trek.com",
+    address: "University of Florida, Gainesville, FL",
+  };
+
+  const footerCopyright = "© 2025 Trek. All rights reserved. Not affiliated with the University of Florida.";
+
+
+  return (
+    <div className="min-h-screen bg-[#FCFAF7]">
+            {/* Hero Section with Aurora Background */}
+      <div className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden">
+        <FloatingElements />
+        <MorphingShape className="w-96 h-96 -top-48 -right-48" />
+        <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
+        
+        <AuroraBackground>
+          <motion.div
+            initial={{ opacity: 0.0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.3,
+              duration: 0.8,
+              ease: "easeInOut",
+            }}
+            className="relative flex flex-col gap-4 items-center justify-center px-4 z-10"
+          >
+            <motion.div 
+              className="text-3xl md:text-7xl font-bold bg-gradient-to-r from-[#B48A5C] to-[#B48A5C] bg-clip-text text-transparent text-center"
+              animate={{
+                backgroundPosition: ["0%", "100%", "0%"],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              Trek
+            </motion.div>
+            <motion.div 
+              className="font-extralight text-base md:text-4xl text-[#000000] py-4 text-center"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              Share rides with fellow Gators
+            </motion.div>
+            <motion.p 
+              className="text-lg md:text-xl text-center text-[#5F5F5F] max-w-2xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+            >
+              The safe, convenient way for UF students to carpool to campus, back home, or anywhere in between.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button className="bg-[#B48A5C] hover:bg-[#B48A5C]/90 text-white rounded-full w-fit px-8 py-4 text-lg mt-4 shadow-lg hover:shadow-xl transition-all duration-300">
+                Get Started
+              </Button>
+            </motion.div>
+          </motion.div>
+        </AuroraBackground>
+      </div>
+
+            {/* Trek Find Rides Interface Section */}
+      <section className="py-12 md:py-20 bg-gradient-to-b from-[#FCFAF7] to-[#FCFAF7] relative overflow-hidden">
+        <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold mb-6 text-[#B48A5C]"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Trek Find Rides Interface
+          </motion.h2>
+          <motion.p 
+            className="text-lg md:text-xl text-[#5F5F5F] mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Please sign in to continue
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <EnhancedCard>
+              <h3 className="text-2xl font-semibold mb-4 text-[#B48A5C]">Trek is exclusively for University of Florida students.</h3>
+              <p className="text-[#5F5F5F] mb-6">
+                You'll need to sign in with your UF email to access rides.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button className="bg-[#B48A5C] hover:bg-[#B48A5C]/90 text-white px-6 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                    Sign In with UF Email
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="outline" className="border-[#B48A5C] text-[#B48A5C] hover:bg-[#FCFAF7] px-6 py-3 text-lg transition-all duration-300">
+                    Learn More
+                  </Button>
+                </motion.div>
+              </div>
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <motion.div 
+                  className="flex items-start gap-4"
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <CheckCircle className="size-6 text-[#B48A5C] mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg text-[#B48A5C]">UF Students Only</h4>
+                    <p className="text-[#5F5F5F] text-sm">
+                      Verified UF emails ensure you're traveling with fellow Gators.
+                    </p>
+                  </div>
+                </motion.div>
+                <motion.div 
+                  className="flex items-start gap-4"
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ShieldCheck className="size-6 text-[#B48A5C] mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg text-[#B48A5C]">Secure & Easy</h4>
+                    <p className="text-[#5F5F5F] text-sm">
+                      Find rides or offer your own in just a few clicks after signing in.
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </EnhancedCard>
+          </motion.div>
+        </div>
+      </section>
+
+            {/* How Trek Works Section (repurposing FeatureSteps) */}
+      <div className="relative">
+        <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
+        <FeatureSteps
+          features={howTrekWorksFeatures}
+          title="How Trek Works"
+          autoPlayInterval={4000}
+          className="bg-gradient-to-b from-[#FCFAF7] to-[#FCFAF7] relative z-10"
+        />
+      </div>
+
+      {/* Your Safety is Our Priority Section (repurposing FeatureSteps) */}
+      <div className="relative">
+        <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
+        <FeatureSteps
+          features={safetyFeatures}
+          title="Your Safety is Our Priority"
+          autoPlayInterval={4000}
+          className="bg-gradient-to-b from-[#FCFAF7] to-[#FCFAF7] relative z-10"
+        />
+      </div>
+
+            {/* FAQ Section */}
+      <div className="relative">
+        <FloatingElements />
+        <FAQ faqs={faqs} className="bg-gradient-to-b from-[#FCFAF7] to-[#FCFAF7] relative z-10" />
+      </div>
+
+            {/* Particles Background Section (retained from original) */}
+      <div className="relative h-[500px] w-full bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
+        <MorphingShape className="w-full h-full opacity-10" />
+        <motion.span 
+          className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-[#B48A5C] to-[#B48A5C] bg-clip-text text-center text-8xl font-semibold leading-none text-transparent relative z-10"
+          animate={{
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          Trek
+        </motion.span>
+        <Particles
+          className="absolute inset-0"
+          quantity={150}
+          ease={80}
+          color="#B48A5C"
+          refresh
+        />
+      </div>
+
+            {/* Footer Section */}
+      <div className="relative">
+        <MorphingShape className="w-64 h-64 top-20 left-20 opacity-5" />
+        <Footer
+          sections={footerSections}
+          contactInfo={footerContactInfo}
+          copyright={footerCopyright}
+          className="bg-gradient-to-b from-[#FCFAF7] to-[#FCFAF7] relative z-10"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default LandingPageEffects;

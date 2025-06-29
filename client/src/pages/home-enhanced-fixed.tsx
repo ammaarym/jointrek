@@ -3,7 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  CarTaxiFront,
+  User,
+  MapPin,
+  Shield,
+  Lock,
+  Check,
+  CreditCard,
+  UserCheck,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { StarBorder } from "@/components/ui/star-border";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { cn } from "@/lib/utils";
@@ -205,7 +217,7 @@ const Particles: React.FC<ParticlesProps> = ({
         0,
         0,
         canvasSize.current.w,
-        canvasSize.current.h
+        canvasSize.current.h,
       );
     }
   };
@@ -224,7 +236,7 @@ const Particles: React.FC<ParticlesProps> = ({
     start1: number,
     end1: number,
     start2: number,
-    end2: number
+    end2: number,
   ): number => {
     const remapped =
       ((value - start1) * (end2 - start2)) / (end1 - start1) + start2;
@@ -242,7 +254,7 @@ const Particles: React.FC<ParticlesProps> = ({
       ];
       const closestEdge = edge.reduce((a, b) => Math.min(a, b));
       const remapClosestEdge = parseFloat(
-        remapValue(closestEdge, 0, 20, 0, 1).toFixed(2)
+        remapValue(closestEdge, 0, 20, 0, 1).toFixed(2),
       );
       if (remapClosestEdge > 1) {
         circle.alpha += 0.02;
@@ -321,7 +333,10 @@ const FloatingElements = () => {
 const MorphingShape = ({ className }: { className?: string }) => {
   return (
     <motion.div
-      className={cn("absolute bg-gradient-to-br from-[#B48A5C] to-[#B48A5C] rounded-full opacity-10", className)}
+      className={cn(
+        "absolute bg-gradient-to-br from-[#B48A5C] to-[#B48A5C] rounded-full opacity-10",
+        className,
+      )}
       animate={{
         borderRadius: ["50%", "30%", "50%"],
         scale: [1, 1.2, 1],
@@ -337,10 +352,19 @@ const MorphingShape = ({ className }: { className?: string }) => {
 };
 
 // Enhanced Card Component with Hover Effects
-const EnhancedCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+const EnhancedCard = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
   return (
     <motion.div
-      className={cn("bg-gradient-to-br from-[#FEFCF8] to-[#FEFCF8] p-4 sm:p-8 rounded-xl shadow-lg border border-[#E8DCC6]", className)}
+      className={cn(
+        "bg-gradient-to-br from-[#FEFCF8] to-[#FEFCF8] p-4 sm:p-8 rounded-xl shadow-lg border border-[#E8DCC6]",
+        className,
+      )}
       whileHover={{
         scale: 1.02,
         boxShadow: "0 20px 40px rgba(180, 138, 92, 0.1)",
@@ -364,7 +388,7 @@ export default function Home() {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    
+
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 100);
@@ -373,9 +397,11 @@ export default function Home() {
 
   // Redirect authenticated users to profile (avoid redirect loops)
   useEffect(() => {
-    if (!loading && currentUser && window.location.pathname === '/') {
-      console.log("Home page: Authenticated user on home, redirecting to profile");
-      window.location.replace('/profile');
+    if (!loading && currentUser && window.location.pathname === "/") {
+      console.log(
+        "Home page: Authenticated user on home, redirecting to profile",
+      );
+      window.location.replace("/profile");
     }
   }, [currentUser, loading]);
 
@@ -390,12 +416,18 @@ export default function Home() {
       <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold font-satoshi transition-colors" style={{ color: '#B8956B' }}>
+            <span
+              className="text-2xl font-bold font-satoshi transition-colors"
+              style={{ color: "#B8956B" }}
+            >
               Trek
             </span>
           </Link>
-          
-          <div className="inline-flex items-center px-6 py-2 text-sm font-semibold rounded-lg" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+
+          <div
+            className="inline-flex items-center px-6 py-2 text-sm font-semibold rounded-lg"
+            style={{ backgroundColor: "#F0E6D6", color: "#8A6F47" }}
+          >
             Coming Soon
           </div>
         </div>
@@ -405,12 +437,12 @@ export default function Home() {
       <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
-        
+
         {/* Aurora Background Effect */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -inset-[10px] opacity-50 will-change-transform pointer-events-none blur-[10px] invert [background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] [background-size:300%,_200%] [background-position:50%_50%,50%_50%] after:content-[''] after:absolute after:inset-0 after:[background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] after:[background-size:200%,_100%] after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference [mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]"></div>
         </div>
-        
+
         <div className="relative flex flex-col items-center justify-center px-4 z-10 text-center max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0.0, y: 40 }}
@@ -422,7 +454,7 @@ export default function Home() {
             }}
             className="flex flex-col gap-4 items-center justify-center"
           >
-            <motion.div 
+            <motion.div
               className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4 leading-tight"
               animate={{
                 backgroundPosition: ["0%", "100%", "0%"],
@@ -434,10 +466,10 @@ export default function Home() {
               }}
             >
               Share rides with fellow{" "}
-              <span style={{ color: '#B8956B' }}>Gators</span>
+              <span style={{ color: "#B8956B" }}>Gators</span>
             </motion.div>
-            
-            <motion.p 
+
+            <motion.p
               className="text-sm sm:text-xl mb-3 md:mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -448,16 +480,16 @@ export default function Home() {
             </motion.p>
 
             {/* Find Rides Screenshot with enhanced animation */}
-            <motion.div 
+            <motion.div
               className="mb-6 md:mb-12"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.8 }}
             >
               <div className="max-w-sm sm:max-w-4xl mx-auto px-4 sm:px-0">
-                <motion.img 
-                  src={findRidesScreenshot} 
-                  alt="Trek Find Rides Interface" 
+                <motion.img
+                  src={findRidesScreenshot}
+                  alt="Trek Find Rides Interface"
                   className="w-full rounded-lg sm:rounded-2xl shadow-lg sm:shadow-2xl border border-stone-200"
                   whileHover={{ scale: 1.02, y: -5 }}
                   transition={{ duration: 0.3 }}
@@ -467,26 +499,32 @@ export default function Home() {
 
             {/* Action buttons or sign-in card */}
             {currentUser ? (
-              <motion.div 
+              <motion.div
                 className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.1, duration: 0.6 }}
               >
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
                     asChild
                     className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                    style={{ backgroundColor: '#B8956B' }}
+                    style={{ backgroundColor: "#B8956B" }}
                   >
                     <Link href="/find-rides">Find a Ride</Link>
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
                     asChild
                     className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                    style={{ backgroundColor: '#9B7F56' }}
+                    style={{ backgroundColor: "#9B7F56" }}
                   >
                     <Link href="/setup-post-ride">Offer a Ride</Link>
                   </Button>
@@ -499,9 +537,7 @@ export default function Home() {
                 transition={{ delay: 1.1, duration: 0.6 }}
                 className="flex flex-col items-center justify-center mb-16 mt-2"
               >
-                <StarBorder>
-                  Coming Soon
-                </StarBorder>
+                <StarBorder>Coming Soon</StarBorder>
               </motion.div>
             )}
           </motion.div>
@@ -512,7 +548,7 @@ export default function Home() {
       <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
-          <motion.h2 
+          <motion.h2
             className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -523,11 +559,26 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6 sm:gap-12 max-w-5xl mx-auto">
             {[
-              { icon: User, title: "Sign Up", description: "Create an account using your UF email to join the Gator community." },
-              { icon: MapPin, title: "Find or Post Rides", description: "Browse available rides or offer a ride to fellow students." },
-              { icon: CarTaxiFront, title: "Travel Safe", description: "Connect with verified students and enjoy secure, convenient transportation." }
+              {
+                icon: User,
+                title: "Sign Up",
+                description:
+                  "Create an account using your UF email to join the Gator community.",
+              },
+              {
+                icon: MapPin,
+                title: "Find or Post Rides",
+                description:
+                  "Browse available rides or offer a ride to fellow students.",
+              },
+              {
+                icon: CarTaxiFront,
+                title: "Travel Safe",
+                description:
+                  "Connect with verified students and enjoy secure, convenient transportation.",
+              },
             ].map((step, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 className="text-center"
                 initial={{ opacity: 0, y: 50 }}
@@ -535,14 +586,21 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 whileHover={{ y: -10 }}
               >
-                <motion.div 
-                  className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300" 
-                  style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}
+                <motion.div
+                  className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300"
+                  style={{
+                    background: "linear-gradient(135deg, #F0E6D6, #E8DCC6)",
+                  }}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
-                  <step.icon className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
+                  <step.icon
+                    className="h-6 w-6 sm:h-8 sm:w-8"
+                    style={{ color: "#8A6F47" }}
+                  />
                 </motion.div>
-                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">{step.title}</h3>
+                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">
+                  {step.title}
+                </h3>
                 <p className="text-stone-700 text-sm sm:text-lg leading-relaxed">
                   {step.description}
                 </p>
@@ -556,7 +614,7 @@ export default function Home() {
       <section className="py-4 sm:py-8 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
-          <motion.h2 
+          <motion.h2
             className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -567,12 +625,28 @@ export default function Home() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 max-w-6xl mx-auto">
             {[
-              { icon: UserCheck, title: "Verified Students", description: "All users must verify with UF email addresses" },
-              { icon: Lock, title: "Contact Privacy", description: "Contact info only shared after mutual approval" },
-              { icon: CreditCard, title: "Secure Payments", description: "Banking and payment info protected by Stripe encryption" },
-              { icon: AlertTriangle, title: "Report System", description: "Easy reporting for safety concerns" }
+              {
+                icon: UserCheck,
+                title: "Verified Students",
+                description: "All users must verify with UF email addresses",
+              },
+              {
+                icon: Lock,
+                title: "Contact Privacy",
+                description: "Contact info only shared after mutual approval",
+              },
+              {
+                icon: CreditCard,
+                title: "Secure Payments",
+                description: "Banking and payment info protected by Stripe",
+              },
+              {
+                icon: AlertTriangle,
+                title: "Report System",
+                description: "Easy reporting for safety concerns",
+              },
             ].map((feature, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 className="text-center p-3 sm:p-6"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -580,15 +654,22 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -5, scale: 1.05 }}
               >
-                <motion.div 
-                  className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md" 
-                  style={{ backgroundColor: '#F0E6D6' }}
+                <motion.div
+                  className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md"
+                  style={{ backgroundColor: "#F0E6D6" }}
                   whileHover={{ rotate: 10, scale: 1.1 }}
                 >
-                  <feature.icon className="h-5 w-5 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
+                  <feature.icon
+                    className="h-5 w-5 sm:h-8 sm:w-8"
+                    style={{ color: "#8A6F47" }}
+                  />
                 </motion.div>
-                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">{feature.title}</h3>
-                <p className="text-xs sm:text-base text-stone-700">{feature.description}</p>
+                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">
+                  {feature.title}
+                </h3>
+                <p className="text-xs sm:text-base text-stone-700">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -599,7 +680,7 @@ export default function Home() {
       <section className="py-4 sm:py-8 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
-          <motion.h2 
+          <motion.h2
             className="text-xl sm:text-4xl font-bold text-center mb-4 sm:mb-16 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -613,23 +694,27 @@ export default function Home() {
               {
                 id: "security",
                 question: "How does Trek protect my banking information?",
-                answer: "Trek uses industry-leading security measures. All payment processing is handled by Stripe, which is PCI DSS compliant and uses bank-level encryption. We never see or store your banking details, credit card numbers, or SSN. Your financial information is encrypted and securely transmitted directly to Stripe's secure servers."
+                answer:
+                  "Trek uses industry-leading security measures. All payment processing is handled by Stripe, which is PCI DSS compliant and uses bank-level encryption. We never see or store your banking details, credit card numbers, or SSN. Your financial information is encrypted and securely transmitted directly to Stripe's secure servers.",
               },
               {
-                id: "scammers", 
+                id: "scammers",
                 question: "How does Trek prevent scammers?",
-                answer: "All users must verify their identity using official UF email addresses (@ufl.edu). Additionally, we require phone number verification via SMS before accessing ride features. This dual verification system ensures only legitimate UF students can use the platform."
+                answer:
+                  "All users must verify their identity using official UF email addresses (@ufl.edu). Additionally, we require phone number verification via SMS before accessing ride features. This dual verification system ensures only legitimate UF students can use the platform.",
               },
               {
                 id: "safety",
                 question: "What safety features does Trek provide?",
-                answer: "Trek includes SMS notifications for ride updates, verification codes for ride start/completion, gender preference settings, and an easy reporting system. All users are verified UF students, and we track ride completion to ensure accountability."
+                answer:
+                  "Trek includes SMS notifications for ride updates, verification codes for ride start/completion, gender preference settings, and an easy reporting system. All users are verified UF students, and we track ride completion to ensure accountability.",
               },
               {
                 id: "payments",
                 question: "How do payments work?",
-                answer: "Payments are processed securely through Stripe. Passengers are charged when rides are completed, not when booked. If a ride is cancelled or doesn't occur, you receive automatic refunds. Drivers receive payouts directly to their bank accounts after ride completion."
-              }
+                answer:
+                  "Payments are processed securely through Stripe. Passengers are charged when rides are completed, not when booked. If a ride is cancelled or doesn't occur, you receive automatic refunds. Drivers receive payouts directly to their bank accounts after ride completion.",
+              },
             ].map((faq, index) => (
               <motion.div
                 key={faq.id}
@@ -640,15 +725,19 @@ export default function Home() {
               >
                 <Collapsible
                   open={openFAQ === faq.id}
-                  onOpenChange={() => setOpenFAQ(openFAQ === faq.id ? null : faq.id)}
+                  onOpenChange={() =>
+                    setOpenFAQ(openFAQ === faq.id ? null : faq.id)
+                  }
                 >
                   <CollapsibleTrigger asChild>
                     <motion.div whileHover={{ x: 3 }}>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         className="w-full justify-between py-1 px-2 sm:p-6 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors min-h-[2rem] sm:min-h-auto"
                       >
-                        <span className="font-medium text-stone-900 text-[11px] sm:text-lg leading-tight pr-1 flex-1">{faq.question}</span>
+                        <span className="font-medium text-stone-900 text-[11px] sm:text-lg leading-tight pr-1 flex-1">
+                          {faq.question}
+                        </span>
                         <motion.div
                           animate={{ rotate: openFAQ === faq.id ? 180 : 0 }}
                           transition={{ duration: 0.2 }}
@@ -663,13 +752,15 @@ export default function Home() {
                     </motion.div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="px-2 pb-1 sm:px-6 sm:pb-6">
-                    <motion.div 
+                    <motion.div
                       className="pt-1 sm:pt-4 border-t border-stone-100"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <p className="text-stone-700 leading-tight text-[10px] sm:text-base">{faq.answer}</p>
+                      <p className="text-stone-700 leading-tight text-[10px] sm:text-base">
+                        {faq.answer}
+                      </p>
                     </motion.div>
                   </CollapsibleContent>
                 </Collapsible>
@@ -682,7 +773,7 @@ export default function Home() {
       {/* Final Section */}
       <div className="relative h-[300px] sm:h-[500px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
-        <motion.span 
+        <motion.span
           className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-[#B8956B] to-[#B8956B] bg-clip-text text-center text-4xl sm:text-8xl font-semibold leading-none text-transparent relative z-10"
           animate={{
             scale: [1, 1.05, 1],

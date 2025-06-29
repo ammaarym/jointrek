@@ -45,20 +45,21 @@ export default function Home() {
         <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-24">
           <div className="max-w-6xl mx-auto">
             <div className={`transform transition-all duration-1000 ease-out delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              <div className="text-center mb-8">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-                  Share rides with fellow{" "}
-                  <span style={{ color: '#B8956B' }}>Gators</span>
-                </h1>
-                <p className="text-xl mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed">
-                  The safe, convenient way for UF students to carpool to campus,
-                  back home, or anywhere in between.
-                </p>
-              </div>
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-8">
+                {/* Text Content */}
+                <div className="text-center lg:text-left">
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight">
+                    Share rides with fellow{" "}
+                    <span style={{ color: '#B8956B' }}>Gators</span>
+                  </h1>
+                  <p className="text-lg md:text-xl mb-6 text-stone-600 leading-relaxed">
+                    The safe, convenient way for UF students to carpool to campus,
+                    back home, or anywhere in between.
+                  </p>
+                </div>
 
-              {/* Find Rides Screenshot */}
-              <div className="mb-12">
-                <div className="max-w-4xl mx-auto">
+                {/* Find Rides Screenshot */}
+                <div className="order-first lg:order-last">
                   <img 
                     src={findRidesScreenshot} 
                     alt="Trek Find Rides Interface" 

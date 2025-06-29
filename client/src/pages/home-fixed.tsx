@@ -45,24 +45,24 @@ export default function Home() {
         <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-24">
           <div className="max-w-6xl mx-auto">
             <div className={`transform transition-all duration-1000 ease-out delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              <div className="text-center mb-8">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+              <div className="text-center mb-4 md:mb-8">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4 leading-tight">
                   Share rides with fellow{" "}
                   <span style={{ color: '#B8956B' }}>Gators</span>
                 </h1>
-                <p className="text-xl mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-sm sm:text-xl mb-3 md:mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed px-4">
                   The safe, convenient way for UF students to carpool to campus,
                   back home, or anywhere in between.
                 </p>
               </div>
 
               {/* Find Rides Screenshot */}
-              <div className="mb-12">
-                <div className="max-w-4xl mx-auto">
+              <div className="mb-6 md:mb-12">
+                <div className="max-w-sm sm:max-w-4xl mx-auto px-4 sm:px-0">
                   <img 
                     src={findRidesScreenshot} 
                     alt="Trek Find Rides Interface" 
-                    className="w-full rounded-2xl shadow-2xl border border-stone-200"
+                    className="w-full rounded-lg sm:rounded-2xl shadow-lg sm:shadow-2xl border border-stone-200"
                   />
                 </div>
               </div>
@@ -70,40 +70,40 @@ export default function Home() {
 
             <div className={`transform transition-all duration-1000 ease-out delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               {currentUser ? (
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <Button
                     asChild
-                    className="text-white px-8 py-4 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     style={{ backgroundColor: '#B8956B' }}
                   >
                     <Link href="/find-rides">Find a Ride</Link>
                   </Button>
                   <Button
                     asChild
-                    className="text-white px-8 py-4 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                     style={{ backgroundColor: '#9B7F56' }}
                   >
                     <Link href="/setup-post-ride">Offer a Ride</Link>
                   </Button>
                 </div>
               ) : (
-                <div className="flex flex-col items-center max-w-2xl mx-auto">
-                  <Card className="w-full mb-8 shadow-lg border-0" style={{ backgroundColor: '#FEFCF8', borderColor: '#E8DCC6', borderWidth: '1px' }}>
-                    <CardContent className="p-8">
-                      <div className="flex items-center justify-center mb-4">
-                        <div className="rounded-full p-3 mr-3" style={{ backgroundColor: '#F0E6D6' }}>
-                          <Lock className="w-6 h-6" style={{ color: '#8A6F47' }} />
+                <div className="flex flex-col items-center max-w-2xl mx-auto px-4">
+                  <Card className="w-full mb-4 sm:mb-8 shadow-lg border-0" style={{ backgroundColor: '#FEFCF8', borderColor: '#E8DCC6', borderWidth: '1px' }}>
+                    <CardContent className="p-4 sm:p-8">
+                      <div className="flex items-center justify-center mb-3 sm:mb-4">
+                        <div className="rounded-full p-2 sm:p-3 mr-2 sm:mr-3" style={{ backgroundColor: '#F0E6D6' }}>
+                          <Lock className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
                         </div>
-                        <h3 className="text-xl font-semibold" style={{ color: '#8A6F47' }}>
+                        <h3 className="text-lg sm:text-xl font-semibold" style={{ color: '#8A6F47' }}>
                           Please sign in to continue
                         </h3>
                       </div>
-                      <p className="text-stone-700 mb-6 text-center">
+                      <p className="text-stone-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
                         Trek is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
                       </p>
                       <div className="flex justify-center">
                         <Button 
-                          className="text-white px-8 py-3 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                          className="text-white px-4 py-2 sm:px-8 sm:py-3 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                           style={{ backgroundColor: '#B8956B' }}
                           onClick={handleLogin}
                         >
@@ -113,24 +113,24 @@ export default function Home() {
                     </CardContent>
                   </Card>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-                    <div className="flex items-start p-4 rounded-lg" style={{ backgroundColor: '#FEFCF8' }}>
-                      <div className="shrink-0 rounded-full p-3 mr-4" style={{ backgroundColor: '#F0E6D6' }}>
-                        <Shield className="w-6 h-6" style={{ color: '#8A6F47' }} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 w-full">
+                    <div className="flex items-start p-3 sm:p-4 rounded-lg" style={{ backgroundColor: '#FEFCF8' }}>
+                      <div className="shrink-0 rounded-full p-2 sm:p-3 mr-3 sm:mr-4" style={{ backgroundColor: '#F0E6D6' }}>
+                        <Shield className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-stone-900 mb-1">UF Students Only</h4>
-                        <p className="text-sm text-stone-700">Verified UF emails ensure you're traveling with fellow Gators.</p>
+                        <h4 className="font-semibold text-stone-900 mb-1 text-sm sm:text-base">UF Students Only</h4>
+                        <p className="text-xs sm:text-sm text-stone-700">Verified UF emails ensure you're traveling with fellow Gators.</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-start p-4 rounded-lg" style={{ backgroundColor: '#FEFCF8' }}>
-                      <div className="shrink-0 rounded-full p-3 mr-4" style={{ backgroundColor: '#F0E6D6' }}>
-                        <Check className="w-6 h-6" style={{ color: '#8A6F47' }} />
+                    <div className="flex items-start p-3 sm:p-4 rounded-lg" style={{ backgroundColor: '#FEFCF8' }}>
+                      <div className="shrink-0 rounded-full p-2 sm:p-3 mr-3 sm:mr-4" style={{ backgroundColor: '#F0E6D6' }}>
+                        <Check className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-stone-900 mb-1">Secure & Easy</h4>
-                        <p className="text-sm text-stone-700">Find rides or offer your own in just a few clicks after signing in.</p>
+                        <h4 className="font-semibold text-stone-900 mb-1 text-sm sm:text-base">Secure & Easy</h4>
+                        <p className="text-xs sm:text-sm text-stone-700">Find rides or offer your own in just a few clicks after signing in.</p>
                       </div>
                     </div>
                   </div>

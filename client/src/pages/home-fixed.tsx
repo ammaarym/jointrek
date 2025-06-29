@@ -61,7 +61,7 @@ export default function Home() {
 
       {/* Hero Section with Screenshot */}
       <section className="bg-white text-black min-h-screen pt-16">
-        <div className="container mx-auto px-4 pt-4 pb-12 md:pt-6 md:pb-24">
+        <div className="container mx-auto px-4 pt-1 pb-12 md:pt-1 md:pb-24">
           <div className="max-w-6xl mx-auto">
             <div className={`transform transition-all duration-1000 ease-out delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
               <div className="text-center mb-4 md:mb-8">

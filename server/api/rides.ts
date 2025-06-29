@@ -40,15 +40,30 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     console.log("Received ride data:", req.body);
+    console.log("Request headers:", {
+      'x-user-id': req.headers['x-user-id'],
+      'X-User-ID': req.headers['X-User-ID'],
+      'x-user-email': req.headers['x-user-email'],
+      'X-User-Email': req.headers['X-User-Email']
+    });
     
-    // Convert string dates to Date objects
+    // Get user ID from headers (Express converts headers to lowercase)
+    const firebaseUid = req.headers['x-user-id'] as string;
+    const userEmail = req.headers['x-user-email'] as string;
+    
+    if (!firebaseUid) {
+      return res.status(401).json({ error: "Authentication required - missing user ID" });
+    }
+    
+    // Convert string dates to Date objects and add driverId
     const rideData = {
       ...req.body,
+      driverId: firebaseUid, // Add the authenticated user's ID
       departureTime: req.body.departureTime ? new Date(req.body.departureTime) : undefined,
       arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
     };
     
-    console.log("Processed ride data:", rideData);
+    console.log("Processed ride data with driverId:", rideData);
     
     // Validate the request body against our schema
     const validationResult = insertRideSchema.safeParse(rideData);

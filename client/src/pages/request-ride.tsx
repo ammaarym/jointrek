@@ -20,22 +20,33 @@ export default function RequestRidePage() {
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
-  // Fetch ride details
-  const { data: rides, isLoading: ridesLoading } = useQuery({
-    queryKey: ["/api/rides"],
+  // Fetch specific ride details
+  const { data: ride, isLoading: ridesLoading, error: ridesError } = useQuery({
+    queryKey: ["/api/rides", rideId],
+    queryFn: async () => {
+      const response = await fetch(`/api/rides/${rideId}`);
+      if (!response.ok) {
+        throw new Error('Ride not found');
+      }
+      return response.json();
+    },
     enabled: !!rideId,
   });
-
-  const ride = Array.isArray(rides) ? rides.find((r: any) => r.id === rideId) : null;
   
   // Debug logging
-  if (rideId && rides) {
-    console.log('DEBUG Request-ride:', {
-      rideId,
-      rideIdType: typeof rideId,
-      ridesCount: rides.length,
-      availableIds: rides.map(r => ({ id: r.id, type: typeof r.id })),
-      foundRide: !!ride
+  console.log('DEBUG Request-ride params:', { params, rideId, rideIdType: typeof rideId });
+  console.log('DEBUG Request-ride state:', { 
+    ridesLoading, 
+    ridesError: ridesError?.message, 
+    rideData: ride,
+    hasRide: !!ride
+  });
+  if (ride) {
+    console.log('DEBUG Request-ride found:', {
+      rideId: ride.id,
+      origin: ride.origin,
+      destination: ride.destination,
+      driverName: ride.driverName || 'N/A'
     });
   }
 

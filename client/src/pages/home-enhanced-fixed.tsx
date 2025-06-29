@@ -568,13 +568,6 @@ export default function Home() {
       {/* How Trek Works Section with Enhanced Effects */}
       <section className="py-8 sm:py-20 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
-        <Particles
-          className="absolute inset-0"
-          quantity={50}
-          ease={80}
-          color="#B8956B"
-          size={0.3}
-        />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2 
             className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"
@@ -663,13 +656,6 @@ export default function Home() {
       {/* FAQ Section with Enhanced Effects */}
       <section className="py-6 sm:py-20 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
-        <Particles
-          className="absolute inset-0"
-          quantity={30}
-          ease={80}
-          color="#B8956B"
-          size={0.2}
-        />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2 
             className="text-xl sm:text-4xl font-bold text-center mb-4 sm:mb-16 text-stone-900"
@@ -751,7 +737,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final Particles Section */}
+      {/* Final Section */}
       <div className="relative h-[300px] sm:h-[500px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
         <motion.span 
@@ -767,13 +753,6 @@ export default function Home() {
         >
           Trek
         </motion.span>
-        <Particles
-          className="absolute inset-0"
-          quantity={150}
-          ease={80}
-          color="#B8956B"
-          refresh
-        />
       </div>
     </div>
   );

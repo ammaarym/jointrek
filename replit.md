@@ -187,6 +187,7 @@ DATABASE_URL
 - June 29, 2025: Fixed critical ride posting database storage issue - resolved foreign key constraint violations by implementing automatic user creation in PostgreSQL when Firebase users post rides, ensuring seamless ride creation for both new and existing users without manual database intervention
 - June 29, 2025: Resolved "Ride not found" error in ride request functionality - fixed App.tsx routing configuration where /request-ride/:id was incorrectly mapped to RequestRideSimplePage instead of RequestRidePage, eliminating authentication conflicts and enabling proper ride lookup and request processing
 - June 29, 2025: Fixed ride data fetching in request-ride page - changed from fetching all rides and filtering to direct individual ride API calls (/api/rides/${rideId}), resolving authentication timing issues and ensuring reliable ride lookup for "Request a Trek" functionality
+- June 29, 2025: Converted home page to "coming soon" landing page - replaced all "Get Started" buttons with "Coming Soon" messaging and removed footer section with Quick Links/Support/Contact for pre-launch marketing
 
 ## User Preferences
 

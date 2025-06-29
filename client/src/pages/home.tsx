@@ -92,13 +92,14 @@ export default function Home() {
                         Trek is exclusively for University of Florida students. You'll need to sign in with your UF email to access rides.
                       </p>
                       <div className="flex justify-center">
-                        <Button 
-                          className="text-white px-8 py-3 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                          style={{ backgroundColor: '#B8956B' }}
-                          onClick={handleLogin}
-                        >
-                          Get Started
-                        </Button>
+                        <div className="text-center">
+                          <div className="inline-flex items-center px-8 py-3 rounded-lg font-semibold text-lg mb-3" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+                            Coming Soon
+                          </div>
+                          <p className="text-sm text-stone-600">
+                            Trek is launching soon for UF students. Stay tuned!
+                          </p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -282,22 +283,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Coming Soon Section */}
       <section className="py-20 text-white" style={{ background: 'linear-gradient(135deg, #B8956B, #9B7F56)' }}>
         <div className="container mx-auto px-4 text-center">
           <div className={`transform transition-all duration-1000 ease-out delay-1300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-4xl font-bold mb-6">Ready to Start Your Journey?</h2>
+            <h2 className="text-4xl font-bold mb-6">Coming Soon to UF</h2>
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of UF students already using Trek for safe, convenient transportation.
+              Trek is launching soon for University of Florida students. Be the first to know when we're ready!
             </p>
-            {!currentUser && (
-              <Button 
-                className="bg-white text-stone-900 hover:bg-stone-100 px-8 py-4 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                onClick={handleLogin}
-              >
-                Get Started Today
-              </Button>
-            )}
+            <div className="inline-flex items-center px-8 py-4 rounded-lg font-semibold text-lg bg-white/20 backdrop-blur-sm">
+              Stay Tuned
+            </div>
           </div>
         </div>
       </section>

@@ -1,14 +1,15 @@
 import React from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { CarTaxiFront, Mail, MapPin } from "lucide-react";
 import { FaInstagram, FaTwitter, FaFacebookSquare } from "react-icons/fa";
 import { useAuth } from "../hooks/use-auth-new";
 
 export default function Footer() {
   const { currentUser } = useAuth();
+  const [location] = useLocation();
 
-  // Don't show footer if user is logged in
-  if (currentUser) {
+  // Don't show footer if user is logged in or on home page (coming soon)
+  if (currentUser || location === '/') {
     return null;
   }
   return (

@@ -2,13 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle } from "lucide-react";
+import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth-fixed";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import findRidesScreenshot from "@assets/image_1751166578599.png";
 
 export default function Home() {
   const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
+  const [openFAQ, setOpenFAQ] = useState<string | null>(null);
 
   // Add fade-in animation effect
   useEffect(() => {
@@ -33,19 +40,32 @@ export default function Home() {
 
   return (
     <div className={`transition-opacity duration-1000 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Hero Section */}
-      <section className="bg-white text-black min-h-screen flex items-center">
-        <div className="container mx-auto px-4 py-12 md:py-24">
-          <div className="max-w-4xl mx-auto text-center">
+      {/* Hero Section with Screenshot */}
+      <section className="bg-white text-black min-h-screen">
+        <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-24">
+          <div className="max-w-6xl mx-auto">
             <div className={`transform transition-all duration-1000 ease-out delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Share rides with fellow{" "}
-                <span style={{ color: '#B8956B' }}>Gators</span>
-              </h1>
-              <p className="text-xl mb-12 text-stone-600 max-w-2xl mx-auto leading-relaxed">
-                The safe, convenient way for UF students to carpool to campus,
-                back home, or anywhere in between.
-              </p>
+              <div className="text-center mb-8">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+                  Share rides with fellow{" "}
+                  <span style={{ color: '#B8956B' }}>Gators</span>
+                </h1>
+                <p className="text-xl mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed">
+                  The safe, convenient way for UF students to carpool to campus,
+                  back home, or anywhere in between.
+                </p>
+              </div>
+
+              {/* Find Rides Screenshot */}
+              <div className="mb-12">
+                <div className="max-w-4xl mx-auto">
+                  <img 
+                    src={findRidesScreenshot} 
+                    alt="Trek Find Rides Interface" 
+                    className="w-full rounded-2xl shadow-2xl border border-stone-200"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className={`transform transition-all duration-1000 ease-out delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
@@ -211,25 +231,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="py-20 text-white" style={{ background: 'linear-gradient(135deg, #B8956B, #9B7F56)' }}>
-        <div className="container mx-auto px-4 text-center">
+      {/* FAQ Section */}
+      <section className="py-20 bg-neutral-50">
+        <div className="container mx-auto px-4">
           <div className={`transform transition-all duration-1000 ease-out delay-1100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-4xl font-bold mb-6">Ready to Start Your Journey?</h2>
-            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join thousands of UF students already using Trek for safe, convenient transportation.
-            </p>
-            {!currentUser && (
-              <Button 
-                className="bg-white text-stone-900 hover:bg-stone-100 px-8 py-4 text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                onClick={handleLogin}
-              >
-                Get Started Today
-              </Button>
-            )}
+            <h2 className="text-4xl font-bold text-center mb-16 text-stone-900">
+              Frequently Asked Questions
+            </h2>
+
+            <div className="max-w-3xl mx-auto space-y-4">
+              {[
+                {
+                  id: "security",
+                  question: "How does Trek protect my banking and personal information?",
+                  answer: "Trek uses industry-leading security measures. All payment processing is handled by Stripe, which is PCI DSS compliant and uses bank-level encryption. We never see or store your banking details, credit card numbers, or SSN. Your financial information is encrypted and securely transmitted directly to Stripe's secure servers."
+                },
+                {
+                  id: "scammers", 
+                  question: "How does Trek prevent scammers and fake accounts?",
+                  answer: "All users must verify their identity using official UF email addresses (@ufl.edu). Additionally, we require phone number verification via SMS before accessing ride features. This dual verification system ensures only legitimate UF students can use the platform."
+                },
+                {
+                  id: "safety",
+                  question: "What safety features does Trek provide?",
+                  answer: "Trek includes SMS notifications for ride updates, verification codes for ride start/completion, gender preference settings, and an easy reporting system. All users are verified UF students, and we track ride completion to ensure accountability."
+                },
+                {
+                  id: "payments",
+                  question: "How do payments work and when am I charged?",
+                  answer: "Payments are processed securely through Stripe. Passengers are charged when rides are completed, not when booked. If a ride is cancelled or doesn't occur, you receive automatic refunds. Drivers receive payouts directly to their bank accounts after ride completion."
+                }
+              ].map((faq) => (
+                <Collapsible
+                  key={faq.id}
+                  open={openFAQ === faq.id}
+                  onOpenChange={() => setOpenFAQ(openFAQ === faq.id ? null : faq.id)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-between p-6 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+                    >
+                      <span className="font-semibold text-stone-900 text-lg">{faq.question}</span>
+                      {openFAQ === faq.id ? (
+                        <ChevronUp className="h-5 w-5 text-stone-600" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-stone-600" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-6 pb-6">
+                    <div className="pt-4 border-t border-stone-100">
+                      <p className="text-stone-700 leading-relaxed">{faq.answer}</p>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+
     </div>
   );
 }

@@ -176,7 +176,8 @@ DATABASE_URL
 - June 28, 2025: Commented out star ratings throughout application - removed star rating displays from user profile modals and ride cards while preserving ride count numbers, keeping rating code commented for future restoration
 - June 28, 2025: Removed redundant driver verification from post ride form - eliminated duplicate verification checks, warning cards, and button disable conditions since users can only reach the form after completing verification
 - June 28, 2025: Added Stripe Connect prefill functionality - automatically populates business information (transportation/ridesharing, Trek company details, jointrek.com website) and user details (name, email, phone) during driver account setup to reduce onboarding friction
-- June 28, 2025: Enhanced home page with smooth fade-in animations and clean design - implemented staggered entrance effects matching demo screenshot with improved hero section, security features showcase, and call-to-action sections
+- June 28, 2025: Enhanced home page with smooth fade-in animations and clean design - implemented staggered entrance effects matching demo screenshot with improved hero section, security features showcase, comprehensive FAQ section with collapsible questions covering banking security/scammer prevention/safety features/payment policies, and call-to-action sections
+- June 29, 2025: Added Find Rides interface screenshot to home page hero section and removed bottom call-to-action section - integrated actual platform interface image with elegant styling to showcase functionality immediately after headline
 
 ## User Preferences
 

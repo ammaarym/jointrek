@@ -497,7 +497,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.1, duration: 0.6 }}
-                className="flex flex-col items-center justify-center mb-16 mt-8"
+                className="flex flex-col items-center justify-center mb-16 mt-2"
               >
                 <StarBorder>
                   Coming Soon
@@ -568,8 +568,8 @@ export default function Home() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 max-w-6xl mx-auto">
             {[
               { icon: UserCheck, title: "Verified Students", description: "All users must verify with UF email addresses" },
-              { icon: Lock, title: "Contact Privacy", description: "Phone numbers and social media are only shared after both parties approve the ride" },
-              { icon: Shield, title: "Ride Tracking", description: "SMS notifications and ride verification codes" },
+              { icon: Lock, title: "Contact Privacy", description: "Contact info only shared after mutual approval" },
+              { icon: CreditCard, title: "Secure Payments", description: "Banking and payment info protected by Stripe encryption" },
               { icon: AlertTriangle, title: "Report System", description: "Easy reporting for safety concerns" }
             ].map((feature, index) => (
               <motion.div 

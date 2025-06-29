@@ -192,6 +192,7 @@ DATABASE_URL
 - June 29, 2025: Simplified coming soon landing page - removed "Please sign in to continue" section entirely and replaced with clean, prominent "Coming Soon" card focusing solely on launch messaging
 - June 29, 2025: Enhanced StarBorder "Coming Soon" button - increased size, added light beige background (#F5F0E8), improved spacing, and made more prominent for better visual appeal on landing page
 - June 29, 2025: Updated safety features section - replaced "Secure Payments" with "Contact Privacy" feature explaining that phone numbers and social media are only shared after both parties approve rides
+- June 29, 2025: Refined safety features section - replaced "Ride Tracking" with "Secure Payments" emphasizing Stripe encryption protection, shortened contact privacy description, and moved coming soon button higher on page
 
 ## User Preferences
 

@@ -423,8 +423,6 @@ export default function Home() {
               Trek
             </span>
           </Link>
-
-
         </div>
       </div>
 
@@ -450,7 +448,7 @@ export default function Home() {
             className="flex flex-col gap-4 items-center justify-center"
           >
             <motion.div
-              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4 leading-tight"
+              className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-1 md:mb-2 leading-tight"
               animate={{
                 backgroundPosition: ["0%", "100%", "0%"],
               }}
@@ -465,18 +463,17 @@ export default function Home() {
             </motion.div>
 
             <motion.p
-              className="text-sm sm:text-xl mb-3 md:mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed px-4"
+              className="text-sm sm:text-lg mb-2 md:mb-4 text-stone-600 max-w-2xl mx-auto leading-relaxed px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
             >
-              The safe, convenient way for UF students to carpool to campus,
-              back home, or anywhere in between.
+              The easy way for UF students to carpool to Gainesville and home
             </motion.p>
 
             {/* Find Rides Screenshot with enhanced animation */}
             <motion.div
-              className="mb-6 md:mb-12"
+              className="mb-4 md:mb-8"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -530,7 +527,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.1, duration: 0.6 }}
-                className="flex flex-col items-center justify-center mb-16 mt-2"
+                className="flex flex-col items-center justify-center mb-8 mt-2"
               >
                 <StarBorder>Coming Soon</StarBorder>
               </motion.div>
@@ -606,11 +603,11 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-4 sm:py-8 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
+      <section className="py-3 sm:py-6 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"
+            className="text-xl sm:text-3xl font-bold text-center mb-4 sm:mb-10 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}

@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
-import { motion, useScroll, useTransform, useAnimation, AnimatePresence } from "framer-motion";
+import React, { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle, ChevronDown, ChevronUp, Mail, ShieldCheck, Users, BellRing, Flag } from "lucide-react";
+import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { cn } from "@/lib/utils";
 import {
@@ -12,55 +12,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import findRidesScreenshot from "@assets/image_1751166578599.png";
-
-// Aurora Background Component
-interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
-  children: React.ReactNode;
-  showRadialGradient?: boolean;
-}
-
-const AuroraBackground = ({
-  className,
-  children,
-  showRadialGradient = true,
-  ...props
-}: AuroraBackgroundProps) => {
-  return (
-    <div
-      className={cn(
-        "relative flex flex-col min-h-screen items-center justify-center bg-[#FCFAF7] text-foreground transition-bg",
-        className
-      )}
-      {...props}
-    >
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          className={cn(
-            `
-            [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
-            [--dark-gradient:repeating-linear-gradient(100deg,var(--black)_0%,var(--black)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--black)_16%)]
-            [--aurora:repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)]
-            [background-image:var(--white-gradient),var(--aurora)]
-            dark:[background-image:var(--dark-gradient),var(--aurora)]
-            [background-size:300%,_200%]
-            [background-position:50%_50%,50%_50%]
-            filter blur-[10px] invert dark:invert-0
-            after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
-            after:dark:[background-image:var(--dark-gradient),var(--aurora)]
-            after:[background-size:200%,_100%] 
-            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
-            pointer-events-none
-            absolute -inset-[10px] opacity-50 will-change-transform`,
-
-            showRadialGradient &&
-              `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
-          )}
-        ></div>
-      </div>
-      {children}
-    </div>
-  );
-};
 
 // Particles Component
 interface MousePosition {
@@ -453,33 +404,18 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero Section with Aurora Background and Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16">
+      {/* Hero Section with Enhanced Effects */}
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 flex items-center justify-center">
         <FloatingElements />
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
         
         {/* Aurora Background Effect */}
         <div className="absolute inset-0 overflow-hidden">
-          <div
-            className="
-            [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
-            [--aurora:repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)]
-            [background-image:var(--white-gradient),var(--aurora)]
-            [background-size:300%,_200%]
-            [background-position:50%_50%,50%_50%]
-            filter blur-[10px] invert
-            after:content-[''] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
-            after:[background-size:200%,_100%] 
-            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
-            pointer-events-none
-            absolute -inset-[10px] opacity-50 will-change-transform
-            [mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]
-            "
-          ></div>
+          <div className="absolute -inset-[10px] opacity-50 will-change-transform pointer-events-none blur-[10px] invert [background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] [background-size:300%,_200%] [background-position:50%_50%,50%_50%] after:content-[''] after:absolute after:inset-0 after:[background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] after:[background-size:200%,_100%] after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference [mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]"></div>
         </div>
         
-        <div className="relative flex flex-col items-center justify-center min-h-screen px-4 z-10">
+        <div className="relative flex flex-col items-center justify-center px-4 z-10 text-center max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0.0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -488,10 +424,10 @@ export default function Home() {
               duration: 0.8,
               ease: "easeInOut",
             }}
-            className="flex flex-col gap-4 items-center justify-center text-center"
+            className="flex flex-col gap-4 items-center justify-center"
           >
             <motion.div 
-              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#B8956B] to-[#B8956B] bg-clip-text text-transparent text-center"
+              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4 leading-tight"
               animate={{
                 backgroundPosition: ["0%", "100%", "0%"],
               }}
@@ -506,7 +442,7 @@ export default function Home() {
             </motion.div>
             
             <motion.p 
-              className="text-sm sm:text-xl text-center text-stone-600 max-w-2xl leading-relaxed px-4"
+              className="text-sm sm:text-xl mb-3 md:mb-6 text-stone-600 max-w-2xl mx-auto leading-relaxed px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
@@ -517,7 +453,7 @@ export default function Home() {
 
             {/* Find Rides Screenshot with enhanced animation */}
             <motion.div 
-              className="mb-6 md:mb-12 mt-6"
+              className="mb-6 md:mb-12"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -626,8 +562,8 @@ export default function Home() {
               </motion.div>
             )}
           </motion.div>
-        </AuroraBackground>
-      </div>
+        </div>
+      </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
       <section className="py-8 sm:py-20 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">

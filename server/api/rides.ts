@@ -55,6 +55,33 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Authentication required - missing user ID" });
     }
     
+    // Ensure user exists in PostgreSQL database before creating ride
+    try {
+      console.log("Checking if user exists for Firebase UID:", firebaseUid);
+      const existingUser = await storage.getUserByFirebaseUid(firebaseUid);
+      
+      if (!existingUser) {
+        console.log("User does not exist, creating new user...");
+        const userName = req.headers['x-user-name'] as string;
+        const userData = {
+          firebaseUid: firebaseUid,
+          email: userEmail || '',
+          displayName: userName || 'Trek User',
+          photoUrl: null,
+          emailVerified: true
+        };
+        console.log("Creating user with data:", userData);
+        
+        const newUser = await storage.createUser(userData);
+        console.log("Successfully created new user in PostgreSQL:", newUser.id);
+      } else {
+        console.log("User already exists:", existingUser.id);
+      }
+    } catch (userError) {
+      console.error("Error ensuring user exists:", userError);
+      return res.status(500).json({ error: "Failed to verify user account" });
+    }
+    
     // Convert string dates to Date objects and add driverId
     const rideData = {
       ...req.body,
@@ -64,9 +91,11 @@ router.post("/", async (req: Request, res: Response) => {
     };
     
     console.log("Processed ride data with driverId:", rideData);
+    console.log("About to validate ride data...");
     
     // Validate the request body against our schema
     const validationResult = insertRideSchema.safeParse(rideData);
+    console.log("Validation completed, success:", validationResult.success);
     
     if (!validationResult.success) {
       console.log("Validation errors:", validationResult.error.format());

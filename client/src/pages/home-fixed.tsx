@@ -142,42 +142,42 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section */}
-      <section className="py-20 bg-neutral-50">
+      <section className="py-8 sm:py-20 bg-neutral-50">
         <div className="container mx-auto px-4">
           <div className={`transform transition-all duration-1000 ease-out delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-4xl font-bold text-center mb-16 text-stone-900">
+            <h2 className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900">
               How Trek Works
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6 sm:gap-12 max-w-5xl mx-auto">
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
-                  <User className="h-8 w-8" style={{ color: '#8A6F47' }} />
+                <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
+                  <User className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-stone-900">Sign Up</h3>
-                <p className="text-stone-700 text-lg leading-relaxed">
+                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">Sign Up</h3>
+                <p className="text-stone-700 text-sm sm:text-lg leading-relaxed">
                   Create an account using your UF email to join the Gator community.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
-                  <MapPin className="h-8 w-8" style={{ color: '#8A6F47' }} />
+                <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
+                  <MapPin className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-stone-900">
+                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">
                   Find or Post Rides
                 </h3>
-                <p className="text-stone-700 text-lg leading-relaxed">
+                <p className="text-stone-700 text-sm sm:text-lg leading-relaxed">
                   Browse available rides or offer a ride to fellow students.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
-                  <CarTaxiFront className="h-8 w-8" style={{ color: '#8A6F47' }} />
+                <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300 hover:scale-110" style={{ background: 'linear-gradient(135deg, #F0E6D6, #E8DCC6)' }}>
+                  <CarTaxiFront className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-stone-900">Travel Safe</h3>
-                <p className="text-stone-700 text-lg leading-relaxed">
+                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">Travel Safe</h3>
+                <p className="text-stone-700 text-sm sm:text-lg leading-relaxed">
                   Connect with verified students and enjoy secure, convenient transportation.
                 </p>
               </div>
@@ -187,44 +187,44 @@ export default function Home() {
       </section>
 
       {/* Security Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-8 sm:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className={`transform transition-all duration-1000 ease-out delay-900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-4xl font-bold text-center mb-16 text-stone-900">
+            <h2 className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900">
               Your Safety is Our Priority
             </h2>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-              <div className="text-center p-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
-                  <UserCheck className="h-8 w-8" style={{ color: '#8A6F47' }} />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 max-w-6xl mx-auto">
+              <div className="text-center p-3 sm:p-6">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
+                  <UserCheck className="h-5 w-5 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-stone-900">Verified Students</h3>
-                <p className="text-stone-700">All users must verify with UF email addresses</p>
+                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">Verified Students</h3>
+                <p className="text-xs sm:text-base text-stone-700">All users must verify with UF email addresses</p>
               </div>
 
-              <div className="text-center p-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
-                  <CreditCard className="h-8 w-8" style={{ color: '#8A6F47' }} />
+              <div className="text-center p-3 sm:p-6">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
+                  <CreditCard className="h-5 w-5 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-stone-900">Secure Payments</h3>
-                <p className="text-stone-700">Banking details protected by Stripe encryption</p>
+                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">Secure Payments</h3>
+                <p className="text-xs sm:text-base text-stone-700">Banking details protected by Stripe encryption</p>
               </div>
 
-              <div className="text-center p-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
-                  <Shield className="h-8 w-8" style={{ color: '#8A6F47' }} />
+              <div className="text-center p-3 sm:p-6">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
+                  <Shield className="h-5 w-5 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-stone-900">Ride Tracking</h3>
-                <p className="text-stone-700">SMS notifications and ride verification codes</p>
+                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">Ride Tracking</h3>
+                <p className="text-xs sm:text-base text-stone-700">SMS notifications and ride verification codes</p>
               </div>
 
-              <div className="text-center p-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
-                  <AlertTriangle className="h-8 w-8" style={{ color: '#8A6F47' }} />
+              <div className="text-center p-3 sm:p-6">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md" style={{ backgroundColor: '#F0E6D6' }}>
+                  <AlertTriangle className="h-5 w-5 sm:h-8 sm:w-8" style={{ color: '#8A6F47' }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-stone-900">Report System</h3>
-                <p className="text-stone-700">Easy reporting for safety concerns</p>
+                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">Report System</h3>
+                <p className="text-xs sm:text-base text-stone-700">Easy reporting for safety concerns</p>
               </div>
             </div>
           </div>
@@ -232,23 +232,23 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-neutral-50">
-        <div className="container mx-auto px-4">
+      <section className="py-6 sm:py-20 bg-neutral-50">
+        <div className="container mx-auto px-2 sm:px-4">
           <div className={`transform transition-all duration-1000 ease-out delay-1100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-4xl font-bold text-center mb-16 text-stone-900">
+            <h2 className="text-xl sm:text-4xl font-bold text-center mb-4 sm:mb-16 text-stone-900">
               Frequently Asked Questions
             </h2>
 
-            <div className="max-w-3xl mx-auto space-y-4">
+            <div className="max-w-3xl mx-auto space-y-1 sm:space-y-4">
               {[
                 {
                   id: "security",
-                  question: "How does Trek protect my banking and personal information?",
+                  question: "How does Trek protect my banking information?",
                   answer: "Trek uses industry-leading security measures. All payment processing is handled by Stripe, which is PCI DSS compliant and uses bank-level encryption. We never see or store your banking details, credit card numbers, or SSN. Your financial information is encrypted and securely transmitted directly to Stripe's secure servers."
                 },
                 {
                   id: "scammers", 
-                  question: "How does Trek prevent scammers and fake accounts?",
+                  question: "How does Trek prevent scammers?",
                   answer: "All users must verify their identity using official UF email addresses (@ufl.edu). Additionally, we require phone number verification via SMS before accessing ride features. This dual verification system ensures only legitimate UF students can use the platform."
                 },
                 {
@@ -258,7 +258,7 @@ export default function Home() {
                 },
                 {
                   id: "payments",
-                  question: "How do payments work and when am I charged?",
+                  question: "How do payments work?",
                   answer: "Payments are processed securely through Stripe. Passengers are charged when rides are completed, not when booked. If a ride is cancelled or doesn't occur, you receive automatic refunds. Drivers receive payouts directly to their bank accounts after ride completion."
                 }
               ].map((faq) => (
@@ -270,19 +270,19 @@ export default function Home() {
                   <CollapsibleTrigger asChild>
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-between p-6 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+                      className="w-full justify-between py-1 px-2 sm:p-6 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors min-h-[2rem] sm:min-h-auto"
                     >
-                      <span className="font-semibold text-stone-900 text-lg">{faq.question}</span>
+                      <span className="font-medium text-stone-900 text-[11px] sm:text-lg leading-tight pr-1 flex-1">{faq.question}</span>
                       {openFAQ === faq.id ? (
-                        <ChevronUp className="h-5 w-5 text-stone-600" />
+                        <ChevronUp className="h-3 w-3 sm:h-5 sm:w-5 text-stone-600 shrink-0 ml-1" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-stone-600" />
+                        <ChevronDown className="h-3 w-3 sm:h-5 sm:w-5 text-stone-600 shrink-0 ml-1" />
                       )}
                     </Button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="px-6 pb-6">
-                    <div className="pt-4 border-t border-stone-100">
-                      <p className="text-stone-700 leading-relaxed">{faq.answer}</p>
+                  <CollapsibleContent className="px-2 pb-1 sm:px-6 sm:pb-6">
+                    <div className="pt-1 sm:pt-4 border-t border-stone-100">
+                      <p className="text-stone-700 leading-tight text-[10px] sm:text-base">{faq.answer}</p>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>

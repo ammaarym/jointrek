@@ -178,6 +178,8 @@ DATABASE_URL
 - June 28, 2025: Added Stripe Connect prefill functionality - automatically populates business information (transportation/ridesharing, Trek company details, jointrek.com website) and user details (name, email, phone) during driver account setup to reduce onboarding friction
 - June 28, 2025: Enhanced home page with smooth fade-in animations and clean design - implemented staggered entrance effects matching demo screenshot with improved hero section, security features showcase, comprehensive FAQ section with collapsible questions covering banking security/scammer prevention/safety features/payment policies, and call-to-action sections
 - June 29, 2025: Added Find Rides interface screenshot to home page hero section and removed bottom call-to-action section - integrated actual platform interface image with elegant styling to showcase functionality immediately after headline
+- June 29, 2025: Optimized home page for mobile devices - reduced text sizes throughout (2xl vs 4xl+ headlines, sm vs lg body text), compressed section spacing (py-8 vs py-20), resized screenshot for mobile viewports, and made buttons/icons more compact while maintaining desktop experience
+- June 29, 2025: Fixed mobile FAQ section display issues - implemented ultra-compact text sizes (11px/10px vs lg/base), shortened question text to prevent truncation, reduced padding and spacing significantly, and ensured all FAQ questions display properly on mobile without cutoff
 
 ## User Preferences
 

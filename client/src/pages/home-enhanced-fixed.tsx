@@ -412,8 +412,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#FCFAF7]">
-      {/* Sticky Header with Coming Soon Badge */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-stone-200">
+      {/* Sticky Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-stone-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span

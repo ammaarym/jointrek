@@ -169,73 +169,73 @@ const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Driver Setup Guide</h2>
-              <p className="text-sm text-gray-600 mt-1">Follow these steps in the Stripe popup window</p>
-            </div>
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+    <div className="fixed right-4 top-20 bottom-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-40 overflow-y-auto">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Driver Setup Guide</h2>
+            <p className="text-xs text-gray-600 mt-1">Follow these steps in the Stripe popup window</p>
           </div>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
 
-          <div className="space-y-4">
-            {setupSteps.map((step, index) => (
-              <div
-                key={step.id}
-                className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-                    {step.icon}
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                      Step {step.id}
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {step.description}
-                  </p>
-                  <div className="flex items-start space-x-1">
-                    <span className="text-xs text-blue-600">💡</span>
-                    <span className="text-xs text-blue-600 font-medium">
-                      {step.tips}
-                    </span>
-                  </div>
+        <div className="space-y-3">
+          {setupSteps.map((step, index) => (
+            <div
+              key={step.id}
+              className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                <div className="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+                  {step.icon}
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-start space-x-2">
-              <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="text-sm font-medium text-blue-900 mb-1">Security Notice</h4>
-                <p className="text-xs text-blue-700">
-                  Your banking and identity information is securely handled by Stripe. 
-                  Trek never sees your bank account details, SSN, or sensitive financial information.
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                    Step {step.id}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                  {step.title}
+                </h3>
+                <p className="text-xs text-gray-600 mb-1">
+                  {step.description}
                 </p>
+                <div className="flex items-start space-x-1">
+                  <span className="text-xs text-blue-600">💡</span>
+                  <span className="text-xs text-blue-600 font-medium">
+                    {step.tips}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-green-900">
-                This guide will automatically close when you finish the setup
-              </span>
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-start space-x-2">
+            <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-900 mb-1">Security Notice</h4>
+              <p className="text-xs text-blue-700">
+                Your banking and identity information is securely handled by Stripe. 
+                Trek never sees your bank account details, SSN, or sensitive financial information.
+              </p>
             </div>
           </div>
         </div>
+
+        <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-green-600" />
+            <span className="text-xs font-medium text-green-900">
+              This guide will automatically close when you finish the setup
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
       </div>
     </div>
   );

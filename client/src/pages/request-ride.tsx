@@ -39,8 +39,8 @@ export default function RequestRidePage() {
     enabled: !!currentUser,
   });
 
-  const hasPaymentMethod = paymentData?.paymentMethods?.length > 0;
-  const defaultPaymentMethod = paymentData?.paymentMethods?.find((pm: any) => pm.id === paymentData?.defaultPaymentMethodId) || paymentData?.paymentMethods?.[0];
+  const hasPaymentMethod = (paymentData as any)?.paymentMethods?.length > 0;
+  const defaultPaymentMethod = (paymentData as any)?.paymentMethods?.find((pm: any) => pm.id === (paymentData as any)?.defaultPaymentMethodId) || (paymentData as any)?.paymentMethods?.[0];
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({

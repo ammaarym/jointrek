@@ -39,17 +39,11 @@ router.get("/:id", async (req: Request, res: Response) => {
 // POST /api/rides - Create a new ride
 router.post("/", async (req: Request, res: Response) => {
   try {
-    console.log("Received ride data:", req.body);
-    console.log("Request headers:", {
-      'x-user-id': req.headers['x-user-id'],
-      'X-User-ID': req.headers['X-User-ID'],
-      'x-user-email': req.headers['x-user-email'],
-      'X-User-Email': req.headers['X-User-Email']
-    });
-    
     // Get user ID from headers (Express converts headers to lowercase)
     const firebaseUid = req.headers['x-user-id'] as string;
     const userEmail = req.headers['x-user-email'] as string;
+    
+    console.log("Creating ride for user:", firebaseUid);
     
     if (!firebaseUid) {
       return res.status(401).json({ error: "Authentication required - missing user ID" });
@@ -57,11 +51,9 @@ router.post("/", async (req: Request, res: Response) => {
     
     // Ensure user exists in PostgreSQL database before creating ride
     try {
-      console.log("Checking if user exists for Firebase UID:", firebaseUid);
       const existingUser = await storage.getUserByFirebaseUid(firebaseUid);
       
       if (!existingUser) {
-        console.log("User does not exist, creating new user...");
         const userName = req.headers['x-user-name'] as string;
         const userData = {
           firebaseUid: firebaseUid,
@@ -70,12 +62,9 @@ router.post("/", async (req: Request, res: Response) => {
           photoUrl: null,
           emailVerified: true
         };
-        console.log("Creating user with data:", userData);
         
         const newUser = await storage.createUser(userData);
-        console.log("Successfully created new user in PostgreSQL:", newUser.id);
-      } else {
-        console.log("User already exists:", existingUser.id);
+        console.log("Created new user in PostgreSQL:", newUser.id);
       }
     } catch (userError) {
       console.error("Error ensuring user exists:", userError);
@@ -90,12 +79,8 @@ router.post("/", async (req: Request, res: Response) => {
       arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
     };
     
-    console.log("Processed ride data with driverId:", rideData);
-    console.log("About to validate ride data...");
-    
     // Validate the request body against our schema
     const validationResult = insertRideSchema.safeParse(rideData);
-    console.log("Validation completed, success:", validationResult.success);
     
     if (!validationResult.success) {
       console.log("Validation errors:", validationResult.error.format());

@@ -431,6 +431,32 @@ export default function Profile() {
     deleteDriverMutation.mutate();
   };
 
+  const loadDriverStatus = async () => {
+    if (!currentUser) return;
+    
+    setIsDriverLoading(true);
+    try {
+      const response = await fetch('/api/driver/status', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const status = await response.json();
+        setDriverStatus(status);
+      } else {
+        console.error('Failed to load driver status');
+      }
+    } catch (error) {
+      console.error('Error loading driver status:', error);
+    } finally {
+      setIsDriverLoading(false);
+    }
+  };
+
   const sendVerificationCode = async () => {
     if (!phone) {
       toast({
@@ -535,31 +561,7 @@ export default function Profile() {
     }
   };
 
-  const loadDriverStatus = async () => {
-    if (!currentUser) return;
-    
-    setIsDriverLoading(true);
-    try {
-      const response = await fetch('/api/driver/status', {
-        headers: {
-          'x-user-id': currentUser.uid,
-          'x-user-email': currentUser.email || '',
-          'x-user-name': currentUser.displayName || ''
-        }
-      });
 
-      if (response.ok) {
-        const status = await response.json();
-        setDriverStatus(status);
-      } else {
-        console.error('Failed to load driver status');
-      }
-    } catch (error) {
-      console.error('Error loading driver status:', error);
-    } finally {
-      setIsDriverLoading(false);
-    }
-  };
 
   // Load user profile data on mount
   useEffect(() => {

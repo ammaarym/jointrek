@@ -568,7 +568,7 @@ export default function Home() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 max-w-6xl mx-auto">
             {[
               { icon: UserCheck, title: "Verified Students", description: "All users must verify with UF email addresses" },
-              { icon: CreditCard, title: "Secure Payments", description: "Banking details protected by Stripe encryption" },
+              { icon: Lock, title: "Contact Privacy", description: "Phone numbers and social media are only shared after both parties approve the ride" },
               { icon: Shield, title: "Ride Tracking", description: "SMS notifications and ride verification codes" },
               { icon: AlertTriangle, title: "Report System", description: "Easy reporting for safety concerns" }
             ].map((feature, index) => (

@@ -191,6 +191,7 @@ DATABASE_URL
 - June 29, 2025: Fixed "Coming Soon" implementation - corrected home-enhanced-fixed.tsx file to properly replace both sticky header and main card "Get Started" buttons with "Coming Soon" badges and messaging
 - June 29, 2025: Simplified coming soon landing page - removed "Please sign in to continue" section entirely and replaced with clean, prominent "Coming Soon" card focusing solely on launch messaging
 - June 29, 2025: Enhanced StarBorder "Coming Soon" button - increased size, added light beige background (#F5F0E8), improved spacing, and made more prominent for better visual appeal on landing page
+- June 29, 2025: Updated safety features section - replaced "Secure Payments" with "Contact Privacy" feature explaining that phone numbers and social media are only shared after both parties approve rides
 
 ## User Preferences
 

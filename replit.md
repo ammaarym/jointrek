@@ -197,6 +197,7 @@ DATABASE_URL
 - June 29, 2025: Fixed sticky header scrolling issue - changed from semi-transparent backdrop-blur to solid white background to eliminate visible white gap when scrolling up
 - June 29, 2025: Reduced home page element sizes - made text, spacing, and sections smaller throughout for better scrolling experience while keeping ride screenshot image at original size for visibility
 - June 29, 2025: Fixed header duplication issue - resolved duplicate Trek logo appearing when scrolling by hiding global header component on home page, eliminating visual conflicts between custom and global headers
+- June 29, 2025: Added Umami analytics tracking - implemented website analytics script (ID: a1255eee-71c4-4d09-8386-fae40e456b55) in HTML head for comprehensive user behavior tracking across all pages
 
 ## User Preferences
 

@@ -498,12 +498,12 @@ export default function Home() {
                 transition={{ delay: 1.1, duration: 0.6 }}
                 className="flex flex-col items-center max-w-2xl mx-auto px-4"
               >
-                <EnhancedCard className="w-full mb-4 sm:mb-8">
-                  <div className="text-center py-4 sm:py-8">
-                    <div className="inline-flex items-center px-6 py-3 sm:px-12 sm:py-6 rounded-xl font-bold text-xl sm:text-3xl mb-3 sm:mb-4" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
+                <EnhancedCard className="w-full mb-4 sm:mb-6 max-w-lg mx-auto">
+                  <div className="text-center py-3 sm:py-4">
+                    <div className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-lg sm:text-xl mb-2 sm:mb-3" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
                       Coming Soon
                     </div>
-                    <p className="text-sm sm:text-lg text-stone-600 max-w-md mx-auto">
+                    <p className="text-xs sm:text-sm text-stone-600">
                       Trek is launching soon for University of Florida students. Stay tuned!
                     </p>
                   </div>

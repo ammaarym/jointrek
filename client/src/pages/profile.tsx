@@ -598,6 +598,22 @@ export default function Profile() {
     }
   }, [currentUser]);
 
+  // Handle hash anchor scrolling
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && dataLoaded) {
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 100); // Small delay to ensure content is rendered
+      }
+    }
+  }, [dataLoaded]);
+
   const loadUserProfile = async () => {
     try {
       console.log('[PROFILE] Loading user profile for:', currentUser?.uid);
@@ -1112,7 +1128,7 @@ export default function Profile() {
       </Card>
 
       {/* Bank Account Setup Section */}
-      <Card>
+      <Card id="bank-account">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-2">

@@ -151,7 +151,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
         {mode === 'post' && (
           <Card 
             className={`${hasDriverSetup ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors'}`}
-            onClick={!hasDriverSetup ? () => setLocation('/driver-onboard') : undefined}
+            onClick={!hasDriverSetup ? () => setLocation('/profile#bank-account') : undefined}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                 <Button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    setLocation('/driver-onboard');
+                    setLocation('/profile#bank-account');
                   }}
                   className="bg-orange-600 hover:bg-orange-700"
                 >

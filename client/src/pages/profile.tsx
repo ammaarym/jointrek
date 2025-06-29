@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
-import { Plus, Star, CheckCircle, DollarSign, Clock, FileText } from 'lucide-react';
+import { Plus, Star, CheckCircle, DollarSign, Clock, FileText, CreditCard, User, Shield, Landmark } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -126,6 +126,121 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
   );
 };
 
+// Visual Setup Guide Component
+const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
+  if (!isVisible) return null;
+
+  const setupSteps = [
+    {
+      id: 1,
+      icon: <User className="w-5 h-5" />,
+      title: "Business Information",
+      description: "Fill out your business type (Individual) and personal details",
+      tips: "Make sure your legal name matches your ID exactly"
+    },
+    {
+      id: 2,
+      icon: <Shield className="w-5 h-5" />,
+      title: "Identity Verification", 
+      description: "Upload a valid government-issued photo ID",
+      tips: "Use a clear photo of your driver's license or passport"
+    },
+    {
+      id: 3,
+      icon: <Bank className="w-5 h-5" />,
+      title: "Bank Account Details",
+      description: "Enter your bank account information for payouts",
+      tips: "Double-check your routing and account numbers"
+    },
+    {
+      id: 4,
+      icon: <CreditCard className="w-5 h-5" />,
+      title: "Tax Information",
+      description: "Provide your Social Security Number or Tax ID",
+      tips: "This is required for tax reporting purposes"
+    },
+    {
+      id: 5,
+      icon: <CheckCircle className="w-5 h-5" />,
+      title: "Review & Submit",
+      description: "Review all information and submit for approval",
+      tips: "Processing typically takes 1-2 business days"
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Driver Setup Guide</h2>
+              <p className="text-sm text-gray-600 mt-1">Follow these steps in the Stripe popup window</p>
+            </div>
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          </div>
+
+          <div className="space-y-4">
+            {setupSteps.map((step, index) => (
+              <div
+                key={step.id}
+                className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+                    {step.icon}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                      Step {step.id}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {step.description}
+                  </p>
+                  <div className="flex items-start space-x-1">
+                    <span className="text-xs text-blue-600">💡</span>
+                    <span className="text-xs text-blue-600 font-medium">
+                      {step.tips}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start space-x-2">
+              <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-medium text-blue-900 mb-1">Security Notice</h4>
+                <p className="text-xs text-blue-700">
+                  Your banking and identity information is securely handled by Stripe. 
+                  Trek never sees your bank account details, SSN, or sensitive financial information.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-medium text-green-900">
+                This guide will automatically close when you finish the setup
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Profile() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
@@ -148,6 +263,8 @@ export default function Profile() {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [stripePopupWindow, setStripePopupWindow] = useState<Window | null>(null);
 
   // Fetch user profile data
   const { data: userData, refetch: refetchUser } = useQuery({
@@ -169,6 +286,23 @@ export default function Profile() {
       }
     }
   }, [dataLoaded]);
+
+  // Monitor Stripe popup window
+  useEffect(() => {
+    if (stripePopupWindow) {
+      const checkClosed = setInterval(() => {
+        if (stripePopupWindow.closed) {
+          setShowSetupGuide(false);
+          setStripePopupWindow(null);
+          clearInterval(checkClosed);
+          // Refresh driver status after popup closes
+          loadDriverStatus();
+        }
+      }, 1000);
+
+      return () => clearInterval(checkClosed);
+    }
+  }, [stripePopupWindow]);
 
   // Fetch user's payment methods
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
@@ -608,8 +742,20 @@ export default function Profile() {
         const result = await response.json();
         
         if (result.onboardingUrl) {
-          // Redirect to Stripe Express onboarding
-          window.location.href = result.onboardingUrl;
+          // Open Stripe Express onboarding in popup
+          const popup = window.open(
+            result.onboardingUrl,
+            'stripe-onboarding',
+            'width=800,height=600,scrollbars=yes,resizable=yes'
+          );
+          
+          if (popup) {
+            setStripePopupWindow(popup);
+            setShowSetupGuide(true);
+          } else {
+            // Fallback to redirect if popup blocked
+            window.location.href = result.onboardingUrl;
+          }
         } else {
           toast({
             title: "Already Setup",

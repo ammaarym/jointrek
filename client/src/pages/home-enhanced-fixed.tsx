@@ -406,7 +406,6 @@ export default function Home() {
 
       {/* Hero Section with Enhanced Effects */}
       <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 flex items-center justify-center">
-        <FloatingElements />
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
         
@@ -612,7 +611,6 @@ export default function Home() {
       {/* Security Features Section with Enhanced Effects */}
       <section className="py-8 sm:py-20 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
-        <FloatingElements />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2 
             className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"

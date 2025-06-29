@@ -537,11 +537,11 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="py-4 sm:py-6 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-2xl sm:text-4xl font-bold text-center mb-6 sm:mb-16 text-stone-900"
+            className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-8 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -549,7 +549,7 @@ export default function Home() {
             How Trek Works
           </motion.h2>
 
-          <div className="grid md:grid-cols-3 gap-6 sm:gap-12 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {[
               {
                 icon: User,
@@ -579,21 +579,21 @@ export default function Home() {
                 whileHover={{ y: -10 }}
               >
                 <motion.div
-                  className="w-12 h-12 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-6 shadow-lg transition-transform duration-300"
+                  className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-lg transition-transform duration-300"
                   style={{
                     background: "linear-gradient(135deg, #F0E6D6, #E8DCC6)",
                   }}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
                   <step.icon
-                    className="h-6 w-6 sm:h-8 sm:w-8"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     style={{ color: "#8A6F47" }}
                   />
                 </motion.div>
-                <h3 className="text-lg sm:text-2xl font-semibold mb-2 sm:mb-4 text-stone-900">
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">
                   {step.title}
                 </h3>
-                <p className="text-stone-700 text-sm sm:text-lg leading-relaxed">
+                <p className="text-stone-700 text-xs sm:text-sm leading-relaxed">
                   {step.description}
                 </p>
               </motion.div>
@@ -603,11 +603,11 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-3 sm:py-6 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
+      <section className="py-2 sm:py-4 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-xl sm:text-3xl font-bold text-center mb-4 sm:mb-10 text-stone-900"
+            className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-6 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -615,7 +615,7 @@ export default function Home() {
             Your Safety is Our Priority
           </motion.h2>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 max-w-5xl mx-auto">
             {[
               {
                 icon: UserCheck,
@@ -647,19 +647,19 @@ export default function Home() {
                 whileHover={{ y: -5, scale: 1.05 }}
               >
                 <motion.div
-                  className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-md"
+                  className="w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-3 shadow-md"
                   style={{ backgroundColor: "#F0E6D6" }}
                   whileHover={{ rotate: 10, scale: 1.1 }}
                 >
                   <feature.icon
-                    className="h-5 w-5 sm:h-8 sm:w-8"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
                     style={{ color: "#8A6F47" }}
                   />
                 </motion.div>
-                <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 text-stone-900">
+                <h3 className="text-xs sm:text-sm font-semibold mb-1 text-stone-900">
                   {feature.title}
                 </h3>
-                <p className="text-xs sm:text-base text-stone-700">
+                <p className="text-xs sm:text-xs text-stone-700">
                   {feature.description}
                 </p>
               </motion.div>
@@ -669,11 +669,11 @@ export default function Home() {
       </section>
 
       {/* FAQ Section with Enhanced Effects */}
-      <section className="py-3 sm:py-6 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
+      <section className="py-2 sm:py-4 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2
-            className="text-lg sm:text-3xl font-bold text-center mb-3 sm:mb-10 text-stone-900"
+            className="text-base sm:text-lg font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -681,7 +681,7 @@ export default function Home() {
             Frequently Asked Questions
           </motion.h2>
 
-          <div className="max-w-3xl mx-auto space-y-1 sm:space-y-4">
+          <div className="max-w-2xl mx-auto space-y-1 sm:space-y-2">
             {[
               {
                 id: "security",
@@ -725,9 +725,9 @@ export default function Home() {
                     <motion.div whileHover={{ x: 3 }}>
                       <Button
                         variant="ghost"
-                        className="w-full justify-between py-1 px-2 sm:p-6 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors min-h-[2rem] sm:min-h-auto"
+                        className="w-full justify-between py-1 px-2 sm:py-2 sm:px-3 h-auto text-left rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors min-h-[2rem] sm:min-h-auto"
                       >
-                        <span className="font-medium text-stone-900 text-[11px] sm:text-lg leading-tight pr-1 flex-1">
+                        <span className="font-medium text-stone-900 text-[11px] sm:text-sm leading-tight pr-1 flex-1">
                           {faq.question}
                         </span>
                         <motion.div

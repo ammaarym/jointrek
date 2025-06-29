@@ -32,14 +32,26 @@ export default function RequestRidePage() {
     },
     enabled: !!rideId,
   });
-  
 
+  // Fetch user's payment methods
+  const { data: paymentData, isLoading: paymentLoading } = useQuery({
+    queryKey: ["/api/payment-methods"],
+    enabled: !!currentUser,
+  });
+
+  const hasPaymentMethod = paymentData?.paymentMethods?.length > 0;
+  const defaultPaymentMethod = paymentData?.paymentMethods?.find((pm: any) => pm.id === paymentData?.defaultPaymentMethodId) || paymentData?.paymentMethods?.[0];
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({
     mutationFn: async ({ rideId, message }: { rideId: number; message?: string }) => {
+      if (!hasPaymentMethod || !defaultPaymentMethod) {
+        throw new Error('Please add a payment method to your profile first');
+      }
+      
       const response = await apiRequest("POST", "/api/confirm-ride-request", {
         rideId,
+        paymentMethodId: defaultPaymentMethod.id,
         message: message?.trim() || undefined
       });
       return response.json();
@@ -62,7 +74,7 @@ export default function RequestRidePage() {
   });
 
   const handleConfirmRequest = () => {
-    if (!ride || !currentUser) return;
+    if (!ride || !currentUser || !hasPaymentMethod) return;
 
     confirmRideRequestMutation.mutate({
       rideId: ride.id,
@@ -70,7 +82,7 @@ export default function RequestRidePage() {
     });
   };
 
-  if (ridesLoading) {
+  if (ridesLoading || paymentLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center">
@@ -214,14 +226,35 @@ export default function RequestRidePage() {
               </p>
             </div>
 
+            {!hasPaymentMethod && (
+              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                  Payment Method Required
+                </h4>
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Please add a payment method to your profile before requesting rides.
+                </p>
+                <Button 
+                  onClick={() => setLocation("/profile")}
+                  variant="outline"
+                  className="mt-3"
+                  size="sm"
+                >
+                  Add Payment Method
+                </Button>
+              </div>
+            )}
+
             <Button 
               onClick={handleConfirmRequest}
-              disabled={confirmRideRequestMutation.isPending || !currentUser}
+              disabled={confirmRideRequestMutation.isPending || !currentUser || !hasPaymentMethod}
               className="w-full"
               size="lg"
             >
               {confirmRideRequestMutation.isPending 
                 ? "Processing payment..." 
+                : !hasPaymentMethod 
+                ? "Add Payment Method Required"
                 : `Confirm Ride Request - Pay $${ride.price}`
               }
             </Button>

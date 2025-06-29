@@ -236,8 +236,6 @@ const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
         </div>
       </div>
     </div>
-      </div>
-    </div>
   );
 };
 

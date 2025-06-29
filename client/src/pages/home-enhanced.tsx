@@ -627,7 +627,7 @@ export default function Home() {
             )}
           </motion.div>
         </AuroraBackground>
-      </div>
+      </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
       <section className="py-8 sm:py-20 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">

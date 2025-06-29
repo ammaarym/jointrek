@@ -33,7 +33,7 @@ export function StarBorder({ children, className }: StarBorderProps) {
             `,
           }}
         />
-        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-2xl bg-white/95 backdrop-blur-xl px-8 py-3 text-lg font-bold" style={{ color: '#8A6F47' }}>
+        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-2xl backdrop-blur-xl px-12 py-5 text-2xl font-bold" style={{ backgroundColor: '#F5F0E8', color: '#8A6F47' }}>
           {children}
         </div>
       </div>

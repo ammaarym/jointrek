@@ -497,7 +497,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.1, duration: 0.6 }}
-                className="flex flex-col items-center justify-center"
+                className="flex flex-col items-center justify-center mb-16 mt-8"
               >
                 <StarBorder>
                   Coming Soon

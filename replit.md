@@ -190,6 +190,7 @@ DATABASE_URL
 - June 29, 2025: Converted home page to "coming soon" landing page - replaced all "Get Started" buttons with "Coming Soon" messaging and removed footer section with Quick Links/Support/Contact for pre-launch marketing
 - June 29, 2025: Fixed "Coming Soon" implementation - corrected home-enhanced-fixed.tsx file to properly replace both sticky header and main card "Get Started" buttons with "Coming Soon" badges and messaging
 - June 29, 2025: Simplified coming soon landing page - removed "Please sign in to continue" section entirely and replaced with clean, prominent "Coming Soon" card focusing solely on launch messaging
+- June 29, 2025: Enhanced StarBorder "Coming Soon" button - increased size, added light beige background (#F5F0E8), improved spacing, and made more prominent for better visual appeal on landing page
 
 ## User Preferences
 

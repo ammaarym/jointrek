@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CarTaxiFront, User, MapPin, Shield, Lock, Check, CreditCard, UserCheck, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { StarBorder } from "@/components/ui/star-border";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { cn } from "@/lib/utils";
 import {
@@ -496,50 +497,11 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1.1, duration: 0.6 }}
-                className="flex flex-col items-center max-w-2xl mx-auto px-4"
+                className="flex flex-col items-center justify-center"
               >
-                <EnhancedCard className="w-full mb-4 sm:mb-6 max-w-lg mx-auto">
-                  <div className="text-center py-3 sm:py-4">
-                    <div className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-lg sm:text-xl mb-2 sm:mb-3" style={{ backgroundColor: '#F0E6D6', color: '#8A6F47' }}>
-                      Coming Soon
-                    </div>
-                    <p className="text-xs sm:text-sm text-stone-600">
-                      Trek is launching soon for University of Florida students. Stay tuned!
-                    </p>
-                  </div>
-                </EnhancedCard>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 w-full">
-                  <motion.div 
-                    className="flex items-start p-3 sm:p-4 rounded-lg" 
-                    style={{ backgroundColor: '#FEFCF8' }}
-                    whileHover={{ x: 5, scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="shrink-0 rounded-full p-2 sm:p-3 mr-3 sm:mr-4" style={{ backgroundColor: '#F0E6D6' }}>
-                      <Shield className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-stone-900 mb-1 text-sm sm:text-base">UF Students Only</h4>
-                      <p className="text-xs sm:text-sm text-stone-700">Verified UF emails ensure you're traveling with fellow Gators.</p>
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="flex items-start p-3 sm:p-4 rounded-lg" 
-                    style={{ backgroundColor: '#FEFCF8' }}
-                    whileHover={{ x: 5, scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="shrink-0 rounded-full p-2 sm:p-3 mr-3 sm:mr-4" style={{ backgroundColor: '#F0E6D6' }}>
-                      <Check className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: '#8A6F47' }} />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-stone-900 mb-1 text-sm sm:text-base">Secure & Easy</h4>
-                      <p className="text-xs sm:text-sm text-stone-700">Find rides or offer your own in just a few clicks after signing in.</p>
-                    </div>
-                  </motion.div>
-                </div>
+                <StarBorder>
+                  Coming Soon
+                </StarBorder>
               </motion.div>
             )}
           </motion.div>

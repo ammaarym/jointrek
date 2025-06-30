@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trek Auth Test</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trek Authentication Test</h1>
+        <button onclick="testAuth()">Test Google Sign-In</button>
+        <button onclick="clearAuth()">Clear Auth State</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // Firebase config - same as your app
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGX7VJULFWTKgCT5-Gr71aF2cFYP3Y5sM",
+            authDomain: "gatorlift-a1a82.firebaseapp.com",
+            projectId: "gatorlift-a1a82",
+            storageBucket: "gatorlift-a1a82.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `<div class="log">${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+
+        function testAuth() {
+            log('Starting authentication test...');
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('email');
+            provider.addScope('profile');
+            provider.setCustomParameters({
+                'hd': 'ufl.edu',
+                'prompt': 'select_account'
+            });
+
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    log(`Success: ${result.user.email}`);
+                    if (!result.user.email.endsWith('@ufl.edu')) {
+                        log('Non-UF email detected, signing out');
+                        auth.signOut();
+                    }
+                })
+                .catch((error) => {
+                    log(`Error: ${error.code} - ${error.message}`);
+                });
+        }
+
+        function clearAuth() {
+            auth.signOut().then(() => {
+                log('Signed out successfully');
+                document.getElementById('log').innerHTML = '';
+            });
+        }
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                log(`Auth state: Signed in as ${user.email}`);
+            } else {
+                log('Auth state: Signed out');
+            }
+        });
+    </script>
+</body>
+</html>

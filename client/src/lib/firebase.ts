@@ -36,7 +36,7 @@ try {
 export const auth = getAuth(app);
 
 // Configure auth persistence for Replit production environment
-import { setPersistence, browserLocalPersistence } from "firebase/auth";
+import { setPersistence, browserLocalPersistence, connectAuthEmulator } from "firebase/auth";
 
 // Configure multiple persistence layers for Replit compatibility
 async function configureFirebaseAuth() {
@@ -65,6 +65,9 @@ async function configureFirebaseAuth() {
 
 // Initialize enhanced persistence
 configureFirebaseAuth();
+
+// Add additional auth configuration for production stability
+auth.settings.appVerificationDisabledForTesting = false;
 
 // Configure auth to use redirect flow only
 auth.settings.appVerificationDisabledForTesting = false;

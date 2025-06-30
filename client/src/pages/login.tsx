@@ -53,25 +53,29 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      console.log("[DEBUG] Login page sign-in clicked");
+      console.log("🔵 Login button clicked");
       setIsSigningIn(true);
       
-      // Just call signInWithGoogle - it will handle mobile detection internally
       await signInWithGoogle();
+      console.log("✅ Sign-in process completed successfully");
       
     } catch (error: any) {
-      console.error("[ERROR] Login authentication failed:", error);
+      console.error("❌ Login authentication failed:", error);
       setIsSigningIn(false);
       
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.log("[DEBUG] User cancelled authentication - resetting button state");
-        // User cancelled, no need to show error, just reset state
+      // Handle specific error cases
+      if (error.code === 'auth/popup-closed-by-user' || 
+          error.code === 'auth/cancelled-popup-request') {
+        console.log("ℹ️ User cancelled authentication");
+        // User cancelled, just reset state
+      } else if (error.code === 'auth/network-request-failed') {
+        alert("Network error. Please check your connection and try again.");
+      } else if (error.message?.includes('@ufl.edu')) {
+        alert("Please use your @ufl.edu email address to sign in.");
       } else {
-        alert("Authentication failed. Please try again.");
+        console.error("🚨 Unexpected error:", error);
+        alert("Authentication failed. Please refresh the page and try again.");
       }
-    } finally {
-      // Always reset the signing in state so button is clickable again
-      setIsSigningIn(false);
     }
   };
 

@@ -21,43 +21,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-  
-    
-    // Check for redirect result first
-    getRedirectResult(auth)
-      .then((result) => {
+    // Enhanced authentication state management
+    const initializeAuth = async () => {
+      setLoading(true);
+      
+      try {
+        // Check for redirect result first
+        const result = await getRedirectResult(auth);
         if (result && result.user) {
-  
           if (!isUFEmail(result.user.email || '')) {
-            firebaseSignOut(auth);
+            await firebaseSignOut(auth);
             throw new Error('Please use your @ufl.edu email address');
           }
         }
-      })
-      .catch((error) => {
-
-      });
-    
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email && isUFEmail(user.email)) {
-        setCurrentUser(user);
-        setLoading(false);
-        
-        // Handle redirects for authenticated users
-        const currentPath = window.location.pathname;
-        if (currentPath === '/login' || currentPath === '/') {
-          setTimeout(() => {
-            window.location.replace('/profile');
-          }, 100);
-        }
-      } else {
-        setCurrentUser(null);
+      } catch (error) {
+        console.error('Redirect result error:', error);
       }
       
-      setLoading(false);
-    });
+      // Set up auth state listener
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user && user.email && isUFEmail(user.email)) {
+          setCurrentUser(user);
+          
+          // Handle redirects for authenticated users
+          const currentPath = window.location.pathname;
+          if (currentPath === '/login' || currentPath === '/') {
+            setTimeout(() => {
+              window.location.replace('/profile');
+            }, 100);
+          }
+        } else if (user && user.email && !isUFEmail(user.email)) {
+          await firebaseSignOut(auth);
+          setCurrentUser(null);
+        } else {
+          setCurrentUser(null);
+        }
+        
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return unsubscribe;
+    };
+
+    const unsubscribePromise = initializeAuth();
+    
+    return () => {
+      unsubscribePromise.then(unsubscribe => unsubscribe?.());
+    };
   }, []);
 
   const signOut = async () => {
@@ -70,51 +80,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     provider.addScope('email');
     provider.addScope('profile');
     
-    // Configure provider to only allow UF domain
+    // Configure provider for production environment
     provider.setCustomParameters({
-      'hd': 'ufl.edu', // Hosted domain - restricts to UF emails only
-      'prompt': 'select_account'
+      'hd': 'ufl.edu',
+      'prompt': 'select_account',
+      'access_type': 'online'
     });
     
     try {
-      console.log('🚀 Starting Google sign-in process...');
+      console.log('Starting Google authentication...');
       
-      // Check if we're in mobile environment
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      console.log('📱 Mobile device detected:', isMobile);
+      // Always use redirect for production reliability
+      console.log('Using redirect authentication for production stability');
+      await signInWithRedirect(auth, provider);
       
-      if (isMobile) {
-        // Use redirect for mobile devices to avoid popup issues
-        console.log('📱 Using redirect authentication for mobile');
-        await signInWithRedirect(auth, provider);
-      } else {
-        // Try popup for desktop
-        console.log('🖥️ Using popup authentication for desktop');
-        const result = await signInWithPopup(auth, provider);
-        
-        if (result.user && result.user.email) {
-          console.log('✅ Popup authentication successful:', result.user.email);
-          if (!isUFEmail(result.user.email)) {
-            console.log('❌ Non-UF email detected, signing out');
-            await firebaseSignOut(auth);
-            throw new Error('Please use your @ufl.edu email address');
-          }
-        }
-      }
     } catch (error: any) {
-      console.error('❌ Authentication error:', error);
+      console.error('Authentication error:', error);
       
-      if (error.code === 'auth/popup-blocked' || 
-          error.code === 'auth/popup-closed-by-user' || 
-          error.code === 'auth/cancelled-popup-request') {
-        console.log('🔄 Popup blocked/cancelled, falling back to redirect');
-        await signInWithRedirect(auth, provider);
-      } else if (error.code === 'auth/network-request-failed') {
-        console.log('🌐 Network error, retrying with redirect');
-        await signInWithRedirect(auth, provider);
+      // Handle authentication errors
+      if (error.code === 'auth/network-request-failed') {
+        throw new Error('Network connection failed. Please check your internet and try again.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Google sign-in is not enabled. Please contact support.');
+      } else if (error.code === 'auth/invalid-credential') {
+        throw new Error('Invalid credentials. Please try again.');
       } else {
-        console.error('🚨 Unhandled authentication error:', error);
-        throw error;
+        console.error('Unexpected authentication error:', error);
+        throw new Error('Authentication failed. Please refresh the page and try again.');
       }
     }
   };

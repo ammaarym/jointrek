@@ -70,7 +70,6 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
           email_verified: payload.email_verified || false,
           name: payload.name || 'Trek User',
         } as admin.auth.DecodedIdToken;
-        
         req.user = authenticatedUser;
         return next();
       } catch (tokenError) {
@@ -357,27 +356,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create ride request
   app.post("/api/ride-requests", authenticate, async (req, res) => {
     try {
-      console.log("Creating ride request - user:", req.user);
       const firebaseUid = req.user!.uid;
       const userEmail = req.user!.email;
-      console.log("Firebase UID:", firebaseUid, "Email:", userEmail);
       
       // Ensure passenger user exists in PostgreSQL database before creating request
       try {
         let user = await storage.getUserByFirebaseUid(firebaseUid);
-        console.log("Checking if passenger exists:", firebaseUid, "Found:", !!user);
         
         if (!user) {
           // Try to find by email first to avoid duplicates
           const userByEmail = await storage.getUserByEmail(userEmail || '');
-          console.log("Checking by email:", userEmail, "Found:", !!userByEmail);
           
           if (userByEmail) {
             // Update existing user with Firebase UID
             user = await storage.updateUser(userByEmail.firebaseUid, {
               firebaseUid: firebaseUid
             });
-            console.log("Updated existing passenger with Firebase UID:", user?.id);
           } else {
             // Create new user
             const userData = {
@@ -388,12 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               emailVerified: req.user!.email_verified || false
             };
             
-            console.log("Creating new passenger with data:", userData);
             user = await storage.createUser(userData);
-            console.log("Successfully created new passenger in PostgreSQL:", user.id);
           }
-        } else {
-          console.log("Passenger already exists in PostgreSQL:", user.id);
         }
         
         // Verify user creation was successful
@@ -401,7 +391,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!verifyUser) {
           throw new Error("User creation verification failed");
         }
-        console.log("User creation verified successfully:", verifyUser.id);
         
       } catch (userError) {
         console.error("Error ensuring passenger exists:", userError);

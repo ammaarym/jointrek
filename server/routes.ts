@@ -2813,6 +2813,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin rides list
+  app.get("/api/admin/rides", adminAuth, async (req, res) => {
+    try {
+      const rides = await storage.getAllRides();
+      res.json(rides);
+    } catch (error) {
+      console.error("Admin rides error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Admin update user
   app.patch("/api/admin/users/:id", adminAuth, async (req, res) => {
     try {

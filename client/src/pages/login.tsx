@@ -23,19 +23,25 @@ export default function Login() {
 
   // Navigate to profile once auth is complete and user is loaded
   useEffect(() => {
+    console.log('🔵 [LOGIN_REDIRECT] Auth state check:', {
+      loading,
+      hasCurrentUser: !!currentUser,
+      userEmail: currentUser ? currentUser.email || 'no email' : 'null',
+      hasRedirected,
+      isMobile
+    });
+
     if (!loading && currentUser && !hasRedirected) {
-      console.log("[DEBUG] Login page: Authenticated user detected, redirecting to profile");
-      console.log("[DEBUG] User email:", currentUser ? currentUser.email || 'no email' : 'null');
-      console.log("[DEBUG] User UID:", currentUser ? currentUser.uid || 'no uid' : 'null');
+      console.log("🎯 [LOGIN_REDIRECT] Conditions met - executing redirect");
       setHasRedirected(true);
       
       // Use a small delay to ensure auth state is fully settled
       setTimeout(() => {
-        console.log("[DEBUG] Executing redirect to /profile");
+        console.log("🚀 [LOGIN_REDIRECT] Executing window.location.replace to /profile");
         window.location.replace('/profile');
       }, 100);
     }
-  }, [currentUser, loading, hasRedirected]);
+  }, [currentUser, loading, hasRedirected, isMobile]);
 
   // Show loading while authentication state is being determined
   if (loading) {

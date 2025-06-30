@@ -61,10 +61,8 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
             onSuccess(result.user);
           }
           
-          // Redirect to dashboard
-          setTimeout(() => {
-            setLocation(redirectPath);
-          }, 100);
+          // Let the parent component handle navigation
+          console.log('✅ [MOBILE_AUTH] Authentication successful, parent will handle redirect');
         } else {
           console.log('ℹ️ [MOBILE_AUTH] No redirect result found');
         }
@@ -91,10 +89,8 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
           onSuccess(user);
         }
         
-        // Auto-redirect authenticated users
-        setTimeout(() => {
-          setLocation(redirectPath);
-        }, 100);
+        // Let parent component handle navigation
+        console.log('✅ [MOBILE_AUTH] User authenticated via state change, parent will handle redirect');
       } else if (user && user.email && !user.email.endsWith('@ufl.edu')) {
         // Sign out non-UF users
         auth.signOut();

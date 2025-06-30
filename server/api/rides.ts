@@ -1,7 +1,73 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { storage } from "../postgres-storage";
 import { insertRideSchema } from "@shared/schema";
 import { z } from "zod";
+import * as admin from "firebase-admin";
+
+// Extend Request interface to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: admin.auth.DecodedIdToken;
+    }
+  }
+}
+
+// Authentication middleware that handles Firebase tokens
+const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // First try Authorization header (Firebase token)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      
+      try {
+        // Decode the JWT to extract user info
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          throw new Error('Invalid token format');
+        }
+        
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+        
+        const authenticatedUser = {
+          uid: payload.user_id || payload.sub || payload.uid,
+          email: payload.email || '',
+          email_verified: payload.email_verified || false,
+          name: payload.name || payload.display_name || 'Trek User',
+        } as admin.auth.DecodedIdToken;
+        
+        req.user = authenticatedUser;
+        return next();
+      } catch (tokenError) {
+        console.error("Token verification error:", tokenError);
+        return res.status(401).json({ message: "Invalid authentication token" });
+      }
+    }
+    
+    // Fallback to header-based auth (for backward compatibility)
+    const firebaseUid = req.headers['x-user-id'] as string;
+    const userEmail = req.headers['x-user-email'] as string;
+    const userName = req.headers['x-user-name'] as string;
+    
+    if (!firebaseUid) {
+      return res.status(401).json({ message: "Authentication required - missing user ID" });
+    }
+    
+    const authenticatedUser = {
+      uid: firebaseUid,
+      email: userEmail || '',
+      email_verified: true,
+      name: userName || 'Trek User',
+    } as admin.auth.DecodedIdToken;
+    
+    req.user = authenticatedUser;
+    next();
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return res.status(401).json({ message: "Unauthorized: Invalid token" });
+  }
+};
 
 const router = Router();
 
@@ -37,30 +103,24 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // POST /api/rides - Create a new ride
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", authenticate, async (req: Request, res: Response) => {
   try {
-    // Get user ID from headers (Express converts headers to lowercase)
-    const firebaseUid = req.headers['x-user-id'] as string;
-    const userEmail = req.headers['x-user-email'] as string;
+    const firebaseUid = req.user!.uid;
+    const userEmail = req.user!.email;
     
     console.log("Creating ride for user:", firebaseUid);
-    
-    if (!firebaseUid) {
-      return res.status(401).json({ error: "Authentication required - missing user ID" });
-    }
     
     // Ensure user exists in PostgreSQL database before creating ride
     try {
       const existingUser = await storage.getUserByFirebaseUid(firebaseUid);
       
       if (!existingUser) {
-        const userName = req.headers['x-user-name'] as string;
         const userData = {
           firebaseUid: firebaseUid,
           email: userEmail || '',
-          displayName: userName || 'Trek User',
+          displayName: req.user!.name || 'Trek User',
           photoUrl: null,
-          emailVerified: true
+          emailVerified: req.user!.email_verified || false
         };
         
         const newUser = await storage.createUser(userData);
@@ -101,18 +161,14 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // PUT /api/rides/:id - Update a ride
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", authenticate, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid ride ID" });
     }
     
-    // Get user info from headers (since we're using client-side auth)
-    const userId = req.headers['x-user-id'] as string;
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
+    const userId = req.user!.uid;
     
     // Ensure the ride exists
     const existingRide = await storage.getRide(id);

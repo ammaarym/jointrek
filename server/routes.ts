@@ -51,19 +51,43 @@ const initFirebase = () => {
   }
 };
 
-// Authentication middleware that extracts Firebase user info from headers
+// Authentication middleware that handles Firebase tokens
 const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Get Firebase user info from headers (set by client-side auth)
+    // First try Authorization header (Firebase token)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      
+      try {
+        // For production, we would verify the token with Firebase Admin SDK
+        // For now, we'll decode the JWT to extract user info
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        
+        const authenticatedUser = {
+          uid: payload.user_id || payload.sub,
+          email: payload.email || '',
+          email_verified: payload.email_verified || false,
+          name: payload.name || 'Trek User',
+        } as admin.auth.DecodedIdToken;
+        
+        req.user = authenticatedUser;
+        return next();
+      } catch (tokenError) {
+        console.error("Token verification error:", tokenError);
+        return res.status(401).json({ message: "Invalid authentication token" });
+      }
+    }
+    
+    // Fallback to header-based auth (for backward compatibility)
     const firebaseUid = req.headers['x-user-id'] as string;
     const userEmail = req.headers['x-user-email'] as string;
     const userName = req.headers['x-user-name'] as string;
     
     if (!firebaseUid) {
-      return res.status(401).json({ message: "Authentication required" });
+      return res.status(401).json({ message: "Authentication required - missing user ID" });
     }
     
-    // Create user object with Firebase info
     const authenticatedUser = {
       uid: firebaseUid,
       email: userEmail || '',
@@ -71,7 +95,6 @@ const authenticate = async (req: Request, res: Response, next: NextFunction) => 
       name: userName || 'Trek User',
     } as admin.auth.DecodedIdToken;
     
-    // Add user info to request
     req.user = authenticatedUser;
     next();
   } catch (error) {

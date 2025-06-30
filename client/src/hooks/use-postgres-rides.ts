@@ -6,14 +6,33 @@ import marcusJohnsonPhoto from '@assets/marcus_1750976723565.png';
 import emilyRodriguezPhoto from '@assets/emily_1750977859226.png';
 import vanessaRamirezPhoto from '@assets/vanesa_1750978625848.png';
 
-// Helper function to make API requests
+import { auth } from '@/lib/firebase';
+
+// Helper function to make API requests with Firebase auth
 async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
+  let headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  // Get Firebase auth token
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      headers = {
+        ...headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
+  } catch (authError) {
+    console.error('Error getting auth token:', authError);
+    throw new Error('Authentication failed. Please try signing in again.');
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {

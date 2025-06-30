@@ -61,8 +61,10 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
             onSuccess(result.user);
           }
           
-          // Let the parent component handle navigation
-          console.log('✅ [MOBILE_AUTH] Authentication successful, parent will handle redirect');
+          // Store auth success in sessionStorage and redirect immediately
+          console.log('✅ [MOBILE_AUTH] Authentication successful, redirecting to profile');
+          sessionStorage.setItem('mobile_auth_success', 'true');
+          window.location.replace('/profile');
         } else {
           console.log('ℹ️ [MOBILE_AUTH] No redirect result found');
         }
@@ -89,8 +91,10 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
           onSuccess(user);
         }
         
-        // Let parent component handle navigation
-        console.log('✅ [MOBILE_AUTH] User authenticated via state change, parent will handle redirect');
+        // Store auth success and redirect immediately 
+        console.log('✅ [MOBILE_AUTH] User authenticated via state change, redirecting to profile');
+        sessionStorage.setItem('mobile_auth_success', 'true');
+        window.location.replace('/profile');
       } else if (user && user.email && !user.email.endsWith('@ufl.edu')) {
         // Sign out non-UF users
         auth.signOut();

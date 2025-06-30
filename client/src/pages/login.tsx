@@ -28,14 +28,21 @@ export default function Login() {
       hasCurrentUser: !!currentUser,
       userEmail: currentUser ? currentUser.email || 'no email' : 'null',
       hasRedirected,
-      isMobile
+      isMobile,
+      mobileAuthSuccess: sessionStorage.getItem('mobile_auth_success')
     });
 
-    if (!loading && currentUser && !hasRedirected) {
-      console.log("🎯 [LOGIN_REDIRECT] Conditions met - executing redirect");
+    // Skip redirect if mobile auth already handled it
+    if (isMobile && sessionStorage.getItem('mobile_auth_success')) {
+      console.log("📱 [LOGIN_REDIRECT] Mobile auth success detected, skipping login page redirect");
+      sessionStorage.removeItem('mobile_auth_success');
+      return;
+    }
+
+    if (!loading && currentUser && !hasRedirected && !isMobile) {
+      console.log("🎯 [LOGIN_REDIRECT] Desktop user - executing redirect");
       setHasRedirected(true);
       
-      // Use a small delay to ensure auth state is fully settled
       setTimeout(() => {
         console.log("🚀 [LOGIN_REDIRECT] Executing window.location.replace to /profile");
         window.location.replace('/profile');

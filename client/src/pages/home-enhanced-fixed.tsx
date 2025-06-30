@@ -416,7 +416,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-24 flex items-center justify-center">
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 sm:pt-24 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -462,7 +462,7 @@ export default function Home() {
 
             {/* Find Rides Screenshot with enhanced animation */}
             <motion.div
-              className="mb-4 md:mb-8"
+              className="mb-2 md:mb-4"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -483,7 +483,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.1, duration: 0.6 }}
-              className="flex flex-col items-center justify-center mb-8 mt-2"
+              className="flex flex-col items-center justify-center mb-2 mt-2"
             >
               <StarBorder>Coming Soon</StarBorder>
             </motion.div>
@@ -492,11 +492,11 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-4 sm:py-6 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="py-2 sm:py-4 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-8 text-stone-900"
+            className="text-xl sm:text-2xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}

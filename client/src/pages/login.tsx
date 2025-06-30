@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import MobileAuth from "@/components/mobile-auth";
+import MobileAuthFixed from "@/components/mobile-auth-fixed";
 
 export default function Login() {
   const { currentUser, loading, signInWithGoogle } = useAuth();
@@ -32,12 +32,12 @@ export default function Login() {
       mobileAuthSuccess: sessionStorage.getItem('mobile_auth_success')
     });
 
-    // Skip redirect if mobile auth already handled it
-    const mobileAuthHandled = localStorage.getItem('mobile_auth_redirect_success') || localStorage.getItem('mobile_auth_state_success');
-    if (isMobile && mobileAuthHandled) {
-      console.log("📱 [LOGIN_REDIRECT] Mobile auth success detected, skipping login page redirect");
-      localStorage.removeItem('mobile_auth_redirect_success');
-      localStorage.removeItem('mobile_auth_state_success');
+    // Skip redirect if mobile auth was recently processed
+    const mobileAuthProcessed = localStorage.getItem('mobile_auth_processed');
+    const recentlyProcessed = mobileAuthProcessed && (Date.now() - parseInt(mobileAuthProcessed)) < 5000; // 5 seconds
+    
+    if (isMobile && recentlyProcessed) {
+      console.log("📱 [LOGIN_REDIRECT] Mobile auth recently processed, skipping login page redirect");
       return;
     }
 
@@ -159,8 +159,7 @@ export default function Login() {
 
         <div className="space-y-3">
           {isMobile ? (
-            <MobileAuth 
-              redirectPath="/profile"
+            <MobileAuthFixed 
               onSuccess={(user) => {
                 console.log('✅ [LOGIN] Mobile auth success:', user.email);
                 setHasRedirected(true);

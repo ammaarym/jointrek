@@ -52,39 +52,62 @@ export default function Login() {
   }
 
   const handleGoogleSignIn = async () => {
+    console.log('🔵 [LOGIN] Sign in button clicked');
+    console.log('🔵 [LOGIN] Current loading state:', loading);
+    console.log('🔵 [LOGIN] Current user:', currentUser?.email || 'null');
+    
     try {
+      console.log('🔵 [LOGIN] Setting isSigningIn to true');
       setIsSigningIn(true);
       
       // Detect mobile device
       const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      console.log('🔵 [LOGIN] Device detection:', { isMobile, userAgent: navigator.userAgent });
       
       if (isMobile) {
-        // For mobile, don't reset loading state since redirect will happen
-        console.log('Starting mobile redirect authentication...');
+        console.log('🔵 [LOGIN] Mobile device - will not reset loading state after signInWithGoogle');
+      } else {
+        console.log('🔵 [LOGIN] Desktop device - will reset loading state after signInWithGoogle');
       }
       
+      console.log('🔵 [LOGIN] Calling signInWithGoogle...');
       await signInWithGoogle();
+      console.log('🔵 [LOGIN] signInWithGoogle completed');
       
       // Only reset loading state if not mobile (since mobile redirects)
       if (!isMobile) {
+        console.log('🔵 [LOGIN] Resetting isSigningIn to false for desktop');
         setIsSigningIn(false);
+      } else {
+        console.log('🔵 [LOGIN] Keeping isSigningIn true for mobile redirect');
       }
       
     } catch (error: any) {
+      console.log('💥 [LOGIN] Error in handleGoogleSignIn:', { 
+        code: error.code, 
+        message: error.message,
+        stack: error.stack 
+      });
+      
+      console.log('🔵 [LOGIN] Resetting isSigningIn to false due to error');
       setIsSigningIn(false);
       
       // Handle specific error cases with user-friendly messages
       if (error.code === 'auth/popup-closed-by-user' || 
           error.code === 'auth/cancelled-popup-request') {
-        // User cancelled, just reset state
+        console.log('👤 [LOGIN] User cancelled authentication');
         return;
       } else if (error.code === 'auth/network-request-failed') {
+        console.log('🌐 [LOGIN] Network error detected');
         alert("Network error. Please check your connection and try again.");
       } else if (error.message?.includes('@ufl.edu')) {
+        console.log('🏫 [LOGIN] UF email validation error');
         alert("Please use your @ufl.edu email address to sign in.");
       } else if (error.code === 'auth/popup-blocked') {
+        console.log('🚫 [LOGIN] Popup blocked error');
         alert("Popup was blocked. Redirecting to Google sign-in...");
       } else {
+        console.log('❓ [LOGIN] Unknown authentication error');
         alert("Authentication failed. Please refresh the page and try again.");
       }
     }

@@ -4,13 +4,12 @@ import {
   getRedirectResult, 
   onAuthStateChanged, 
   setPersistence, 
-  browserSessionPersistence,
+  browserLocalPersistence,
   GoogleAuthProvider,
   User
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { useLocation } from 'wouter';
 
 interface MobileAuthProps {
   onSuccess?: (user: User) => void;
@@ -19,18 +18,18 @@ interface MobileAuthProps {
 
 const MobileAuth: React.FC<MobileAuthProps> = ({ 
   onSuccess, 
-  redirectPath = '/dashboard' 
+  redirectPath = '/profile' 
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [, setLocation] = useLocation();
+  const [hasCheckedRedirect, setHasCheckedRedirect] = useState(false);
 
   useEffect(() => {
-    // Configure Firebase Auth persistence for mobile
+    // Configure Firebase Auth persistence for mobile with local storage
     const configurePersistence = async () => {
       try {
-        await setPersistence(auth, browserSessionPersistence);
-        console.log('✅ [MOBILE_AUTH] Session persistence configured');
+        await setPersistence(auth, browserLocalPersistence);
+        console.log('✅ [MOBILE_AUTH] Local persistence configured');
       } catch (error) {
         console.error('❌ [MOBILE_AUTH] Error setting persistence:', error);
       }
@@ -38,10 +37,14 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
 
     configurePersistence();
 
-    // Check for redirect result on component mount
+    // Check for redirect result once on component mount
     const handleRedirectResult = async () => {
+      if (hasCheckedRedirect) return;
+      
       try {
         console.log('🔍 [MOBILE_AUTH] Checking for redirect result...');
+        setHasCheckedRedirect(true);
+        
         const result = await getRedirectResult(auth);
         
         if (result) {
@@ -56,17 +59,21 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
             return;
           }
 
+          // Store success flag before redirect to prevent loops
+          localStorage.setItem('mobile_auth_redirect_success', result.user.uid);
+          localStorage.setItem('mobile_auth_email', result.user.email || '');
+          
           setUser(result.user);
           if (onSuccess) {
             onSuccess(result.user);
           }
           
-          // Store auth success in sessionStorage and redirect immediately
-          console.log('✅ [MOBILE_AUTH] Authentication successful, redirecting to profile');
-          sessionStorage.setItem('mobile_auth_success', 'true');
+          console.log('🚀 [MOBILE_AUTH] Redirecting to profile immediately');
+          // Use replace to prevent back navigation issues
           window.location.replace('/profile');
         } else {
           console.log('ℹ️ [MOBILE_AUTH] No redirect result found');
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('💥 [MOBILE_AUTH] Redirect result error:', error);
@@ -76,12 +83,26 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
 
     handleRedirectResult();
 
-    // Set up auth state listener
+    // Set up auth state listener with redirect protection
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log('🔥 [MOBILE_AUTH] Auth state changed:', {
         hasUser: !!user,
-        email: user?.email || 'null'
+        email: user?.email || 'null',
+        hasCheckedRedirect
       });
+      
+      // Check if we already handled this user via redirect result
+      const handledRedirect = localStorage.getItem('mobile_auth_redirect_success');
+      if (handledRedirect && user && user.uid === handledRedirect) {
+        console.log('📋 [MOBILE_AUTH] User already handled via redirect, skipping state change redirect');
+        localStorage.removeItem('mobile_auth_redirect_success');
+        setUser(user);
+        setIsLoading(false);
+        if (onSuccess) {
+          onSuccess(user);
+        }
+        return;
+      }
       
       if (user && user.email && user.email.endsWith('@ufl.edu')) {
         setUser(user);
@@ -91,15 +112,18 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
           onSuccess(user);
         }
         
-        // Store auth success and redirect immediately 
-        console.log('✅ [MOBILE_AUTH] User authenticated via state change, redirecting to profile');
-        sessionStorage.setItem('mobile_auth_success', 'true');
-        window.location.replace('/profile');
+        // Only redirect if this wasn't from redirect result and we've checked for redirect
+        if (!handledRedirect && hasCheckedRedirect) {
+          console.log('✅ [MOBILE_AUTH] User authenticated via state change, redirecting to profile');
+          localStorage.setItem('mobile_auth_state_success', user.uid);
+          window.location.replace('/profile');
+        }
       } else if (user && user.email && !user.email.endsWith('@ufl.edu')) {
         // Sign out non-UF users
         auth.signOut();
         setUser(null);
         setIsLoading(false);
+        alert('Please use your @ufl.edu email address to sign in.');
       } else {
         setUser(null);
         setIsLoading(false);
@@ -107,7 +131,7 @@ const MobileAuth: React.FC<MobileAuthProps> = ({
     });
 
     return () => unsubscribe();
-  }, [onSuccess, redirectPath, setLocation]);
+  }, [onSuccess, redirectPath, hasCheckedRedirect]);
 
   const handleGoogleSignIn = async () => {
     try {

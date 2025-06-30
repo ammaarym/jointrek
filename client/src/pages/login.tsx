@@ -33,9 +33,11 @@ export default function Login() {
     });
 
     // Skip redirect if mobile auth already handled it
-    if (isMobile && sessionStorage.getItem('mobile_auth_success')) {
+    const mobileAuthHandled = localStorage.getItem('mobile_auth_redirect_success') || localStorage.getItem('mobile_auth_state_success');
+    if (isMobile && mobileAuthHandled) {
       console.log("📱 [LOGIN_REDIRECT] Mobile auth success detected, skipping login page redirect");
-      sessionStorage.removeItem('mobile_auth_success');
+      localStorage.removeItem('mobile_auth_redirect_success');
+      localStorage.removeItem('mobile_auth_state_success');
       return;
     }
 

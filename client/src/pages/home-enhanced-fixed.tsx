@@ -17,7 +17,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { StarBorder } from "@/components/ui/star-border";
-import { useAuth } from "@/hooks/use-auth-fixed";
+// Removed useAuth import - landing page doesn't need authentication
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -377,7 +377,6 @@ const EnhancedCard = ({
 };
 
 export default function Home() {
-  const { currentUser, loading } = useAuth();
   const [, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<string | null>(null);
@@ -394,16 +393,6 @@ export default function Home() {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  // Redirect authenticated users to profile (avoid redirect loops)
-  useEffect(() => {
-    if (!loading && currentUser && window.location.pathname === "/") {
-      console.log(
-        "Home page: Authenticated user on home, redirecting to profile",
-      );
-      window.location.replace("/profile");
-    }
-  }, [currentUser, loading]);
 
   const handleLogin = () => {
     console.log("[DEBUG] Home page login clicked");
@@ -489,49 +478,15 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Action buttons or sign-in card */}
-            {currentUser ? (
-              <motion.div
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.1, duration: 0.6 }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    asChild
-                    className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                    style={{ backgroundColor: "#B8956B" }}
-                  >
-                    <Link href="/find-rides">Find a Ride</Link>
-                  </Button>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    asChild
-                    className="text-white px-4 py-2 sm:px-8 sm:py-4 text-sm sm:text-lg rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                    style={{ backgroundColor: "#9B7F56" }}
-                  >
-                    <Link href="/setup-post-ride">Offer a Ride</Link>
-                  </Button>
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.1, duration: 0.6 }}
-                className="flex flex-col items-center justify-center mb-8 mt-2"
-              >
-                <StarBorder>Coming Soon</StarBorder>
-              </motion.div>
-            )}
+            {/* Coming Soon Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.1, duration: 0.6 }}
+              className="flex flex-col items-center justify-center mb-8 mt-2"
+            >
+              <StarBorder>Coming Soon</StarBorder>
+            </motion.div>
           </motion.div>
         </div>
       </section>

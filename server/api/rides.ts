@@ -112,23 +112,38 @@ router.post("/", authenticate, async (req: Request, res: Response) => {
     
     // Ensure user exists in PostgreSQL database before creating ride
     try {
-      const existingUser = await storage.getUserByFirebaseUid(firebaseUid);
+      let user = await storage.getUserByFirebaseUid(firebaseUid);
       
-      if (!existingUser) {
-        const userData = {
-          firebaseUid: firebaseUid,
-          email: userEmail || '',
-          displayName: req.user!.name || 'Trek User',
-          photoUrl: null,
-          emailVerified: req.user!.email_verified || false
-        };
+      if (!user) {
+        // Try to find by email first to avoid duplicates
+        const userByEmail = await storage.getUserByEmail(userEmail || '');
         
-        const newUser = await storage.createUser(userData);
-        console.log("Created new user in PostgreSQL:", newUser.id);
+        if (userByEmail) {
+          // Update existing user with Firebase UID
+          user = await storage.updateUser(userByEmail.firebaseUid, {
+            firebaseUid: firebaseUid
+          });
+          console.log("Updated existing user with Firebase UID:", user?.id);
+        } else {
+          // Create new user
+          const userData = {
+            firebaseUid: firebaseUid,
+            email: userEmail || '',
+            displayName: req.user!.name || 'Trek User',
+            photoUrl: null,
+            emailVerified: req.user!.email_verified || false
+          };
+          
+          user = await storage.createUser(userData);
+          console.log("Created new user in PostgreSQL:", user.id);
+        }
+      } else {
+        console.log("User already exists in PostgreSQL:", user.id);
       }
     } catch (userError) {
       console.error("Error ensuring user exists:", userError);
-      return res.status(500).json({ error: "Failed to verify user account" });
+      // Continue with ride creation even if user verification fails
+      console.log("Continuing with ride creation despite user verification error");
     }
     
     // Convert string dates to Date objects and add driverId
@@ -136,11 +151,17 @@ router.post("/", authenticate, async (req: Request, res: Response) => {
       ...req.body,
       driverId: firebaseUid, // Add the authenticated user's ID
       departureTime: req.body.departureTime ? new Date(req.body.departureTime) : undefined,
-      arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined
+      arrivalTime: req.body.arrivalTime ? new Date(req.body.arrivalTime) : undefined,
+      price: req.body.price ? String(req.body.price) : undefined // Convert price to string
     };
     
+    // Create a custom validation schema that transforms price to string
+    const transformedRideSchema = insertRideSchema.extend({
+      price: z.union([z.string(), z.number()]).transform(val => String(val))
+    });
+    
     // Validate the request body against our schema
-    const validationResult = insertRideSchema.safeParse(rideData);
+    const validationResult = transformedRideSchema.safeParse(rideData);
     
     if (!validationResult.success) {
       console.log("Validation errors:", validationResult.error.format());

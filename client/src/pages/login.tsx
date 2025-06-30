@@ -4,19 +4,29 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import MobileAuth from "@/components/mobile-auth";
 
 export default function Login() {
   const { currentUser, loading, signInWithGoogle } = useAuth();
   const [, navigate] = useLocation();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device on component mount
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const mobileDetected = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    setIsMobile(mobileDetected);
+    console.log('📱 [LOGIN] Device detection:', { isMobile: mobileDetected, userAgent });
+  }, []);
 
   // Navigate to profile once auth is complete and user is loaded
   useEffect(() => {
     if (!loading && currentUser && !hasRedirected) {
       console.log("[DEBUG] Login page: Authenticated user detected, redirecting to profile");
-      console.log("[DEBUG] User email:", currentUser.email);
-      console.log("[DEBUG] User UID:", currentUser.uid);
+      console.log("[DEBUG] User email:", currentUser ? currentUser.email || 'no email' : 'null');
+      console.log("[DEBUG] User UID:", currentUser ? currentUser.uid || 'no uid' : 'null');
       setHasRedirected(true);
       
       // Use a small delay to ensure auth state is fully settled
@@ -133,36 +143,46 @@ export default function Login() {
         </div>
 
         <div className="space-y-3">
-          <Button
-            onClick={handleGoogleSignIn}
-            disabled={isSigningIn}
-            className="flex w-full items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white py-6 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSigningIn ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Redirecting to Google...</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  className="h-5 w-5"
-                >
-                  <path
-                    fill="#fff"
-                    d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032
-                    s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2
-                    C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-                  />
-                </svg>
-                <span>Sign in with Google</span>
-              </>
-            )}
-          </Button>
+          {isMobile ? (
+            <MobileAuth 
+              redirectPath="/profile"
+              onSuccess={(user) => {
+                console.log('✅ [LOGIN] Mobile auth success:', user.email);
+                setHasRedirected(true);
+              }}
+            />
+          ) : (
+            <Button
+              onClick={handleGoogleSignIn}
+              disabled={isSigningIn}
+              className="flex w-full items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white py-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSigningIn ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      fill="#fff"
+                      d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032
+                      s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2
+                      C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                    />
+                  </svg>
+                  <span>Sign in with Google</span>
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {isSigningIn && (

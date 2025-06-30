@@ -177,9 +177,15 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin-login" className="w-full">
+                        <Link href="/admin-quick" className="w-full">
                           <Shield className="h-4 w-4 mr-2" />
-                          Admin
+                          Admin Quick View
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin-dashboard" className="w-full">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin Dashboard
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -190,16 +196,36 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
 
             {/* Admin Button - only show for specific admin emails on desktop */}
             {isAdmin && (
-              <Link href="/admin-login">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:flex items-center gap-2 bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-quick" className="w-full">
+                      Quick View
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-dashboard" className="w-full">
+                      Full Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-login" className="w-full">
+                      Login/Switch
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             {/* Notifications Bell and Profile Picture - show on both mobile and desktop when logged in */}

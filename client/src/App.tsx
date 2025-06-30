@@ -21,6 +21,7 @@ import RideRequestApproval from "@/pages/ride-request-approval";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDashboardEnhanced from "@/pages/admin-dashboard-enhanced";
+import AdminQuick from "@/pages/admin-quick";
 
 import MyRidesPostgresClean from "@/pages/my-rides-postgres-clean";
 import Profile from "@/pages/profile";
@@ -319,6 +320,7 @@ function AppRoutes() {
           </Route>
           <Route path="/admin-login" component={AdminLogin} />
           <Route path="/admin-dashboard" component={AdminDashboardEnhanced} />
+          <Route path="/admin-quick" component={AdminQuick} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>

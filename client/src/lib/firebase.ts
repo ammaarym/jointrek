@@ -69,8 +69,15 @@ configureFirebaseAuth();
 // Add additional auth configuration for production stability
 auth.settings.appVerificationDisabledForTesting = false;
 
-// Configure auth to use redirect flow only
+// Configure auth for production environment
 auth.settings.appVerificationDisabledForTesting = false;
+
+// Add production-specific auth configuration
+const isProduction = window.location.hostname !== 'localhost';
+if (isProduction) {
+  // Ensure proper domain configuration for production
+  console.log('Configuring Firebase for production environment');
+}
 
 // Get firestore database reference with improved caching
 import { enableIndexedDbPersistence, initializeFirestore, persistentLocalCache, CACHE_SIZE_UNLIMITED } from "firebase/firestore";

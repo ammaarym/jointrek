@@ -75,37 +75,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentUser(null);
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<void> => {
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
     
-    // Configure provider for production environment
+    // Configure provider for UF domain restriction
     provider.setCustomParameters({
       'hd': 'ufl.edu',
-      'prompt': 'select_account',
-      'access_type': 'online'
+      'prompt': 'select_account'
     });
     
     try {
-      console.log('Starting Google authentication...');
-      
-      // Always use redirect for production reliability
-      console.log('Using redirect authentication for production stability');
-      await signInWithRedirect(auth, provider);
+      // First attempt: Try popup for better UX
+      try {
+        const result = await signInWithPopup(auth, provider);
+        if (result.user && result.user.email && !isUFEmail(result.user.email)) {
+          await firebaseSignOut(auth);
+          throw new Error('Please use your @ufl.edu email address');
+        }
+        return;
+      } catch (popupError: any) {
+        // If popup fails, fall back to redirect
+        if (popupError.code === 'auth/popup-blocked' || 
+            popupError.code === 'auth/popup-closed-by-user' ||
+            popupError.code === 'auth/cancelled-popup-request') {
+          
+          // Use redirect as fallback
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw popupError;
+      }
       
     } catch (error: any) {
-      console.error('Authentication error:', error);
-      
-      // Handle authentication errors
-      if (error.code === 'auth/network-request-failed') {
+      // Handle specific authentication errors
+      if (error.message?.includes('@ufl.edu')) {
+        throw error; // Re-throw UF email errors
+      } else if (error.code === 'auth/network-request-failed') {
         throw new Error('Network connection failed. Please check your internet and try again.');
       } else if (error.code === 'auth/operation-not-allowed') {
         throw new Error('Google sign-in is not enabled. Please contact support.');
-      } else if (error.code === 'auth/invalid-credential') {
-        throw new Error('Invalid credentials. Please try again.');
       } else {
-        console.error('Unexpected authentication error:', error);
         throw new Error('Authentication failed. Please refresh the page and try again.');
       }
     }

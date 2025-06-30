@@ -53,27 +53,24 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      console.log("🔵 Login button clicked");
       setIsSigningIn(true);
-      
       await signInWithGoogle();
-      console.log("✅ Sign-in process completed successfully");
       
     } catch (error: any) {
-      console.error("❌ Login authentication failed:", error);
       setIsSigningIn(false);
       
-      // Handle specific error cases
+      // Handle specific error cases with user-friendly messages
       if (error.code === 'auth/popup-closed-by-user' || 
           error.code === 'auth/cancelled-popup-request') {
-        console.log("ℹ️ User cancelled authentication");
         // User cancelled, just reset state
+        return;
       } else if (error.code === 'auth/network-request-failed') {
         alert("Network error. Please check your connection and try again.");
       } else if (error.message?.includes('@ufl.edu')) {
         alert("Please use your @ufl.edu email address to sign in.");
+      } else if (error.code === 'auth/popup-blocked') {
+        alert("Popup was blocked. Please allow popups for this site and try again, or the page will redirect you to Google.");
       } else {
-        console.error("🚨 Unexpected error:", error);
         alert("Authentication failed. Please refresh the page and try again.");
       }
     }

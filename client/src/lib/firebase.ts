@@ -77,6 +77,11 @@ const isProduction = window.location.hostname !== 'localhost';
 if (isProduction) {
   // Ensure proper domain configuration for production
   console.log('Configuring Firebase for production environment');
+  
+  // Add current domain to console log for easy copying
+  const currentDomain = window.location.hostname;
+  console.log('🌐 Current domain that needs to be authorized in Firebase:', currentDomain);
+  console.log('🔧 Add this domain to Firebase Console → Authentication → Settings → Authorized domains');
 }
 
 // Get firestore database reference with improved caching

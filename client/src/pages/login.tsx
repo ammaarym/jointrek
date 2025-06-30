@@ -54,7 +54,7 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     console.log('🔵 [LOGIN] Sign in button clicked');
     console.log('🔵 [LOGIN] Current loading state:', loading);
-    console.log('🔵 [LOGIN] Current user:', currentUser?.email || 'null');
+    console.log('🔵 [LOGIN] Current user:', currentUser ? currentUser.email || 'no email' : 'null');
     
     try {
       console.log('🔵 [LOGIN] Setting isSigningIn to true');

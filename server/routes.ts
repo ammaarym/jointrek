@@ -357,10 +357,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create ride request
   app.post("/api/ride-requests", authenticate, async (req, res) => {
     try {
+      console.log("Creating ride request - user:", req.user);
+      const firebaseUid = req.user!.uid;
+      const userEmail = req.user!.email;
+      console.log("Firebase UID:", firebaseUid, "Email:", userEmail);
+      
+      // Ensure passenger user exists in PostgreSQL database before creating request
+      try {
+        let user = await storage.getUserByFirebaseUid(firebaseUid);
+        console.log("Checking if passenger exists:", firebaseUid, "Found:", !!user);
+        
+        if (!user) {
+          // Try to find by email first to avoid duplicates
+          const userByEmail = await storage.getUserByEmail(userEmail || '');
+          console.log("Checking by email:", userEmail, "Found:", !!userByEmail);
+          
+          if (userByEmail) {
+            // Update existing user with Firebase UID
+            user = await storage.updateUser(userByEmail.firebaseUid, {
+              firebaseUid: firebaseUid
+            });
+            console.log("Updated existing passenger with Firebase UID:", user?.id);
+          } else {
+            // Create new user
+            const userData = {
+              firebaseUid: firebaseUid,
+              email: userEmail || '',
+              displayName: req.user!.name || 'Trek User',
+              photoUrl: null,
+              emailVerified: req.user!.email_verified || false
+            };
+            
+            console.log("Creating new passenger with data:", userData);
+            user = await storage.createUser(userData);
+            console.log("Successfully created new passenger in PostgreSQL:", user.id);
+          }
+        } else {
+          console.log("Passenger already exists in PostgreSQL:", user.id);
+        }
+        
+        // Verify user creation was successful
+        const verifyUser = await storage.getUserByFirebaseUid(firebaseUid);
+        if (!verifyUser) {
+          throw new Error("User creation verification failed");
+        }
+        console.log("User creation verified successfully:", verifyUser.id);
+        
+      } catch (userError) {
+        console.error("Error ensuring passenger exists:", userError);
+        return res.status(500).json({ error: "Failed to verify passenger account" });
+      }
+      
       // Create the request data with authenticated user's ID
       const requestData = {
         ...req.body,
-        passengerId: req.user!.uid
+        passengerId: firebaseUid
       };
       
       // Validate the complete request data

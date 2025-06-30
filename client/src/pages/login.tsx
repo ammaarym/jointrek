@@ -54,7 +54,21 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);
+      
+      // Detect mobile device
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // For mobile, don't reset loading state since redirect will happen
+        console.log('Starting mobile redirect authentication...');
+      }
+      
       await signInWithGoogle();
+      
+      // Only reset loading state if not mobile (since mobile redirects)
+      if (!isMobile) {
+        setIsSigningIn(false);
+      }
       
     } catch (error: any) {
       setIsSigningIn(false);
@@ -69,7 +83,7 @@ export default function Login() {
       } else if (error.message?.includes('@ufl.edu')) {
         alert("Please use your @ufl.edu email address to sign in.");
       } else if (error.code === 'auth/popup-blocked') {
-        alert("Popup was blocked. Please allow popups for this site and try again, or the page will redirect you to Google.");
+        alert("Popup was blocked. Redirecting to Google sign-in...");
       } else {
         alert("Authentication failed. Please refresh the page and try again.");
       }

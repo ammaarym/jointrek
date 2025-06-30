@@ -29,9 +29,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check for redirect result first
         const result = await getRedirectResult(auth);
         if (result && result.user) {
+          console.log('🔄 Processing redirect result for:', result.user.email);
           if (!isUFEmail(result.user.email || '')) {
+            console.log('❌ Non-UF email from redirect, signing out');
             await firebaseSignOut(auth);
+            alert('Please use your @ufl.edu email address to sign in.');
             throw new Error('Please use your @ufl.edu email address');
+          } else {
+            console.log('✅ Redirect authentication successful for:', result.user.email);
           }
         }
       } catch (error) {
@@ -86,26 +91,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'prompt': 'select_account'
     });
     
+    // Detect if this is a mobile device
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     try {
-      // First attempt: Try popup for better UX
-      try {
-        const result = await signInWithPopup(auth, provider);
-        if (result.user && result.user.email && !isUFEmail(result.user.email)) {
-          await firebaseSignOut(auth);
-          throw new Error('Please use your @ufl.edu email address');
-        }
+      if (isMobile) {
+        // Use redirect for mobile devices
+        console.log('Mobile device detected, using redirect authentication');
+        await signInWithRedirect(auth, provider);
         return;
-      } catch (popupError: any) {
-        // If popup fails, fall back to redirect
-        if (popupError.code === 'auth/popup-blocked' || 
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.code === 'auth/cancelled-popup-request') {
-          
-          // Use redirect as fallback
-          await signInWithRedirect(auth, provider);
+      } else {
+        // Use popup for desktop browsers
+        console.log('Desktop browser detected, using popup authentication');
+        try {
+          const result = await signInWithPopup(auth, provider);
+          if (result.user && result.user.email && !isUFEmail(result.user.email)) {
+            await firebaseSignOut(auth);
+            throw new Error('Please use your @ufl.edu email address');
+          }
           return;
+        } catch (popupError: any) {
+          // If popup fails on desktop, fall back to redirect
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user' ||
+              popupError.code === 'auth/cancelled-popup-request') {
+            
+            console.log('Popup failed, falling back to redirect');
+            await signInWithRedirect(auth, provider);
+            return;
+          }
+          throw popupError;
         }
-        throw popupError;
       }
       
     } catch (error: any) {

@@ -357,11 +357,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create ride request
   app.post("/api/ride-requests", authenticate, async (req, res) => {
     try {
-      const validatedData = insertRideRequestSchema.parse(req.body);
-      const rideRequest = await storage.createRideRequest({
-        ...validatedData,
+      // Create the request data with authenticated user's ID
+      const requestData = {
+        ...req.body,
         passengerId: req.user!.uid
-      });
+      };
+      
+      // Validate the complete request data
+      const validatedData = insertRideRequestSchema.parse(requestData);
+      const rideRequest = await storage.createRideRequest(validatedData);
 
       // Send SMS notification to driver
       let smsStatus = { sent: false, reason: 'Unknown error' };

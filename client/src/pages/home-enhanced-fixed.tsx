@@ -447,9 +447,8 @@ export default function Home() {
                 ease: "easeInOut",
               }}
             >
-              The rideshare marketplace built for UF
-{" "}
-              <span style={{ color: "#B8956B" }}>Gators</span>
+              Rideshare Marketplace Built for UF{" "}
+              {/* <span style={{ color: "#B8956B" }}>Gators</span> */}
             </motion.div>
 
             <motion.p
@@ -458,7 +457,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
             >
-              Getting home doesn't have to suck
+              Getting in and out of the Swamp doesn't have to suck
             </motion.p>
 
             {/* Find Rides Screenshot with enhanced animation */}

@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/use-auth-fixed";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MobileAuthFixed from "@/components/mobile-auth-fixed";
+import { getRedirectResult } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export default function Login() {
   const { currentUser, loading, signInWithGoogle } = useAuth();
@@ -12,6 +14,24 @@ export default function Login() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Check for redirect result on login page load
+  useEffect(() => {
+    console.log("🔍 Checking redirect result on load...");
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log("✅ User returned from redirect:", result.user);
+          // Optionally update state/context here
+        } else {
+          console.log("ℹ️ No redirect result found");
+        }
+        console.log("✅ Finished checking redirect result");
+      })
+      .catch((error) => {
+        console.error("❌ Error handling redirect:", error);
+      });
+  }, []);
 
   // Detect mobile device on component mount
   useEffect(() => {

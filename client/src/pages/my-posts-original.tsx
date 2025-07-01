@@ -79,9 +79,6 @@ export default function MyPostsOriginal() {
   
   // Ride request state
   const [rideRequests, setRideRequests] = useState<any[]>([]);
-  
-  // Debug log in render
-  console.log('RENDER DEBUG - rideRequests state:', rideRequests.length, rideRequests);
   const [requestsLoading, setRequestsLoading] = useState(false);
   
   // Pending requests (outgoing) state
@@ -220,29 +217,14 @@ export default function MyPostsOriginal() {
   }, [currentUser, updateDataIfChanged, pendingRequests]);
 
   const loadMyRides = useCallback(async (userId: string, forceUpdate = false) => {
-    console.log('🔄 [LOAD_MY_RIDES] Starting to load rides', {
-      userId,
-      forceUpdate,
-      isMounted: isMountedRef.current,
-      currentUser: currentUser?.email
-    });
-    
-    if (!userId || !isMountedRef.current) {
-      console.log('❌ [LOAD_MY_RIDES] Aborting - missing userId or component unmounted', {
-        userId,
-        isMounted: isMountedRef.current
-      });
-      return;
-    }
+    if (!userId || !isMountedRef.current) return;
 
     if (!forceUpdate) {
-      console.log('🔄 [LOAD_MY_RIDES] Setting loading to true');
       setLoading(true);
     }
     setError(null);
     
     try {
-      console.log('🌐 [LOAD_MY_RIDES] Making API request to /api/user-rides');
       const response = await fetch('/api/user-rides', {
         headers: {
           'x-user-id': userId,
@@ -250,41 +232,18 @@ export default function MyPostsOriginal() {
         }
       });
       
-      console.log('📡 [LOAD_MY_RIDES] API response status:', response.status, response.statusText);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ [LOAD_MY_RIDES] API request failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorText
-        });
         throw new Error(`Failed to fetch rides: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('✅ [LOAD_MY_RIDES] Successfully loaded rides data:', {
-        dataLength: data?.length || 0,
-        data: data?.slice(0, 2) // Log first 2 items for debugging
-      });
-      
-      const hasChanges = updateDataIfChanged(setMyRides, data || [], myRides);
-      console.log('🔄 [LOAD_MY_RIDES] Data update result:', {
-        hasChanges,
-        newDataLength: data?.length || 0,
-        currentDataLength: myRides.length
-      });
+      updateDataIfChanged(setMyRides, data || [], myRides);
     } catch (error) {
-      console.error('❌ [LOAD_MY_RIDES] Error loading rides:', {
-        error: error instanceof Error ? error.message : error,
-        stack: error instanceof Error ? error.stack : undefined,
-        userId,
-        currentUserEmail: currentUser?.email
-      });
+      console.error('Error loading rides:', error);
       if (!forceUpdate) setError('Failed to load rides. Please try again.');
     } finally {
       if (!forceUpdate) {
-        console.log('✅ [LOAD_MY_RIDES] Setting loading to false');
         setLoading(false);
       }
     }
@@ -350,25 +309,14 @@ export default function MyPostsOriginal() {
   }, []);
 
   useEffect(() => {
-    console.log('🔄 [MY_POSTS] Data loading useEffect triggered', {
-      currentUser: currentUser?.email || 'null',
-      currentUserUid: currentUser?.uid || 'null',
-      isMounted: isMountedRef.current
-    });
-    
     if (currentUser) {
-      console.log('✅ [MY_POSTS] Current user exists, starting data load');
       // Use a flag to prevent multiple calls
       let hasLoaded = false;
       
       const loadData = async () => {
-        if (hasLoaded) {
-          console.log('⚠️ [MY_POSTS] Data already loaded, skipping');
-          return;
-        }
+        if (hasLoaded) return;
         hasLoaded = true;
         
-        console.log('🔄 [MY_POSTS] Starting parallel data loading...');
         try {
           await Promise.all([
             loadMyRides(currentUser.uid),
@@ -378,45 +326,46 @@ export default function MyPostsOriginal() {
             loadUserStrikes(),
             loadDriverOffers()
           ]);
-          console.log('✅ [MY_POSTS] All data loaded successfully');
         } catch (error) {
-          console.error('❌ [MY_POSTS] Error loading data:', error);
+          console.error('Error loading data:', error);
         }
       };
       
       loadData();
-    } else {
-      console.log('❌ [MY_POSTS] No current user, skipping data load');
     }
-  }, [currentUser?.uid, loadMyRides, loadRideRequests, loadPendingRequests, loadApprovedRides]); // Added dependencies
+  }, [currentUser?.uid]); // Simplified dependencies to prevent constant re-renders
 
-  // Add real-time polling for ride status updates (reduced frequency)
+  // Add real-time polling for ride status updates (only when needed)
   useEffect(() => {
     if (!currentUser) return;
 
     const pollForRideUpdates = setInterval(async () => {
       try {
-        // Only refresh if we have rides that might need updates
-        const hasActiveRides = myRides.some(ride => 
+        // Get current state to check for active rides without triggering re-renders
+        const currentMyRides = myRides;
+        const currentApprovedRides = approvedRides;
+        
+        const hasActiveRides = currentMyRides.some(ride => 
           ride.status === 'started' || ride.status === 'in_progress'
-        ) || approvedRides.some(ride => 
+        ) || currentApprovedRides.some(ride => 
           ride.status === 'started' || ride.status === 'in_progress'
         );
         
         if (hasActiveRides) {
+          // Only update ride requests and approved rides - skip my rides to reduce flashing
           await Promise.all([
-            loadMyRides(currentUser.uid, true), // Force reload only if needed
+            loadRideRequests(),
             loadApprovedRides()
           ]);
         }
       } catch (error) {
-        console.error('Error polling for ride updates:', error);
+        console.error('Error during polling:', error);
       }
-    }, 15000); // Poll every 15 seconds instead of 5
+    }, 30000); // Poll every 30 seconds to reduce flashing
 
     // Cleanup interval on unmount
     return () => clearInterval(pollForRideUpdates);
-  }, [currentUser?.uid, myRides, approvedRides]);
+  }, [currentUser?.uid]); // Only depend on user ID to prevent constant recreation
 
   // Handle ride request approval/rejection
   const handleRequestAction = async (requestId: number, action: 'approve' | 'reject') => {
@@ -1193,8 +1142,7 @@ export default function MyPostsOriginal() {
               const pendingCount = rideRequests.filter(req => req.status === 'pending').length;
               const pendingOffers = driverOffers.filter(offer => offer.status === 'pending').length;
               const totalPending = pendingCount + pendingOffers;
-              console.log('Ride requests with statuses:', rideRequests.map(req => ({ id: req.id, status: req.status })));
-              console.log('Pending requests count:', pendingCount, 'Driver offers:', pendingOffers, 'Total:', totalPending);
+
               return totalPending > 0 ? (
                 <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg ring-2 ring-yellow-300">
                   {totalPending}

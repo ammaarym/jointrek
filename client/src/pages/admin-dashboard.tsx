@@ -22,6 +22,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  AlertTriangle,
   Database,
   Edit,
   Trash2,
@@ -41,6 +42,29 @@ interface DashboardStats {
   totalPayments: number;
   totalRevenue: number;
   platformFees: number;
+}
+
+interface Complaint {
+  id: number;
+  reporterId: string;
+  rideId: number;
+  subject: string;
+  description: string;
+  contactEmail: string;
+  status: string;
+  priority: string;
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reporterName: string;
+  reporterEmail: string;
+  reporterPhone: string | null;
+  rideOrigin: string;
+  rideDestination: string;
+  rideDepartureTime: string;
+  ridePrice: string;
+  driverName: string;
+  driverEmail: string;
 }
 
 interface User {
@@ -559,6 +583,7 @@ export default function AdminDashboard() {
   const [rides, setRides] = useState<Ride[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [approvedRides, setApprovedRides] = useState<any[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -581,12 +606,13 @@ export default function AdminDashboard() {
       };
 
       // Fetch dashboard stats
-      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes] = await Promise.all([
+      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes, complaintsRes] = await Promise.all([
         fetch('/api/admin/stats', { headers }),
         fetch('/api/admin/users', { headers }),
         fetch('/api/admin/rides', { headers }),
         fetch('/api/admin/requests', { headers }),
-        fetch('/api/admin/approved-rides', { headers })
+        fetch('/api/admin/approved-rides', { headers }),
+        fetch('/api/admin/complaints', { headers })
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -594,6 +620,7 @@ export default function AdminDashboard() {
       if (ridesRes.ok) setRides(await ridesRes.json());
       if (requestsRes.ok) setRequests(await requestsRes.json());
       if (approvedRidesRes.ok) setApprovedRides(await approvedRidesRes.json());
+      if (complaintsRes.ok) setComplaints(await complaintsRes.json());
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -747,9 +774,10 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="requests">Ride Requests</TabsTrigger>
             <TabsTrigger value="approved">Approved Rides</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="rides">All Rides</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>

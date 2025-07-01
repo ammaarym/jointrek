@@ -14,8 +14,9 @@ export default function Login() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [redirectResultChecked, setRedirectResultChecked] = useState(false);
 
-  // Check for redirect result on login page load
+  // Check for redirect result on login page load - MUST complete before any redirects
   useEffect(() => {
     console.log("🔍 Checking redirect result on load...");
     getRedirectResult(auth)
@@ -27,9 +28,11 @@ export default function Login() {
           console.log("ℹ️ No redirect result found");
         }
         console.log("✅ Finished checking redirect result");
+        setRedirectResultChecked(true); // Mark as complete
       })
       .catch((error) => {
         console.error("❌ Error handling redirect:", error);
+        setRedirectResultChecked(true); // Still mark as complete even on error
       });
   }, []);
 
@@ -61,7 +64,7 @@ export default function Login() {
       return;
     }
 
-    if (!loading && currentUser && !hasRedirected && !isMobile) {
+    if (!loading && currentUser && !hasRedirected && !isMobile && redirectResultChecked) {
       console.log("🎯 [LOGIN_REDIRECT] Desktop user - executing redirect");
       setHasRedirected(true);
       
@@ -70,7 +73,7 @@ export default function Login() {
         window.location.replace('/profile');
       }, 100);
     }
-  }, [currentUser, loading, hasRedirected, isMobile]);
+  }, [currentUser, loading, hasRedirected, isMobile, redirectResultChecked]);
 
   // Show loading while authentication state is being determined
   if (loading) {

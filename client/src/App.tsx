@@ -23,7 +23,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDashboardEnhanced from "@/pages/admin-dashboard-enhanced";
 import AdminQuick from "@/pages/admin-quick";
 
-import MyRidesClean from "@/pages/my-rides-clean";
+import MyPostsOriginal from "@/pages/my-posts-original";
 import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";

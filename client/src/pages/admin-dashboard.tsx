@@ -926,6 +926,142 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Complaints Tab */}
+          <TabsContent value="complaints">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Customer Complaints
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {complaints.map((complaint) => (
+                    <div key={complaint.id} className="border border-stone-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge className={
+                            complaint.status === 'open' 
+                              ? 'bg-red-100 text-red-800 border-red-200' 
+                              : complaint.status === 'in_progress'
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                              : 'bg-green-100 text-green-800 border-green-200'
+                          }>
+                            {complaint.status.toUpperCase().replace('_', ' ')}
+                          </Badge>
+                          <Badge className={
+                            complaint.priority === 'high' 
+                              ? 'bg-red-100 text-red-800 border-red-200' 
+                              : complaint.priority === 'medium'
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                              : 'bg-blue-100 text-blue-800 border-blue-200'
+                          }>
+                            {complaint.priority.toUpperCase()} PRIORITY
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-stone-500">
+                          {formatDate(complaint.createdAt)}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-1">Reporter</h4>
+                          <div className="text-sm text-stone-900">{complaint.reporterName}</div>
+                          <div className="text-xs text-stone-600">{complaint.reporterEmail}</div>
+                          {complaint.reporterPhone && (
+                            <div className="text-xs text-stone-600">{complaint.reporterPhone}</div>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-stone-700 mb-1">Ride Details</h4>
+                          <div className="text-sm text-stone-900">
+                            {complaint.rideOrigin} → {complaint.rideDestination}
+                          </div>
+                          <div className="text-xs text-stone-600">
+                            {formatDate(complaint.rideDepartureTime)} • ${complaint.ridePrice}
+                          </div>
+                          <div className="text-xs text-stone-600">
+                            Driver: {complaint.driverName}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <h4 className="text-sm font-medium text-stone-700 mb-1">Subject</h4>
+                        <div className="text-sm text-stone-900">{complaint.subject}</div>
+                      </div>
+
+                      <div className="mb-3">
+                        <h4 className="text-sm font-medium text-stone-700 mb-1">Description</h4>
+                        <div className="text-sm text-stone-900 bg-stone-50 p-3 rounded">
+                          {complaint.description}
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <h4 className="text-sm font-medium text-stone-700 mb-1">Contact Email</h4>
+                        <div className="text-sm text-stone-900">{complaint.contactEmail}</div>
+                      </div>
+
+                      {complaint.adminNotes && (
+                        <div className="mb-3">
+                          <h4 className="text-sm font-medium text-stone-700 mb-1">Admin Notes</h4>
+                          <div className="text-sm text-stone-900 bg-blue-50 p-3 rounded border border-blue-200">
+                            {complaint.adminNotes}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-4">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Update Status
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Update Complaint Status</DialogTitle>
+                            </DialogHeader>
+                            <ComplaintStatusForm
+                              complaint={complaint}
+                              onStatusUpdated={fetchDashboardData}
+                            />
+                          </DialogContent>
+                        </Dialog>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Update Priority
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Update Complaint Priority</DialogTitle>
+                            </DialogHeader>
+                            <ComplaintPriorityForm
+                              complaint={complaint}
+                              onPriorityUpdated={fetchDashboardData}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+                  ))}
+                  {complaints.length === 0 && (
+                    <div className="text-center py-8 text-stone-600">
+                      No complaints found
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Payments Tab */}
           <TabsContent value="payments">
             <Card>

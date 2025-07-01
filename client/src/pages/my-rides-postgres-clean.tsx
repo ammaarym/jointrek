@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth-fixed';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,10 +35,7 @@ export default function MyRidesPostgres() {
   const [rideToDelete, setRideToDelete] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [rideToEdit, setRideToEdit] = useState<any>(null);
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
-  const [rideToReview, setRideToReview] = useState<any>(null);
-  const [rating, setRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
+
   const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const [rideToComplete, setRideToComplete] = useState<any>(null);
   const [verificationCode, setVerificationCode] = useState<string>('');
@@ -507,9 +504,11 @@ export default function MyRidesPostgres() {
           loadMyRides(currentUser.uid);
         }
         
-        // Show review modal
-        setRideToReview(rideToComplete);
-        setReviewModalOpen(true);
+        // Ride completed successfully - no review system needed
+        toast({
+          title: "Ride Completed!",
+          description: "Thank you for using Trek!",
+        });
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to mark ride as complete');
@@ -682,61 +681,7 @@ export default function MyRidesPostgres() {
     }
   };
 
-  const handleSubmitReview = async () => {
-    if (!rideToReview || rating === 0 || !currentUser) {
-      toast({
-        title: "Invalid Review",
-        description: "Please provide a rating to submit your review.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Submit review to backend
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': currentUser?.uid || '',
-          'x-user-email': currentUser?.email || '',
-          'x-user-name': currentUser?.displayName || '',
-        },
-        body: JSON.stringify({
-          rideId: rideToReview?.id,
-          rating,
-          revieweeId: rideToReview?.driverId,
-          reviewType: 'driver', // Always rating the driver when passenger completes a ride
-        }),
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Review Submitted",
-          description: "Thank you for your feedback!",
-        });
-      } else {
-        throw new Error('Failed to submit review');
-      }
-      
-      setReviewModalOpen(false);
-      setRating(0);
-      
-      // Update the ride status immediately in the state
-      if (rideToReview) {
-        setCompletedRides(prev => new Set(Array.from(prev).concat(rideToReview.id)));
-      }
-      
-      setRideToReview(null);
-    } catch (error: any) {
-      console.error('Error submitting review:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit review. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  // Review system removed - no ratings after ride completion
 
   // Start ride verification handlers
   const handlePassengerStartCode = async ({ id }: { id: number }) => {
@@ -2097,45 +2042,7 @@ export default function MyRidesPostgres() {
         </DialogContent>
       </Dialog>
       
-      {/* Review Modal */}
-      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rate Your Experience</DialogTitle>
-            <DialogDescription>
-              How was your ride? Your feedback helps improve the service.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-8 h-8 cursor-pointer transition-colors ${
-                    star <= (hoveredRating || rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                />
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              Click a star to rate your experience
-            </p>
-          </div>
-          <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => setReviewModalOpen(false)} className="flex-1">
-              Skip
-            </Button>
-            <Button onClick={handleSubmitReview} disabled={rating === 0} className="flex-1">
-              Submit Review
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Review system removed */}
 
       {/* Ride Cancellation Dialog with Penalty Warning */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

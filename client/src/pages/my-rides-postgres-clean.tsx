@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiRequest } from '@/lib/queryClient';
 
 
 // Helper function to capitalize car types
@@ -154,21 +155,17 @@ export default function MyRidesPostgres() {
       return;
     }
     
+    if (!currentUser?.uid) {
+      setError('Authentication required');
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/user-rides', {
-        headers: {
-          'x-user-id': userId,
-          'x-user-email': currentUser?.email || '',
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      
+      const response = await apiRequest('GET', '/api/user-rides');
       const data = await response.json();
       setMyRides(data || []);
     } catch (error) {

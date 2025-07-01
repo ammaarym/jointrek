@@ -43,9 +43,34 @@ export const getAllComplaints = async (req: Request, res: Response) => {
     
     const complaints = await storage.getAllComplaints();
     
-    console.log(`Found ${complaints.length} complaints`);
+    // For each complaint, fetch passenger information if it's related to a ride
+    const complaintsWithPassengers = await Promise.all(
+      complaints.map(async (complaint) => {
+        if (complaint.rideId) {
+          try {
+            const passengers = await storage.getComplaintsWithPassengers(complaint.rideId);
+            return {
+              ...complaint,
+              passengers: passengers.filter(p => p.requestStatus === 'approved') // Only approved passengers
+            };
+          } catch (error) {
+            console.error(`Error fetching passengers for ride ${complaint.rideId}:`, error);
+            return {
+              ...complaint,
+              passengers: []
+            };
+          }
+        }
+        return {
+          ...complaint,
+          passengers: []
+        };
+      })
+    );
     
-    res.json(complaints);
+    console.log(`Found ${complaints.length} complaints with passenger data`);
+    
+    res.json(complaintsWithPassengers);
   } catch (error) {
     console.error('Error fetching complaints:', error);
     res.status(500).json({ 

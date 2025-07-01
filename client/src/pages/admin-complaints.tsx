@@ -9,6 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
+interface Passenger {
+  passengerId: string;
+  passengerName: string;
+  passengerEmail: string;
+  passengerPhone: string;
+  passengerInstagram: string;
+  passengerSnapchat: string;
+  requestStatus: string;
+}
+
 interface Complaint {
   id: number;
   reporterId: string;
@@ -55,6 +65,7 @@ interface Complaint {
   driverPhone: string;
   driverInstagram: string;
   driverSnapchat: string;
+  passengers: Passenger[];
 }
 
 export default function AdminComplaints() {
@@ -358,6 +369,42 @@ export default function AdminComplaints() {
                     </div>
                   </div>
                 </div>
+
+                {/* Passengers Information - Only show for driver complaints */}
+                {complaint.passengers && complaint.passengers.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">Passengers on This Ride</h4>
+                    <div className="space-y-3">
+                      {complaint.passengers.map((passenger, index) => (
+                        <div key={passenger.passengerId} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium">{passenger.passengerName}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-blue-600" />
+                              {passenger.passengerEmail}
+                            </div>
+                            {passenger.passengerPhone && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4 text-blue-600" />
+                                {passenger.passengerPhone}
+                              </div>
+                            )}
+                            {(passenger.passengerInstagram || passenger.passengerSnapchat) && (
+                              <div className="text-xs text-blue-700">
+                                {passenger.passengerInstagram && `Instagram: @${passenger.passengerInstagram}`}
+                                {passenger.passengerInstagram && passenger.passengerSnapchat && ' • '}
+                                {passenger.passengerSnapchat && `Snapchat: @${passenger.passengerSnapchat}`}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Admin Notes */}
                 {complaint.adminNotes && (

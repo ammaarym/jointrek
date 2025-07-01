@@ -285,14 +285,50 @@ export default function MyRidesPostgres() {
 
   useEffect(() => {
     if (currentUser) {
-      loadMyRides(currentUser.uid);
-      loadRideRequests();
-      loadPendingRequests();
-      loadApprovedRides();
-      loadUserStrikes();
-      loadDriverOffers();
+      // Use a flag to prevent multiple calls
+      let hasLoaded = false;
+      
+      const loadData = async () => {
+        if (hasLoaded) return;
+        hasLoaded = true;
+        
+        try {
+          await Promise.all([
+            loadMyRides(currentUser.uid),
+            loadRideRequests(),
+            loadPendingRequests(),
+            loadApprovedRides(),
+            loadUserStrikes(),
+            loadDriverOffers()
+          ]);
+        } catch (error) {
+          console.error('Error loading data:', error);
+        }
+      };
+      
+      loadData();
     }
-  }, [currentUser]);
+  }, [currentUser?.uid]); // Only depend on UID to prevent unnecessary re-runs
+
+  // Add real-time polling for ride status updates
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const pollForRideUpdates = setInterval(async () => {
+      try {
+        // Refresh all ride data to catch status changes
+        await Promise.all([
+          loadMyRides(currentUser.uid, true), // Force reload
+          loadApprovedRides()
+        ]);
+      } catch (error) {
+        console.error('Error polling for ride updates:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(pollForRideUpdates);
+  }, [currentUser?.uid]);
 
   // Handle ride request approval/rejection
   const handleRequestAction = async (requestId: number, action: 'approve' | 'reject') => {
@@ -1198,7 +1234,7 @@ export default function MyRidesPostgres() {
                                       COMPLETED
                                     </span>
                                   ) : ride.isStarted ? (
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium text-white blink-red">
                                       IN PROGRESS
                                     </span>
                                   ) : (
@@ -1256,7 +1292,7 @@ export default function MyRidesPostgres() {
                             ) : ride.isStarted ? (
                               // Ride has started - show completion flow
                               <div className="flex flex-col gap-2">
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                <span className="px-3 py-1 rounded-full text-xs font-medium text-white blink-red">
                                   IN PROGRESS
                                 </span>
                                 <Button
@@ -1361,7 +1397,7 @@ export default function MyRidesPostgres() {
                                       COMPLETED
                                     </span>
                                   ) : ride.isStarted ? (
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                    <span className="px-3 py-1 rounded-full text-xs font-medium text-white blink-red">
                                       IN PROGRESS
                                     </span>
                                   ) : (

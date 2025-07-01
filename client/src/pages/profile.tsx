@@ -700,6 +700,7 @@ export default function Profile() {
         setPhone('');
         setInstagram('');
         setSnapchat('');
+        setInterestTags([]);
         setIsEditing(true);
         setDataLoaded(true);
       } else {
@@ -734,6 +735,7 @@ export default function Profile() {
           phone,
           instagram,
           snapchat,
+          interestTags,
         }),
       });
 
@@ -1128,6 +1130,24 @@ export default function Profile() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="interest-tags" className="flex items-center gap-2 mb-2">
+                  <Star className="text-primary" />
+                  Interest Tags (Optional)
+                </Label>
+                <MultiSelect
+                  options={INTEREST_TAGS.map(tag => ({ value: tag, label: tag }))}
+                  value={interestTags}
+                  onChange={setInterestTags}
+                  placeholder="Select up to 5 interests..."
+                  maxSelections={MAX_INTEREST_TAGS}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Help other students know what you're like! Choose up to {MAX_INTEREST_TAGS} tags.
+                </p>
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <Button 
                   onClick={handleSave} 
@@ -1201,6 +1221,25 @@ export default function Profile() {
                   <div>
                     <p className="font-medium text-gray-900">Snapchat</p>
                     <p className="text-gray-600">{snapchat}</p>
+                  </div>
+                </div>
+              )}
+
+              {interestTags && interestTags.length > 0 && (
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                  <Star className="text-primary w-5 h-5 mt-1" />
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 mb-2">Interest Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {interestTags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

@@ -301,7 +301,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>
           <Route path="/my-rides">
-            {(params) => <ProtectedRoute component={MyRidesClean} path="/my-rides" requiresContactInfo={true} />}
+            {(params) => <ProtectedRoute component={MyPostsOriginal} path="/my-rides" requiresContactInfo={true} />}
           </Route>
           <Route path="/help">
             {(params) => <ProtectedRoute component={Help} path="/help" />}

@@ -1372,3 +1372,143 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+// Complaint Status Form Component
+function ComplaintStatusForm({ complaint, onStatusUpdated }: { complaint: Complaint; onStatusUpdated: () => void }) {
+  const { toast } = useToast();
+  const [status, setStatus] = useState(complaint.status);
+  const [adminNotes, setAdminNotes] = useState(complaint.adminNotes || '');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/complaints/${complaint.id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status, adminNotes })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Status Updated",
+          description: "Complaint status has been updated successfully."
+        });
+        onStatusUpdated();
+      } else {
+        throw new Error('Failed to update status');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update complaint status.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Status</label>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="open">Open</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium">Admin Notes</label>
+        <Textarea
+          value={adminNotes}
+          onChange={(e) => setAdminNotes(e.target.value)}
+          placeholder="Add notes about the investigation or resolution..."
+          rows={4}
+        />
+      </div>
+
+      <Button type="submit" disabled={loading}>
+        {loading ? 'Updating...' : 'Update Status'}
+      </Button>
+    </form>
+  );
+}
+
+// Complaint Priority Form Component
+function ComplaintPriorityForm({ complaint, onPriorityUpdated }: { complaint: Complaint; onPriorityUpdated: () => void }) {
+  const { toast } = useToast();
+  const [priority, setPriority] = useState(complaint.priority);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const adminToken = sessionStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/complaints/${complaint.id}/priority`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ priority })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Priority Updated",
+          description: "Complaint priority has been updated successfully."
+        });
+        onPriorityUpdated();
+      } else {
+        throw new Error('Failed to update priority');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update complaint priority.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Priority Level</label>
+        <Select value={priority} onValueChange={setPriority}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low Priority</SelectItem>
+            <SelectItem value="medium">Medium Priority</SelectItem>
+            <SelectItem value="high">High Priority</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button type="submit" disabled={loading}>
+        {loading ? 'Updating...' : 'Update Priority'}
+      </Button>
+    </form>
+  );
+}

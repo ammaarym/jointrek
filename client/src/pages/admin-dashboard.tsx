@@ -605,24 +605,68 @@ export default function AdminDashboard() {
         'Content-Type': 'application/json'
       };
 
-      console.log('Starting admin dashboard data fetch...');
+      console.log('🚀 Starting admin dashboard data fetch...');
 
-      // Fetch core dashboard data
-      console.log('Fetching core dashboard data...');
-      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes] = await Promise.all([
-        fetch('/api/admin/stats', { headers }),
-        fetch('/api/admin/users', { headers }),
-        fetch('/api/admin/rides', { headers }),
-        fetch('/api/admin/requests', { headers }),
-        fetch('/api/admin/approved-rides', { headers })
-      ]);
+      // Fetch data independently to avoid Promise.all failures
+      console.log('📊 Fetching dashboard data independently...');
+      
+      console.log('🔍 Fetching stats...');
+      const statsRes = await fetch('/api/admin/stats', { headers });
+      console.log('📊 Stats response:', statsRes.status);
+      
+      console.log('👥 Fetching users...');
+      const usersRes = await fetch('/api/admin/users', { headers });
+      console.log('👥 Users response:', usersRes.status);
+      
+      console.log('🚗 Fetching rides...');
+      const ridesRes = await fetch('/api/admin/rides', { headers });
+      console.log('🚗 Rides response:', ridesRes.status);
+      
+      console.log('📋 Fetching requests...');
+      const requestsRes = await fetch('/api/admin/requests', { headers });
+      console.log('📋 Requests response:', requestsRes.status);
+      
+      let approvedRidesRes;
+      try {
+        console.log('Fetching approved rides...');
+        approvedRidesRes = await fetch('/api/admin/approved-rides', { headers });
+        console.log('Approved rides fetch completed:', approvedRidesRes.status);
+      } catch (error) {
+        console.error('Error fetching approved rides:', error);
+      }
+      
       console.log('Core data fetched successfully');
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (usersRes.ok) setUsers(await usersRes.json());
-      if (ridesRes.ok) setRides(await ridesRes.json());
-      if (requestsRes.ok) setRequests(await requestsRes.json());
-      if (approvedRidesRes.ok) setApprovedRides(await approvedRidesRes.json());
+      console.log('Processing responses...');
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        console.log('Stats loaded:', statsData);
+        setStats(statsData);
+      }
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        console.log('Users loaded:', usersData.length);
+        setUsers(usersData);
+      }
+      if (ridesRes.ok) {
+        const ridesData = await ridesRes.json();
+        console.log('Rides loaded:', ridesData.length);
+        setRides(ridesData);
+      }
+      if (requestsRes.ok) {
+        const requestsData = await requestsRes.json();
+        console.log('Requests loaded:', requestsData.length);
+        setRequests(requestsData);
+      }
+      if (approvedRidesRes && approvedRidesRes.ok) {
+        try {
+          const approvedData = await approvedRidesRes.json();
+          console.log('Approved rides loaded:', approvedData.length);
+          setApprovedRides(approvedData);
+        } catch (error) {
+          console.error('Error parsing approved rides response:', error);
+        }
+      }
 
       // Fetch complaints separately to ensure it doesn't fail silently
       try {

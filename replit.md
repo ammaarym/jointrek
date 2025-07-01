@@ -208,6 +208,7 @@ DATABASE_URL
 - June 30, 2025: Fixed mobile landing page spacing issues - reduced excessive whitespace by adjusting header padding (pt-16 vs pt-24), Coming Soon margins (mb-2 vs mb-8), section padding (py-2 vs py-4), and content spacing throughout for compact mobile layout
 - June 30, 2025: Created comprehensive admin dashboard system - built enhanced admin dashboard with tabbed interface for users/rides/requests/database management, admin quick view page for essential information at a glance, CSV export functionality, detailed user/ride modals, real-time data refresh, and integrated admin dropdown menus in header for easy access to both quick view and full dashboard
 - June 30, 2025: Fixed critical authentication system for ride posting and requesting - resolved Firebase Bearer token authentication in both server API routes and main routes, implemented automatic user creation for new drivers and passengers, fixed schema validation for price field conversion (number to string), and enabled complete ride request flow with proper user verification and database relationships
+- July 1, 2025: Fixed payment method selection UX issue - replaced basic request ride page with enhanced version that shows payment method dropdown when cards exist (even if not set as default), corrected authentication hooks, and ensured proper API endpoint integration for seamless ride request flow
 
 ## User Preferences
 

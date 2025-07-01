@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
-import { useAuth } from "@/hooks/use-auth-new";
+import { useAuth } from "@/hooks/use-auth-fixed";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,16 @@ export default function RequestRideSimplePage() {
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
-  // Fetch ride details
-  const { data: rides, isLoading: ridesLoading } = useQuery({
-    queryKey: ["/api/rides"],
+  // Fetch specific ride details
+  const { data: ride, isLoading: ridesLoading } = useQuery({
+    queryKey: ["/api/rides", rideId],
+    queryFn: async () => {
+      const response = await fetch(`/api/rides/${rideId}`);
+      if (!response.ok) {
+        throw new Error('Ride not found');
+      }
+      return response.json();
+    },
     enabled: !!rideId,
   });
 
@@ -34,8 +41,6 @@ export default function RequestRideSimplePage() {
     queryKey: ["/api/payment-methods"],
     enabled: !!currentUser,
   });
-
-  const ride = (rides as any[])?.find((r: any) => r.id === rideId);
 
   // Confirm ride request mutation (new simplified flow)
   const confirmRequestMutation = useMutation({

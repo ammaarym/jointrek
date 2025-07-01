@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { isSafari, isMobileSafari, setSafariAuthState, getSafariAuthState, clearSafariAuthState, handleSafariRedirect } from '@/lib/safari-auth-fix';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -21,18 +22,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Enhanced authentication state management
+    // Enhanced authentication state management with Safari-specific fixes
     const initializeAuth = async () => {
       console.log('🔥 [AUTH_INIT] Starting authentication initialization');
       setLoading(true);
       
       try {
+        const currentUrl = window.location.href;
+        const safariDetected = isSafari();
+        const mobileSafariDetected = isMobileSafari();
+        
+        console.log('🍎 [SAFARI_DEBUG] Browser detection:', {
+          safari: safariDetected,
+          mobileSafari: mobileSafariDetected,
+          userAgent: navigator.userAgent
+        });
+
+        // Safari-specific: Check session storage for auth state
+        const safariAuthState = getSafariAuthState();
+        if (safariAuthState) {
+          console.log('🍎 [SAFARI_DEBUG] Found Safari auth state:', safariAuthState);
+          
+          // If auth was completed, clear the state
+          if (safariAuthState.state === 'completed') {
+            clearSafariAuthState();
+          }
+        }
+        
+        // Safari-specific: Check if we're returning from OAuth
+        if (safariDetected && handleSafariRedirect(currentUrl)) {
+          console.log('🍎 [SAFARI_DEBUG] OAuth redirect detected, waiting for auth state...');
+        }
+        
         // Check for redirect result first
         console.log('🔍 [MOBILE_DEBUG] Checking for redirect result...');
-        console.log('📊 [MOBILE_DEBUG] Current URL:', window.location.href);
+        console.log('📊 [MOBILE_DEBUG] Current URL:', currentUrl);
         console.log('🔍 [MOBILE_DEBUG] Current session:', document.cookie);
         
-        const result = await getRedirectResult(auth);
+        // Add timeout for Safari redirect result check - longer for Safari
+        const timeoutDuration = safariDetected ? 10000 : 5000;
+        const redirectResultPromise = getRedirectResult(auth);
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), timeoutDuration));
+        
+        const result = await Promise.race([redirectResultPromise, timeoutPromise]) as any;
         
         if (result && result.user) {
           console.log('✅ [MOBILE_DEBUG] Returned from Google, checking auth state...');
@@ -138,14 +170,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       pathname: window.location.pathname
     });
     
-    // Detect if this is a mobile device
+    // Detect Safari specifically
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    console.log('📱 [AUTH] Device detection:', { isMobile, userAgent: navigator.userAgent });
+    console.log('🍎 [SAFARI_DEBUG] Browser detection:', { isSafari, isMobile, userAgent: navigator.userAgent });
     
     try {
-      if (isMobile) {
-        // Use redirect for mobile devices
-        console.log('📱 [AUTH] Mobile device detected, using redirect authentication');
+      if (isMobile || isSafari) {
+        // Safari/Mobile specific handling - set session storage flag
+        setSafariAuthState('pending', {
+          timestamp: Date.now(),
+          provider: 'google',
+          returnUrl: window.location.pathname
+        });
+        console.log('🍎 [SAFARI_DEBUG] Set auth pending state');
+        
+        // Use redirect for mobile devices and Safari
+        console.log('📱 [AUTH] Mobile/Safari device detected, using redirect authentication');
         console.log('🔄 [AUTH] Calling signInWithRedirect...');
         await signInWithRedirect(auth, provider);
         console.log('✅ [AUTH] signInWithRedirect completed (redirect initiated)');

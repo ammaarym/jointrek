@@ -217,6 +217,8 @@ DATABASE_URL
 - July 1, 2025: Fixed authentication unauthorized domain error - added auth/unauthorized-domain to fallback conditions so popup authentication automatically falls back to redirect when domain isn't authorized in Firebase, resolving login issues in Replit deployment environment
 - July 1, 2025: Enhanced complaint system availability - Report Issue button now appears for both passengers and drivers at all stages once rides are approved (not started, started, and completed), enabling comprehensive issue reporting throughout the entire ride lifecycle
 - July 1, 2025: Updated SMS message formatting and links - all SMS notifications now display names in "First Last" format instead of "Last, First", and redirect users to jointrek.com/my-rides instead of jointrek.replit.app for consistent branding
+- July 1, 2025: Completed admin dashboard complaints management system - added comprehensive complaints tab between requests and database sections with color-coded status/priority badges, status and priority update forms, detailed complaint information display including reporter details and ride information, and integrated complaints data fetching with existing admin API
+- July 1, 2025: Database cleanup and branding improvements - removed all test/fake users (Ashley Brown, David Miller, Jessica Taylor, Ryan Anderson, Sarah Johnson, Emily Davis, James Wilson, Mike Thompson) and their associated ride data, cleaned up mock ride entries, updated website title to "Trek" and added orange "T" favicon for consistent branding across browser tabs
 
 ## User Preferences
 

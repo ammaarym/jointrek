@@ -11,6 +11,7 @@ import {
   userStats,
   notifications,
   driverOffers,
+  complaints,
   type Ride,
   type InsertRide,
   type User,
@@ -31,6 +32,8 @@ import {
   type InsertUserStats,
   type DriverOffer,
   type InsertDriverOffer,
+  type Complaint,
+  type InsertComplaint,
   insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
@@ -1386,6 +1389,179 @@ export class PostgresStorage implements IStorage {
       .orderBy(desc(driverOffers.createdAt));
 
     return result;
+  }
+
+  // Complaint methods
+  async createComplaint(complaintData: InsertComplaint): Promise<Complaint> {
+    const [complaint] = await db.insert(complaints).values(complaintData).returning();
+    return complaint;
+  }
+
+  async getAllComplaints(): Promise<any[]> {
+    // Get all complaints with full ride and user details
+    const results = await db
+      .select({
+        id: complaints.id,
+        reporterId: complaints.reporterId,
+        rideId: complaints.rideId,
+        subject: complaints.subject,
+        description: complaints.description,
+        contactEmail: complaints.contactEmail,
+        status: complaints.status,
+        priority: complaints.priority,
+        adminNotes: complaints.adminNotes,
+        createdAt: complaints.createdAt,
+        updatedAt: complaints.updatedAt,
+        // Reporter details
+        reporterName: users.displayName,
+        reporterEmail: users.email,
+        reporterPhone: users.phone,
+        reporterInstagram: users.instagram,
+        reporterSnapchat: users.snapchat,
+        // Ride details
+        rideOrigin: rides.origin,
+        rideOriginArea: rides.originArea,
+        rideDestination: rides.destination,
+        rideDestinationArea: rides.destinationArea,
+        rideDepartureTime: rides.departureTime,
+        rideArrivalTime: rides.arrivalTime,
+        ridePrice: rides.price,
+        rideSeatsTotal: rides.seatsTotal,
+        rideSeatsLeft: rides.seatsLeft,
+        rideGenderPreference: rides.genderPreference,
+        rideCarMake: rides.carMake,
+        rideCarModel: rides.carModel,
+        rideCarYear: rides.carYear,
+        rideNotes: rides.notes,
+        rideBaggageCheckIn: rides.baggageCheckIn,
+        rideBaggagePersonal: rides.baggagePersonal,
+        rideIsStarted: rides.isStarted,
+        rideStartedAt: rides.startedAt,
+        rideIsCompleted: rides.isCompleted,
+        rideIsCancelled: rides.isCancelled,
+        rideCancelledBy: rides.cancelledBy,
+        rideCancelledAt: rides.cancelledAt,
+        rideCancellationReason: rides.cancellationReason,
+        // Driver details
+        driverId: rides.driverId,
+        driverName: sql<string>`driver_users.display_name`,
+        driverEmail: sql<string>`driver_users.email`,
+        driverPhone: sql<string>`driver_users.phone`,
+        driverInstagram: sql<string>`driver_users.instagram`,
+        driverSnapchat: sql<string>`driver_users.snapchat`
+      })
+      .from(complaints)
+      .leftJoin(users, eq(complaints.reporterId, users.firebaseUid))
+      .leftJoin(rides, eq(complaints.rideId, rides.id))
+      .leftJoin(sql`users as driver_users`, sql`rides.driver_id = driver_users.firebase_uid`)
+      .orderBy(desc(complaints.createdAt));
+
+    return results;
+  }
+
+  async getComplaintById(id: number): Promise<any | undefined> {
+    const [result] = await db
+      .select({
+        id: complaints.id,
+        reporterId: complaints.reporterId,
+        rideId: complaints.rideId,
+        subject: complaints.subject,
+        description: complaints.description,
+        contactEmail: complaints.contactEmail,
+        status: complaints.status,
+        priority: complaints.priority,
+        adminNotes: complaints.adminNotes,
+        createdAt: complaints.createdAt,
+        updatedAt: complaints.updatedAt,
+        // Reporter details
+        reporterName: users.displayName,
+        reporterEmail: users.email,
+        reporterPhone: users.phone,
+        reporterInstagram: users.instagram,
+        reporterSnapchat: users.snapchat,
+        // Ride details
+        rideOrigin: rides.origin,
+        rideOriginArea: rides.originArea,
+        rideDestination: rides.destination,
+        rideDestinationArea: rides.destinationArea,
+        rideDepartureTime: rides.departureTime,
+        rideArrivalTime: rides.arrivalTime,
+        ridePrice: rides.price,
+        rideSeatsTotal: rides.seatsTotal,
+        rideSeatsLeft: rides.seatsLeft,
+        rideGenderPreference: rides.genderPreference,
+        rideCarMake: rides.carMake,
+        rideCarModel: rides.carModel,
+        rideCarYear: rides.carYear,
+        rideNotes: rides.notes,
+        rideBaggageCheckIn: rides.baggageCheckIn,
+        rideBaggagePersonal: rides.baggagePersonal,
+        rideIsStarted: rides.isStarted,
+        rideStartedAt: rides.startedAt,
+        rideIsCompleted: rides.isCompleted,
+        rideIsCancelled: rides.isCancelled,
+        rideCancelledBy: rides.cancelledBy,
+        rideCancelledAt: rides.cancelledAt,
+        rideCancellationReason: rides.cancellationReason,
+        // Driver details
+        driverId: rides.driverId,
+        driverName: sql<string>`driver_users.display_name`,
+        driverEmail: sql<string>`driver_users.email`,
+        driverPhone: sql<string>`driver_users.phone`,
+        driverInstagram: sql<string>`driver_users.instagram`,
+        driverSnapchat: sql<string>`driver_users.snapchat`
+      })
+      .from(complaints)
+      .leftJoin(users, eq(complaints.reporterId, users.firebaseUid))
+      .leftJoin(rides, eq(complaints.rideId, rides.id))
+      .leftJoin(sql`users as driver_users`, sql`rides.driver_id = driver_users.firebase_uid`)
+      .where(eq(complaints.id, id));
+
+    return result;
+  }
+
+  async updateComplaintStatus(id: number, status: string, adminNotes?: string): Promise<Complaint | undefined> {
+    const updateData: any = { status, updatedAt: new Date() };
+    if (adminNotes !== undefined) {
+      updateData.adminNotes = adminNotes;
+    }
+
+    const [complaint] = await db
+      .update(complaints)
+      .set(updateData)
+      .where(eq(complaints.id, id))
+      .returning();
+    
+    return complaint;
+  }
+
+  async updateComplaintPriority(id: number, priority: string): Promise<Complaint | undefined> {
+    const [complaint] = await db
+      .update(complaints)
+      .set({ priority, updatedAt: new Date() })
+      .where(eq(complaints.id, id))
+      .returning();
+    
+    return complaint;
+  }
+
+  // Get complaints with passenger details for rides
+  async getComplaintsWithPassengers(rideId: number): Promise<any[]> {
+    const passengers = await db
+      .select({
+        passengerId: rideRequests.passengerId,
+        passengerName: users.displayName,
+        passengerEmail: users.email,
+        passengerPhone: users.phone,
+        passengerInstagram: users.instagram,
+        passengerSnapchat: users.snapchat,
+        requestStatus: rideRequests.status
+      })
+      .from(rideRequests)
+      .leftJoin(users, eq(rideRequests.passengerId, users.firebaseUid))
+      .where(eq(rideRequests.rideId, rideId));
+
+    return passengers;
   }
 }
 

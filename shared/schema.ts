@@ -179,6 +179,28 @@ export const insertDriverOfferSchema = createInsertSchema(driverOffers).omit({
   updatedAt: true
 });
 
+// Complaints table schema
+export const complaints = pgTable("complaints", {
+  id: serial("id").primaryKey(),
+  reporterId: text("reporter_id").notNull().references(() => users.firebaseUid),
+  rideId: integer("ride_id").notNull().references(() => rides.id),
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  contactEmail: text("contact_email"), // Optional email for follow-up
+  status: text("status").notNull().default("open"), // open, investigating, resolved, closed
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  adminNotes: text("admin_notes"), // Admin internal notes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Complaints insert schema
+export const insertComplaintSchema = createInsertSchema(complaints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Booking table schema
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
@@ -255,3 +277,6 @@ export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
 
 export type DriverOffer = typeof driverOffers.$inferSelect;
 export type InsertDriverOffer = z.infer<typeof insertDriverOfferSchema>;
+
+export type Complaint = typeof complaints.$inferSelect;
+export type InsertComplaint = z.infer<typeof insertComplaintSchema>;

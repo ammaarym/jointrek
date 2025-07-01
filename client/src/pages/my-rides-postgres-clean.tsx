@@ -119,7 +119,12 @@ export default function MyRidesPostgres() {
   };
 
   // Load user's rides
-  const loadMyRides = async (userId: string) => {
+  const loadMyRides = async (userId: string, forceReload = false) => {
+    // Skip if already loaded and not forcing reload
+    if (myRides.length > 0 && !forceReload && !error) {
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -1508,10 +1513,10 @@ export default function MyRidesPostgres() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => generateVerificationCode({ id: ride.rideId })}
-                                  className="flex items-center gap-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                                  className="flex items-center gap-1 border-green-600 text-green-600 hover:bg-green-50"
                                 >
-                                  <FaKey className="w-4 h-4" />
-                                  Generate Code
+                                  <FaCheck className="w-4 h-4" />
+                                  Complete Ride
                                 </Button>
                               ) : (
                                 // Ride not started yet - show start flow and cancel option for driver

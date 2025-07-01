@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth-fixed';
 import { usePostgresRides } from '../hooks/use-postgres-rides';
+import { useQuery } from '@tanstack/react-query';
 
 import { formatDate } from '../lib/date-utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -155,6 +156,14 @@ export default function FindRidesPostgres() {
 
     }
   };
+
+  // Prefetch payment methods for faster "Request a Trek" button experience
+  const { data: paymentData } = useQuery({
+    queryKey: ["/api/payment-methods"],
+    enabled: !!currentUser,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 15, // Keep in cache for 15 minutes
+  });
 
   // Load all rides and user requests when component mounts
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);

@@ -20,7 +20,7 @@ export default function RequestRidePage() {
 
   const rideId = params?.id ? parseInt(params.id) : null;
 
-  // Fetch specific ride details
+  // Fetch specific ride details with optimized caching
   const { data: ride, isLoading: ridesLoading, error: ridesError } = useQuery({
     queryKey: ["/api/rides", rideId],
     queryFn: async () => {
@@ -31,16 +31,23 @@ export default function RequestRidePage() {
       return response.json();
     },
     enabled: !!rideId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
   });
 
-  // Fetch user's payment methods
+  // Fetch user's payment methods with optimized caching
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
     queryKey: ["/api/payment-methods"],
     enabled: !!currentUser,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 15, // Keep in cache for 15 minutes
   });
 
   const hasPaymentMethod = (paymentData as any)?.paymentMethods?.length > 0;
   const defaultPaymentMethod = (paymentData as any)?.paymentMethods?.find((pm: any) => pm.id === (paymentData as any)?.defaultPaymentMethodId) || (paymentData as any)?.paymentMethods?.[0];
+  
+  // Show loading state for payment methods separately
+  const isPaymentMethodsReady = !paymentLoading;
 
   // Consolidated payment and ride request mutation
   const confirmRideRequestMutation = useMutation({
@@ -82,11 +89,48 @@ export default function RequestRidePage() {
     });
   };
 
-  if (ridesLoading || paymentLoading) {
+  // Show immediate loading for better UX
+  if (ridesLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => setLocation("/find-rides")}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Find Rides
+            </Button>
+            <h1 className="text-3xl font-bold">Request Ride</h1>
+          </div>
+          
+          {/* Skeleton loading */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Loading ride details...
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="animate-pulse">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

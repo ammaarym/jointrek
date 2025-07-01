@@ -270,7 +270,18 @@ export default function RequestRidePage() {
               </p>
             </div>
 
-            {!hasPaymentMethod && (
+            {paymentLoading && (
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                    Loading Payment Methods...
+                  </h4>
+                </div>
+              </div>
+            )}
+
+            {!paymentLoading && !hasPaymentMethod && (
               <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
                 <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
                   Payment Method Required

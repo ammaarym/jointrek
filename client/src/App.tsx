@@ -7,7 +7,7 @@ import { ErrorBoundary } from "@/lib/error-boundary";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Header from "@/components/header";
-import Footer from "@/components/footer";
+
 import Home from "@/pages/home-enhanced-fixed";
 import Login from "@/pages/login";
 import AuthTab from "@/pages/auth-tab";
@@ -325,7 +325,6 @@ function AppRoutes() {
           <Route component={NotFound} />
         </Switch>
       </main>
-      <Footer />
       <Toaster />
     </div>
   );

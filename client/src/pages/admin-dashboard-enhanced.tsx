@@ -217,6 +217,15 @@ export default function AdminDashboardEnhanced() {
         </div>
         <div className="flex gap-2">
           <Button 
+            onClick={() => setLocation('/admin-complaints')}
+            variant="outline"
+            size="sm"
+            className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Complaints
+          </Button>
+          <Button 
             onClick={refreshData} 
             disabled={refreshing}
             variant="outline"

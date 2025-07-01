@@ -188,6 +188,12 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                           Admin Dashboard
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin-complaints" className="w-full">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Complaints
+                        </Link>
+                      </DropdownMenuItem>
                     </>
                   )}
                 </DropdownMenuContent>
@@ -216,6 +222,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link href="/admin-dashboard" className="w-full">
                       Full Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-complaints" className="w-full">
+                      Complaints
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

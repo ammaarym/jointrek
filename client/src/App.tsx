@@ -22,6 +22,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDashboardEnhanced from "@/pages/admin-dashboard-enhanced";
 import AdminQuick from "@/pages/admin-quick";
+import AdminComplaints from "@/pages/admin-complaints";
 
 import MyPostsOriginal from "@/pages/my-posts-original";
 import Profile from "@/pages/profile";
@@ -321,6 +322,7 @@ function AppRoutes() {
           <Route path="/admin-login" component={AdminLogin} />
           <Route path="/admin-dashboard" component={AdminDashboardEnhanced} />
           <Route path="/admin-quick" component={AdminQuick} />
+          <Route path="/admin-complaints" component={AdminComplaints} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>

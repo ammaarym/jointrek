@@ -587,19 +587,29 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔄 ADMIN DASHBOARD: useEffect triggered');
+    
     // Check admin authentication
     const adminToken = sessionStorage.getItem('adminToken');
+    console.log('🔑 Admin token check:', adminToken ? 'Found' : 'Missing');
+    
     if (!adminToken) {
+      console.log('❌ No admin token, redirecting to login');
       setLocation('/admin-login');
       return;
     }
 
+    console.log('✅ Admin token found, calling fetchDashboardData');
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
+    console.log('🚀 ADMIN DASHBOARD: Starting fetchDashboardData function');
+    
     try {
       const adminToken = sessionStorage.getItem('adminToken');
+      console.log('🔑 ADMIN TOKEN:', adminToken ? 'Found' : 'Missing');
+      
       const headers = {
         'Authorization': `Bearer ${adminToken}`,
         'Content-Type': 'application/json'
@@ -684,13 +694,15 @@ export default function AdminDashboard() {
       }
 
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('🚨 CRITICAL ERROR in fetchDashboardData:', error);
+      console.error('🚨 Error stack trace:', error?.stack || 'No stack trace available');
       toast({
         title: "Error",
         description: "Failed to load dashboard data",
         variant: "destructive",
       });
     } finally {
+      console.log('🏁 fetchDashboardData finally block reached');
       setLoading(false);
     }
   };

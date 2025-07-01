@@ -1,0 +1,26 @@
+🔒 [PROTECTED_ROUTE] Auth check started 
+Object {loading: false, currentUser: "ammaar.mohammed@ufl.edu", requiresContactInfo: false, hasLoadedContactInfo: false, authChecked: false, …}
+🔒 [PROTECTED_ROUTE] User authenticated: ammaar.mohammed@ufl.edu
+🔒 [PROTECTED_ROUTE] No contact info required, setting not loading
+🔒 [PROTECTED_ROUTE] Auth check completed 
+Object {finalCurrentUser: "ammaar.mohammed@ufl.edu", authChecked: true, authStateStable: false, timestamp: "2025-07-01T20:32:50.258Z"}
+🔒 [PROTECTED_ROUTE] Contact info validation 
+Object {requiresContactInfo: false, userContactInfo: "null", hasValidPhone: undefined, isPhoneVerified: false, path: "/profile"}
+🔒 [PROTECTED_ROUTE] All checks passed - rendering component 
+Object {path: "/profile", userEmail: "ammaar.mohammed@ufl.edu"}
+[PROFILE] Showing loading spinner - currentUser: true loading: true dataLoaded: false
+[PROFILE] Loading user profile for: u0Vs0GP05rgrtIW0cJiZQHItw9e2
+[PROFILE] Showing loading spinner - currentUser: true loading: true dataLoaded: false
+✅ Firebase auth persistence set to local storage for Replit compatibility
+✅ Auth state backup stored
+[PROFILE] Showing loading spinner - currentUser: true loading: true dataLoaded: false
+[PROFILE] Profile API response status: 200
+[PROFILE] Loaded user data: 
+Object {id: 1, firebaseUid: "u0Vs0GP05rgrtIW0cJiZQHItw9e2", email: "ammaar.mohammed@ufl.edu", displayName: "Mohammed, Ammaar Y.", photoUrl: "https://lh3.googleusercontent.com/a/ACg8ocL0bwikJR62RFbl19pSieuIlKpXBOoIJLR9f0JmHVV9oOL2UA=s96-c", …}
+[PROFILE] Profile loaded successfully
+[PROFILE] Rendering profile page - loading: false dataLoaded: true currentUser: ammaar.mohammed@ufl.edu
+🔒 [PROTECTED_ROUTE] Contact info validation 
+Object {requiresContactInfo: false, userContactInfo: "null", hasValidPhone: undefined, isPhoneVerified: false, path: "/profile"}
+🔒 [PROTECTED_ROUTE] All checks passed - rendering component 
+Object {path: "/profile", userEmail: "ammaar.mohammed@ufl.edu"}
+[PROFILE] Rendering profile page - loading: false dataLoaded: true currentUser: ammaar.mohammed@ufl.edu

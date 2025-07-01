@@ -1394,15 +1394,18 @@ export default function MyPostsOriginal() {
                               </>
                             )}
                             {ride.isStarted && !ride.isCompleted && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => generateVerificationCode({ id: ride.rideId })}
-                                className="flex items-center gap-1 flex-1"
-                              >
-                                <FaCheck className="w-3 h-3" />
-                                Complete Ride
-                              </Button>
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => generateVerificationCode({ id: ride.rideId })}
+                                  className="flex items-center gap-1 flex-1"
+                                >
+                                  <FaCheck className="w-3 h-3" />
+                                  Complete Ride
+                                </Button>
+                                <ComplaintDialog rideId={ride.rideId} />
+                              </>
                             )}
                             {ride.isCompleted && (
                               <div className="flex items-center gap-1 text-green-600 font-medium">

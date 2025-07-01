@@ -1299,10 +1299,16 @@ export default function MyPostsOriginal() {
                               </>
                             )}
                             {ride.isCompleted && (
-                              <div className="flex items-center gap-1 text-green-600 font-medium">
-                                <FaCheck className="w-4 h-4" />
-                                Completed
-                              </div>
+                              <>
+                                <div className="flex items-center gap-1 text-green-600 font-medium">
+                                  <FaCheck className="w-4 h-4" />
+                                  Completed
+                                </div>
+                                <ComplaintDialog rideId={ride.rideId} />
+                              </>
+                            )}
+                            {!ride.isStarted && !ride.isCompleted && (
+                              <ComplaintDialog rideId={ride.rideId} />
                             )}
                           </CardFooter>
                         </Card>
@@ -1409,6 +1415,7 @@ export default function MyPostsOriginal() {
                                 >
                                   Cancel
                                 </Button>
+                                <ComplaintDialog rideId={ride.rideId} />
                               </>
                             )}
                             {ride.isStarted && !ride.isCompleted && (
@@ -1426,10 +1433,13 @@ export default function MyPostsOriginal() {
                               </>
                             )}
                             {ride.isCompleted && (
-                              <div className="flex items-center gap-1 text-green-600 font-medium">
-                                <FaCheck className="w-4 h-4" />
-                                Completed
-                              </div>
+                              <>
+                                <div className="flex items-center gap-1 text-green-600 font-medium">
+                                  <FaCheck className="w-4 h-4" />
+                                  Completed
+                                </div>
+                                <ComplaintDialog rideId={ride.rideId} />
+                              </>
                             )}
                           </CardFooter>
                         </Card>

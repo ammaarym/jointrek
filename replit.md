@@ -215,6 +215,8 @@ DATABASE_URL
 - July 1, 2025: Optimized "Request a Trek" button performance - implemented TanStack Query caching with 5-15 minute cache times, added progressive loading with skeleton states, prefetched payment methods on Find Rides page, and enhanced payment method loading states to reduce perceived loading time from slow to instant for cached data
 - July 1, 2025: Fixed payment method validation bug - resolved authentication timing issues where users with valid payment methods still saw "Payment Method Required" error by ensuring queries only run when user is fully authenticated and using proper authenticated API requests
 - July 1, 2025: Fixed authentication unauthorized domain error - added auth/unauthorized-domain to fallback conditions so popup authentication automatically falls back to redirect when domain isn't authorized in Firebase, resolving login issues in Replit deployment environment
+- July 1, 2025: Enhanced complaint system availability - Report Issue button now appears for both passengers and drivers at all stages once rides are approved (not started, started, and completed), enabling comprehensive issue reporting throughout the entire ride lifecycle
+- July 1, 2025: Updated SMS message formatting and links - all SMS notifications now display names in "First Last" format instead of "Last, First", and redirect users to jointrek.com/my-rides instead of jointrek.replit.app for consistent branding
 
 ## User Preferences
 

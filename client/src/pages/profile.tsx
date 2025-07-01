@@ -15,6 +15,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { INTEREST_TAGS, MAX_INTEREST_TAGS } from '@shared/constants';
 
 // Helper function to format display name (convert "Last, First" to "First Last")
 const formatDisplayName = (displayName: string | null | undefined): string => {
@@ -262,6 +264,7 @@ export default function Profile() {
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
   const [snapchat, setSnapchat] = useState('');
+  const [interestTags, setInterestTags] = useState<string[]>([]);
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
@@ -651,6 +654,7 @@ export default function Profile() {
         setPhone(userData.phone || '');
         setInstagram(userData.instagram || '');
         setSnapchat(userData.snapchat || '');
+        setInterestTags(userData.interestTags || []);
         // If no phone number exists, start in edit mode
         if (!userData.phone) {
           console.log('[PROFILE] No phone number found, enabling edit mode');

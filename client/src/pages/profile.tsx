@@ -768,6 +768,37 @@ export default function Profile() {
     setIsEditing(false);
   };
 
+  // Auto-save function with debouncing
+  const handleAutoSave = async (phoneValue: string, instagramValue: string, snapchatValue: string, tagsValue: string[]) => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await fetch(`/api/users/firebase/${currentUser.uid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: phoneValue,
+          instagram: instagramValue,
+          snapchat: snapchatValue,
+          interestTags: tagsValue,
+        }),
+      });
+
+      if (response.ok) {
+        // Signal other components that profile was updated
+        localStorage.setItem('profile_updated', Date.now().toString());
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'profile_updated',
+          newValue: Date.now().toString()
+        }));
+      }
+    } catch (error) {
+      console.error('Error auto-saving profile:', error);
+    }
+  };
+
 
 
   const startOnboarding = async () => {
@@ -1077,6 +1108,7 @@ export default function Profile() {
                   placeholder="Phone number (any format)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onBlur={() => handleAutoSave(phone, instagram, snapchat, interestTags)}
                   className="flex-1"
                   required
                   disabled={userData?.phoneVerified}
@@ -1106,13 +1138,16 @@ export default function Profile() {
             {/* Always visible Interest Tags section */}
             <div className="p-4 bg-gray-50 rounded-lg">
               <Label htmlFor="interest-tags" className="flex items-center gap-2 mb-2">
-                <Star className="text-primary" />
-                Interest Tags (Optional)
+                <Star className="text-primary w-4 h-4" />
+                Interest Tags (Required)
               </Label>
               <MultiSelect
                 options={INTEREST_TAGS.map(tag => ({ value: tag, label: tag }))}
                 value={interestTags}
-                onChange={setInterestTags}
+                onChange={(newTags) => {
+                  setInterestTags(newTags);
+                  handleAutoSave(phone, instagram, snapchat, newTags);
+                }}
                 placeholder="Select up to 5 interests..."
                 maxSelections={MAX_INTEREST_TAGS}
                 className="w-full"
@@ -1120,111 +1155,7 @@ export default function Profile() {
               <p className="text-xs text-gray-500 mt-1">
                 Help other students know what you're like! Choose up to {MAX_INTEREST_TAGS} tags.
               </p>
-              <Button 
-                onClick={handleSave} 
-                disabled={loading}
-                className="bg-primary hover:bg-orange-600 text-white w-full mt-2"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </Button>
             </div>
-
-            {/* Optional social media - shown only if filled or in edit mode */}
-            {isEditing ? (
-              <div className="space-y-4 p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium text-gray-900">Social Media (Optional)</h3>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleCancel}
-                    disabled={loading}
-                    size="sm"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-                
-                <div>
-                  <Label htmlFor="instagram" className="flex items-center gap-2 mb-2">
-                    <FaInstagram className="text-primary" />
-                    Instagram Username
-                  </Label>
-                  <Input
-                    id="instagram"
-                    placeholder="Enter your Instagram username"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="snapchat" className="flex items-center gap-2 mb-2">
-                    <RiSnapchatFill className="text-primary" />
-                    Snapchat Username
-                  </Label>
-                  <Input
-                    id="snapchat"
-                    placeholder="Enter your Snapchat username"
-                    value={snapchat}
-                    onChange={(e) => setSnapchat(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-
-                <Button 
-                  onClick={handleSave} 
-                  disabled={loading}
-                  className="bg-primary hover:bg-orange-600 text-white w-full"
-                >
-                  {loading ? 'Saving...' : 'Save Social Media'}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Display existing social media or add button */}
-                {instagram && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                    <FaInstagram className="text-primary w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">Instagram</p>
-                      <p className="text-gray-600">@{instagram}</p>
-                    </div>
-                  </div>
-                )}
-
-                {snapchat && (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                    <RiSnapchatFill className="text-primary w-5 h-5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">Snapchat</p>
-                      <p className="text-gray-600">{snapchat}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Show add/edit social media button */}
-                {(!instagram && !snapchat) ? (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setIsEditing(true)}
-                    className="w-full"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Social Media (Optional)
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setIsEditing(true)}
-                    className="w-full"
-                  >
-                    <FaEdit className="w-4 h-4 mr-2" />
-                    Edit Social Media
-                  </Button>
-                )}
-              </div>
-            )}
 
             {!phone && (
               <div className="text-center py-8">

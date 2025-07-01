@@ -465,7 +465,7 @@ export default function MyRidesPostgres() {
     }
 
     try {
-      const response = await fetch(`/api/rides/${rideToComplete.rideId}/complete`, {
+      const response = await fetch(`/api/rides/${rideToComplete.rideId}/verify-complete`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -28,28 +28,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         // Check for redirect result first
-        console.log('🔍 [AUTH_INIT] Checking for redirect result...');
+        console.log('🔍 [MOBILE_DEBUG] Checking for redirect result...');
+        console.log('📊 [MOBILE_DEBUG] Current URL:', window.location.href);
+        console.log('🔍 [MOBILE_DEBUG] Current session:', document.cookie);
+        
         const result = await getRedirectResult(auth);
         
         if (result && result.user) {
-          console.log('🔄 [AUTH_INIT] Processing redirect result for:', result.user.email);
-          console.log('📊 [AUTH_INIT] Redirect result details:', {
+          console.log('✅ [MOBILE_DEBUG] Returned from Google, checking auth state...');
+          console.log('🔄 [MOBILE_DEBUG] Processing redirect result for:', result.user.email);
+          console.log('📊 [MOBILE_DEBUG] Redirect result details:', {
             uid: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
-            emailVerified: result.user.emailVerified
+            emailVerified: result.user.emailVerified,
+            currentPath: window.location.pathname
           });
           
           if (!isUFEmail(result.user.email || '')) {
-            console.log('❌ [AUTH_INIT] Non-UF email from redirect, signing out');
+            console.log('❌ [MOBILE_DEBUG] Non-UF email from redirect, signing out');
             await firebaseSignOut(auth);
+            console.log('❌ [MOBILE_DEBUG] User not authenticated, showing login again');
             alert('Please use your @ufl.edu email address to sign in.');
             throw new Error('Please use your @ufl.edu email address');
           } else {
-            console.log('✅ [AUTH_INIT] Redirect authentication successful for:', result.user.email);
+            console.log('✅ [MOBILE_DEBUG] Auth successful:', result.user.email);
+            console.log('✅ [MOBILE_DEBUG] UF email validation passed, user should be logged in');
           }
         } else {
-          console.log('ℹ️ [AUTH_INIT] No redirect result found');
+          console.log('ℹ️ [MOBILE_DEBUG] No redirect result found');
+          console.log('🔍 [MOBILE_DEBUG] Current auth.currentUser:', auth.currentUser?.email || 'none');
         }
       } catch (error) {
         console.error('💥 [AUTH_INIT] Redirect result error:', error);
@@ -109,7 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async (): Promise<void> => {
-    console.log('🚀 [AUTH] signInWithGoogle called');
+    console.log('🚀 [MOBILE_DEBUG] Login button clicked');
+    console.log('📱 [MOBILE_DEBUG] Starting Google login redirect');
+    console.log('🔍 [MOBILE_DEBUG] Current session:', document.cookie);
     
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
@@ -121,7 +131,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       'prompt': 'select_account'
     });
     
-    console.log('🔧 [AUTH] Provider configured with UF domain restriction');
+    console.log('🔧 [MOBILE_DEBUG] Provider configured with UF domain restriction');
+    console.log('📊 [MOBILE_DEBUG] Current auth state:', {
+      user: auth.currentUser?.email || 'none',
+      domain: window.location.hostname,
+      pathname: window.location.pathname
+    });
     
     // Detect if this is a mobile device
     const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

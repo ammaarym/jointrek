@@ -85,7 +85,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Link href={currentUser ? "/find-rides" : "/"} className="flex items-center">
-              <span className="text-2xl font-bold font-satoshi transition-colors" style={{ color: '#B8956B' }} onMouseEnter={(e) => e.currentTarget.style.color = '#A6855A'} onMouseLeave={(e) => e.currentTarget.style.color = '#B8956B'}>
+              <span className="text-2xl font-bold font-inter transition-colors" style={{ color: '#B8956B' }} onMouseEnter={(e) => e.currentTarget.style.color = '#A6855A'} onMouseLeave={(e) => e.currentTarget.style.color = '#B8956B'}>
                 Trek
               </span>
             </Link>

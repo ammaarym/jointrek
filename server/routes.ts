@@ -2570,23 +2570,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // If user has a Stripe Connect account, delete it
-      if (user.stripeConnectAccountId) {
-        try {
-          await stripe.accounts.del(user.stripeConnectAccountId);
-        } catch (stripeError: any) {
-          console.error("Error deleting Stripe Connect account:", stripeError);
-          // Continue with local cleanup even if Stripe deletion fails
-        }
-      }
-
-      // Reset the user's Stripe Connect account ID in the database
+      // Reset the user's Stripe Connect account ID in the database immediately
       await storage.updateUserStripeConnectAccount(user.id, null);
 
+      // Respond immediately to the client
       res.json({ 
         success: true, 
         message: "Driver account deleted successfully. You can now restart the driver setup process." 
       });
+
+      // If user has a Stripe Connect account, delete it asynchronously in the background
+      if (user.stripeConnectAccountId) {
+        setImmediate(async () => {
+          try {
+            await stripe.accounts.del(user.stripeConnectAccountId);
+            console.log(`Successfully deleted Stripe Connect account: ${user.stripeConnectAccountId}`);
+          } catch (stripeError: any) {
+            console.error("Error deleting Stripe Connect account:", stripeError);
+            // This is now a background operation, so we don't need to handle the error in the response
+          }
+        });
+      }
     } catch (error: any) {
       console.error("Error deleting driver account:", error);
       res.status(500).json({ message: "Error deleting driver account: " + error.message });

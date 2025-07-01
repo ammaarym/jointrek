@@ -415,8 +415,12 @@ export default function Profile() {
         title: "Bank Account Deleted",
         description: "Your bank account setup has been successfully removed.",
       });
+      // Immediately update the UI to show the account is deleted
       setDriverStatus(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/driver/status"] });
+      // Refresh the data in the background
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/driver/status"] });
+      }, 100);
     },
     onError: (error: any) => {
       toast({

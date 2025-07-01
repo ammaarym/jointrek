@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   defaultPaymentMethodId: text("default_payment_method_id"),
   stripeConnectAccountId: text("stripe_connect_account_id"),
+  interestTags: text("interest_tags").array(),
   cancellationStrikeCount: integer("cancellation_strike_count").default(0).notNull(),
   strikeResetDate: timestamp("strike_reset_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

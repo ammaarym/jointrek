@@ -213,6 +213,7 @@ DATABASE_URL
 - July 1, 2025: Optimized real-time polling to prevent green card flashing - reduced polling frequency from 5 seconds to 15 seconds with intelligent conditions, only polls when active rides need updates, and reduced completion verification polling from 3 seconds to 10 seconds
 - July 1, 2025: Enhanced car information display - updated ride cards to show full car make and model (e.g., "Chrysler Pacifica") instead of just model ("Pacifica") in both my-rides page and ride card component
 - July 1, 2025: Optimized "Request a Trek" button performance - implemented TanStack Query caching with 5-15 minute cache times, added progressive loading with skeleton states, prefetched payment methods on Find Rides page, and enhanced payment method loading states to reduce perceived loading time from slow to instant for cached data
+- July 1, 2025: Fixed payment method validation bug - resolved authentication timing issues where users with valid payment methods still saw "Payment Method Required" error by ensuring queries only run when user is fully authenticated and using proper authenticated API requests
 
 ## User Preferences
 

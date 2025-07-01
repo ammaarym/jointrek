@@ -605,25 +605,38 @@ export default function AdminDashboard() {
         'Content-Type': 'application/json'
       };
 
-      // Fetch dashboard stats
-      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes, complaintsRes] = await Promise.all([
+      console.log('Starting admin dashboard data fetch...');
+
+      // Fetch core dashboard data
+      console.log('Fetching core dashboard data...');
+      const [statsRes, usersRes, ridesRes, requestsRes, approvedRidesRes] = await Promise.all([
         fetch('/api/admin/stats', { headers }),
         fetch('/api/admin/users', { headers }),
         fetch('/api/admin/rides', { headers }),
         fetch('/api/admin/requests', { headers }),
-        fetch('/api/admin/approved-rides', { headers }),
-        fetch('/api/admin/complaints', { headers })
+        fetch('/api/admin/approved-rides', { headers })
       ]);
+      console.log('Core data fetched successfully');
 
       if (statsRes.ok) setStats(await statsRes.json());
       if (usersRes.ok) setUsers(await usersRes.json());
       if (ridesRes.ok) setRides(await ridesRes.json());
       if (requestsRes.ok) setRequests(await requestsRes.json());
       if (approvedRidesRes.ok) setApprovedRides(await approvedRidesRes.json());
-      if (complaintsRes.ok) {
-        const complaintsData = await complaintsRes.json();
-        console.log('Fetched complaints data:', complaintsData);
-        setComplaints(complaintsData);
+
+      // Fetch complaints separately to ensure it doesn't fail silently
+      try {
+        console.log('Fetching complaints...');
+        const complaintsRes = await fetch('/api/admin/complaints', { headers });
+        if (complaintsRes.ok) {
+          const complaintsData = await complaintsRes.json();
+          console.log('Fetched complaints data:', complaintsData);
+          setComplaints(complaintsData);
+        } else {
+          console.error('Complaints fetch failed:', complaintsRes.status, complaintsRes.statusText);
+        }
+      } catch (complaintsError) {
+        console.error('Error fetching complaints:', complaintsError);
       }
 
     } catch (error) {
@@ -777,16 +790,16 @@ export default function AdminDashboard() {
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-1">
-            <TabsTrigger value="requests" className="text-xs sm:text-sm">Requests</TabsTrigger>
-            <TabsTrigger value="complaints" className="text-xs sm:text-sm">Complaints</TabsTrigger>
-            <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
-            <TabsTrigger value="rides" className="text-xs sm:text-sm">Rides</TabsTrigger>
-            <TabsTrigger value="approved" className="text-xs sm:text-sm">Approved</TabsTrigger>
-            <TabsTrigger value="payments" className="text-xs sm:text-sm">Payments</TabsTrigger>
-            <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
-            <TabsTrigger value="sheets" className="text-xs sm:text-sm">Sheets</TabsTrigger>
+        <Tabs defaultValue="complaints" className="space-y-6">
+          <TabsList className="flex flex-wrap w-full gap-1 h-auto p-2">
+            <TabsTrigger value="complaints" className="flex-1 min-w-0 text-xs sm:text-sm bg-orange-100 text-orange-800 border-orange-200">
+              Complaints ({complaints.length})
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="flex-1 min-w-0 text-xs sm:text-sm">Requests</TabsTrigger>
+            <TabsTrigger value="users" className="flex-1 min-w-0 text-xs sm:text-sm">Users</TabsTrigger>
+            <TabsTrigger value="rides" className="flex-1 min-w-0 text-xs sm:text-sm">Rides</TabsTrigger>
+            <TabsTrigger value="approved" className="flex-1 min-w-0 text-xs sm:text-sm">Approved</TabsTrigger>
+            <TabsTrigger value="database" className="flex-1 min-w-0 text-xs sm:text-sm">Database</TabsTrigger>
           </TabsList>
 
           {/* Ride Requests Tab */}

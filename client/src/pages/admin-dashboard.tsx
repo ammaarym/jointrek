@@ -845,6 +845,34 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Force complaints data load and display */}
+        <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <h3 className="text-lg font-semibold text-orange-800 mb-2">Complaints System Test</h3>
+          <p className="text-sm text-orange-600 mb-3">
+            Active complaints: {complaints.length} | Status: {loading ? 'Loading...' : 'Loaded'}
+          </p>
+          <button 
+            onClick={() => {
+              console.log('Manual complaints fetch triggered');
+              fetch('/api/admin/complaints', {
+                headers: {
+                  'Authorization': `Bearer ${sessionStorage.getItem('adminToken')}`,
+                  'Content-Type': 'application/json'
+                }
+              })
+              .then(res => res.json())
+              .then(data => {
+                console.log('Manual fetch result:', data);
+                setComplaints(data);
+              })
+              .catch(err => console.error('Manual fetch error:', err));
+            }}
+            className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+          >
+            Force Load Complaints
+          </button>
+        </div>
+
         {/* Tabs */}
         <Tabs defaultValue="complaints" className="space-y-6">
           <TabsList className="flex flex-wrap w-full gap-1 h-auto p-2">
@@ -1005,8 +1033,12 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5" />
-                  Customer Complaints
+                  Customer Complaints ({complaints.length})
                 </CardTitle>
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+                  <strong>Debug Info:</strong> Loading: {loading.toString()}, Complaints: {complaints.length}, 
+                  Data: {complaints.length > 0 ? 'Loaded' : 'Empty'}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

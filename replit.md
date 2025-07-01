@@ -214,6 +214,7 @@ DATABASE_URL
 - July 1, 2025: Enhanced car information display - updated ride cards to show full car make and model (e.g., "Chrysler Pacifica") instead of just model ("Pacifica") in both my-rides page and ride card component
 - July 1, 2025: Optimized "Request a Trek" button performance - implemented TanStack Query caching with 5-15 minute cache times, added progressive loading with skeleton states, prefetched payment methods on Find Rides page, and enhanced payment method loading states to reduce perceived loading time from slow to instant for cached data
 - July 1, 2025: Fixed payment method validation bug - resolved authentication timing issues where users with valid payment methods still saw "Payment Method Required" error by ensuring queries only run when user is fully authenticated and using proper authenticated API requests
+- July 1, 2025: Fixed authentication unauthorized domain error - added auth/unauthorized-domain to fallback conditions so popup authentication automatically falls back to redirect when domain isn't authorized in Firebase, resolving login issues in Replit deployment environment
 
 ## User Preferences
 

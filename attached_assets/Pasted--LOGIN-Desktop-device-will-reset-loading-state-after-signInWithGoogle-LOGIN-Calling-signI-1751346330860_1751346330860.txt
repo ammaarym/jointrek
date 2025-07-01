@@ -1,0 +1,40 @@
+🔵 [LOGIN] Desktop device - will reset loading state after signInWithGoogle
+🔵 [LOGIN] Calling signInWithGoogle...
+🚀 [AUTH] signInWithGoogle called
+🔧 [AUTH] Provider configured with UF domain restriction
+📱 [AUTH] Device detection: 
+Object {isMobile: false, userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)…"}
+💻 [AUTH] Desktop browser detected, using popup authentication
+🪟 [AUTH] Calling signInWithPopup...
+❌ [AUTH] Popup failed: 
+Object {code: "auth/unauthorized-domain", message: "Firebase: Error (auth/unauthorized-domain)."}
+💥 [AUTH] Authentication error: 
+Object {code: "auth/unauthorized-domain", message: "Firebase: Error (auth/unauthorized-domain)."}
+❓ [AUTH] Unknown authentication error
+💥 [LOGIN] Error in handleGoogleSignIn: 
+Object {code: undefined, message: "Authentication failed. Please refresh the page and try again.", stack: "Error: Authentication failed. Please refresh the page and try again.↵    at signInWithGoogle…"}
+🔵 [LOGIN] Resetting isSigningIn to false due to error
+❓ [LOGIN] Unknown authentication error
+🔵 [LOGIN] Sign in button clicked
+🔵 [LOGIN] Current loading state: false
+🔵 [LOGIN] Current user: null
+🔵 [LOGIN] Setting isSigningIn to true
+🔵 [LOGIN] Device detection: 
+Object {isMobile: false, userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)…"}
+🔵 [LOGIN] Desktop device - will reset loading state after signInWithGoogle
+🔵 [LOGIN] Calling signInWithGoogle...
+🚀 [AUTH] signInWithGoogle called
+🔧 [AUTH] Provider configured with UF domain restriction
+📱 [AUTH] Device detection: 
+Object {isMobile: false, userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)…"}
+💻 [AUTH] Desktop browser detected, using popup authentication
+🪟 [AUTH] Calling signInWithPopup...
+❌ [AUTH] Popup failed: 
+Object {code: "auth/unauthorized-domain", message: "Firebase: Error (auth/unauthorized-domain)."}
+💥 [AUTH] Authentication error: 
+Object {code: "auth/unauthorized-domain", message: "Firebase: Error (auth/unauthorized-domain)."}
+❓ [AUTH] Unknown authentication error
+💥 [LOGIN] Error in handleGoogleSignIn: 
+Object {code: undefined, message: "Authentication failed. Please refresh the page and try again.", stack: "Error: Authentication failed. Please refresh the page and try again.↵    at signInWithGoogle…"}
+🔵 [LOGIN] Resetting isSigningIn to false due to error
+❓ [LOGIN] Unknown authentication error

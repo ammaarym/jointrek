@@ -157,7 +157,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // If popup fails on desktop, fall back to redirect
           if (popupError.code === 'auth/popup-blocked' || 
               popupError.code === 'auth/popup-closed-by-user' ||
-              popupError.code === 'auth/cancelled-popup-request') {
+              popupError.code === 'auth/cancelled-popup-request' ||
+              popupError.code === 'auth/unauthorized-domain') {
             
             console.log('🔄 [AUTH] Popup failed, falling back to redirect');
             await signInWithRedirect(auth, provider);

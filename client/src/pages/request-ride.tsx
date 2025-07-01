@@ -24,13 +24,10 @@ export default function RequestRidePage() {
   const { data: ride, isLoading: ridesLoading, error: ridesError } = useQuery({
     queryKey: ["/api/rides", rideId],
     queryFn: async () => {
-      const response = await fetch(`/api/rides/${rideId}`);
-      if (!response.ok) {
-        throw new Error('Ride not found');
-      }
+      const response = await apiRequest("GET", `/api/rides/${rideId}`);
       return response.json();
     },
-    enabled: !!rideId,
+    enabled: !!rideId && !!currentUser?.uid, // Only fetch when user is authenticated and ride ID exists
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
   });
@@ -38,7 +35,7 @@ export default function RequestRidePage() {
   // Fetch user's payment methods with optimized caching
   const { data: paymentData, isLoading: paymentLoading } = useQuery({
     queryKey: ["/api/payment-methods"],
-    enabled: !!currentUser,
+    enabled: !!currentUser?.uid, // Only fetch when user is fully authenticated
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     gcTime: 1000 * 60 * 15, // Keep in cache for 15 minutes
   });

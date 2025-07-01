@@ -791,6 +791,72 @@ export default function Profile() {
           if (popup) {
             setStripePopupWindow(popup);
             setShowSetupGuide(true);
+            
+            // Monitor popup for completion with automatic closing
+            let checkInterval: NodeJS.Timeout;
+            let statusCheckInterval: NodeJS.Timeout;
+            
+            const checkCompletion = async () => {
+              try {
+                // Check if driver status has been updated (indicates completion)
+                const statusResponse = await fetch('/api/driver/status', {
+                  headers: {
+                    'x-user-id': currentUser.uid,
+                    'x-user-email': currentUser.email || '',
+                    'x-user-name': currentUser.displayName || ''
+                  }
+                });
+                
+                if (statusResponse.ok) {
+                  const status = await statusResponse.json();
+                  // If onboarding is complete and payouts are enabled, setup is done
+                  if (status.isOnboarded && status.payoutsEnabled) {
+                    clearInterval(checkInterval);
+                    clearInterval(statusCheckInterval);
+                    
+                    // Close the popup automatically
+                    popup.close();
+                    setStripePopupWindow(null);
+                    setShowSetupGuide(false);
+                    
+                    toast({
+                      title: "Setup Complete!",
+                      description: "Your bank account is now ready to receive payments.",
+                    });
+                    
+                    // Refresh the profile page
+                    setTimeout(() => {
+                      loadDriverStatus();
+                    }, 500);
+                    
+                    return true;
+                  }
+                }
+              } catch (error) {
+                console.log('Status check error:', error);
+              }
+              return false;
+            };
+            
+            // Check for popup closure (manual close)
+            checkInterval = setInterval(() => {
+              if (popup.closed) {
+                clearInterval(checkInterval);
+                clearInterval(statusCheckInterval);
+                setStripePopupWindow(null);
+                setShowSetupGuide(false);
+                // Refresh status after popup closes
+                setTimeout(() => {
+                  loadDriverStatus();
+                }, 1000);
+              }
+            }, 1000);
+            
+            // Check for completion status every 3 seconds
+            statusCheckInterval = setInterval(checkCompletion, 3000);
+            
+            // Also check immediately after 2 seconds
+            setTimeout(checkCompletion, 2000);
           } else {
             // Fallback to redirect if popup blocked
             window.location.href = result.onboardingUrl;

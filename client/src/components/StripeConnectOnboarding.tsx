@@ -53,15 +53,66 @@ export default function StripeConnectOnboarding({ onComplete, onError }: StripeC
           });
 
           // Monitor popup for completion
-          const checkClosed = setInterval(() => {
+          let checkInterval: NodeJS.Timeout;
+          let statusCheckInterval: NodeJS.Timeout;
+          
+          const checkCompletion = async () => {
+            try {
+              // Check if driver status has been updated (indicates completion)
+              const statusResponse = await fetch('/api/driver/status', {
+                headers: {
+                  'x-user-id': currentUser.uid,
+                  'x-user-email': currentUser.email || '',
+                  'x-user-name': currentUser.displayName || ''
+                }
+              });
+              
+              if (statusResponse.ok) {
+                const status = await statusResponse.json();
+                // If onboarding is complete and payouts are enabled, setup is done
+                if (status.isOnboarded && status.payoutsEnabled) {
+                  clearInterval(checkInterval);
+                  clearInterval(statusCheckInterval);
+                  
+                  // Close the popup automatically
+                  popup.close();
+                  
+                  toast({
+                    title: "Setup Complete!",
+                    description: "Your bank account is now ready to receive payments.",
+                  });
+                  
+                  // Refresh the profile page
+                  setTimeout(() => {
+                    onComplete?.();
+                  }, 500);
+                  
+                  return true;
+                }
+              }
+            } catch (error) {
+              console.log('Status check error:', error);
+            }
+            return false;
+          };
+          
+          // Check for popup closure (manual close)
+          checkInterval = setInterval(() => {
             if (popup.closed) {
-              clearInterval(checkClosed);
+              clearInterval(checkInterval);
+              clearInterval(statusCheckInterval);
               // Refresh status after popup closes
               setTimeout(() => {
                 onComplete?.();
               }, 1000);
             }
           }, 1000);
+          
+          // Check for completion status every 3 seconds
+          statusCheckInterval = setInterval(checkCompletion, 3000);
+          
+          // Also check immediately
+          setTimeout(checkCompletion, 2000);
         } else {
           throw new Error('Popup was blocked. Please allow popups and try again.');
         }

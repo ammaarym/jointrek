@@ -413,6 +413,16 @@ export default function FindRidesPostgres() {
               setQuickFilter('departures');
               setFrom('Gainesville');
               setTo('any');
+              // Auto-apply filters when tab is clicked
+              setTimeout(() => {
+                setAppliedFilters({
+                  from: 'Gainesville',
+                  to: 'any',
+                  date,
+                  passengers,
+                  genderFilter
+                });
+              }, 0);
             }}
             className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
               quickFilter === 'departures'
@@ -427,6 +437,16 @@ export default function FindRidesPostgres() {
               setQuickFilter('arrivals');
               setFrom('any');
               setTo('Gainesville');
+              // Auto-apply filters when tab is clicked
+              setTimeout(() => {
+                setAppliedFilters({
+                  from: 'any',
+                  to: 'Gainesville',
+                  date,
+                  passengers,
+                  genderFilter
+                });
+              }, 0);
             }}
             className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
               quickFilter === 'arrivals'

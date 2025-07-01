@@ -235,7 +235,7 @@ export default function EditRideModal({
         baggagePersonal: parseInt(baggagePersonal) || 0,
       };
 
-      const success = await updateRide(ride.id, updateData);
+      const success = await updateRide(parseInt(ride.id as any), updateData);
 
       if (success) {
         toast({

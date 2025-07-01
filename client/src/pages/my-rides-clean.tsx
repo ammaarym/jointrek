@@ -150,7 +150,20 @@ export default function MyRidesClean() {
     if (!currentUser?.uid) return;
 
     try {
-      const response = await apiRequest('POST', `/api/rides/${rideId}/generate-start-verification`);
+      const response = await fetch(`/api/rides/${rideId}/generate-start-verification`, {
+        method: 'POST',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate start code');
+      }
+
       const data = await response.json();
       
       setStartCodeGenerated(data.startVerificationCode);
@@ -175,7 +188,20 @@ export default function MyRidesClean() {
     if (!currentUser?.uid) return;
 
     try {
-      const response = await apiRequest('POST', `/api/rides/${rideId}/generate-verification`);
+      const response = await fetch(`/api/rides/${rideId}/generate-verification`, {
+        method: 'POST',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate verification code');
+      }
+
       const data = await response.json();
       
       setGeneratedCode(data.verificationCode);
@@ -200,9 +226,18 @@ export default function MyRidesClean() {
     if (!rideToComplete || !currentUser?.uid || !inputVerificationCode.trim()) return;
 
     try {
-      const response = await apiRequest('PATCH', `/api/rides/${rideToComplete.id}/verify-complete`, {
-        verificationCode: inputVerificationCode.trim(),
-        isPassenger
+      const response = await fetch(`/api/rides/${rideToComplete.id}/verify-complete`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({
+          verificationCode: inputVerificationCode.trim(),
+          isPassenger
+        })
       });
 
       if (response.ok) {
@@ -235,7 +270,14 @@ export default function MyRidesClean() {
 
     setDeleting(true);
     try {
-      const response = await apiRequest('DELETE', `/api/rides/${rideToDelete.id}`);
+      const response = await fetch(`/api/rides/${rideToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
 
       if (response.ok) {
         toast({
@@ -265,8 +307,17 @@ export default function MyRidesClean() {
 
     setCancelling(true);
     try {
-      const response = await apiRequest('POST', `/api/ride-requests/${passengerToCancel.id}/cancel-by-driver`, {
-        cancellationReason: 'Cancelled by driver'
+      const response = await fetch(`/api/ride-requests/${passengerToCancel.id}/cancel-by-driver`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        },
+        body: JSON.stringify({
+          cancellationReason: 'Cancelled by driver'
+        })
       });
 
       if (response.ok) {
@@ -675,6 +726,141 @@ export default function MyRidesClean() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Delete Ride Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Ride</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this ride? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteRide}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Passenger Dialog */}
+      <AlertDialog open={passengerCancelDialogOpen} onOpenChange={setPassengerCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Passenger</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {passengerToCancel?.passengerName} from this ride? 
+              They will be notified of the cancellation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelPassenger}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Removing...' : 'Remove Passenger'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Start Code Display Dialog */}
+      <Dialog open={showStartCode} onOpenChange={setShowStartCode}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ride Start Code</DialogTitle>
+            <DialogDescription>
+              Share this 4-digit code with your passengers to verify the ride has started.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-center py-8">
+            <div className="text-6xl font-bold text-blue-600 mb-4">
+              {startCodeGenerated}
+            </div>
+            <p className="text-gray-600">
+              Passengers need this code to confirm ride start
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowStartCode(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Completion Code Display Dialog */}
+      <Dialog open={showVerificationCode} onOpenChange={setShowVerificationCode}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ride Completion Code</DialogTitle>
+            <DialogDescription>
+              Share this 6-digit code with your passengers to complete the ride.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="text-center py-8">
+            <div className="text-6xl font-bold text-green-600 mb-4">
+              {generatedCode}
+            </div>
+            <p className="text-gray-600">
+              Passengers need this code to complete the ride
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowVerificationCode(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ride Completion Verification Dialog */}
+      <Dialog open={verificationDialogOpen} onOpenChange={setVerificationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Complete Ride</DialogTitle>
+            <DialogDescription>
+              {isPassenger 
+                ? "Enter the 6-digit completion code provided by your driver"
+                : "Enter the 6-digit completion code to mark this ride as complete"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="verification-code">Verification Code</Label>
+              <Input
+                id="verification-code"
+                type="text"
+                value={inputVerificationCode}
+                onChange={(e) => setInputVerificationCode(e.target.value)}
+                placeholder="Enter 6-digit code"
+                maxLength={6}
+                className="text-center text-2xl tracking-widest"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setVerificationDialogOpen(false);
+                setInputVerificationCode('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCompleteVerification}
+              disabled={!inputVerificationCode.trim() || inputVerificationCode.length !== 6}
+            >
+              Complete Ride
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -406,7 +406,7 @@ export default function Home() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span
-              className="text-2xl font-bold font-inter transition-colors"
+              className="text-2xl font-bold font-satoshi transition-colors"
               style={{ color: "#B8956B" }}
             >
               Trek
@@ -447,7 +447,8 @@ export default function Home() {
                 ease: "easeInOut",
               }}
             >
-              Share rides with fellow{" "}
+              The rideshare marketplace built for UF
+{" "}
               <span style={{ color: "#B8956B" }}>Gators</span>
             </motion.div>
 
@@ -457,7 +458,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
             >
-              The easy way for UF students to carpool to and from Gainesville
+              Getting home doesn't have to suck
             </motion.p>
 
             {/* Find Rides Screenshot with enhanced animation */}

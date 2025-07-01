@@ -528,7 +528,7 @@ export default function RideCard({
                   <div className="font-medium">
                     {ride.carYear && `${ride.carYear} `}
                     {ride.carMake && `${ride.carMake} `}
-                    {ride.carModel || ride.carModel?.charAt(0).toUpperCase() + ride.carModel?.slice(1)}
+                    {ride.carModel && ride.carModel}
                   </div>
                 </div>
               )}

@@ -315,25 +315,33 @@ export default function MyRidesPostgres() {
     }
   }, [currentUser?.uid]); // Only depend on UID to prevent unnecessary re-runs
 
-  // Add real-time polling for ride status updates
+  // Add real-time polling for ride status updates (reduced frequency)
   useEffect(() => {
     if (!currentUser) return;
 
     const pollForRideUpdates = setInterval(async () => {
       try {
-        // Refresh all ride data to catch status changes
-        await Promise.all([
-          loadMyRides(currentUser.uid, true), // Force reload
-          loadApprovedRides()
-        ]);
+        // Only refresh if we have rides that might need updates
+        const hasActiveRides = myRides.some(ride => 
+          ride.status === 'started' || ride.status === 'in_progress'
+        ) || approvedRides.some(ride => 
+          ride.status === 'started' || ride.status === 'in_progress'
+        );
+        
+        if (hasActiveRides) {
+          await Promise.all([
+            loadMyRides(currentUser.uid, true), // Force reload only if needed
+            loadApprovedRides()
+          ]);
+        }
       } catch (error) {
         console.error('Error polling for ride updates:', error);
       }
-    }, 5000); // Poll every 5 seconds
+    }, 15000); // Poll every 15 seconds instead of 5
 
     // Cleanup interval on unmount
     return () => clearInterval(pollForRideUpdates);
-  }, [currentUser?.uid]);
+  }, [currentUser?.uid, myRides, approvedRides]);
 
   // Handle ride request approval/rejection
   const handleRequestAction = async (requestId: number, action: 'approve' | 'reject') => {
@@ -813,14 +821,14 @@ export default function MyRidesPostgres() {
         // Refresh the approved rides to show updated status
         loadApprovedRides();
         
-        // Set up polling to automatically refresh when the other party verifies
+        // Set up polling to automatically refresh when the other party verifies (reduced frequency)
         const pollForUpdates = setInterval(async () => {
           try {
             await loadApprovedRides();
           } catch (error) {
             console.error('Error polling for updates:', error);
           }
-        }, 3000); // Poll every 3 seconds
+        }, 10000); // Poll every 10 seconds instead of 3
         
         // Stop polling after 2 minutes
         setTimeout(() => {
@@ -936,7 +944,7 @@ export default function MyRidesPostgres() {
             <>
               <div className="flex items-center">
                 <FaCar className="text-primary mr-2 flex-shrink-0" />
-                <span>{capitalizeCarType(ride.carModel || '')}</span>
+                <span>{capitalizeCarType(`${ride.carMake || ''} ${ride.carModel || ''}`.trim())}</span>
               </div>
               <div className="flex items-center">
                 <FaUserFriends className="text-primary mr-2 flex-shrink-0" />

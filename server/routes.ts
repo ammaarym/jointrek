@@ -2713,7 +2713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
             
             const formattedDriverName = formatName(driverUser.displayName);
-            const smsMessage = `🚗 New driver offer from ${formattedDriverName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nView and respond: https://jointrek.replit.app/`;
+            const smsMessage = `🚗 New driver offer from ${formattedDriverName}!\n\nRoute: ${ride.origin} → ${ride.destination}\nPrice: $${price}\nDeparture: ${new Date(ride.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${new Date(ride.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}\n${message ? `\nMessage: "${message}"\n` : ''}\nView and respond: https://jointrek.com/my-rides`;
             
             await twilioService.sendSMS({
               to: passenger.phone,

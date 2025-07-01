@@ -457,7 +457,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
             >
-              The easy way for UF students to carpool to Gainesville and home
+              The easy way for UF students to carpool to and from Gainesville
             </motion.p>
 
             {/* Find Rides Screenshot with enhanced animation */}

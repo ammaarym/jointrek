@@ -100,7 +100,8 @@ class TwilioService {
     departureTime: string;
     seats: number;
   }): Promise<boolean> {
-    const message = `🚗 New ride request from ${passengerName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nSeats: ${rideDetails.seats}\n\nView details: https://jointrek.replit.app/`;
+    const formattedName = formatName(passengerName);
+    const message = `🚗 New ride request from ${formattedName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nSeats: ${rideDetails.seats}\n\nView details: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
       to: driverPhone,
@@ -116,7 +117,7 @@ class TwilioService {
     driverPhone: string;
   }): Promise<boolean> {
     const formattedName = formatName(driverName);
-    const message = `✅ Your ride request approved by ${formattedName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nDriver: ${formattedName} (${rideDetails.driverPhone})\n\nView details: https://jointrek.replit.app/`;
+    const message = `✅ Your ride request approved by ${formattedName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nDriver: ${formattedName} (${rideDetails.driverPhone})\n\nView details: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
       to: passengerPhone,
@@ -133,7 +134,7 @@ class TwilioService {
   }): Promise<boolean> {
     const formattedName = formatName(passengerName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
-    const message = `❌ ${formattedName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nView details: https://jointrek.replit.app/`;
+    const message = `❌ ${formattedName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nView details: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
       to: driverPhone,
@@ -150,7 +151,7 @@ class TwilioService {
   }): Promise<boolean> {
     const formattedName = formatName(driverName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
-    const message = `❌ ${formattedName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind alternatives: https://jointrek.replit.app/`;
+    const message = `❌ ${formattedName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind alternatives: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
       to: passengerPhone,
@@ -167,7 +168,7 @@ class TwilioService {
   }): Promise<boolean> {
     const formattedName = formatName(driverName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
-    const message = `❌ Your ride request was rejected by ${formattedName}.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind other rides: https://jointrek.replit.app/`;
+    const message = `❌ Your ride request was rejected by ${formattedName}.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind other rides: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
       to: passengerPhone,

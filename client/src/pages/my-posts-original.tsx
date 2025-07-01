@@ -27,6 +27,24 @@ const capitalizeCarType = (carType: string) => {
   return carType.charAt(0).toUpperCase() + carType.slice(1).toLowerCase();
 };
 
+// Helper function to format names from "Last, First" to "First Last"
+const formatName = (displayName: string | null): string => {
+  if (!displayName) return '';
+  
+  // Check if name is in "Last, First" format
+  if (displayName.includes(', ')) {
+    const parts = displayName.split(', ');
+    if (parts.length >= 2) {
+      const lastName = parts[0];
+      const firstName = parts[1];
+      return `${firstName} ${lastName}`;
+    }
+  }
+  
+  // Return as-is if not in expected format
+  return displayName;
+};
+
 export default function MyPostsOriginal() {
   const { currentUser } = useAuth();
   const [, setLocation] = useLocation();
@@ -937,7 +955,7 @@ export default function MyPostsOriginal() {
                         {approvedPassengers.map((passenger) => (
                           <div key={passenger.id} className="text-xs flex justify-between items-start">
                             <div className="flex-1">
-                              <div className="font-medium text-green-800">{passenger.passengerName}</div>
+                              <div className="font-medium text-green-800">{formatName(passenger.passengerName)}</div>
                               <div className="text-green-600">{passenger.passengerEmail}</div>
                               {passenger.passengerPhone && (
                                 <div className="text-green-600">📞 {passenger.passengerPhone}</div>
@@ -1334,7 +1352,7 @@ export default function MyPostsOriginal() {
                               </div>
                               <div className="flex items-center">
                                 <FaUser className="text-primary mr-2 flex-shrink-0" />
-                                <span>Passenger: {ride.passengerName}</span>
+                                <span>Passenger: {formatName(ride.passengerName)}</span>
                               </div>
                               <div className="flex items-start">
                                 <FaMapMarkerAlt className="text-primary mr-2 mt-1 flex-shrink-0" />

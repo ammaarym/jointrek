@@ -406,7 +406,7 @@ export default function Home() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span
-              className="text-2xl font-bold font-satoshi transition-colors"
+              className="text-2xl font-bold font-inter transition-colors"
               style={{ color: "#B8956B" }}
             >
               Trek

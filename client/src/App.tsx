@@ -185,6 +185,7 @@ function AppRoutes() {
 
     // Only show authentication required if we're certain auth is loaded, stable, and user is null
     if (!loading && authChecked && !currentUser && authStateStable) {
+      console.log('❌ [MOBILE_DEBUG] User not authenticated, showing login again');
       console.log('🔒 [PROTECTED_ROUTE] ❌ AUTHENTICATION REQUIRED - showing login prompt', {
         loading,
         authChecked,
@@ -193,14 +194,19 @@ function AppRoutes() {
         authStateStable,
         path: rest.path,
         timestamp: new Date().toISOString(),
-        possibleRaceCondition: 'User was authenticated but now appears null'
+        possibleRaceCondition: 'User was authenticated but now appears null',
+        currentURL: window.location.href,
+        referrer: document.referrer
       });
       return <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4 text-gray-800">Authentication Required</h2>
           <p className="mb-6 text-gray-600">You need to be logged in to access this page.</p>
           <button 
-            onClick={() => setLocation("/login")}
+            onClick={() => {
+              console.log('🔄 [MOBILE_DEBUG] Redirecting to login page');
+              setLocation("/login");
+            }}
             className="px-6 py-3 text-white rounded-lg font-medium"
             style={{ backgroundColor: '#B8956B' }}
           >

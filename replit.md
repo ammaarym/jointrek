@@ -221,6 +221,7 @@ DATABASE_URL
 - July 1, 2025: Database cleanup and branding improvements - removed all test/fake users (Ashley Brown, David Miller, Jessica Taylor, Ryan Anderson, Sarah Johnson, Emily Davis, James Wilson, Mike Thompson) and their associated ride data, cleaned up mock ride entries, updated website title to "Trek" and added orange "T" favicon for consistent branding across browser tabs
 - July 1, 2025: Completed comprehensive admin complaints management system - created dedicated complaints page at /admin-complaints with status/priority management capabilities, integrated orange "Complaints" button in admin dashboard header for direct access, and removed complaints links from dropdown menus to streamline navigation while maintaining functionality
 - July 1, 2025: Enhanced complaint cards with passenger information display - added comprehensive passenger details (name, email, phone, social media) for driver complaints showing all approved passengers who were on the ride, enabling better context for resolving customer issues
+- July 1, 2025: Fixed Safari font compatibility and mobile authentication debugging - replaced Satoshi font with Inter to resolve Safari loading errors, improved baggage badge spacing for better mobile display, and added comprehensive mobile authentication debug logging with MOBILE_DEBUG tags to help identify Safari login loop issues
 
 ## User Preferences
 

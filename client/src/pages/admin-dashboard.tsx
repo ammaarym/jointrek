@@ -620,7 +620,11 @@ export default function AdminDashboard() {
       if (ridesRes.ok) setRides(await ridesRes.json());
       if (requestsRes.ok) setRequests(await requestsRes.json());
       if (approvedRidesRes.ok) setApprovedRides(await approvedRidesRes.json());
-      if (complaintsRes.ok) setComplaints(await complaintsRes.json());
+      if (complaintsRes.ok) {
+        const complaintsData = await complaintsRes.json();
+        console.log('Fetched complaints data:', complaintsData);
+        setComplaints(complaintsData);
+      }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

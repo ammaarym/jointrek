@@ -778,15 +778,15 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="requests">Ride Requests</TabsTrigger>
-            <TabsTrigger value="approved">Approved Rides</TabsTrigger>
-            <TabsTrigger value="complaints">Complaints</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="rides">All Rides</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="database">Database</TabsTrigger>
-            <TabsTrigger value="sheets">Excel Sheets</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-1">
+            <TabsTrigger value="requests" className="text-xs sm:text-sm">Requests</TabsTrigger>
+            <TabsTrigger value="complaints" className="text-xs sm:text-sm">Complaints</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
+            <TabsTrigger value="rides" className="text-xs sm:text-sm">Rides</TabsTrigger>
+            <TabsTrigger value="approved" className="text-xs sm:text-sm">Approved</TabsTrigger>
+            <TabsTrigger value="payments" className="text-xs sm:text-sm">Payments</TabsTrigger>
+            <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
+            <TabsTrigger value="sheets" className="text-xs sm:text-sm">Sheets</TabsTrigger>
           </TabsList>
 
           {/* Ride Requests Tab */}

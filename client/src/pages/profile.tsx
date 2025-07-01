@@ -176,7 +176,16 @@ const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
             <h2 className="text-lg font-bold text-gray-900">Driver Setup Guide</h2>
             <p className="text-xs text-gray-600 mt-1">Follow these steps in the Stripe popup window</p>
           </div>
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <button
+            onClick={() => {
+              setShowSetupGuide(false);
+              setStripePopupWindow(null);
+            }}
+            className="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+            title="Close guide"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="space-y-3">
@@ -293,8 +302,16 @@ export default function Profile() {
           setShowSetupGuide(false);
           setStripePopupWindow(null);
           clearInterval(checkClosed);
-          // Refresh driver status after popup closes
-          loadDriverStatus();
+          // Refresh driver status after popup closes with multiple attempts
+          setTimeout(async () => {
+            await loadDriverStatus();
+            // Wait a bit more and try again to ensure Stripe has processed
+            setTimeout(async () => {
+              await loadDriverStatus();
+              // Force a page refresh to ensure all data is synchronized
+              window.location.reload();
+            }, 3000);
+          }, 1000);
         }
       }, 1000);
 

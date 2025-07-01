@@ -23,7 +23,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDashboardEnhanced from "@/pages/admin-dashboard-enhanced";
 import AdminQuick from "@/pages/admin-quick";
 
-import MyRidesOptimized from "@/pages/my-rides-optimized";
+import MyRidesClean from "@/pages/my-rides-clean";
 import Profile from "@/pages/profile";
 import TestPayment from "@/pages/test-payment";
 import Help from "@/pages/help";
@@ -301,7 +301,7 @@ function AppRoutes() {
             {(params) => <ProtectedRoute component={TestPayment} path="/test-payment" />}
           </Route>
           <Route path="/my-rides">
-            {(params) => <ProtectedRoute component={MyRidesOptimized} path="/my-rides" requiresContactInfo={true} />}
+            {(params) => <ProtectedRoute component={MyRidesClean} path="/my-rides" requiresContactInfo={true} />}
           </Route>
           <Route path="/help">
             {(params) => <ProtectedRoute component={Help} path="/help" />}

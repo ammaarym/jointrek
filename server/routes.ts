@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./postgres-storage"; // Use PostgreSQL storage
-import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema, insertReviewSchema, insertRideRequestSchema } from "@shared/schema";
+import { insertUserSchema, insertRideSchema, insertBookingSchema, insertMessageSchema, insertConversationSchema, insertReviewSchema, insertRideRequestSchema, insertComplaintSchema } from "@shared/schema";
 import * as admin from 'firebase-admin';
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -3395,6 +3395,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin payment processing error:", error);
       res.status(500).json({ error: "Payment processing failed: " + (error as Error).message });
+    }
+  });
+
+  // Complaint routes
+  app.post('/api/complaints', authenticate, async (req: Request, res: Response) => {
+    try {
+      console.log('Creating complaint with data:', req.body);
+      
+      // Validate the request body
+      const validatedData = insertComplaintSchema.parse(req.body);
+      
+      console.log('Validated complaint data:', validatedData);
+      
+      // Create the complaint
+      const complaint = await storage.createComplaint(validatedData);
+      
+      console.log('Created complaint:', complaint);
+      
+      res.status(201).json(complaint);
+    } catch (error) {
+      console.error('Error creating complaint:', error);
+      
+      if (error instanceof ZodError) {
+        return res.status(400).json({ 
+          error: 'Validation failed', 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to create complaint',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get all complaints with full details (admin only)
+  app.get('/api/admin/complaints', adminAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('Fetching all complaints for admin dashboard');
+      
+      const complaints = await storage.getAllComplaints();
+      
+      console.log(`Found ${complaints.length} complaints`);
+      
+      res.json(complaints);
+    } catch (error) {
+      console.error('Error fetching complaints:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch complaints',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get a specific complaint by ID (admin only)
+  app.get('/api/admin/complaints/:id', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const complaintId = parseInt(req.params.id);
+      
+      if (isNaN(complaintId)) {
+        return res.status(400).json({ error: 'Invalid complaint ID' });
+      }
+      
+      console.log('Fetching complaint with ID:', complaintId);
+      
+      const complaint = await storage.getComplaintById(complaintId);
+      
+      if (!complaint) {
+        return res.status(404).json({ error: 'Complaint not found' });
+      }
+      
+      console.log('Found complaint:', complaint);
+      
+      res.json(complaint);
+    } catch (error) {
+      console.error('Error fetching complaint:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch complaint',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update complaint status and admin notes (admin only)
+  app.patch('/api/admin/complaints/:id/status', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const complaintId = parseInt(req.params.id);
+      const { status, adminNotes } = req.body;
+      
+      if (isNaN(complaintId)) {
+        return res.status(400).json({ error: 'Invalid complaint ID' });
+      }
+      
+      if (!status) {
+        return res.status(400).json({ error: 'Status is required' });
+      }
+      
+      console.log('Updating complaint status:', { complaintId, status, adminNotes });
+      
+      const updatedComplaint = await storage.updateComplaintStatus(complaintId, status, adminNotes);
+      
+      if (!updatedComplaint) {
+        return res.status(404).json({ error: 'Complaint not found' });
+      }
+      
+      console.log('Updated complaint:', updatedComplaint);
+      
+      res.json(updatedComplaint);
+    } catch (error) {
+      console.error('Error updating complaint status:', error);
+      res.status(500).json({ 
+        error: 'Failed to update complaint status',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update complaint priority (admin only)
+  app.patch('/api/admin/complaints/:id/priority', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const complaintId = parseInt(req.params.id);
+      const { priority } = req.body;
+      
+      if (isNaN(complaintId)) {
+        return res.status(400).json({ error: 'Invalid complaint ID' });
+      }
+      
+      if (!priority) {
+        return res.status(400).json({ error: 'Priority is required' });
+      }
+      
+      console.log('Updating complaint priority:', { complaintId, priority });
+      
+      const updatedComplaint = await storage.updateComplaintPriority(complaintId, priority);
+      
+      if (!updatedComplaint) {
+        return res.status(404).json({ error: 'Complaint not found' });
+      }
+      
+      console.log('Updated complaint priority:', updatedComplaint);
+      
+      res.json(updatedComplaint);
+    } catch (error) {
+      console.error('Error updating complaint priority:', error);
+      res.status(500).json({ 
+        error: 'Failed to update complaint priority',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditRideModal from '@/components/edit-ride-modal';
+import { ComplaintDialog } from '@/components/complaint-dialog';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiRequest } from '@/lib/queryClient';
@@ -1266,15 +1267,18 @@ export default function MyPostsOriginal() {
                               </>
                             )}
                             {ride.isStarted && !ride.isCompleted && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePassengerVerification({ id: ride.rideId })}
-                                className="flex items-center gap-1 flex-1"
-                              >
-                                <FaCheck className="w-3 h-3" />
-                                Complete Ride
-                              </Button>
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePassengerVerification({ id: ride.rideId })}
+                                  className="flex items-center gap-1 flex-1"
+                                >
+                                  <FaCheck className="w-3 h-3" />
+                                  Complete Ride
+                                </Button>
+                                <ComplaintDialog rideId={ride.rideId} />
+                              </>
                             )}
                             {ride.isCompleted && (
                               <div className="flex items-center gap-1 text-green-600 font-medium">

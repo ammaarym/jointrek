@@ -768,6 +768,8 @@ export default function Profile() {
     setIsEditing(false);
   };
 
+
+
   const startOnboarding = async () => {
     if (!currentUser) return;
 
@@ -1061,202 +1063,181 @@ export default function Profile() {
             )}
           </div>
 
-          {isEditing ? (
-            // Edit Mode
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
-                  <FaPhone className="text-primary" />
-                  Phone Number (Required)
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Phone number (any format)"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="flex-1"
-                    required
-                    disabled={userData?.phoneVerified}
-                  />
-                  {phone && phone.length > 0 && !userData?.phoneVerified && (
-                    <Button
-                      type="button"
-                      onClick={sendVerificationCode}
-                      disabled={isSendingCode}
-                      className="bg-orange-500 hover:bg-orange-600 text-white"
-                    >
-                      {isSendingCode ? 'Sending...' : 'Verify'}
-                    </Button>
-                  )}
-                  {userData?.phoneVerified && (
-                    <div className="flex items-center gap-2 text-green-600 px-3 py-2 bg-green-50 rounded-md">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-sm font-medium">Verified</span>
-                    </div>
-                  )}
+          {/* Always visible Phone Number section */}
+          <div className="space-y-6">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
+                <FaPhone className="text-primary" />
+                Phone Number (Required)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Phone number (any format)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="flex-1"
+                  required
+                  disabled={userData?.phoneVerified}
+                />
+                {phone && phone.length > 0 && !userData?.phoneVerified && (
+                  <Button
+                    type="button"
+                    onClick={sendVerificationCode}
+                    disabled={isSendingCode}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {isSendingCode ? 'Sending...' : 'Verify'}
+                  </Button>
+                )}
+                {userData?.phoneVerified && (
+                  <div className="flex items-center gap-2 text-green-600 px-3 py-2 bg-green-50 rounded-md">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-medium">Verified</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Required for SMS ride notifications and safety</p>
+            </div>
+
+            {/* Always visible Interest Tags section */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <Label htmlFor="interest-tags" className="flex items-center gap-2 mb-2">
+                <Star className="text-primary" />
+                Interest Tags (Optional)
+              </Label>
+              <MultiSelect
+                options={INTEREST_TAGS.map(tag => ({ value: tag, label: tag }))}
+                value={interestTags}
+                onChange={setInterestTags}
+                placeholder="Select up to 5 interests..."
+                maxSelections={MAX_INTEREST_TAGS}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Help other students know what you're like! Choose up to {MAX_INTEREST_TAGS} tags.
+              </p>
+              <Button 
+                onClick={handleSave} 
+                disabled={loading}
+                className="bg-primary hover:bg-orange-600 text-white w-full mt-2"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+
+            {/* Optional social media - shown only if filled or in edit mode */}
+            {isEditing ? (
+              <div className="space-y-4 p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-gray-900">Social Media (Optional)</h3>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancel}
+                    disabled={loading}
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Required for SMS ride notifications and safety</p>
-              </div>
+                
+                <div>
+                  <Label htmlFor="instagram" className="flex items-center gap-2 mb-2">
+                    <FaInstagram className="text-primary" />
+                    Instagram Username
+                  </Label>
+                  <Input
+                    id="instagram"
+                    placeholder="Enter your Instagram username"
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="instagram" className="flex items-center gap-2 mb-2">
-                  <FaInstagram className="text-primary" />
-                  Instagram Username (Optional)
-                </Label>
-                <Input
-                  id="instagram"
-                  placeholder="Enter your Instagram username"
-                  value={instagram}
-                  onChange={(e) => setInstagram(e.target.value)}
-                  className="w-full"
-                />
-              </div>
+                <div>
+                  <Label htmlFor="snapchat" className="flex items-center gap-2 mb-2">
+                    <RiSnapchatFill className="text-primary" />
+                    Snapchat Username
+                  </Label>
+                  <Input
+                    id="snapchat"
+                    placeholder="Enter your Snapchat username"
+                    value={snapchat}
+                    onChange={(e) => setSnapchat(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="snapchat" className="flex items-center gap-2 mb-2">
-                  <RiSnapchatFill className="text-primary" />
-                  Snapchat Username (Optional)
-                </Label>
-                <Input
-                  id="snapchat"
-                  placeholder="Enter your Snapchat username"
-                  value={snapchat}
-                  onChange={(e) => setSnapchat(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="interest-tags" className="flex items-center gap-2 mb-2">
-                  <Star className="text-primary" />
-                  Interest Tags (Optional)
-                </Label>
-                <MultiSelect
-                  options={INTEREST_TAGS.map(tag => ({ value: tag, label: tag }))}
-                  value={interestTags}
-                  onChange={setInterestTags}
-                  placeholder="Select up to 5 interests..."
-                  maxSelections={MAX_INTEREST_TAGS}
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Help other students know what you're like! Choose up to {MAX_INTEREST_TAGS} tags.
-                </p>
-              </div>
-
-              <div className="flex gap-3 pt-4">
                 <Button 
                   onClick={handleSave} 
                   disabled={loading}
-                  className="bg-primary hover:bg-orange-600 text-white flex-1"
+                  className="bg-primary hover:bg-orange-600 text-white w-full"
                 >
-                  {loading ? 'Saving...' : 'Save Contact Information'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="flex-1"
-                >
-                  Cancel
+                  {loading ? 'Saving...' : 'Save Social Media'}
                 </Button>
               </div>
-            </div>
-          ) : (
-            // Display Mode
-            <div className="space-y-6">
-              {phone && (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <FaPhone className="text-primary w-5 h-5" />
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">Phone Number</p>
-                    <p className="text-gray-600">{phone}</p>
-                  </div>
-                  {userData?.phoneVerified ? (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-sm font-medium">Verified</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-2 text-orange-600 mr-3">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <span className="text-sm font-medium">Not Verified</span>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={sendVerificationCode}
-                        disabled={isSendingCode}
-                        size="sm"
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
-                      >
-                        {isSendingCode ? 'Sending...' : 'Verify'}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {instagram && (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <FaInstagram className="text-primary w-5 h-5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Instagram</p>
-                    <p className="text-gray-600">@{instagram}</p>
-                  </div>
-                </div>
-              )}
-
-              {snapchat && (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <RiSnapchatFill className="text-primary w-5 h-5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Snapchat</p>
-                    <p className="text-gray-600">{snapchat}</p>
-                  </div>
-                </div>
-              )}
-
-              {interestTags && interestTags.length > 0 && (
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                  <Star className="text-primary w-5 h-5 mt-1" />
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 mb-2">Interest Tags</p>
-                    <div className="flex flex-wrap gap-2">
-                      {interestTags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+            ) : (
+              <div className="space-y-4">
+                {/* Display existing social media or add button */}
+                {instagram && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <FaInstagram className="text-primary w-5 h-5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Instagram</p>
+                      <p className="text-gray-600">@{instagram}</p>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {!phone && (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">Phone number required</p>
+                {snapchat && (
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <RiSnapchatFill className="text-primary w-5 h-5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">Snapchat</p>
+                      <p className="text-gray-600">{snapchat}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Show add/edit social media button */}
+                {(!instagram && !snapchat) ? (
                   <Button 
+                    variant="outline"
                     onClick={() => setIsEditing(true)}
-                    className="bg-primary hover:bg-orange-600 text-white"
+                    className="w-full"
                   >
-                    Add Phone Number
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Social Media (Optional)
                   </Button>
-                </div>
-              )}
-            </div>
-          )}
+                ) : (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setIsEditing(true)}
+                    className="w-full"
+                  >
+                    <FaEdit className="w-4 h-4 mr-2" />
+                    Edit Social Media
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {!phone && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">Phone number required</p>
+                <Button 
+                  onClick={() => setIsEditing(true)}
+                  className="bg-primary hover:bg-orange-600 text-white"
+                >
+                  Add Phone Number
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

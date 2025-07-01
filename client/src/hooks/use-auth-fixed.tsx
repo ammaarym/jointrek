@@ -66,16 +66,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const result = await Promise.race([redirectResultPromise, timeoutPromise]) as any;
         
-        if (result && result.user) {
-          console.log('✅ [MOBILE_DEBUG] Returned from Google, checking auth state...');
+        // Enhanced redirect result logging
+        if (result?.user) {
+          console.log('✅ [MOBILE_DEBUG] User returned from redirect:', result.user.displayName);
           console.log('🔄 [MOBILE_DEBUG] Processing redirect result for:', result.user.email);
           console.log('📊 [MOBILE_DEBUG] Redirect result details:', {
             uid: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
             emailVerified: result.user.emailVerified,
-            currentPath: window.location.pathname
+            currentPath: window.location.pathname,
+            providerId: result.providerId || 'unknown',
+            operationType: result.operationType || 'unknown',
+            credential: result.credential ? 'present' : 'null'
           });
+        } else {
+          console.log('❌ [MOBILE_DEBUG] No redirect result found');
+          console.log('📊 [MOBILE_DEBUG] Redirect result was:', result);
+          console.log('🔍 [MOBILE_DEBUG] Result type:', typeof result);
+          console.log('🔍 [MOBILE_DEBUG] Result null?:', result === null);
+          console.log('🔍 [MOBILE_DEBUG] Result undefined?:', result === undefined);
+          
+          // Log current auth state even when no redirect result
+          console.log('🔍 [MOBILE_DEBUG] Current auth.currentUser:', auth.currentUser?.email || 'null');
+        }
+        
+        if (result && result.user) {
           
           if (!isUFEmail(result.user.email || '')) {
             console.log('❌ [MOBILE_DEBUG] Non-UF email from redirect, signing out');

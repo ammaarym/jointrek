@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorToast } from '@/hooks/use-error-toast';
 import { FaPhone, FaInstagram, FaEdit, FaCreditCard, FaCar } from 'react-icons/fa';
 import { RiSnapchatFill } from 'react-icons/ri';
-import { Plus, Star, CheckCircle, DollarSign, Clock, FileText, CreditCard, User, Shield, Landmark } from 'lucide-react';
+import { Plus, Star, CheckCircle, DollarSign, Clock, FileText, CreditCard, User, Shield, Landmark, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -127,7 +127,13 @@ const PaymentSetupForm = ({ clientSecret, onSuccess }: { clientSecret: string; o
 };
 
 // Visual Setup Guide Component
-const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
+const StripeSetupGuide = ({ 
+  isVisible, 
+  onClose 
+}: { 
+  isVisible: boolean;
+  onClose: () => void;
+}) => {
   if (!isVisible) return null;
 
   const setupSteps = [
@@ -177,10 +183,7 @@ const StripeSetupGuide = ({ isVisible }: { isVisible: boolean }) => {
             <p className="text-xs text-gray-600 mt-1">Follow these steps in the Stripe popup window</p>
           </div>
           <button
-            onClick={() => {
-              setShowSetupGuide(false);
-              setStripePopupWindow(null);
-            }}
+            onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700"
             title="Close guide"
           >
@@ -1520,7 +1523,15 @@ export default function Profile() {
       </Dialog>
 
       {/* Visual Setup Guide - appears when Stripe popup is open */}
-      <StripeSetupGuide isVisible={showSetupGuide} />
+      <StripeSetupGuide 
+        isVisible={showSetupGuide} 
+        onClose={() => {
+          setShowSetupGuide(false);
+          setStripePopupWindow(null);
+          // Refresh driver status when manually closed
+          loadDriverStatus();
+        }}
+      />
     </div>
   );
 }

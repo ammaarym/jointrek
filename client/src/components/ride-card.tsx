@@ -317,7 +317,7 @@ export default function RideCard({
           <div className="hidden md:flex items-start gap-4">
             {/* Driver info section - left side with tags below in rows */}
             <div className="flex flex-col min-w-[240px]">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-3">
                 <Avatar className="w-12 h-12 ring-2 ring-gray-200">
                   <AvatarImage
                     src={ride.driver.photoUrl}
@@ -347,7 +347,7 @@ export default function RideCard({
               
               {/* Interest Tags in rows below driver info */}
               {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                <div className="flex flex-wrap gap-1 max-w-[240px]">
+                <div className="flex flex-wrap gap-1 max-w-[240px] mt-1">
                   {(ride.driver as any).interestTags.map((tag: string, index: number) => (
                     <span 
                       key={index}
@@ -365,7 +365,7 @@ export default function RideCard({
               <div className="flex flex-col mr-3 relative h-16 justify-between pt-1">
                 <div className="w-3 h-3 rounded-full bg-black"></div>
                 <div className="w-0.5 flex-1 bg-neutral-300 self-center my-1"></div>
-                <div className="w-3 h-3 rounded-full bg-primary"></div>
+                <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
               </div>
               <div className="flex-1 max-w-[300px]">
                 <div className="flex justify-between items-start">
@@ -412,14 +412,15 @@ export default function RideCard({
               <div className="text-2xl font-bold text-neutral-900 mb-1">
                 ${ride.price}
               </div>
-              <div className="text-sm text-gray-600 text-right mb-2">
-                {ride.seatsLeft} of {ride.seatsTotal} seats available
-              </div>
+              {ride.rideType === 'driver' && (
+                <div className="text-sm text-gray-600 text-right mb-2">
+                  {ride.seatsLeft} of {ride.seatsTotal} seats available
+                </div>
+              )}
               
               {/* Baggage space section */}
               {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
                 <div className="mb-3">
-                  <div className="text-xs text-gray-500 mb-1 text-right">Baggage space:</div>
                   <div className="flex items-center space-x-1">
                     {(ride.baggageCheckIn || 0) > 0 && (
                       <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">

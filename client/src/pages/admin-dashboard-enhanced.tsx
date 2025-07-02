@@ -318,10 +318,11 @@ export default function AdminDashboardEnhanced() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="rides">Rides ({rides.length})</TabsTrigger>
           <TabsTrigger value="requests">Requests ({requests.length})</TabsTrigger>
+          <TabsTrigger value="insurance">Insurance</TabsTrigger>
           <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
           <TabsTrigger value="database">Database</TabsTrigger>
         </TabsList>
@@ -645,6 +646,41 @@ export default function AdminDashboardEnhanced() {
                 ))}
               </TableBody>
             </Table>
+          </Card>
+        </TabsContent>
+
+        {/* Insurance Tab */}
+        <TabsContent value="insurance" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Insurance Verification Management</h3>
+            <Button 
+              onClick={handleRefresh} 
+              disabled={refreshing}
+              variant="outline"
+            >
+              {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Refresh
+            </Button>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Insurance Verifications</CardTitle>
+              <CardDescription>
+                Drivers awaiting insurance verification to post rides
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Insurance verification system is now integrated. 
+                Users can upload insurance documents through their profile page, 
+                and admins can approve/reject submissions through the API endpoints:
+                <br />
+                • GET /api/admin/insurance/pending - View pending submissions
+                <br />
+                • PATCH /api/admin/insurance/:userId/verify - Approve/reject submissions
+              </p>
+            </CardContent>
           </Card>
         </TabsContent>
 

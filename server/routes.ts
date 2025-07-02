@@ -2844,6 +2844,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Insurance verification endpoints
+  app.post('/api/users/insurance', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { insuranceProvider, insurancePolicyNumber, insuranceExpirationDate } = req.body;
+
+      // Validate required fields
+      if (!insuranceProvider || !insurancePolicyNumber || !insuranceExpirationDate) {
+        return res.status(400).json({ message: 'All insurance fields are required' });
+      }
+
+      // Validate expiration date is in the future
+      const expirationDate = new Date(insuranceExpirationDate);
+      if (expirationDate <= new Date()) {
+        return res.status(400).json({ message: 'Insurance expiration date must be in the future' });
+      }
+
+      // Update user insurance information
+      const updatedUser = await storage.updateUser(userId, {
+        insuranceProvider,
+        insurancePolicyNumber,
+        insuranceExpirationDate: expirationDate,
+        insuranceVerified: false, // Reset verification status
+        insuranceVerificationDate: null
+      });
+
+      if (!updatedUser) {
+        return res.status(500).json({ message: 'Failed to update insurance information' });
+      }
+
+      res.json({ 
+        message: 'Insurance information submitted successfully',
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error updating insurance:', error);
+      res.status(500).json({ message: 'Failed to update insurance information' });
+    }
+  });
+
+  app.get('/api/users/insurance/status', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUserByFirebaseUid(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const insuranceStatus = {
+        hasInsurance: !!(user.insuranceProvider && user.insurancePolicyNumber && user.insuranceExpirationDate),
+        isVerified: user.insuranceVerified || false,
+        provider: user.insuranceProvider,
+        policyNumber: user.insurancePolicyNumber,
+        expirationDate: user.insuranceExpirationDate,
+        verificationDate: user.insuranceVerificationDate
+      };
+
+      res.json(insuranceStatus);
+    } catch (error) {
+      console.error('Error getting insurance status:', error);
+      res.status(500).json({ message: 'Failed to get insurance status' });
+    }
+  });
+
   // Admin middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -2871,6 +2943,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin stats error:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Admin insurance verification endpoints
+  app.get('/api/admin/insurance/pending', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const pendingVerifications = await storage.executeSQL(`
+        SELECT 
+          id, firebase_uid, display_name, email, phone,
+          insurance_provider, insurance_policy_number, insurance_expiration_date,
+          insurance_verified, created_at
+        FROM users 
+        WHERE insurance_provider IS NOT NULL 
+        AND insurance_policy_number IS NOT NULL 
+        AND insurance_expiration_date IS NOT NULL
+        AND (insurance_verified IS NULL OR insurance_verified = false)
+        ORDER BY created_at DESC
+      `);
+      
+      res.json(pendingVerifications);
+    } catch (error) {
+      console.error('Error getting pending insurance verifications:', error);
+      res.status(500).json({ message: 'Failed to get pending verifications' });
+    }
+  });
+
+  app.patch('/api/admin/insurance/:userId/verify', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { verified, notes } = req.body;
+
+      const user = await storage.getUserByFirebaseUid(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const updateData: any = {
+        insuranceVerified: verified
+      };
+
+      if (verified) {
+        updateData.insuranceVerificationDate = new Date();
+      }
+
+      const updatedUser = await storage.updateUser(userId, updateData);
+
+      // Send SMS notification to user about verification status
+      if (user.phone && twilioService) {
+        try {
+          const statusMessage = verified 
+            ? '✅ Your insurance has been verified! You can now post rides on Trek. Visit https://jointrek.com/profile'
+            : '❌ Your insurance verification was rejected. Please check your information and resubmit. Visit https://jointrek.com/profile';
+          
+          await twilioService.sendSMS({
+            to: user.phone,
+            message: statusMessage
+          });
+        } catch (smsError) {
+          console.error('Error sending insurance verification SMS:', smsError);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Insurance ${verified ? 'verified' : 'rejected'} successfully`,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error updating insurance verification:', error);
+      res.status(500).json({ message: 'Failed to update insurance verification' });
     }
   });
 

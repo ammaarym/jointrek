@@ -16,6 +16,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { InsuranceVerification } from '@/components/insurance-verification';
 import { INTEREST_TAGS, MAX_INTEREST_TAGS } from '@shared/constants';
 
 // Helper function to format display name (convert "Last, First" to "First Last")
@@ -1340,6 +1341,17 @@ export default function Profile() {
           )}
         </CardContent>
       </Card>
+
+      {/* Insurance Verification Section */}
+      <InsuranceVerification 
+        currentInsurance={userData ? {
+          insuranceProvider: userData.insuranceProvider,
+          insurancePolicyNumber: userData.insurancePolicyNumber,
+          insuranceExpirationDate: userData.insuranceExpirationDate,
+          insuranceVerified: userData.insuranceVerified
+        } : undefined}
+        onUpdate={refetchUser}
+      />
 
       {/* Payment Methods Section */}
       <Card id="payment-methods-section">

@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FaCarSide, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
+import { FileText } from 'lucide-react';
 
 interface DriverStatus {
   isOnboarded: boolean;
@@ -55,6 +56,8 @@ export default function PostRidePostgres() {
   const { showErrorFromException } = useErrorToast();
   const [driverStatus, setDriverStatus] = useState<DriverStatus | null>(null);
   const [checkingDriverStatus, setCheckingDriverStatus] = useState(false);
+  const [insuranceStatus, setInsuranceStatus] = useState<{ verified: boolean } | null>(null);
+  const [checkingInsurance, setCheckingInsurance] = useState(false);
   
   // Form state - auto-select passenger tab if on request-ride route
   const [rideType, setRideType] = useState<'driver' | 'passenger'>(
@@ -66,10 +69,11 @@ export default function PostRidePostgres() {
     setRideType(location === '/request-ride' ? 'passenger' : 'driver');
   }, [location]);
 
-  // Check driver status when switching to driver mode
+  // Check driver status and insurance when switching to driver mode
   useEffect(() => {
     if (rideType === 'driver' && currentUser) {
       checkDriverStatus();
+      checkInsuranceStatus();
     }
   }, [rideType, currentUser]);
 
@@ -95,6 +99,31 @@ export default function PostRidePostgres() {
       showErrorFromException(error, 'driver_onboarding');
     } finally {
       setCheckingDriverStatus(false);
+    }
+  };
+
+  const checkInsuranceStatus = async () => {
+    if (!currentUser) return;
+
+    setCheckingInsurance(true);
+    try {
+      const response = await fetch('/api/users/insurance/status', {
+        headers: {
+          'x-user-id': currentUser.uid,
+          'x-user-email': currentUser.email || '',
+          'x-user-name': currentUser.displayName || ''
+        }
+      });
+
+      if (response.ok) {
+        const status = await response.json();
+        setInsuranceStatus(status);
+      }
+    } catch (error) {
+      console.error('Error checking insurance status:', error);
+      showErrorFromException(error, 'insurance_check');
+    } finally {
+      setCheckingInsurance(false);
     }
   };
   const [origin, setOrigin] = useState('Gainesville');
@@ -212,6 +241,17 @@ export default function PostRidePostgres() {
       toast({
         title: "Missing Information",
         description: "Please fill out all required fields",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check insurance verification for drivers
+    if (rideType === 'driver' && insuranceStatus && !insuranceStatus.verified) {
+      toast({
+        title: "Insurance Verification Required",
+        description: "You must verify your auto insurance before posting rides. Please go to your profile to complete verification.",
         variant: "destructive"
       });
       setIsSubmitting(false);
@@ -343,6 +383,34 @@ export default function PostRidePostgres() {
       <h1 className="text-3xl font-bold mb-6">
         {rideType === 'passenger' ? 'Request a Ride' : 'Post a Ride'}
       </h1>
+
+      {/* Insurance Verification Warning for Drivers */}
+      {rideType === 'driver' && insuranceStatus && !insuranceStatus.verified && (
+        <Card className="mb-6 bg-yellow-50 border-yellow-200">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <FileText className="w-4 h-4 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-yellow-800 mb-2">
+                  Insurance Verification Required
+                </h3>
+                <p className="text-yellow-700 text-sm mb-4">
+                  You must verify your auto insurance before posting rides. This ensures passenger safety and meets Trek's driver requirements.
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => setLocation('/profile')}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  Verify Insurance Now
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <form onSubmit={handleSubmit}>
         <Card className="mb-6">

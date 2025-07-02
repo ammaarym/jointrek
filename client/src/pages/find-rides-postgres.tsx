@@ -628,7 +628,7 @@ export default function FindRidesPostgres() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Available Drivers
+                Drivers
               </button>
               <button
                 onClick={() => setRideTypeFilter('passenger')}
@@ -638,7 +638,7 @@ export default function FindRidesPostgres() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Available Passengers
+                Passengers
               </button>
             </div>
             

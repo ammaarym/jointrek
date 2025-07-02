@@ -524,19 +524,19 @@ export default function Home() {
                 icon: User,
                 title: "Sign Up",
                 description:
-                  "Create an account using your UF email to join the Trek community.",
+                  "Create an account using your UF email to join the Trek community",
               },
               {
                 icon: MapPin,
                 title: "Find or Post Rides",
                 description:
-                  "Browse available rides or offer a ride to fellow students. Match with students who share your interests.",
+                  "Browse available rides or offer a ride to fellow students with shared interests",
               },
               {
                 icon: CarTaxiFront,
                 title: "Travel Safe",
                 description:
-                  "Connect with verified students and enjoy secure, convenient transportation.",
+                  "Connect with verified students and enjoy secure, convenient transportation",
               },
             ].map((step, index) => (
               <motion.div
@@ -590,7 +590,7 @@ export default function Home() {
                 icon: UserCheck,
                 title: "Verified Students",
                 description:
-                  "All passengers must verify with UF email addresses. All drivers must verify identity with a government-issued ID.",
+                  "All drivers must verify with UF email addresses and government-issued IDs.",
               },
               {
                 icon: Lock,

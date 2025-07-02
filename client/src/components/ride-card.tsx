@@ -56,7 +56,7 @@ export default function RideCard({
   onRequestRide,
   showRequestButton = false,
   isRequested = false,
-  rideTypeFilter = 'driver',
+  rideTypeFilter = "driver",
   isApproved = false,
   isRejected = false,
   isCancelled = false,
@@ -94,7 +94,7 @@ export default function RideCard({
         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
         onClick={() => setDetailsOpen(true)}
       >
-        <div className="p-5 pb-6">
+        <div className="p-5 pb-8">
           {/* Mobile Layout */}
           <div className="flex flex-col md:hidden gap-4">
             {/* Driver info */}
@@ -132,22 +132,25 @@ export default function RideCard({
                   </div>
                 </div>
               </div>
-              
+
               {/* Interest Tags */}
-              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                <div className="mt-3">
-                  <div className="flex flex-wrap gap-1">
-                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
-                      <span 
-                        key={index}
-                        className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+              {(ride.driver as any).interestTags &&
+                (ride.driver as any).interestTags.length > 0 && (
+                  <div className="mt-3">
+                    <div className="flex flex-wrap gap-1">
+                      {(ride.driver as any).interestTags.map(
+                        (tag: string, index: number) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ),
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
 
             {/* Route info with integrated price and seats */}
@@ -174,7 +177,7 @@ export default function RideCard({
                         {formatTime(ride.departureTime)}
                       </div>
                     </div>
-                    
+
                     {/* Price and seats info moved to right side */}
                     <div className="flex flex-col items-end ml-4">
                       <div className="text-2xl font-bold text-neutral-900 mb-1">
@@ -185,7 +188,7 @@ export default function RideCard({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-end justify-between">
                     <div>
                       <span className="text-neutral-900 font-medium">
@@ -201,23 +204,28 @@ export default function RideCard({
                         {getEstimatedArrival() || formatTime(ride.arrivalTime)}
                       </div>
                     </div>
-                    
+
                     {/* Gender preference badge and baggage info */}
                     <div className="flex flex-col items-end space-y-1">
                       {ride.genderPreference === "female_only" ? (
                         <div className="flex items-center px-2 py-1 rounded-full bg-pink-50 border border-pink-200">
                           <User className="w-3 h-3 mr-1 text-pink-600" />
-                          <span className="text-xs font-medium text-pink-700">Female only</span>
+                          <span className="text-xs font-medium text-pink-700">
+                            Female only
+                          </span>
                         </div>
                       ) : ride.genderPreference === "male_only" ? (
                         <div className="flex items-center px-2 py-1 rounded-full bg-blue-50 border border-blue-200">
                           <User className="w-3 h-3 mr-1 text-blue-600" />
-                          <span className="text-xs font-medium text-blue-700">Male only</span>
+                          <span className="text-xs font-medium text-blue-700">
+                            Male only
+                          </span>
                         </div>
                       ) : null}
-                      
+
                       {/* Baggage Information - compact display */}
-                      {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+                      {((ride.baggageCheckIn || 0) > 0 ||
+                        (ride.baggagePersonal || 0) > 0) && (
                         <div className="flex items-center space-x-1 mb-4">
                           {(ride.baggageCheckIn || 0) > 0 && (
                             <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
@@ -254,59 +262,71 @@ export default function RideCard({
                   </Button>
                 </div>
               )}
-              
+
               {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
                     className={`block mt-4 px-4 py-2 rounded-md font-medium transition ${
                       isApproved
-                        ? "bg-green-600 text-white hover:bg-green-700" 
+                        ? "bg-green-600 text-white hover:bg-green-700"
                         : isRejected
-                        ? "bg-red-500 text-white cursor-not-allowed"
-                        : isCancelled
-                        ? "bg-gray-500 text-white cursor-not-allowed"
-                        : existingDriverOffer && rideTypeFilter === 'passenger'
-                        ? existingDriverOffer.status === 'pending'
-                          ? "bg-orange-500 text-white cursor-not-allowed"
-                          : existingDriverOffer.status === 'accepted'
-                          ? "bg-green-600 text-white cursor-not-allowed"
-                          : existingDriverOffer.status === 'rejected'
                           ? "bg-red-500 text-white cursor-not-allowed"
-                          : "bg-primary text-white hover:bg-primary/90"
-                        : isRequested 
-                        ? "bg-orange-500 text-white hover:bg-orange-600" 
-                        : "bg-primary text-white hover:bg-primary/90"
+                          : isCancelled
+                            ? "bg-gray-500 text-white cursor-not-allowed"
+                            : existingDriverOffer &&
+                                rideTypeFilter === "passenger"
+                              ? existingDriverOffer.status === "pending"
+                                ? "bg-orange-500 text-white cursor-not-allowed"
+                                : existingDriverOffer.status === "accepted"
+                                  ? "bg-green-600 text-white cursor-not-allowed"
+                                  : existingDriverOffer.status === "rejected"
+                                    ? "bg-red-500 text-white cursor-not-allowed"
+                                    : "bg-primary text-white hover:bg-primary/90"
+                              : isRequested
+                                ? "bg-orange-500 text-white hover:bg-orange-600"
+                                : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled && 
-                          !(existingDriverOffer && rideTypeFilter === 'passenger')) {
+                      if (
+                        onRequestRide &&
+                        !isRequested &&
+                        !isApproved &&
+                        !isRejected &&
+                        !isCancelled &&
+                        !(existingDriverOffer && rideTypeFilter === "passenger")
+                      ) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested || isApproved || isRejected || isCancelled || 
-                             (existingDriverOffer && rideTypeFilter === 'passenger')}
+                    disabled={
+                      isRequested ||
+                      isApproved ||
+                      isRejected ||
+                      isCancelled ||
+                      (existingDriverOffer && rideTypeFilter === "passenger")
+                    }
                   >
                     {isApproved
                       ? "Ride Approved"
                       : isRejected
-                      ? "Request Denied"
-                      : isCancelled
-                      ? "CANCELLED"
-                      : existingDriverOffer && rideTypeFilter === 'passenger'
-                      ? existingDriverOffer.status === 'pending'
-                        ? `Offer Sent ($${existingDriverOffer.price})`
-                        : existingDriverOffer.status === 'accepted'
-                        ? `Offer Accepted ($${existingDriverOffer.price})`
-                        : existingDriverOffer.status === 'rejected'
-                        ? `Offer Rejected ($${existingDriverOffer.price})`
-                        : "Offer a Trek"
-                      : isRequested 
-                      ? "Request Sent" 
-                      : rideTypeFilter === 'passenger' 
-                        ? "Offer a Trek" 
-                        : "Request a Trek"
-                    }
+                        ? "Request Denied"
+                        : isCancelled
+                          ? "CANCELLED"
+                          : existingDriverOffer &&
+                              rideTypeFilter === "passenger"
+                            ? existingDriverOffer.status === "pending"
+                              ? `Offer Sent ($${existingDriverOffer.price})`
+                              : existingDriverOffer.status === "accepted"
+                                ? `Offer Accepted ($${existingDriverOffer.price})`
+                                : existingDriverOffer.status === "rejected"
+                                  ? `Offer Rejected ($${existingDriverOffer.price})`
+                                  : "Offer a Trek"
+                            : isRequested
+                              ? "Request Sent"
+                              : rideTypeFilter === "passenger"
+                                ? "Offer a Trek"
+                                : "Request a Trek"}
                   </Button>
                 </div>
               )}
@@ -332,7 +352,7 @@ export default function RideCard({
                       .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                
+
                 <div>
                   <h4 className="font-semibold text-black">
                     {ride.driver.name}
@@ -344,27 +364,30 @@ export default function RideCard({
                   </div>
                 </div>
               </div>
-              
+
               {/* Interest Tags in rows below driver info */}
-              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                <div className="flex flex-wrap gap-1 max-w-[240px] mt-1">
-                  {(ride.driver as any).interestTags.map((tag: string, index: number) => (
-                    <span 
-                      key={index}
-                      className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {(ride.driver as any).interestTags &&
+                (ride.driver as any).interestTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 max-w-[240px] mt-1">
+                    {(ride.driver as any).interestTags.map(
+                      (tag: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                )}
             </div>
 
             {/* Route information - centered */}
             <div className="flex items-start flex-1 justify-center mx-8 h-24">
-              <div className="flex flex-col items-center mr-3 h-full pt-1">
+              <div className="flex flex-col items-center mr-3 pt-[3px]">
                 <div className="w-3 h-3 rounded-full bg-black mt-1"></div>
-                <div className="flex-1 w-0.5 bg-neutral-300"></div>
+                <div className="w-0.5 h-[55px] bg-neutral-300"></div>
                 <div className="w-3 h-3 rounded-full bg-primary"></div>
               </div>
               <div className="flex-1 max-w-[300px]">
@@ -412,14 +435,15 @@ export default function RideCard({
               <div className="text-2xl font-bold text-neutral-900 mb-1">
                 ${ride.price}
               </div>
-              {ride.rideType === 'driver' && (
+              {ride.rideType === "driver" && (
                 <div className="text-sm text-gray-600 text-right mb-2">
                   {ride.seatsLeft} of {ride.seatsTotal} seats available
                 </div>
               )}
-              
+
               {/* Baggage space section */}
-              {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+              {((ride.baggageCheckIn || 0) > 0 ||
+                (ride.baggagePersonal || 0) > 0) && (
                 <div className="mb-3">
                   <div className="flex items-center space-x-1">
                     {(ride.baggageCheckIn || 0) > 0 && (
@@ -435,20 +459,24 @@ export default function RideCard({
                   </div>
                 </div>
               )}
-              
+
               {/* Gender preference badge */}
               {ride.genderPreference === "female_only" ? (
                 <div className="flex items-center px-2 py-1 rounded-full bg-pink-50 border border-pink-200 mb-3">
                   <User className="w-3 h-3 mr-1 text-pink-600" />
-                  <span className="text-xs font-medium text-pink-700">Female only</span>
+                  <span className="text-xs font-medium text-pink-700">
+                    Female only
+                  </span>
                 </div>
               ) : ride.genderPreference === "male_only" ? (
                 <div className="flex items-center px-2 py-1 rounded-full bg-blue-50 border border-blue-200 mb-3">
                   <User className="w-3 h-3 mr-1 text-blue-600" />
-                  <span className="text-xs font-medium text-blue-700">Male only</span>
+                  <span className="text-xs font-medium text-blue-700">
+                    Male only
+                  </span>
                 </div>
               ) : null}
-              
+
               {/* Action button */}
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
@@ -465,65 +493,76 @@ export default function RideCard({
                   </Button>
                 </div>
               )}
-              
+
               {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
                     className={`px-4 py-2 rounded-md font-medium transition ${
                       isApproved
-                        ? "bg-green-600 text-white hover:bg-green-700" 
+                        ? "bg-green-600 text-white hover:bg-green-700"
                         : isRejected
-                        ? "bg-red-500 text-white cursor-not-allowed"
-                        : isCancelled
-                        ? "bg-gray-500 text-white cursor-not-allowed"
-                        : existingDriverOffer && rideTypeFilter === 'passenger'
-                        ? existingDriverOffer.status === 'pending'
-                          ? "bg-orange-500 text-white cursor-not-allowed"
-                          : existingDriverOffer.status === 'accepted'
-                          ? "bg-green-600 text-white cursor-not-allowed"
-                          : existingDriverOffer.status === 'rejected'
                           ? "bg-red-500 text-white cursor-not-allowed"
-                          : "bg-primary text-white hover:bg-primary/90"
-                        : isRequested 
-                        ? "bg-orange-500 text-white hover:bg-orange-600" 
-                        : "bg-primary text-white hover:bg-primary/90"
+                          : isCancelled
+                            ? "bg-gray-500 text-white cursor-not-allowed"
+                            : existingDriverOffer &&
+                                rideTypeFilter === "passenger"
+                              ? existingDriverOffer.status === "pending"
+                                ? "bg-orange-500 text-white cursor-not-allowed"
+                                : existingDriverOffer.status === "accepted"
+                                  ? "bg-green-600 text-white cursor-not-allowed"
+                                  : existingDriverOffer.status === "rejected"
+                                    ? "bg-red-500 text-white cursor-not-allowed"
+                                    : "bg-primary text-white hover:bg-primary/90"
+                              : isRequested
+                                ? "bg-orange-500 text-white hover:bg-orange-600"
+                                : "bg-primary text-white hover:bg-primary/90"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled && 
-                          !(existingDriverOffer && rideTypeFilter === 'passenger')) {
+                      if (
+                        onRequestRide &&
+                        !isRequested &&
+                        !isApproved &&
+                        !isRejected &&
+                        !isCancelled &&
+                        !(existingDriverOffer && rideTypeFilter === "passenger")
+                      ) {
                         onRequestRide(Number(ride.id));
                       }
                     }}
-                    disabled={isRequested || isApproved || isRejected || isCancelled || 
-                             (existingDriverOffer && rideTypeFilter === 'passenger')}
+                    disabled={
+                      isRequested ||
+                      isApproved ||
+                      isRejected ||
+                      isCancelled ||
+                      (existingDriverOffer && rideTypeFilter === "passenger")
+                    }
                   >
                     {isApproved
                       ? "Ride Approved"
                       : isRejected
-                      ? "Request Denied"
-                      : isCancelled
-                      ? "CANCELLED"
-                      : existingDriverOffer && rideTypeFilter === 'passenger'
-                      ? existingDriverOffer.status === 'pending'
-                        ? `Offer Sent ($${existingDriverOffer.price})`
-                        : existingDriverOffer.status === 'accepted'
-                        ? `Offer Accepted ($${existingDriverOffer.price})`
-                        : existingDriverOffer.status === 'rejected'
-                        ? `Offer Rejected ($${existingDriverOffer.price})`
-                        : "Offer a Trek"
-                      : isRequested 
-                      ? "Request Sent" 
-                      : rideTypeFilter === 'passenger' 
-                        ? "Offer a Trek" 
-                        : "Request a Trek"
-                    }
+                        ? "Request Denied"
+                        : isCancelled
+                          ? "CANCELLED"
+                          : existingDriverOffer &&
+                              rideTypeFilter === "passenger"
+                            ? existingDriverOffer.status === "pending"
+                              ? `Offer Sent ($${existingDriverOffer.price})`
+                              : existingDriverOffer.status === "accepted"
+                                ? `Offer Accepted ($${existingDriverOffer.price})`
+                                : existingDriverOffer.status === "rejected"
+                                  ? `Offer Rejected ($${existingDriverOffer.price})`
+                                  : "Offer a Trek"
+                            : isRequested
+                              ? "Request Sent"
+                              : rideTypeFilter === "passenger"
+                                ? "Offer a Trek"
+                                : "Request a Trek"}
                   </Button>
                 </div>
               )}
             </div>
           </div>
-
         </div>
       </div>
 
@@ -584,9 +623,9 @@ export default function RideCard({
                 <h5 className="font-medium text-neutral-900 mb-3">
                   Contact Information
                 </h5>
-                
+
                 {/* Only show contact info if user is driver or request is approved */}
-                {(isDriverUser || isApproved) ? (
+                {isDriverUser || isApproved ? (
                   <div className="grid grid-cols-1 gap-3">
                     {/* Show phone first if available */}
                     {(ride.driver.contactInfo?.phone || ride.driver.phone) && (
@@ -604,7 +643,8 @@ export default function RideCard({
                         <div className="flex items-center text-neutral-700">
                           <Mail className="w-5 h-5 mr-3 text-primary" />
                           <span className="font-medium">
-                            {ride.driver.contactInfo?.email || ride.driver.email}
+                            {ride.driver.contactInfo?.email ||
+                              ride.driver.email}
                           </span>
                         </div>
                       )}
@@ -622,26 +662,26 @@ export default function RideCard({
                       </div>
                     )}
 
-                  {/* Show Snapchat */}
-                  {(ride.driver.contactInfo?.snapchat ||
-                    ride.driver.snapchat) && (
-                    <div className="flex items-center text-neutral-700">
-                      <svg
-                        className="w-5 h-5 mr-3 text-primary"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z" />
-                      </svg>
-                      <span className="font-medium">
-                        {ride.driver.contactInfo?.snapchat ||
-                          ride.driver.snapchat}
-                      </span>
-                    </div>
-                  )}
+                    {/* Show Snapchat */}
+                    {(ride.driver.contactInfo?.snapchat ||
+                      ride.driver.snapchat) && (
+                      <div className="flex items-center text-neutral-700">
+                        <svg
+                          className="w-5 h-5 mr-3 text-primary"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M12.166 3C7.482 3.071 4.37 4.133 4.37 11.5c0 1.433.201 2.467.37 3.25.169.783.37 1.216.37 2 0 .5-.268.834-.669 1.166-.401.333-.835.667-.835 1.5 0 .667.5 1.084 1.5 1.084 1.146 0 1.917-.5 3.167-.5s2.083.5 3.333.5 2.083-.5 3.333-.5 2.021.5 3.167.5c1 0 1.5-.417 1.5-1.084 0-.833-.434-1.167-.835-1.5-.401-.332-.669-.666-.669-1.166 0-.784.201-1.217.37-2s.37-1.817.37-3.25c0-7.367-3.112-8.429-7.796-8.5z" />
+                        </svg>
+                        <span className="font-medium">
+                          {ride.driver.contactInfo?.snapchat ||
+                            ride.driver.snapchat}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-4 text-gray-500">
@@ -655,25 +695,28 @@ export default function RideCard({
                   </div>
                 )}
               </div>
-              
+
               {/* Interest Tags Section */}
-              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
-                  <h5 className="font-medium text-neutral-900 mb-3">
-                    Driver Interests
-                  </h5>
-                  <div className="flex flex-wrap gap-2">
-                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
-                      <span 
-                        key={index}
-                        className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+              {(ride.driver as any).interestTags &&
+                (ride.driver as any).interestTags.length > 0 && (
+                  <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
+                    <h5 className="font-medium text-neutral-900 mb-3">
+                      Driver Interests
+                    </h5>
+                    <div className="flex flex-wrap gap-2">
+                      {(ride.driver as any).interestTags.map(
+                        (tag: string, index: number) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ),
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
 
             {/* Ride Details Section */}
@@ -687,16 +730,12 @@ export default function RideCard({
                 <div>
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">From</div>
-                    <div className="font-medium">
-                      {ride.origin.city}
-                    </div>
+                    <div className="font-medium">{ride.origin.city}</div>
                   </div>
 
                   <div className="mb-3">
                     <div className="text-neutral-500 text-sm">To</div>
-                    <div className="font-medium">
-                      {ride.destination.city}
-                    </div>
+                    <div className="font-medium">{ride.destination.city}</div>
                   </div>
                 </div>
 
@@ -766,46 +805,59 @@ export default function RideCard({
                 </div>
               </div>
 
-              {((ride.carMake || ride.carModel) && ride.rideType === "driver") && (
-                <div className="mt-3">
-                  <div className="text-neutral-500 text-sm">Vehicle</div>
-                  <div className="font-medium">
-                    {ride.carYear && `${ride.carYear} `}
-                    {ride.carMake && `${ride.carMake} `}
-                    {ride.carModel && ride.carModel}
+              {(ride.carMake || ride.carModel) &&
+                ride.rideType === "driver" && (
+                  <div className="mt-3">
+                    <div className="text-neutral-500 text-sm">Vehicle</div>
+                    <div className="font-medium">
+                      {ride.carYear && `${ride.carYear} `}
+                      {ride.carMake && `${ride.carMake} `}
+                      {ride.carModel && ride.carModel}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Baggage Information */}
-              {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+              {((ride.baggageCheckIn || 0) > 0 ||
+                (ride.baggagePersonal || 0) > 0) && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                   <div className="text-neutral-500 text-sm mb-2">
-                    {ride.rideType === 'driver' ? 'Available Baggage Space' : 'Baggage Requirements'}
+                    {ride.rideType === "driver"
+                      ? "Available Baggage Space"
+                      : "Baggage Requirements"}
                   </div>
                   <div className="space-y-1">
                     {(ride.baggageCheckIn || 0) > 0 && (
                       <div className="flex items-center text-sm">
                         <span className="font-medium text-blue-700">
-                          {ride.baggageCheckIn} check-in bag{(ride.baggageCheckIn || 0) > 1 ? 's' : ''}
-                          {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
+                          {ride.baggageCheckIn} check-in bag
+                          {(ride.baggageCheckIn || 0) > 1 ? "s" : ""}
+                          {ride.rideType === "driver"
+                            ? " (can accommodate)"
+                            : ""}
                         </span>
-                        <span className="text-neutral-500 ml-2">(large luggage)</span>
+                        <span className="text-neutral-500 ml-2">
+                          (large luggage)
+                        </span>
                       </div>
                     )}
                     {(ride.baggagePersonal || 0) > 0 && (
                       <div className="flex items-center text-sm">
                         <span className="font-medium text-blue-700">
-                          {ride.baggagePersonal} personal bag{(ride.baggagePersonal || 0) > 1 ? 's' : ''}
-                          {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
+                          {ride.baggagePersonal} personal bag
+                          {(ride.baggagePersonal || 0) > 1 ? "s" : ""}
+                          {ride.rideType === "driver"
+                            ? " (can accommodate)"
+                            : ""}
                         </span>
-                        <span className="text-neutral-500 ml-2">(backpacks, smaller bags)</span>
+                        <span className="text-neutral-500 ml-2">
+                          (backpacks, smaller bags)
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
-
             </div>
           </div>
 
@@ -829,8 +881,6 @@ export default function RideCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
     </>
   );
 }

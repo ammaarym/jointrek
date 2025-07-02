@@ -234,6 +234,7 @@ DATABASE_URL
 - July 2, 2025: Optimized ride card layout for compact display - moved price and seat information to the right side next to route information, reduced vertical height from 28 units to 20 units, integrated gender preference badges and baggage information inline with destinations, eliminated redundant spacing and created more efficient use of card real estate across all ride card components
 - July 2, 2025: Fixed name formatting system - created comprehensive name formatter utility to convert "Last, First" format to "First Last" format during user signup and throughout application, updated 13 existing user records in database via SQL migration, standardized SMS message formatting to use consistent "First Last" naming convention, and removed "Needed:" text prefix from baggage information badges for cleaner UI
 - July 2, 2025: Optimized desktop ride card layout for better visual hierarchy - positioned interest tags with increased spacing below driver info, aligned beige destination dot with Miami text, removed seats availability display from passenger ride cards, and removed "Baggage space:" label text for cleaner baggage badge presentation
+- July 2, 2025: Simplified ride type filter tabs - removed "Available" prefix from "Available Drivers" and "Available Passengers" buttons, now showing simply "Drivers" and "Passengers" for cleaner interface, and increased ride card bottom padding from pb-6 to pb-8 for better visual spacing
 
 ## User Preferences
 

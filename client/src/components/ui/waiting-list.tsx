@@ -17,8 +17,8 @@ interface WaitlistComponentProps {
 }
 
 export default function WaitlistComponent({
-  title = "Join our waitlist",
-  subtitle = "Be the first to know when we launch",
+  title,
+  subtitle,
   placeholder = "Enter your email address",
   buttonText = {
     idle: "Join Waitlist",

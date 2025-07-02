@@ -758,6 +758,7 @@ export default function Home() {
             {/* Waitlist Component */}
             <div className="flex items-center justify-center mb-6">
               <WaitlistComponent
+                title=""
                 subtitle=""
                 placeholder="Enter your email address"
                 buttonText={{

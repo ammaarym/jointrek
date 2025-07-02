@@ -93,6 +93,17 @@ export interface IStorage {
   getTableData(tableName: string): Promise<any[]>;
   deleteRecord(tableName: string, id: number): Promise<void>;
   executeSQL(query: string): Promise<any[]>;
+
+  // Waitlist methods
+  createWaitlistEntry(data: any): Promise<any>;
+  getWaitlistByEmail(email: string): Promise<any>;
+  getAllWaitlistEntries(): Promise<any[]>;
+
+  // Poll methods
+  createPollVote(data: any): Promise<any>;
+  getPollVoteByIp(question: string, ip: string): Promise<any>;
+  getPollStats(question: string): Promise<any>;
+  getAllPollData(): Promise<any[]>;
 }
 
 // In-memory storage implementation
@@ -503,6 +514,36 @@ export class MemStorage implements IStorage {
 
   async deleteExpiredRides(): Promise<number> {
     return 0; // MemStorage stub - use PostgreSQL in production
+  }
+
+  // Waitlist methods (stubs)
+  async createWaitlistEntry(data: any): Promise<any> {
+    throw new Error("MemStorage waitlist methods not implemented - use PostgreSQL");
+  }
+
+  async getWaitlistByEmail(email: string): Promise<any> {
+    throw new Error("MemStorage waitlist methods not implemented - use PostgreSQL");
+  }
+
+  async getAllWaitlistEntries(): Promise<any[]> {
+    throw new Error("MemStorage waitlist methods not implemented - use PostgreSQL");
+  }
+
+  // Poll methods (stubs)
+  async createPollVote(data: any): Promise<any> {
+    throw new Error("MemStorage poll methods not implemented - use PostgreSQL");
+  }
+
+  async getPollVoteByIp(question: string, ip: string): Promise<any> {
+    throw new Error("MemStorage poll methods not implemented - use PostgreSQL");
+  }
+
+  async getPollStats(question: string): Promise<any> {
+    throw new Error("MemStorage poll methods not implemented - use PostgreSQL");
+  }
+
+  async getAllPollData(): Promise<any[]> {
+    throw new Error("MemStorage poll methods not implemented - use PostgreSQL");
   }
 }
 

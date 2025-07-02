@@ -3614,5 +3614,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === Waitlist Routes ===
+  
+  // Submit waitlist signup
+  app.post("/api/waitlist", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+      
+      // Check if email already exists
+      const existingEntry = await storage.getWaitlistByEmail(email);
+      if (existingEntry) {
+        return res.status(409).json({ message: "Email already on waitlist" });
+      }
+      
+      // Add to waitlist
+      const waitlistEntry = await storage.createWaitlistEntry({ email });
+      
+      res.status(201).json({ 
+        message: "Successfully added to waitlist", 
+        entry: waitlistEntry 
+      });
+    } catch (error) {
+      console.error("Error adding to waitlist:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get all waitlist entries (admin only)
+  app.get("/api/admin/waitlist", async (req, res) => {
+    try {
+      const waitlistEntries = await storage.getAllWaitlistEntries();
+      
+      res.json(waitlistEntries);
+    } catch (error) {
+      console.error("Error fetching waitlist:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

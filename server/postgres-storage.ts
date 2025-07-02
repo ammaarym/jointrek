@@ -13,6 +13,7 @@ import {
   driverOffers,
   complaints,
   pollVotes,
+  waitlist,
   type Ride,
   type InsertRide,
   type User,
@@ -37,6 +38,8 @@ import {
   type InsertComplaint,
   type PollVote,
   type InsertPollVote,
+  type Waitlist,
+  type InsertWaitlist,
   insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
@@ -1632,6 +1635,32 @@ export class PostgresStorage implements IStorage {
       .orderBy(desc(pollVotes.createdAt));
     
     return votes;
+  }
+
+  // === Waitlist Methods ===
+  
+  async createWaitlistEntry(data: InsertWaitlist): Promise<Waitlist> {
+    const [entry] = await db
+      .insert(waitlist)
+      .values(data)
+      .returning();
+    return entry;
+  }
+
+  async getWaitlistByEmail(email: string): Promise<Waitlist | undefined> {
+    const [entry] = await db
+      .select()
+      .from(waitlist)
+      .where(eq(waitlist.email, email));
+    return entry;
+  }
+
+  async getAllWaitlistEntries(): Promise<Waitlist[]> {
+    const entries = await db
+      .select()
+      .from(waitlist)
+      .orderBy(desc(waitlist.createdAt));
+    return entries;
   }
 }
 

@@ -44,12 +44,28 @@ export default function WaitlistComponent({
     setStatus("loading");
     
     try {
-      // Simulate API call - replace with actual waitlist API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setStatus("success");
-      setMessage("You've been added to our waitlist!");
-      setEmail("");
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setMessage("You've been added to our waitlist!");
+        setEmail("");
+      } else {
+        const errorData = await response.json();
+        if (response.status === 409) {
+          setStatus("error");
+          setMessage("Email already on waitlist");
+        } else {
+          setStatus("error");
+          setMessage(errorData.message || "Something went wrong. Please try again.");
+        }
+      }
     } catch (error) {
       setStatus("error");
       setMessage("Something went wrong. Please try again.");

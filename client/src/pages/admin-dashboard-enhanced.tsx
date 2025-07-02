@@ -89,6 +89,12 @@ interface AdminRequest {
   baggageNeeds?: number;
 }
 
+interface WaitlistEntry {
+  id: number;
+  email: string;
+  createdAt: string;
+}
+
 export default function AdminDashboardEnhanced() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -98,6 +104,7 @@ export default function AdminDashboardEnhanced() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [rides, setRides] = useState<AdminRide[]>([]);
   const [requests, setRequests] = useState<AdminRequest[]>([]);
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   
@@ -130,17 +137,19 @@ export default function AdminDashboardEnhanced() {
       setLoading(true);
       const headers = getAuthHeaders();
       
-      const [statsRes, usersRes, ridesRes, requestsRes] = await Promise.all([
+      const [statsRes, usersRes, ridesRes, requestsRes, waitlistRes] = await Promise.all([
         fetch('/api/admin/stats', { headers }),
         fetch('/api/admin/users', { headers }),
         fetch('/api/admin/rides', { headers }),
-        fetch('/api/admin/requests', { headers })
+        fetch('/api/admin/requests', { headers }),
+        fetch('/api/admin/waitlist', { headers })
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
       if (usersRes.ok) setUsers(await usersRes.json());
       if (ridesRes.ok) setRides(await ridesRes.json());
       if (requestsRes.ok) setRequests(await requestsRes.json());
+      if (waitlistRes.ok) setWaitlist(await waitlistRes.json());
 
     } catch (error) {
       toast({
@@ -309,10 +318,11 @@ export default function AdminDashboardEnhanced() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="rides">Rides ({rides.length})</TabsTrigger>
           <TabsTrigger value="requests">Requests ({requests.length})</TabsTrigger>
+          <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
           <TabsTrigger value="database">Database</TabsTrigger>
         </TabsList>
 
@@ -635,6 +645,72 @@ export default function AdminDashboardEnhanced() {
                 ))}
               </TableBody>
             </Table>
+          </Card>
+        </TabsContent>
+
+        {/* Waitlist Tab */}
+        <TabsContent value="waitlist" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search emails..." 
+                  className="pl-8 w-64"
+                />
+              </div>
+            </div>
+            <Button 
+              onClick={() => exportData(waitlist, 'waitlist')}
+              variant="outline" 
+              size="sm"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Waitlist Entries ({waitlist.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {waitlist.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No waitlist entries yet
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Joined</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {waitlist.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell className="font-medium">{entry.id}</TableCell>
+                        <TableCell>{entry.email}</TableCell>
+                        <TableCell>
+                          {new Date(entry.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
           </Card>
         </TabsContent>
 

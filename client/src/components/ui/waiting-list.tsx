@@ -101,12 +101,12 @@ export default function WaitlistComponent({
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`text-sm text-center ${
+            className={`text-center ${
               status === "success" 
-                ? "text-[#B8956B]" 
+                ? "text-[#8A6F47] text-base font-semibold" 
                 : status === "error" 
-                ? "text-red-600" 
-                : "text-stone-600"
+                ? "text-red-600 text-sm" 
+                : "text-stone-600 text-sm"
             }`}
           >
             {message}

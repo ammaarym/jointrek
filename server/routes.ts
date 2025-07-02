@@ -9,6 +9,7 @@ import apiRoutes from "./api";
 import { twilioService } from "./twilio-service";
 import crypto from "crypto";
 import Stripe from "stripe";
+import { formatDisplayName, formatNameForSMS } from "./utils/name-formatter";
 import { db } from "./db";
 import { rideRequests, rides } from "@shared/schema";
 import { and, eq, sql } from "drizzle-orm";
@@ -140,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = insertUserSchema.parse({
         firebaseUid: req.user.uid,
         email: req.user.email,
-        displayName: req.user.name || req.body.displayName,
+        displayName: formatDisplayName(req.user.name || req.body.displayName || 'Anonymous User'),
         photoUrl: req.user.picture || req.body.photoUrl,
         emailVerified: req.user.email_verified || false
       });

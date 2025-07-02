@@ -1,25 +1,9 @@
 import twilio from 'twilio';
+import { formatNameForSMS } from './utils/name-formatter';
 
 interface SMSData {
   to: string;
   message: string;
-}
-
-// Helper function to format names from "Last, First Middle" to "First Middle Last"
-function formatName(displayName: string): string {
-  if (!displayName) return displayName;
-  
-  // Check if name contains a comma (indicating "Last, First" format)
-  if (displayName.includes(',')) {
-    const parts = displayName.split(',').map(part => part.trim());
-    if (parts.length === 2) {
-      const [lastName, firstMiddle] = parts;
-      return `${firstMiddle} ${lastName}`;
-    }
-  }
-  
-  // If no comma, return as-is
-  return displayName;
 }
 
 class TwilioService {
@@ -100,7 +84,7 @@ class TwilioService {
     departureTime: string;
     seats: number;
   }): Promise<boolean> {
-    const formattedName = formatName(passengerName);
+    const formattedName = formatNameForSMS(passengerName);
     const message = `🚗 New ride request from ${formattedName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nSeats: ${rideDetails.seats}\n\nView details: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
@@ -116,7 +100,7 @@ class TwilioService {
     departureTime: string;
     driverPhone: string;
   }): Promise<boolean> {
-    const formattedName = formatName(driverName);
+    const formattedName = formatNameForSMS(driverName);
     const message = `✅ Your ride request approved by ${formattedName}!\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}\nDriver: ${formattedName} (${rideDetails.driverPhone})\n\nView details: https://jointrek.com/my-rides`;
     
     return this.sendSMS({
@@ -132,7 +116,7 @@ class TwilioService {
     departureTime: string;
     reason?: string;
   }): Promise<boolean> {
-    const formattedName = formatName(passengerName);
+    const formattedName = formatNameForSMS(passengerName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
     const message = `❌ ${formattedName} cancelled their ride request.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nView details: https://jointrek.com/my-rides`;
     
@@ -149,7 +133,7 @@ class TwilioService {
     departureTime: string;
     reason?: string;
   }): Promise<boolean> {
-    const formattedName = formatName(driverName);
+    const formattedName = formatNameForSMS(driverName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
     const message = `❌ ${formattedName} cancelled the ride.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind alternatives: https://jointrek.com/my-rides`;
     
@@ -166,7 +150,7 @@ class TwilioService {
     departureTime: string;
     reason?: string;
   }): Promise<boolean> {
-    const formattedName = formatName(driverName);
+    const formattedName = formatNameForSMS(driverName);
     const reasonText = rideDetails.reason ? `\n\nReason: ${rideDetails.reason}` : '';
     const message = `❌ Your ride request was rejected by ${formattedName}.\n\nRoute: ${rideDetails.origin} → ${rideDetails.destination}\nDeparture: ${rideDetails.departureTime}${reasonText}\n\nFind other rides: https://jointrek.com/my-rides`;
     

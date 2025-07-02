@@ -218,9 +218,6 @@ export default function RideCard({
                       {/* Baggage Information - compact display */}
                       {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
                         <div className="flex items-center space-x-1">
-                          <span className="text-xs text-neutral-500">
-                            {ride.rideType === 'driver' ? 'Space:' : 'Needed:'}
-                          </span>
                           {(ride.baggageCheckIn || 0) > 0 && (
                             <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
                               {ride.baggageCheckIn} check-in
@@ -260,7 +257,7 @@ export default function RideCard({
               {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
-                    className={`block mt-2 px-4 py-2 rounded-md font-medium transition ${
+                    className={`block mt-4 px-4 py-2 rounded-md font-medium transition ${
                       isApproved
                         ? "bg-green-600 text-white hover:bg-green-700" 
                         : isRejected

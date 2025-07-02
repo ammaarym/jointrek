@@ -37,7 +37,7 @@ export function StarBorder({ children, className, onClick }: StarBorderProps) {
             `,
           }}
         />
-        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full backdrop-blur-xl px-12 py-5 text-2xl font-bold transition-transform hover:scale-105" style={{ backgroundColor: '#F5F0E8', color: '#8A6F47' }}>
+        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full backdrop-blur-xl px-8 py-3 text-lg font-bold transition-transform hover:scale-105" style={{ backgroundColor: '#F5F0E8', color: '#8A6F47' }}>
           {children}
         </div>
       </div>

@@ -742,7 +742,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:bg-white/90 transition-colors"
               >
-                <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#0077B5] rounded-md flex items-center justify-center">
                   <span className="text-white text-sm font-bold">in</span>
                 </div>
                 <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>

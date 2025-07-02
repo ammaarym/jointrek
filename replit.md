@@ -235,6 +235,7 @@ DATABASE_URL
 - July 2, 2025: Fixed name formatting system - created comprehensive name formatter utility to convert "Last, First" format to "First Last" format during user signup and throughout application, updated 13 existing user records in database via SQL migration, standardized SMS message formatting to use consistent "First Last" naming convention, and removed "Needed:" text prefix from baggage information badges for cleaner UI
 - July 2, 2025: Optimized desktop ride card layout for better visual hierarchy - positioned interest tags with increased spacing below driver info, aligned beige destination dot with Miami text, removed seats availability display from passenger ride cards, and removed "Baggage space:" label text for cleaner baggage badge presentation
 - July 2, 2025: Simplified ride type filter tabs - removed "Available" prefix from "Available Drivers" and "Available Passengers" buttons, now showing simply "Drivers" and "Passengers" for cleaner interface, and increased ride card bottom padding from pb-6 to pb-8 for better visual spacing
+- July 2, 2025: Enhanced landing page branding and animations - highlighted "Gators" text in beige color (#B8956B) to match Trek brand colors, added spring-powered pop animation to "Coming Soon" button that scales from 0 to create dramatic entrance effect appearing out of thin air, repositioned button above screenshot, and added spacing under screenshot image for better visual hierarchy
 
 ## User Preferences
 

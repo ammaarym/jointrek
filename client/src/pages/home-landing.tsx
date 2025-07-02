@@ -461,8 +461,8 @@ export default function Home() {
                 ease: "easeInOut",
               }}
             >
-              Rideshare Marketplace Built for UF{" "}
-              {/* <span style={{ color: "#B8956B" }}>Gators</span> */}
+              Rideshare Marketplace Built for{" "}
+              <span style={{ color: "#B8956B" }}>Gators</span>
             </motion.div>
 
             <motion.p
@@ -476,12 +476,18 @@ export default function Home() {
 
             {/* Get Early Access Card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
+              transition={{ 
+                delay: 0.8, 
+                duration: 0.6,
+                type: "spring",
+                damping: 12,
+                stiffness: 100
+              }}
               className="flex flex-col items-center justify-center mb-2 md:mb-4"
             >
-              <StarBorder onClick={scrollToBottom}>Get Early Access</StarBorder>
+              <StarBorder onClick={scrollToBottom}>Coming Soon</StarBorder>
             </motion.div>
 
             {/* Find Rides Screenshot with enhanced animation */}
@@ -590,7 +596,7 @@ export default function Home() {
                 icon: UserCheck,
                 title: "Verified Students",
                 description:
-                  "All drivers must verify with UF email addresses and government-issued IDs.",
+                  "All drivers must verify with UF email addresses and government-issued IDs",
               },
               {
                 icon: Lock,

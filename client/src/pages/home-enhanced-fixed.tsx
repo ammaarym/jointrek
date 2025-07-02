@@ -741,22 +741,19 @@ export default function Home() {
             </p>
             
             {/* LinkedIn CTA */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md">
-                <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">in</span>
-                </div>
-                <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
-              </div>
+            <div className="flex items-center justify-center mb-8">
               <motion.a
                 href="https://linkedin.com/in/ammaar-mohammed"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#B48A5C] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9A7249] transition-colors shadow-lg"
+                className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:bg-white/90 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Send Message
+                <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">in</span>
+                </div>
+                <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
               </motion.a>
             </div>
 

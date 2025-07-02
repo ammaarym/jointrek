@@ -10,7 +10,7 @@ export function StarBorder({ children, className }: StarBorderProps) {
   return (
     <div className={cn("relative inline-block", className)}>
       <div
-        className="relative overflow-hidden rounded-2xl p-[1px] backdrop-blur-3xl"
+        className="relative overflow-hidden rounded-full p-[1px] backdrop-blur-3xl"
         style={{
           background: `
             linear-gradient(90deg, transparent, #B8956B, transparent),
@@ -33,7 +33,7 @@ export function StarBorder({ children, className }: StarBorderProps) {
             `,
           }}
         />
-        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-2xl backdrop-blur-xl px-12 py-5 text-2xl font-bold" style={{ backgroundColor: '#F5F0E8', color: '#8A6F47' }}>
+        <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full backdrop-blur-xl px-12 py-5 text-2xl font-bold" style={{ backgroundColor: '#F5F0E8', color: '#8A6F47' }}>
           {children}
         </div>
       </div>

@@ -403,7 +403,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#FCFAF7] relative">
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 flex items-start justify-center">
+      <section className="relative bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 pb-4 flex items-start justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -468,7 +468,7 @@ export default function Home() {
 
             {/* Find Rides Screenshot with enhanced animation */}
             <motion.div
-              className="mb-2 md:mb-4"
+              className="mb-1 md:mb-2"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.8 }}
@@ -489,7 +489,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.1, duration: 0.6 }}
-              className="flex flex-col items-center justify-center mb-4 sm:mb-6 mt-2"
+              className="flex flex-col items-center justify-center mb-1 sm:mb-2 mt-2"
             >
               <StarBorder>Coming Soon</StarBorder>
             </motion.div>
@@ -498,7 +498,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-12 sm:py-16 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="py-4 sm:py-8 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2

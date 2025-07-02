@@ -315,8 +315,8 @@ export default function RideCard({
 
           {/* Desktop Layout - Horizontal compact layout matching the reference image */}
           <div className="hidden md:flex items-start gap-4">
-            {/* Driver info section - left side with tags below */}
-            <div className="flex flex-col min-w-[200px]">
+            {/* Driver info section - left side with tags below in rows */}
+            <div className="flex flex-col min-w-[240px]">
               <div className="flex items-center gap-3 mb-2">
                 <Avatar className="w-12 h-12 ring-2 ring-gray-200">
                   <AvatarImage
@@ -345,9 +345,9 @@ export default function RideCard({
                 </div>
               </div>
               
-              {/* Interest Tags in separate row below driver info */}
+              {/* Interest Tags in rows below driver info */}
               {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 max-w-[240px]">
                   {(ride.driver as any).interestTags.map((tag: string, index: number) => (
                     <span 
                       key={index}

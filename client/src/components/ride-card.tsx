@@ -217,7 +217,7 @@ export default function RideCard({
                       
                       {/* Baggage Information - compact display */}
                       {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-1 mb-4">
                           {(ride.baggageCheckIn || 0) > 0 && (
                             <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
                               {ride.baggageCheckIn} check-in

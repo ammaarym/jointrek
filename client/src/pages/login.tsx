@@ -179,7 +179,8 @@ export default function Login() {
             <img 
               src={trekLogo} 
               alt="Trek" 
-              className="h-12 w-auto"
+              className="h-16 w-auto"
+              style={{ backgroundColor: 'transparent' }}
             />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Welcome to Trek</h2>

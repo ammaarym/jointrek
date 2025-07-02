@@ -409,7 +409,8 @@ export default function Home() {
             <img 
               src={trekLogo} 
               alt="Trek" 
-              className="h-8 w-auto transition-opacity hover:opacity-80"
+              className="h-10 w-auto transition-opacity hover:opacity-80"
+              style={{ backgroundColor: 'transparent' }}
             />
           </Link>
         </div>
@@ -734,7 +735,8 @@ export default function Home() {
           <img 
             src={trekLogo} 
             alt="Trek" 
-            className="h-16 sm:h-24 w-auto"
+            className="h-20 sm:h-32 w-auto"
+            style={{ backgroundColor: 'transparent' }}
           />
         </motion.div>
       </div>

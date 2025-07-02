@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import trekLogo from "@assets/TREK_1751438959440.jpg";
 
 export default function Login() {
   const { currentUser, loading, signInWithGoogle } = useAuth();
@@ -174,6 +175,13 @@ export default function Login() {
 
       <div className="w-full max-w-md space-y-8 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <div className="text-center">
+          <div className="flex justify-center mb-6">
+            <img 
+              src={trekLogo} 
+              alt="Trek" 
+              className="h-12 w-auto"
+            />
+          </div>
           <h2 className="text-3xl font-bold text-gray-900">Welcome to Trek</h2>
           <p className="mt-2 text-gray-600">
             Please sign in with your UF email to continue.

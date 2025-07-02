@@ -723,27 +723,50 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final Section */}
-      <div className="relative h-[200px] sm:h-[350px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
+      {/* Beta Signup Footer */}
+      <div className="relative py-12 sm:py-20 w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
-        <motion.div
-          className="relative z-10 flex items-center justify-center"
-          animate={{
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          <img 
-            src={trekLogo} 
-            alt="Trek" 
-            className="h-32 sm:h-48 w-auto"
-            style={{ backgroundColor: 'transparent' }}
-          />
-        </motion.div>
+        <div className="relative z-10 container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-2xl mx-auto"
+          >
+            <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-4">
+              Help Shape the Future of Campus Transportation
+            </h3>
+            <p className="text-stone-700 text-lg mb-6">
+              Be part of our exclusive beta launch! Join fellow Gators in building the safest ride-sharing community at UF.
+            </p>
+            
+            {/* LinkedIn CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+              <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md">
+                <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">in</span>
+                </div>
+                <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
+              </div>
+              <motion.a
+                href="https://linkedin.com/in/ammaar-mohammed"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#B48A5C] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#9A7249] transition-colors shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Send Message
+              </motion.a>
+            </div>
+
+            {/* Copyright */}
+            <div className="border-t border-stone-200 pt-6 text-stone-600 text-sm">
+              <p>© 2025 Ammaar Mohammed. All rights reserved.</p>
+              <p className="mt-2">Trek is coming soon to the University of Florida</p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

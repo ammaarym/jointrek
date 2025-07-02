@@ -76,20 +76,20 @@ export default function WaitlistComponent({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="flex gap-2">
+        <div className="relative flex items-center bg-white rounded-full border border-stone-300 focus-within:border-[#B8956B] focus-within:ring-1 focus-within:ring-[#B8956B] h-12 pr-2">
           <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={placeholder}
             disabled={status === "loading" || status === "success"}
-            className="flex-1 bg-white border-stone-300 focus:border-[#B8956B] focus:ring-[#B8956B] text-stone-900 placeholder:text-stone-500 rounded-full px-4 py-3 h-12"
+            className="flex-1 bg-transparent border-0 focus:ring-0 text-stone-900 placeholder:text-stone-500 rounded-full px-4 py-3 h-full"
           />
           
           <Button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-3 whitespace-nowrap rounded-full h-12"
+            className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-2 whitespace-nowrap rounded-full h-9 text-sm font-medium"
           >
             {status === "loading" && buttonText.loading}
             {status === "success" && buttonText.success}

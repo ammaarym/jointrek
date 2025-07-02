@@ -55,7 +55,7 @@ export function Poll({ className }: PollProps) {
       className={`bg-[#FCFAF7] rounded-2xl p-6 shadow-md border border-stone-200 ${className}`}
     >
       <p className="text-stone-700 mb-6 text-center text-lg font-medium">
-        Would you use Trek for ridesharing at UF?
+        Would you use Trek?
       </p>
       
       <div className="flex gap-4 justify-center">

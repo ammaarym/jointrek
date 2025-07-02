@@ -25,6 +25,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import findRidesScreenshot from "@assets/image_1751166578599.png";
+import trekLogo from "@assets/TREK_1751438959440.jpg";
 
 // Particles Component
 interface MousePosition {
@@ -405,12 +406,11 @@ export default function Home() {
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-stone-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <span
-              className="text-2xl font-bold font-satoshi transition-colors"
-              style={{ color: "#B8956B" }}
-            >
-              Trek
-            </span>
+            <img 
+              src={trekLogo} 
+              alt="Trek" 
+              className="h-8 w-auto transition-opacity hover:opacity-80"
+            />
           </Link>
         </div>
       </div>
@@ -720,8 +720,8 @@ export default function Home() {
       {/* Final Section */}
       <div className="relative h-[200px] sm:h-[350px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
-        <motion.span
-          className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-[#B8956B] to-[#B8956B] bg-clip-text text-center text-3xl sm:text-6xl font-semibold leading-none text-transparent relative z-10"
+        <motion.div
+          className="relative z-10 flex items-center justify-center"
           animate={{
             scale: [1, 1.05, 1],
           }}
@@ -731,8 +731,12 @@ export default function Home() {
             ease: "easeInOut",
           }}
         >
-          Trek
-        </motion.span>
+          <img 
+            src={trekLogo} 
+            alt="Trek" 
+            className="h-16 sm:h-24 w-auto"
+          />
+        </motion.div>
       </div>
     </div>
   );

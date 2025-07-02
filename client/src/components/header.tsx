@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import NotificationsBell from "@/components/notifications-bell";
+import trekLogo from "@assets/TREK_1751438959440.jpg";
 
 // Helper function to format display name (convert "Last, First" to "First Last")
 const formatDisplayName = (displayName: string | null | undefined): string => {
@@ -85,9 +86,11 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Link href={currentUser ? "/find-rides" : "/"} className="flex items-center">
-              <span className="text-2xl font-bold font-inter transition-colors" style={{ color: '#B8956B' }} onMouseEnter={(e) => e.currentTarget.style.color = '#A6855A'} onMouseLeave={(e) => e.currentTarget.style.color = '#B8956B'}>
-                Trek
-              </span>
+              <img 
+                src={trekLogo} 
+                alt="Trek" 
+                className="h-8 w-auto transition-opacity hover:opacity-80"
+              />
             </Link>
           </div>
 

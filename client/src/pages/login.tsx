@@ -179,7 +179,7 @@ export default function Login() {
             <img 
               src={trekLogo} 
               alt="Trek" 
-              className="h-16 w-auto"
+              className="h-20 w-auto"
               style={{ backgroundColor: 'transparent' }}
             />
           </div>

@@ -89,7 +89,7 @@ export default function Header({ onLogin, onSignup }: HeaderProps) {
               <img 
                 src={trekLogo} 
                 alt="Trek" 
-                className="h-10 w-auto transition-opacity hover:opacity-80 bg-transparent"
+                className="h-12 w-auto transition-opacity hover:opacity-80"
                 style={{ backgroundColor: 'transparent' }}
               />
             </Link>

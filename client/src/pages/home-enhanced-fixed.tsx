@@ -433,7 +433,7 @@ export default function Home() {
                 duration: 0.6,
                 ease: "easeInOut",
               }}
-              className="mb-0 sm:mb-1"
+              className="-mb-2 sm:-mb-1"
             >
               <img 
                 src={trekLogo} 

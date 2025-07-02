@@ -402,22 +402,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#FCFAF7]">
-      {/* Sticky Header */}
-      <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-stone-200">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <img 
-              src={trekLogo} 
-              alt="Trek" 
-              className="h-16 w-auto transition-opacity hover:opacity-80"
-              style={{ backgroundColor: 'transparent' }}
-            />
-          </Link>
-        </div>
-      </div>
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-16 sm:pt-24 flex items-center justify-center">
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 sm:pt-12 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -437,6 +424,25 @@ export default function Home() {
             }}
             className="flex flex-col gap-4 items-center justify-center"
           >
+            {/* Large Trek Logo */}
+            <motion.div
+              initial={{ opacity: 0.0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.1,
+                duration: 0.6,
+                ease: "easeInOut",
+              }}
+              className="mb-4 sm:mb-6"
+            >
+              <img 
+                src={trekLogo} 
+                alt="Trek" 
+                className="h-20 sm:h-28 md:h-32 lg:h-36 w-auto"
+                style={{ backgroundColor: 'transparent' }}
+              />
+            </motion.div>
+
             <motion.div
               className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-1 md:mb-2 leading-tight"
               animate={{

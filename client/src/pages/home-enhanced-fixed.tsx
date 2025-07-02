@@ -438,7 +438,7 @@ export default function Home() {
               <img 
                 src={trekLogo} 
                 alt="Trek" 
-                className="h-32 sm:h-48 md:h-56 lg:h-64 w-auto"
+                className="h-48 sm:h-64 md:h-80 lg:h-96 w-auto"
                 style={{ backgroundColor: 'transparent' }}
               />
             </motion.div>

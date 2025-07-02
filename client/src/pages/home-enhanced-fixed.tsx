@@ -724,39 +724,31 @@ export default function Home() {
       </section>
 
       {/* Beta Signup Footer */}
-      <div className="relative py-4 sm:py-8 w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] overflow-hidden">
-        <MorphingShape className="w-full h-full opacity-10" />
-        <div className="relative z-10 container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl mx-auto"
-          >
+      <div className="relative py-4 sm:py-8 w-full bg-[#FCFAF7]">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto">
             <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-4">
-              Ready to Fix Campus Transportation?
+              Ready to Fix College Travel?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              Want beta access? Connect with me on LinkedIn. I'm personally selecting the first 100 Gators to test Trek before launch.
+              Want beta access? Connect with me on LinkedIn. I'm personally selecting Gators to test Trek before launch.
             </p>
             
             {/* LinkedIn CTA */}
             <div className="flex items-center justify-center mb-6">
-              <motion.a
+              <a
                 href="https://linkedin.com/in/ammaar-mohammed"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:bg-white/90 transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">in</span>
                 </div>
                 <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
-              </motion.a>
+              </a>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
       

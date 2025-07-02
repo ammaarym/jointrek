@@ -734,10 +734,10 @@ export default function Home() {
             className="max-w-2xl mx-auto"
           >
             <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-4">
-              Help Shape the Future of Campus Transportation
+              Ready to Fix Campus Transportation?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              Be part of our exclusive beta launch! Join fellow Gators in building the safest ride-sharing community at UF.
+              Want beta access? Connect with me on LinkedIn. I'm personally selecting the first 100 Gators to test Trek before launch.
             </p>
             
             {/* LinkedIn CTA */}

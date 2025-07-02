@@ -17,6 +17,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { StarBorder } from "@/components/ui/star-border";
+import { Poll } from "@/components/poll";
 // Removed useAuth import - landing page doesn't need authentication
 import { cn } from "@/lib/utils";
 import {
@@ -726,6 +727,15 @@ export default function Home() {
                 </Collapsible>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Poll Section */}
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-neutral-50 to-[#FCFAF7] relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto">
+            <Poll />
           </div>
         </div>
       </section>

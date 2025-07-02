@@ -434,11 +434,11 @@ export default function Home() {
               }}
               className="-mb-6 sm:-mb-4"
             >
-              <img 
-                src={trekLogo} 
-                alt="Trek" 
+              <img
+                src={trekLogo}
+                alt="Trek"
                 className="h-24 sm:h-32 md:h-40 lg:h-48 w-auto"
-                style={{ backgroundColor: 'transparent' }}
+                style={{ backgroundColor: "transparent" }}
               />
             </motion.div>
 
@@ -731,9 +731,10 @@ export default function Home() {
               Ready to Fix College Travel?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              Want beta access? Connect with me on LinkedIn. I'm personally selecting Gators to test Trek before launch.
+              Want beta access? Connect with me on LinkedIn. I'm personally
+              selecting users to test Trek before launch.
             </p>
-            
+
             {/* LinkedIn CTA */}
             <div className="flex items-center justify-center mb-6">
               <a
@@ -745,19 +746,23 @@ export default function Home() {
                 <div className="w-8 h-8 bg-[#0077B5] rounded-md flex items-center justify-center">
                   <span className="text-white text-sm font-bold">in</span>
                 </div>
-                <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
+                <span className="text-stone-700 font-medium">
+                  Text me on LinkedIn
+                </span>
               </a>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Minimal Copyright Footer */}
       <div className="bg-[#FCFAF7] py-3 border-t border-stone-200">
         <div className="container mx-auto px-4 text-center">
           <div className="text-stone-600 text-xs sm:text-sm">
             <p>© 2025 Ammaar Mohammed. All rights reserved.</p>
-            <p className="mt-1">Trek is coming soon to the University of Florida</p>
+            <p className="mt-1">
+              Trek is coming soon to the University of Florida
+            </p>
           </div>
         </div>
       </div>

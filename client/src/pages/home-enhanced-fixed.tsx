@@ -489,7 +489,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.1, duration: 0.6 }}
-              className="flex flex-col items-center justify-center mb-8 sm:mb-12 mt-2"
+              className="flex flex-col items-center justify-center mb-4 sm:mb-6 mt-2"
             >
               <StarBorder>Coming Soon</StarBorder>
             </motion.div>
@@ -498,7 +498,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="py-12 sm:py-16 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -564,7 +564,7 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-2 sm:py-4 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -left-48 opacity-15" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -630,7 +630,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section with Enhanced Effects */}
-      <section className="py-2 sm:py-4 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -right-40 opacity-15" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2

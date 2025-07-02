@@ -5,6 +5,9 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        'xs': '480px',
+      },
       fontFamily: {
         'inter': ['Inter', 'system-ui', 'sans-serif'],
         'sans': ['Inter', 'system-ui', 'sans-serif'],

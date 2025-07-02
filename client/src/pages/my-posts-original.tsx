@@ -1081,9 +1081,9 @@ export default function MyPostsOriginal() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">My Rides</h1>
+    <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-4">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">My Rides</h1>
       </div>
 
       {/* Error message */}
@@ -1129,41 +1129,44 @@ export default function MyPostsOriginal() {
         }}
       />
 
-      {/* Rides list with tabs */}
+      {/* Rides list with tabs - Mobile optimized */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/30 rounded-lg p-1">
           <TabsTrigger 
             value="approved" 
-            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm px-1 sm:px-3"
           >
-            <FaCheck className="w-4 h-4" />
-            <span>Approved Rides</span>
+            <FaCheck className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden xs:inline">Approved Rides</span>
+            <span className="xs:hidden">Approved</span>
             {approvedRides.length > 0 && (
-              <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-2 py-0.5">
+              <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center">
                 {approvedRides.length}
               </span>
             )}
           </TabsTrigger>
           <TabsTrigger 
             value="my-posts" 
-            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm px-1 sm:px-3"
           >
-            <FaCar className="w-4 h-4" />
-            <span>My Posts</span>
+            <FaCar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden xs:inline">My Posts</span>
+            <span className="xs:hidden">Posts</span>
           </TabsTrigger>
           <TabsTrigger 
             value="requests" 
-            className="flex items-center gap-2 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm px-1 sm:px-3"
           >
-            <FaUserFriends className="w-4 h-4" />
-            <span>Ride Requests</span>
+            <FaUserFriends className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="hidden xs:inline">Ride Requests</span>
+            <span className="xs:hidden">Requests</span>
             {(() => {
               const pendingCount = rideRequests.filter(req => req.status === 'pending').length;
               const pendingOffers = driverOffers.filter(offer => offer.status === 'pending').length;
               const totalPending = pendingCount + pendingOffers;
 
               return totalPending > 0 ? (
-                <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg ring-2 ring-yellow-300">
+                <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center shadow-lg ring-2 ring-yellow-300">
                   {totalPending}
                 </span>
               ) : null;
@@ -1173,21 +1176,21 @@ export default function MyPostsOriginal() {
         
         <TabsContent value="approved" className="mt-6">
           <div className="space-y-6">
-            {/* Sub-tabs for Passenger and Driver approved rides */}
+            {/* Sub-tabs for Passenger and Driver approved rides - Mobile optimized */}
             <Tabs value={approvedTab} onValueChange={setApprovedTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/30 rounded-lg p-1">
                 <TabsTrigger 
                   value="passenger" 
-                  className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm px-2 sm:px-3"
                 >
-                  <FaUser className="w-3 h-3" />
+                  <FaUser className="w-3 h-3 flex-shrink-0" />
                   <span>As Passenger</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="driver" 
-                  className="flex items-center gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm px-2 sm:px-3"
                 >
-                  <FaCar className="w-3 h-3" />
+                  <FaCar className="w-3 h-3 flex-shrink-0" />
                   <span>As Driver</span>
                 </TabsTrigger>
               </TabsList>

@@ -565,7 +565,7 @@ export default function FindRidesPostgres() {
   );
 
   return (
-    <div className="container px-4 py-8 mx-auto">
+    <div className="container px-3 sm:px-4 py-4 sm:py-8 mx-auto">
       {/* Mobile Filter Button */}
       <div className="lg:hidden mb-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Find Your Ride</h1>
@@ -576,18 +576,23 @@ export default function FindRidesPostgres() {
               Filters
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Filter Rides</DialogTitle>
+          <DialogContent className="max-w-sm mx-auto rounded-2xl p-4 max-h-[80vh] overflow-y-auto">
+            <DialogHeader className="pb-2">
+              <DialogTitle className="text-lg font-semibold text-center">Filter Rides</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <FilterContent />
             </div>
-            <DialogFooter>
+            <DialogFooter className="pt-4 gap-2">
+              <DialogClose asChild>
+                <Button variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+              </DialogClose>
               <Button onClick={() => {
                 applyFilters();
                 setMobileFilterOpen(false);
-              }}>
+              }} className="flex-1">
                 Apply Filters
               </Button>
             </DialogFooter>
@@ -610,38 +615,38 @@ export default function FindRidesPostgres() {
         </div>
         
         {/* Main content with rides */}
-        <div className="lg:col-span-3 mt-6">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-4">
-              {/* Ride Type Toggle Tabs */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setRideTypeFilter('driver')}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    rideTypeFilter === 'driver'
-                      ? 'bg-white shadow text-primary'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Available Drivers
-                </button>
-                <button
-                  onClick={() => setRideTypeFilter('passenger')}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    rideTypeFilter === 'passenger'
-                      ? 'bg-white shadow text-primary'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Available Passengers
-                </button>
-              </div>
+        <div className="lg:col-span-3 lg:mt-6">
+          {/* Mobile/Desktop responsive controls */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+            {/* Ride Type Toggle Tabs - Mobile optimized */}
+            <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
+              <button
+                onClick={() => setRideTypeFilter('driver')}
+                className={`flex-1 sm:flex-none px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                  rideTypeFilter === 'driver'
+                    ? 'bg-white shadow text-primary'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Available Drivers
+              </button>
+              <button
+                onClick={() => setRideTypeFilter('passenger')}
+                className={`flex-1 sm:flex-none px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all ${
+                  rideTypeFilter === 'passenger'
+                    ? 'bg-white shadow text-primary'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Available Passengers
+              </button>
             </div>
             
-            <div className="flex items-center">
-              <span className="text-sm mr-2">Sort by:</span>
+            {/* Sort dropdown - Mobile optimized */}
+            <div className="flex items-center justify-between sm:justify-end">
+              <span className="text-xs sm:text-sm mr-2 text-gray-600">Sort by:</span>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px] border-gray-200">
+                <SelectTrigger className="w-[140px] sm:w-[180px] border-gray-200 text-xs sm:text-sm">
                   <SelectValue placeholder="Departure Time" />
                 </SelectTrigger>
                 <SelectContent>

@@ -773,9 +773,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <div className="text-stone-600 text-xs sm:text-sm">
             <p>© 2025 Ammaar Mohammed, Adnan Sanaulla. All rights reserved.</p>
-            <p className="mt-1">
-              Trek is coming soon to the University of Florida!
-            </p>
+            <p className="mt-1"></p>
           </div>
         </div>
       </div>

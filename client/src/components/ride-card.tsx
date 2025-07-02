@@ -149,15 +149,15 @@ export default function RideCard({
               )}
             </div>
 
-            {/* Route info */}
-            <div className="md:w-2/4">
+            {/* Route info with integrated price and seats */}
+            <div className="md:w-3/4 flex-1">
               <div className="flex mb-3">
-                <div className="flex flex-col mr-3 relative h-28">
+                <div className="flex flex-col mr-3 relative h-20">
                   <div className="w-3 h-3 rounded-full bg-black self-center"></div>
                   <div className="w-0.5 flex-1 bg-neutral-300 self-center"></div>
                   <div className="w-3 h-3 rounded-full bg-primary self-center"></div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between h-28">
+                <div className="flex-1 flex flex-col justify-between h-20">
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-neutral-900 font-medium">
@@ -174,75 +174,73 @@ export default function RideCard({
                       </div>
                     </div>
                     
-                    {/* Gender preference badge aligned with upper city */}
-                    <div className="ml-4">
+                    {/* Price and seats info moved to right side */}
+                    <div className="flex flex-col items-end ml-4">
+                      <div className="text-2xl font-bold text-neutral-900 mb-1">
+                        ${ride.price}
+                      </div>
+                      <div className="text-sm text-gray-600 text-right">
+                        {ride.seatsLeft} of {ride.seatsTotal} seats available
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <span className="text-neutral-900 font-medium">
+                        {ride.destination.city}
+                      </span>
+                      <span className="text-neutral-500 text-sm ml-1">
+                        {ride.destination.area}
+                      </span>
+                      <div className="text-neutral-500 text-sm">
+                        {formatDateTime(ride.arrivalTime)}
+                      </div>
+                      <div className="text-neutral-500 text-xs">
+                        {getEstimatedArrival() || formatTime(ride.arrivalTime)}
+                      </div>
+                    </div>
+                    
+                    {/* Gender preference badge and baggage info */}
+                    <div className="flex flex-col items-end space-y-1">
                       {ride.genderPreference === "female_only" ? (
-                        <div className="flex items-center px-3 py-1 rounded-full bg-pink-50 border border-pink-200">
+                        <div className="flex items-center px-2 py-1 rounded-full bg-pink-50 border border-pink-200">
                           <User className="w-3 h-3 mr-1 text-pink-600" />
                           <span className="text-xs font-medium text-pink-700">Female only</span>
                         </div>
                       ) : ride.genderPreference === "male_only" ? (
-                        <div className="flex items-center px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
+                        <div className="flex items-center px-2 py-1 rounded-full bg-blue-50 border border-blue-200">
                           <User className="w-3 h-3 mr-1 text-blue-600" />
                           <span className="text-xs font-medium text-blue-700">Male only</span>
                         </div>
                       ) : null}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-neutral-900 font-medium">
-                      {ride.destination.city}
-                    </span>
-                    <span className="text-neutral-500 text-sm ml-1">
-                      {ride.destination.area}
-                    </span>
-                    <div className="text-neutral-500 text-sm">
-                      {formatDateTime(ride.arrivalTime)}
-                    </div>
-                    <div className="text-neutral-500 text-xs">
-                      {getEstimatedArrival() || formatTime(ride.arrivalTime)}
+                      
+                      {/* Baggage Information - compact display */}
+                      {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-neutral-500">
+                            {ride.rideType === 'driver' ? 'Space:' : 'Needed:'}
+                          </span>
+                          {(ride.baggageCheckIn || 0) > 0 && (
+                            <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
+                              {ride.baggageCheckIn} check-in
+                            </span>
+                          )}
+                          {(ride.baggagePersonal || 0) > 0 && (
+                            <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs font-medium">
+                              {ride.baggagePersonal} personal
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Price and booking */}
-            <div className="md:w-1/4 flex flex-col items-end">
-              <div className="flex flex-col items-end w-full mb-2">
-                {/* Price moved above available text */}
-                <div className="text-2xl font-bold text-neutral-900 text-right mb-1">
-                  ${ride.price}
-                </div>
-
-                {/* Seats available information */}
-                <div className="text-sm text-gray-600">
-                  {ride.seatsLeft} of {ride.seatsTotal} seats available
-                </div>
-
-                {/* Baggage Information - compact display */}
-                {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
-                  <div className="text-xs text-neutral-500 text-right mt-2">
-                    <div className="flex flex-col items-end space-y-1">
-                      <span className="mb-1">{ride.rideType === 'driver' ? 'Baggage space:' : 'Baggage needed:'}</span>
-                      <div className="flex items-center space-x-2">
-                        {(ride.baggageCheckIn || 0) > 0 && (
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
-                            {ride.baggageCheckIn} check-in
-                          </span>
-                        )}
-                        {(ride.baggagePersonal || 0) > 0 && (
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
-                            {ride.baggagePersonal} personal
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-
+            {/* Action buttons */}
+            <div className="md:w-1/4 flex flex-col items-end justify-center">
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button

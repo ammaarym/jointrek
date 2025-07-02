@@ -243,7 +243,8 @@ export default function FindRidesPostgres() {
         snapchat: ride.driverSnapchat || '',
         id: ride.driverId,
         rating: ride.driverRating || 4.8,
-        totalRides: ride.driverTotalRides || 15
+        totalRides: ride.driverTotalRides || 15,
+        interestTags: ride.driverInterestTags || []
       },
       createdAt: {
         toDate: () => new Date(ride.createdAt),

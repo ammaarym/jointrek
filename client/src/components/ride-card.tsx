@@ -131,6 +131,27 @@ export default function RideCard({
                   </div>
                 </div>
               </div>
+              
+              {/* Interest Tags */}
+              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-1">
+                    {(ride.driver as any).interestTags.slice(0, 3).map((tag: string, index: number) => (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {(ride.driver as any).interestTags.length > 3 && (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                        +{(ride.driver as any).interestTags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Route info */}

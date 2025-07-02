@@ -83,13 +83,13 @@ export default function WaitlistComponent({
             onChange={(e) => setEmail(e.target.value)}
             placeholder={placeholder}
             disabled={status === "loading" || status === "success"}
-            className="flex-1 bg-white border-stone-300 focus:border-[#B8956B] focus:ring-[#B8956B] text-stone-900 placeholder:text-stone-500"
+            className="flex-1 bg-white border-stone-300 focus:border-[#B8956B] focus:ring-[#B8956B] text-stone-900 placeholder:text-stone-500 rounded-full px-4 py-3 h-12"
           />
           
           <Button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-2 whitespace-nowrap"
+            className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-3 whitespace-nowrap rounded-full h-12"
           >
             {status === "loading" && buttonText.loading}
             {status === "success" && buttonText.success}

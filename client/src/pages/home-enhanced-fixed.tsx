@@ -403,7 +403,7 @@ export default function Home() {
   const scrollToBottom = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -505,7 +505,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-4 sm:py-8 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -738,7 +738,7 @@ export default function Home() {
               Ready to Fix College Travel?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              I'm handpicking early testers for Trek's beta. Let me know if you want in.
+              Join Trek’s beta test team and help us get ready for launch!
             </p>
 
             {/* LinkedIn CTA */}

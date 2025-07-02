@@ -409,9 +409,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#F5F0E8] relative">
+    <div className="min-h-screen bg-gradient-to-b from-[#FCFAF7] via-[#F8F4ED] via-[#F5F0E8] via-[#F0EBE1] to-[#EDE8DC] relative">
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 pb-4 flex items-start justify-center">
+      <section className="relative bg-transparent overflow-hidden pt-8 pb-4 flex items-start justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -506,7 +506,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-gradient-to-b from-[#FCFAF7] to-[#F5F0E8] relative overflow-hidden">
+      <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-transparent relative overflow-hidden">
         <MorphingShape className="w-72 h-72 -top-20 -right-20 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -572,7 +572,7 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#F5F0E8] to-[#F0EBE1] relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-transparent relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -left-48 opacity-15" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -639,7 +639,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-transparent relative overflow-hidden">
         <MorphingShape className="w-80 h-80 -top-40 -right-40 opacity-15" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2
@@ -729,20 +729,16 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Poll Section */}
-      <section className="py-6 sm:py-8 bg-gradient-to-b from-neutral-50 to-[#FCFAF7] relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto">
+          
+          {/* Poll Section - moved up */}
+          <div className="max-w-md mx-auto mt-8 sm:mt-12">
             <Poll />
           </div>
         </div>
       </section>
 
       {/* Beta Signup Footer */}
-      <div className="relative py-4 sm:py-8 w-full bg-[#FCFAF7]">
+      <div className="relative py-4 sm:py-8 w-full bg-transparent">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-2xl mx-auto">
             <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-4">
@@ -773,7 +769,7 @@ export default function Home() {
       </div>
 
       {/* Minimal Copyright Footer */}
-      <div className="bg-[#FCFAF7] py-3 border-t border-stone-200">
+      <div className="bg-transparent py-3 border-t border-stone-200/50">
         <div className="container mx-auto px-4 text-center">
           <div className="text-stone-600 text-xs sm:text-sm">
             <p>© 2025 Ammaar Mohammed. All rights reserved.</p>

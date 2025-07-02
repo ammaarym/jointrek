@@ -502,7 +502,7 @@ export default function Home() {
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-xl sm:text-2xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
+            className="text-2xl sm:text-3xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -568,7 +568,7 @@ export default function Home() {
         <MorphingShape className="w-96 h-96 -bottom-48 -left-48 opacity-15" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-lg sm:text-xl font-bold text-center mb-1 sm:mb-2 text-stone-900"
+            className="text-2xl sm:text-3xl font-bold text-center mb-1 sm:mb-2 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -617,10 +617,10 @@ export default function Home() {
                     style={{ color: "#8A6F47" }}
                   />
                 </motion.div>
-                <h3 className="text-xs sm:text-sm font-semibold mb-1 text-stone-900">
+                <h3 className="text-base sm:text-lg font-semibold mb-1 text-stone-900">
                   {feature.title}
                 </h3>
-                <p className="text-xs sm:text-xs text-stone-700">
+                <p className="text-xs sm:text-sm text-stone-700">
                   {feature.description}
                 </p>
               </motion.div>
@@ -634,7 +634,7 @@ export default function Home() {
         <MorphingShape className="w-80 h-80 -top-40 -right-40 opacity-15" />
         <div className="container mx-auto px-2 sm:px-4 relative z-10">
           <motion.h2
-            className="text-base sm:text-lg font-bold text-center mb-2 sm:mb-4 text-stone-900"
+            className="text-2xl sm:text-3xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}

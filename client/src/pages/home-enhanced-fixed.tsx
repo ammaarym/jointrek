@@ -404,7 +404,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FCFAF7]">
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 sm:pt-12 flex items-center justify-center">
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-4 sm:pt-6 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -433,12 +433,12 @@ export default function Home() {
                 duration: 0.6,
                 ease: "easeInOut",
               }}
-              className="mb-4 sm:mb-6"
+              className="mb-2 sm:mb-3"
             >
               <img 
                 src={trekLogo} 
                 alt="Trek" 
-                className="h-20 sm:h-28 md:h-32 lg:h-36 w-auto"
+                className="h-24 sm:h-36 md:h-44 lg:h-52 w-auto"
                 style={{ backgroundColor: 'transparent' }}
               />
             </motion.div>

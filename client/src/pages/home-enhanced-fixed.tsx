@@ -524,13 +524,13 @@ export default function Home() {
                 icon: User,
                 title: "Sign Up",
                 description:
-                  "Create an account using your UF email to join the Gator community.",
+                  "Create an account using your UF email to join the Trek community.",
               },
               {
                 icon: MapPin,
                 title: "Find or Post Rides",
                 description:
-                  "Browse available rides or offer a ride to fellow students.",
+                  "Browse available rides or offer a ride to fellow students. Match with students who share your interests.",
               },
               {
                 icon: CarTaxiFront,
@@ -589,7 +589,8 @@ export default function Home() {
               {
                 icon: UserCheck,
                 title: "Verified Students",
-                description: "All users must verify with UF email addresses",
+                description:
+                  "All passengers must verify with UF email addresses. All drivers must verify identity with a government-issued ID.",
               },
               {
                 icon: Lock,

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { StarBorder } from "@/components/ui/star-border";
 import { Poll } from "@/components/poll";
+import WaitlistComponent from "@/components/ui/waiting-list";
 // Removed useAuth import - landing page doesn't need authentication
 import { cn } from "@/lib/utils";
 import {
@@ -474,7 +475,7 @@ export default function Home() {
               Getting in and out of the Swamp doesn't have to suck
             </motion.p>
 
-            {/* Get Early Access Card */}
+            {/* Join Waitlist Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -487,7 +488,7 @@ export default function Home() {
               }}
               className="flex flex-col items-center justify-center mb-2 md:mb-4"
             >
-              <StarBorder onClick={scrollToBottom}>Get Early Access</StarBorder>
+              <StarBorder onClick={scrollToBottom}>Join Waitlist</StarBorder>
             </motion.div>
 
             {/* Find Rides Screenshot with enhanced animation */}
@@ -743,7 +744,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Beta Signup Footer */}
+      {/* Waitlist Signup Footer */}
       <div className="relative py-4 sm:py-8 w-full bg-transparent">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-2xl mx-auto">
@@ -751,24 +752,21 @@ export default function Home() {
               Ready to Fix College Travel?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              Join Trek’s beta test team and help us get ready for launch!
+              Join our waitlist and be the first to know when Trek launches!
             </p>
 
-            {/* LinkedIn CTA */}
+            {/* Waitlist Component */}
             <div className="flex items-center justify-center mb-6">
-              <a
-                href="https://linkedin.com/in/ammaar-mohammed"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:bg-white/90 transition-colors"
-              >
-                <div className="w-8 h-8 bg-[#0077B5] rounded-md flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">in</span>
-                </div>
-                <span className="text-stone-700 font-medium">
-                  Text me on LinkedIn
-                </span>
-              </a>
+              <WaitlistComponent
+                subtitle=""
+                placeholder="Enter your email address"
+                buttonText={{
+                  idle: "Join Waitlist",
+                  loading: "Joining...",
+                  success: "Welcome aboard!"
+                }}
+                className="w-full max-w-lg"
+              />
             </div>
           </div>
         </div>

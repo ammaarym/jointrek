@@ -417,7 +417,7 @@ export default function Home() {
 
         {/* Aurora Background Effect */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -inset-[10px] opacity-50 will-change-transform pointer-events-none blur-[10px] invert [background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] [background-size:300%,_200%] [background-position:50%_50%,50%_50%] after:content-[''] after:absolute after:inset-0 after:[background-image:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%),repeating-linear-gradient(100deg,#B48A5C_10%,#B48A5C_15%,#B48A5C_20%,#B48A5C_25%,#B48A5C_30%)] after:[background-size:200%,_100%] after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference [mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]"></div>
+          <div className="absolute -inset-[10px] opacity-30 will-change-transform pointer-events-none blur-sm bg-gradient-to-br from-[#B48A5C] via-transparent to-[#B48A5C] animate-pulse"></div>
         </div>
 
         <div className="relative flex flex-col items-center justify-center px-4 z-10 text-center max-w-6xl mx-auto">

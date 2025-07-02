@@ -95,9 +95,10 @@ export default function RideCard({
         onClick={() => setDetailsOpen(true)}
       >
         <div className="p-5">
-          <div className="flex flex-col md:flex-row gap-4">
+          {/* Mobile Layout */}
+          <div className="flex flex-col md:hidden gap-4">
             {/* Driver info */}
-            <div className="md:w-1/4">
+            <div className="w-full">
               <div className="flex items-center">
                 <Avatar className="w-12 h-12 mr-3 ring-2 ring-gray-200">
                   <AvatarImage
@@ -150,7 +151,7 @@ export default function RideCard({
             </div>
 
             {/* Route info with integrated price and seats */}
-            <div className="md:w-3/4 flex-1">
+            <div className="flex-1">
               <div className="flex mb-3">
                 <div className="flex flex-col mr-3 relative h-20">
                   <div className="w-3 h-3 rounded-full bg-black self-center"></div>
@@ -237,7 +238,7 @@ export default function RideCard({
             </div>
 
             {/* Action buttons */}
-            <div className="md:w-1/4 flex flex-col items-end justify-center">
+            <div className="w-full flex flex-col items-end justify-center">
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
@@ -310,6 +311,218 @@ export default function RideCard({
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex flex-col gap-4">
+            {/* Driver info section */}
+            <div className="flex items-start gap-4">
+              <Avatar className="w-12 h-12 ring-2 ring-gray-200">
+                <AvatarImage
+                  src={ride.driver.photoUrl}
+                  alt={ride.driver.name}
+                  className="object-cover object-center w-full h-full"
+                />
+                <AvatarFallback className="bg-primary text-white">
+                  {ride.driver.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1">
+                <h4 className="font-semibold text-black mb-1">
+                  {ride.driver.name}
+                </h4>
+                <div className="flex items-center mb-2">
+                  <span className="text-sm text-neutral-500">
+                    {ride.driver.totalRides} rides
+                  </span>
+                </div>
+                
+                {/* Interest Tags under name */}
+                {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Price and action button */}
+              <div className="flex flex-col items-end">
+                <div className="text-2xl font-bold text-neutral-900 mb-1">
+                  ${ride.price}
+                </div>
+                <div className="text-sm text-gray-600 text-right mb-3">
+                  {ride.seatsLeft} of {ride.seatsTotal} seats available
+                </div>
+                
+                {isDriverUser && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onEdit) {
+                          onEdit(ride);
+                        }
+                      }}
+                    >
+                      Edit Ride
+                    </Button>
+                  </div>
+                )}
+                
+                {showRequestButton && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      className={`px-4 py-2 rounded-md font-medium transition ${
+                        isApproved
+                          ? "bg-green-600 text-white hover:bg-green-700" 
+                          : isRejected
+                          ? "bg-red-500 text-white cursor-not-allowed"
+                          : isCancelled
+                          ? "bg-gray-500 text-white cursor-not-allowed"
+                          : existingDriverOffer && rideTypeFilter === 'passenger'
+                          ? existingDriverOffer.status === 'pending'
+                            ? "bg-orange-500 text-white cursor-not-allowed"
+                            : existingDriverOffer.status === 'accepted'
+                            ? "bg-green-600 text-white cursor-not-allowed"
+                            : existingDriverOffer.status === 'rejected'
+                            ? "bg-red-500 text-white cursor-not-allowed"
+                            : "bg-primary text-white hover:bg-primary/90"
+                          : isRequested 
+                          ? "bg-orange-500 text-white hover:bg-orange-600" 
+                          : "bg-primary text-white hover:bg-primary/90"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onRequestRide && !isRequested && !isApproved && !isRejected && !isCancelled && 
+                            !(existingDriverOffer && rideTypeFilter === 'passenger')) {
+                          onRequestRide(Number(ride.id));
+                        }
+                      }}
+                      disabled={isRequested || isApproved || isRejected || isCancelled || 
+                               (existingDriverOffer && rideTypeFilter === 'passenger')}
+                    >
+                      {isApproved
+                        ? "Ride Approved"
+                        : isRejected
+                        ? "Request Denied"
+                        : isCancelled
+                        ? "CANCELLED"
+                        : existingDriverOffer && rideTypeFilter === 'passenger'
+                        ? existingDriverOffer.status === 'pending'
+                          ? `Offer Sent ($${existingDriverOffer.price})`
+                          : existingDriverOffer.status === 'accepted'
+                          ? `Offer Accepted ($${existingDriverOffer.price})`
+                          : existingDriverOffer.status === 'rejected'
+                          ? `Offer Rejected ($${existingDriverOffer.price})`
+                          : "Offer a Trek"
+                        : isRequested 
+                        ? "Request Sent" 
+                        : rideTypeFilter === 'passenger' 
+                          ? "Offer a Trek" 
+                          : "Request a Trek"
+                      }
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Route information */}
+            <div className="flex">
+              <div className="flex flex-col mr-3 relative h-16">
+                <div className="w-3 h-3 rounded-full bg-black self-center"></div>
+                <div className="w-0.5 flex-1 bg-neutral-300 self-center"></div>
+                <div className="w-3 h-3 rounded-full bg-primary self-center"></div>
+              </div>
+              <div className="flex-1 flex justify-between h-16">
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <span className="text-neutral-900 font-medium">
+                      {ride.origin.city}
+                    </span>
+                    <span className="text-neutral-500 text-sm ml-1">
+                      {ride.origin.area}
+                    </span>
+                    <div className="text-neutral-500 text-sm">
+                      {formatDateTime(ride.departureTime)} • {formatTime(ride.departureTime)}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-neutral-900 font-medium">
+                      {ride.destination.city}
+                    </span>
+                    <span className="text-neutral-500 text-sm ml-1">
+                      {ride.destination.area}
+                    </span>
+                    <div className="text-neutral-500 text-sm">
+                      {formatDateTime(ride.arrivalTime)} • {getEstimatedArrival() || formatTime(ride.arrivalTime)}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Gender preference and car info */}
+                <div className="flex flex-col items-end justify-center space-y-2">
+                  {ride.genderPreference === "female_only" ? (
+                    <div className="flex items-center px-2 py-1 rounded-full bg-pink-50 border border-pink-200">
+                      <User className="w-3 h-3 mr-1 text-pink-600" />
+                      <span className="text-xs font-medium text-pink-700">Female only</span>
+                    </div>
+                  ) : ride.genderPreference === "male_only" ? (
+                    <div className="flex items-center px-2 py-1 rounded-full bg-blue-50 border border-blue-200">
+                      <User className="w-3 h-3 mr-1 text-blue-600" />
+                      <span className="text-xs font-medium text-blue-700">Male only</span>
+                    </div>
+                  ) : null}
+                  
+                  {/* Car information */}
+                  <div className="text-right text-sm text-neutral-600">
+                    {ride.carMake} {ride.carModel}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Baggage Information - Full expanded section for desktop */}
+            {((ride.baggageCheckIn || 0) > 0 || (ride.baggagePersonal || 0) > 0) && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                <div className="text-neutral-500 text-sm mb-2">
+                  {ride.rideType === 'driver' ? 'Available Baggage Space' : 'Baggage Requirements'}
+                </div>
+                <div className="space-y-1">
+                  {(ride.baggageCheckIn || 0) > 0 && (
+                    <div className="flex items-center text-sm">
+                      <span className="font-medium text-blue-700">
+                        {ride.baggageCheckIn} check-in bag{(ride.baggageCheckIn || 0) > 1 ? 's' : ''}
+                        {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
+                      </span>
+                      <span className="text-neutral-500 ml-2">(large luggage)</span>
+                    </div>
+                  )}
+                  {(ride.baggagePersonal || 0) > 0 && (
+                    <div className="flex items-center text-sm">
+                      <span className="font-medium text-blue-700">
+                        {ride.baggagePersonal} personal bag{(ride.baggagePersonal || 0) > 1 ? 's' : ''}
+                        {ride.rideType === 'driver' ? ' (can accommodate)' : ''}
+                      </span>
+                      <span className="text-neutral-500 ml-2">(backpacks, smaller bags)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>

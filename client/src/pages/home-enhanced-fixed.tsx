@@ -401,12 +401,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF7]">
+    <div className="min-h-screen bg-[#FCFAF7] relative">
+      {/* Global Continuous Background Effects */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <MorphingShape className="w-96 h-96 absolute top-10 right-10 opacity-30" />
+        <MorphingShape className="w-64 h-64 absolute top-1/4 left-20 opacity-25" />
+        <MorphingShape className="w-80 h-80 absolute top-1/2 right-1/4 opacity-20" />
+        <MorphingShape className="w-72 h-72 absolute top-3/4 left-10 opacity-25" />
+        <MorphingShape className="w-56 h-56 absolute bottom-20 right-20 opacity-30" />
+      </div>
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-0 flex items-center justify-center">
-        <MorphingShape className="w-96 h-96 -top-48 -right-48" />
-        <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] pt-0 flex items-center justify-center z-10">
 
         {/* Aurora Background Effect */}
         <div className="absolute inset-0 overflow-hidden">
@@ -499,9 +505,8 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
-        <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative z-10">
+        <div className="container mx-auto px-4 relative">
           <motion.h2
             className="text-xl sm:text-2xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
@@ -565,9 +570,8 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-2 sm:py-4 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
-        <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-2 sm:py-4 bg-gradient-to-b from-neutral-50 to-white relative z-10">
+        <div className="container mx-auto px-4 relative">
           <motion.h2
             className="text-lg sm:text-xl font-bold text-center mb-1 sm:mb-2 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
@@ -631,9 +635,8 @@ export default function Home() {
       </section>
 
       {/* FAQ Section with Enhanced Effects */}
-      <section className="py-2 sm:py-4 bg-gradient-to-b from-white to-neutral-50 relative overflow-hidden">
-        <MorphingShape className="w-80 h-80 -top-40 -left-40 opacity-5" />
-        <div className="container mx-auto px-2 sm:px-4 relative z-10">
+      <section className="py-2 sm:py-4 bg-gradient-to-b from-white to-neutral-50 relative z-10">
+        <div className="container mx-auto px-2 sm:px-4 relative">
           <motion.h2
             className="text-base sm:text-lg font-bold text-center mb-2 sm:mb-4 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
@@ -725,8 +728,7 @@ export default function Home() {
       </section>
 
       {/* Final Section */}
-      <div className="relative h-[200px] sm:h-[350px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center overflow-hidden">
-        <MorphingShape className="w-full h-full opacity-10" />
+      <div className="relative h-[200px] sm:h-[350px] w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] flex flex-col items-center justify-center z-10">
         <motion.div
           className="relative z-10 flex items-center justify-center"
           animate={{

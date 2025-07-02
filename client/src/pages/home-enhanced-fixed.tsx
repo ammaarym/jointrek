@@ -400,6 +400,13 @@ export default function Home() {
     navigate("/login");
   };
 
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#FCFAF7] relative">
       {/* Hero Section with Enhanced Effects */}
@@ -484,14 +491,14 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Coming Soon Card */}
+            {/* Get Early Access Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.1, duration: 0.6 }}
               className="flex flex-col items-center justify-center mb-1 sm:mb-2 mt-2"
             >
-              <StarBorder>Coming Soon</StarBorder>
+              <StarBorder onClick={scrollToBottom}>Get Early Access</StarBorder>
             </motion.div>
           </motion.div>
         </div>
@@ -731,8 +738,7 @@ export default function Home() {
               Ready to Fix College Travel?
             </h3>
             <p className="text-stone-700 text-lg mb-6">
-              Want beta access? Connect with me on LinkedIn. I'm personally
-              selecting users to test Trek before launch.
+              I'm handpicking early testers for Trek's beta. Let me know if you want in.
             </p>
 
             {/* LinkedIn CTA */}

@@ -478,16 +478,16 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                delay: 0.8, 
+              transition={{
+                delay: 0.8,
                 duration: 0.6,
                 type: "spring",
                 damping: 12,
-                stiffness: 100
+                stiffness: 100,
               }}
               className="flex flex-col items-center justify-center mb-2 md:mb-4"
             >
-              <StarBorder onClick={scrollToBottom}>Coming Soon</StarBorder>
+              <StarBorder onClick={scrollToBottom}>Get Early Access</StarBorder>
             </motion.div>
 
             {/* Find Rides Screenshot with enhanced animation */}

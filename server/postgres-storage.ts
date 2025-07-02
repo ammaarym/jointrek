@@ -165,7 +165,8 @@ export class PostgresStorage implements IStorage {
         driverPhoto: users.photoUrl,
         driverPhone: users.phone,
         driverInstagram: users.instagram,
-        driverSnapchat: users.snapchat
+        driverSnapchat: users.snapchat,
+        driverInterestTags: users.interestTags
       })
       .from(rides)
       .leftJoin(users, eq(rides.driverId, users.firebaseUid))

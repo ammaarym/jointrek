@@ -103,7 +103,7 @@ export default function WaitlistComponent({
             animate={{ opacity: 1, y: 0 }}
             className={`text-sm text-center ${
               status === "success" 
-                ? "text-green-600" 
+                ? "text-[#B8956B]" 
                 : status === "error" 
                 ? "text-red-600" 
                 : "text-stone-600"

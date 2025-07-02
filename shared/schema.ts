@@ -300,3 +300,19 @@ export const insertPollVoteSchema = createInsertSchema(pollVotes).omit({
 
 export type PollVote = typeof pollVotes.$inferSelect;
 export type InsertPollVote = z.infer<typeof insertPollVoteSchema>;
+
+// Waitlist table schema
+export const waitlist = pgTable("waitlist", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Waitlist insert schema
+export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
+  id: true,
+  createdAt: true
+});
+
+export type Waitlist = typeof waitlist.$inferSelect;
+export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;

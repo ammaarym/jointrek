@@ -724,7 +724,7 @@ export default function Home() {
       </section>
 
       {/* Beta Signup Footer */}
-      <div className="relative py-12 sm:py-20 w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] overflow-hidden">
+      <div className="relative py-4 sm:py-8 w-full bg-gradient-to-br from-neutral-50 via-[#FCFAF7] to-[#FCFAF7] overflow-hidden">
         <MorphingShape className="w-full h-full opacity-10" />
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
@@ -741,7 +741,7 @@ export default function Home() {
             </p>
             
             {/* LinkedIn CTA */}
-            <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center justify-center mb-6">
               <motion.a
                 href="https://linkedin.com/in/ammaar-mohammed"
                 target="_blank"
@@ -756,13 +756,17 @@ export default function Home() {
                 <span className="text-stone-700 font-medium">Connect with me on LinkedIn</span>
               </motion.a>
             </div>
-
-            {/* Copyright */}
-            <div className="border-t border-stone-200 pt-6 text-stone-600 text-sm">
-              <p>© 2025 Ammaar Mohammed. All rights reserved.</p>
-              <p className="mt-2">Trek is coming soon to the University of Florida</p>
-            </div>
           </motion.div>
+        </div>
+      </div>
+      
+      {/* Minimal Copyright Footer */}
+      <div className="bg-[#FCFAF7] py-3 border-t border-stone-200">
+        <div className="container mx-auto px-4 text-center">
+          <div className="text-stone-600 text-xs sm:text-sm">
+            <p>© 2025 Ammaar Mohammed. All rights reserved.</p>
+            <p className="mt-1">Trek is coming soon to the University of Florida</p>
+          </div>
         </div>
       </div>
     </div>

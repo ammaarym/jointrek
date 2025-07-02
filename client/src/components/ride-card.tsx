@@ -94,7 +94,7 @@ export default function RideCard({
         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
         onClick={() => setDetailsOpen(true)}
       >
-        <div className="p-5">
+        <div className="p-5 pb-6">
           {/* Mobile Layout */}
           <div className="flex flex-col md:hidden gap-4">
             {/* Driver info */}
@@ -365,7 +365,7 @@ export default function RideCard({
               <div className="flex flex-col items-center mr-3 h-full pt-1">
                 <div className="w-3 h-3 rounded-full bg-black mt-1"></div>
                 <div className="flex-1 w-0.5 bg-neutral-300"></div>
-                <div className="w-3 h-3 rounded-full bg-primary mb-1"></div>
+                <div className="w-3 h-3 rounded-full bg-primary"></div>
               </div>
               <div className="flex-1 max-w-[300px]">
                 <div className="flex justify-between items-start">

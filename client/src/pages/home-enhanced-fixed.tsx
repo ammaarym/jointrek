@@ -732,7 +732,7 @@ export default function Home() {
       </section>
 
       {/* Poll Section */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-neutral-50 to-[#FCFAF7] relative overflow-hidden">
+      <section className="py-6 sm:py-8 bg-gradient-to-b from-neutral-50 to-[#FCFAF7] relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
             <Poll />

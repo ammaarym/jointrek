@@ -34,7 +34,7 @@ export function Poll({ className }: PollProps) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-200 text-center ${className}`}
+        className={`bg-[#FCFAF7] rounded-2xl p-6 shadow-md border border-stone-200 text-center ${className}`}
       >
         <div className="flex items-center justify-center mb-3">
           <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
@@ -52,19 +52,16 @@ export function Poll({ className }: PollProps) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-md border border-stone-200 ${className}`}
+      className={`bg-[#FCFAF7] rounded-2xl p-6 shadow-md border border-stone-200 ${className}`}
     >
-      <h3 className="text-xl font-bold text-stone-900 mb-4 text-center">
-        Quick Question
-      </h3>
-      <p className="text-stone-700 mb-6 text-center">
+      <p className="text-stone-700 mb-6 text-center text-lg font-medium">
         Would you use Trek for ridesharing at UF?
       </p>
       
       <div className="flex gap-4 justify-center">
         <motion.button
           onClick={() => handleVote('yes')}
-          className="flex-1 bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="flex-1 bg-[#F0E6D6] hover:bg-[#E8DCC6] text-[#8A6F47] font-semibold py-3 px-6 rounded-xl transition-colors"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -72,7 +69,7 @@ export function Poll({ className }: PollProps) {
         </motion.button>
         <motion.button
           onClick={() => handleVote('no')}
-          className="flex-1 bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="flex-1 bg-white hover:bg-gray-50 text-stone-700 font-semibold py-3 px-6 rounded-xl transition-colors border border-stone-200"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

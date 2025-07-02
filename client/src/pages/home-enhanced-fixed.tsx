@@ -25,7 +25,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import findRidesScreenshot from "@assets/image_1751476763712.png";
+import findRidesScreenshot from "@assets/image_1751477334294.png";
 import trekLogo from "@assets/TREK (Presentation)_1751439938143.png";
 
 // Particles Component

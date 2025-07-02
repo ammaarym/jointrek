@@ -281,3 +281,22 @@ export type InsertDriverOffer = z.infer<typeof insertDriverOfferSchema>;
 
 export type Complaint = typeof complaints.$inferSelect;
 export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+
+// Poll votes table schema
+export const pollVotes = pgTable("poll_votes", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(), // e.g., "would-use-trek"
+  answer: text("answer").notNull(), // e.g., "yes" or "no"
+  userIp: text("user_ip"), // Track by IP to prevent duplicate votes
+  userAgent: text("user_agent"), // Additional tracking info
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Poll votes insert schema
+export const insertPollVoteSchema = createInsertSchema(pollVotes).omit({
+  id: true,
+  createdAt: true
+});
+
+export type PollVote = typeof pollVotes.$inferSelect;
+export type InsertPollVote = z.infer<typeof insertPollVoteSchema>;

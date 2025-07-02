@@ -3547,5 +3547,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === Poll Routes ===
+  
+  // Submit poll vote
+  app.post("/api/poll-vote", async (req, res) => {
+    try {
+      const { question, answer } = req.body;
+      
+      if (!question || !answer) {
+        return res.status(400).json({ message: "Question and answer are required" });
+      }
+      
+      if (!['yes', 'no'].includes(answer)) {
+        return res.status(400).json({ message: "Answer must be 'yes' or 'no'" });
+      }
+      
+      // Get user IP and user agent for tracking
+      const userIp = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.get('User-Agent') || 'unknown';
+      
+      // Check if this IP has already voted for this question (simple duplicate prevention)
+      const existingVote = await storage.getPollVoteByIp(question, userIp);
+      if (existingVote) {
+        return res.status(409).json({ message: "You have already voted on this poll" });
+      }
+      
+      // Store the vote
+      const vote = await storage.createPollVote({
+        question,
+        answer,
+        userIp,
+        userAgent
+      });
+      
+      res.status(201).json({ message: "Vote recorded successfully", vote });
+    } catch (error) {
+      console.error("Error recording poll vote:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get poll statistics (admin only - we'll add auth later)
+  app.get("/api/poll-stats/:question", async (req, res) => {
+    try {
+      const { question } = req.params;
+      
+      const stats = await storage.getPollStats(question);
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching poll stats:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

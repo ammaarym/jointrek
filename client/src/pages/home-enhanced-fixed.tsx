@@ -729,7 +729,7 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
-          
+
           {/* Poll Section - moved up */}
           <div className="max-w-md mx-auto mt-8 sm:mt-12">
             <Poll />
@@ -772,9 +772,9 @@ export default function Home() {
       <div className="bg-transparent py-3 border-t border-stone-200/50">
         <div className="container mx-auto px-4 text-center">
           <div className="text-stone-600 text-xs sm:text-sm">
-            <p>© 2025 Ammaar Mohammed. All rights reserved.</p>
+            <p>© 2025 Ammaar Mohammed, Adnan Sanaulla. All rights reserved.</p>
             <p className="mt-1">
-              Trek is coming soon to the University of Florida
+              Trek is coming soon to the University of Florida!
             </p>
           </div>
         </div>

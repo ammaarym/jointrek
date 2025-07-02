@@ -409,7 +409,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF7] relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#F5F0E8] relative">
       {/* Hero Section with Enhanced Effects */}
       <section className="relative bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-8 pb-4 flex items-start justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
@@ -506,7 +506,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-gradient-to-b from-[#FCFAF7] to-[#F5F0E8] relative overflow-hidden">
         <MorphingShape className="w-72 h-72 -top-20 -right-20 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -572,7 +572,7 @@ export default function Home() {
       </section>
 
       {/* Security Features Section with Enhanced Effects */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-neutral-50 to-white relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#F5F0E8] to-[#F0EBE1] relative overflow-hidden">
         <MorphingShape className="w-96 h-96 -bottom-48 -left-48 opacity-15" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2

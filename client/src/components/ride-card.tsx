@@ -152,12 +152,12 @@ export default function RideCard({
             {/* Route info */}
             <div className="md:w-2/4">
               <div className="flex mb-3">
-                <div className="flex flex-col mr-3 relative h-20">
+                <div className="flex flex-col mr-3 relative h-28">
                   <div className="w-3 h-3 rounded-full bg-black self-center"></div>
                   <div className="w-0.5 flex-1 bg-neutral-300 self-center"></div>
                   <div className="w-3 h-3 rounded-full bg-primary self-center"></div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between h-20">
+                <div className="flex-1 flex flex-col justify-between h-28">
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-neutral-900 font-medium">

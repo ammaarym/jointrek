@@ -136,7 +136,7 @@ export default function RideCard({
               {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
                 <div className="mt-3">
                   <div className="flex flex-wrap gap-1">
-                    {(ride.driver as any).interestTags.slice(0, 3).map((tag: string, index: number) => (
+                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
                       <span 
                         key={index}
                         className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
@@ -144,11 +144,6 @@ export default function RideCard({
                         {tag}
                       </span>
                     ))}
-                    {(ride.driver as any).interestTags.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-                        +{(ride.driver as any).interestTags.length - 3}
-                      </span>
-                    )}
                   </div>
                 </div>
               )}
@@ -453,6 +448,25 @@ export default function RideCard({
                   </div>
                 )}
               </div>
+              
+              {/* Interest Tags Section */}
+              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
+                <div className="mt-4 bg-white p-4 rounded-lg border border-neutral-200">
+                  <h5 className="font-medium text-neutral-900 mb-3">
+                    Driver Interests
+                  </h5>
+                  <div className="flex flex-wrap gap-2">
+                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-orange-100 text-orange-700 text-sm font-medium rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Ride Details Section */}

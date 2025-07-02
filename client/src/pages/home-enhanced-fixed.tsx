@@ -506,7 +506,7 @@ export default function Home() {
 
       {/* How Trek Works Section with Enhanced Effects */}
       <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
-        <MorphingShape className="w-72 h-72 top-10 right-10 opacity-20" />
+        <MorphingShape className="w-72 h-72 -top-20 -right-20 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
             className="text-2xl sm:text-3xl font-bold text-center mb-2 sm:mb-4 text-stone-900"

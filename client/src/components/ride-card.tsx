@@ -314,58 +314,60 @@ export default function RideCard({
           </div>
 
           {/* Desktop Layout - Horizontal compact layout matching the reference image */}
-          <div className="hidden md:flex items-center gap-4">
-            {/* Driver info section */}
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12 ring-2 ring-gray-200">
-                <AvatarImage
-                  src={ride.driver.photoUrl}
-                  alt={ride.driver.name}
-                  className="object-cover object-center w-full h-full"
-                />
-                <AvatarFallback className="bg-primary text-white">
-                  {ride.driver.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div>
-                <h4 className="font-semibold text-black">
-                  {ride.driver.name}
-                </h4>
-                <div className="flex items-center">
-                  <span className="text-sm text-neutral-500">
-                    {ride.driver.totalRides} rides
-                  </span>
-                </div>
+          <div className="hidden md:flex items-start gap-4">
+            {/* Driver info section - left side with tags below */}
+            <div className="flex flex-col min-w-[200px]">
+              <div className="flex items-center gap-3 mb-2">
+                <Avatar className="w-12 h-12 ring-2 ring-gray-200">
+                  <AvatarImage
+                    src={ride.driver.photoUrl}
+                    alt={ride.driver.name}
+                    className="object-cover object-center w-full h-full"
+                  />
+                  <AvatarFallback className="bg-primary text-white">
+                    {ride.driver.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 
-                {/* Interest Tags under name */}
-                {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {(ride.driver as any).interestTags.map((tag: string, index: number) => (
-                      <span 
-                        key={index}
-                        className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                <div>
+                  <h4 className="font-semibold text-black">
+                    {ride.driver.name}
+                  </h4>
+                  <div className="flex items-center">
+                    <span className="text-sm text-neutral-500">
+                      {ride.driver.totalRides} rides
+                    </span>
                   </div>
-                )}
+                </div>
               </div>
+              
+              {/* Interest Tags in separate row below driver info */}
+              {(ride.driver as any).interestTags && (ride.driver as any).interestTags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {(ride.driver as any).interestTags.map((tag: string, index: number) => (
+                    <span 
+                      key={index}
+                      className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Route information - horizontal layout */}
-            <div className="flex items-center flex-1 mx-6">
+            {/* Route information - centered */}
+            <div className="flex items-center flex-1 justify-center mx-8">
               <div className="flex flex-col mr-3 relative h-16">
                 <div className="w-3 h-3 rounded-full bg-black self-center"></div>
                 <div className="w-0.5 flex-1 bg-neutral-300 self-center"></div>
                 <div className="w-3 h-3 rounded-full bg-primary self-center"></div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 max-w-[300px]">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center">

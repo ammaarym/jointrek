@@ -489,7 +489,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.1, duration: 0.6 }}
-              className="flex flex-col items-center justify-center mb-2 mt-2"
+              className="flex flex-col items-center justify-center mb-8 sm:mb-12 mt-2"
             >
               <StarBorder>Coming Soon</StarBorder>
             </motion.div>

@@ -404,7 +404,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FCFAF7]">
       {/* Sticky Header */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-stone-200">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <img 
               src={trekLogo} 

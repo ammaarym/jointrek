@@ -25,7 +25,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import findRidesScreenshot from "@assets/image_1751166578599.png";
-import trekLogo from "@assets/TREK_1751438959440.jpg";
+import trekLogo from "@assets/TREK_1751439396881.png";
 
 // Particles Component
 interface MousePosition {
@@ -409,7 +409,7 @@ export default function Home() {
             <img 
               src={trekLogo} 
               alt="Trek" 
-              className="h-12 w-auto transition-opacity hover:opacity-80"
+              className="h-16 w-auto transition-opacity hover:opacity-80"
               style={{ backgroundColor: 'transparent' }}
             />
           </Link>
@@ -735,7 +735,7 @@ export default function Home() {
           <img 
             src={trekLogo} 
             alt="Trek" 
-            className="h-24 sm:h-40 w-auto"
+            className="h-32 sm:h-48 w-auto"
             style={{ backgroundColor: 'transparent' }}
           />
         </motion.div>

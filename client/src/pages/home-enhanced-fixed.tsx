@@ -499,7 +499,7 @@ export default function Home() {
       </section>
 
       {/* How Trek Works Section with Enhanced Effects */}
-      <section className="py-2 sm:py-4 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-[#FCFAF7] to-neutral-50 relative overflow-hidden">
         <MorphingShape className="w-72 h-72 top-10 right-10 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
@@ -569,7 +569,7 @@ export default function Home() {
         <MorphingShape className="w-96 h-96 -bottom-48 -right-48 opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
-            className="text-lg sm:text-xl font-bold text-center mb-3 sm:mb-6 text-stone-900"
+            className="text-lg sm:text-xl font-bold text-center mb-1 sm:mb-2 text-stone-900"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}

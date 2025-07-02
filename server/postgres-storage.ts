@@ -12,6 +12,7 @@ import {
   notifications,
   driverOffers,
   complaints,
+  pollVotes,
   type Ride,
   type InsertRide,
   type User,
@@ -34,6 +35,8 @@ import {
   type InsertDriverOffer,
   type Complaint,
   type InsertComplaint,
+  type PollVote,
+  type InsertPollVote,
   insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
@@ -1568,6 +1571,67 @@ export class PostgresStorage implements IStorage {
       .where(eq(rideRequests.rideId, rideId));
 
     return passengers;
+  }
+
+  // === Poll Vote Methods ===
+  
+  async createPollVote(data: InsertPollVote): Promise<PollVote> {
+    const [vote] = await db
+      .insert(pollVotes)
+      .values(data)
+      .returning();
+    
+    return vote;
+  }
+
+  async getPollVoteByIp(question: string, userIp: string): Promise<PollVote | undefined> {
+    const [vote] = await db
+      .select()
+      .from(pollVotes)
+      .where(and(
+        eq(pollVotes.question, question),
+        eq(pollVotes.userIp, userIp)
+      ));
+    
+    return vote;
+  }
+
+  async getPollStats(question: string): Promise<{ question: string; yesCount: number; noCount: number; totalVotes: number }> {
+    const result = await db
+      .select({
+        answer: pollVotes.answer,
+        count: sql<number>`count(*)`
+      })
+      .from(pollVotes)
+      .where(eq(pollVotes.question, question))
+      .groupBy(pollVotes.answer);
+
+    let yesCount = 0;
+    let noCount = 0;
+
+    for (const row of result) {
+      if (row.answer === 'yes') {
+        yesCount = Number(row.count);
+      } else if (row.answer === 'no') {
+        noCount = Number(row.count);
+      }
+    }
+
+    return {
+      question,
+      yesCount,
+      noCount,
+      totalVotes: yesCount + noCount
+    };
+  }
+
+  async getAllPollData(): Promise<any[]> {
+    const votes = await db
+      .select()
+      .from(pollVotes)
+      .orderBy(desc(pollVotes.createdAt));
+    
+    return votes;
   }
 }
 

@@ -30,7 +30,8 @@ import {
   User,
   Calendar,
   MapPin,
-  Shield
+  Shield,
+  BarChart3
 } from 'lucide-react';
 
 interface AdminStats {
@@ -224,6 +225,15 @@ export default function AdminDashboardEnhanced() {
           >
             <XCircle className="h-4 w-4 mr-2" />
             Complaints
+          </Button>
+          <Button 
+            onClick={() => setLocation('/admin-poll-data')}
+            variant="outline"
+            size="sm"
+            className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Poll Data
           </Button>
           <Button 
             onClick={refreshData} 

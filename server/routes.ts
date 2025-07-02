@@ -3601,5 +3601,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all poll data (admin only)
+  app.get("/api/admin/poll-data", async (req, res) => {
+    try {
+      const pollData = await storage.getAllPollData();
+      
+      res.json(pollData);
+    } catch (error) {
+      console.error("Error fetching poll data:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

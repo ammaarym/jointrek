@@ -23,6 +23,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminDashboardEnhanced from "@/pages/admin-dashboard-enhanced";
 import AdminQuick from "@/pages/admin-quick";
 import AdminComplaints from "@/pages/admin-complaints";
+import AdminPollData from "@/pages/admin-poll-data";
 
 import MyPostsOriginal from "@/pages/my-posts-original";
 import Profile from "@/pages/profile";
@@ -329,6 +330,7 @@ function AppRoutes() {
           <Route path="/admin-dashboard" component={AdminDashboardEnhanced} />
           <Route path="/admin-quick" component={AdminQuick} />
           <Route path="/admin-complaints" component={AdminComplaints} />
+          <Route path="/admin-poll-data" component={AdminPollData} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>

@@ -1,10 +1,9 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { Pool } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
 import * as schema from "@shared/schema";
 
-// Configure Neon database to work with WebSockets for better performance
-neonConfig.webSocketConstructor = ws;
+// Note: Removed WebSocket configuration to avoid connection issues
+// The Neon serverless driver can work without WebSockets
 
 // Make sure DATABASE_URL is set
 if (!process.env.DATABASE_URL) {

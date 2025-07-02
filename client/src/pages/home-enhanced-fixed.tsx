@@ -25,7 +25,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import findRidesScreenshot from "@assets/image_1751166578599.png";
-import trekLogo from "@assets/TREK_1751439396881.png";
+import trekLogo from "@assets/TREK (Presentation)_1751439938143.png";
 
 // Particles Component
 interface MousePosition {
@@ -404,7 +404,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FCFAF7]">
 
       {/* Hero Section with Enhanced Effects */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-1 sm:pt-2 flex items-center justify-center">
+      <section className="relative min-h-screen bg-gradient-to-br from-[#FCFAF7] via-[#FCFAF7] to-[#FCFAF7] overflow-hidden pt-0 flex items-center justify-center">
         <MorphingShape className="w-96 h-96 -top-48 -right-48" />
         <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
@@ -438,7 +438,7 @@ export default function Home() {
               <img 
                 src={trekLogo} 
                 alt="Trek" 
-                className="h-48 sm:h-64 md:h-80 lg:h-96 w-auto"
+                className="h-24 sm:h-32 md:h-40 lg:h-48 w-auto"
                 style={{ backgroundColor: 'transparent' }}
               />
             </motion.div>

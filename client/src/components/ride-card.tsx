@@ -361,11 +361,11 @@ export default function RideCard({
             </div>
 
             {/* Route information - centered */}
-            <div className="flex items-center flex-1 justify-center mx-8">
-              <div className="flex flex-col mr-3 relative h-16">
-                <div className="w-3 h-3 rounded-full bg-black self-center"></div>
-                <div className="w-0.5 flex-1 bg-neutral-300 self-center"></div>
-                <div className="w-3 h-3 rounded-full bg-primary self-center"></div>
+            <div className="flex items-start flex-1 justify-center mx-8">
+              <div className="flex flex-col mr-3 relative h-16 justify-between pt-1">
+                <div className="w-3 h-3 rounded-full bg-black"></div>
+                <div className="w-0.5 flex-1 bg-neutral-300 self-center my-1"></div>
+                <div className="w-3 h-3 rounded-full bg-primary"></div>
               </div>
               <div className="flex-1 max-w-[300px]">
                 <div className="flex justify-between items-start">

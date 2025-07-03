@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth-fixed';
-import { ShieldCheck, AlertTriangle, FileText, Calendar } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileText, Calendar, Upload, X } from 'lucide-react';
 
 const insuranceSchema = z.object({
   insuranceProvider: z.string().min(1, 'Insurance provider is required'),
@@ -39,6 +39,8 @@ const INSURANCE_PROVIDERS = [
 
 export function InsuranceVerification({ currentInsurance, onUpdate }: InsuranceVerificationProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { currentUser } = useAuth();
 
@@ -53,23 +55,74 @@ export function InsuranceVerification({ currentInsurance, onUpdate }: InsuranceV
     }
   });
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => {
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload images (JPEG, PNG) or PDF files only.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Files must be smaller than 10MB.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      return true;
+    });
+
+    setUploadedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = async (data: InsuranceFormData) => {
     try {
       setIsSubmitting(true);
 
+      if (uploadedFiles.length === 0) {
+        toast({
+          title: "Files Required",
+          description: "Please upload at least one insurance document to continue.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const token = await currentUser?.getIdToken();
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('insuranceProvider', data.insuranceProvider);
+      formData.append('insurancePolicyNumber', data.insurancePolicyNumber);
+      formData.append('insuranceExpirationDate', new Date(data.insuranceExpirationDate).toISOString());
+      
+      // Append files
+      uploadedFiles.forEach((file) => {
+        formData.append('insuranceDocument', file);
+      });
       
       const response = await fetch('/api/users/insurance', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Note: Don't set Content-Type for FormData - browser sets it automatically
         },
-        body: JSON.stringify({
-          insuranceProvider: data.insuranceProvider,
-          insurancePolicyNumber: data.insurancePolicyNumber,
-          insuranceExpirationDate: new Date(data.insuranceExpirationDate).toISOString()
-        })
+        body: formData
       });
 
       if (response.ok) {
@@ -235,9 +288,74 @@ export function InsuranceVerification({ currentInsurance, onUpdate }: InsuranceV
               )}
             />
 
+            {/* File Upload Section */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Insurance Documents</Label>
+              <p className="text-sm text-gray-600">
+                Upload photos or scans of your insurance card or policy documents (JPEG, PNG, PDF)
+              </p>
+              
+              {/* File Upload Button */}
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Choose Files
+                </Button>
+                <span className="text-sm text-gray-500">
+                  Max 10MB per file • JPEG, PNG, PDF
+                </span>
+              </div>
+
+              {/* Hidden File Input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {/* Uploaded Files List */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Uploaded Files ({uploadedFiles.length})</Label>
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-gray-500" />
+                          <div>
+                            <p className="text-sm font-medium">{file.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {(file.size / (1024 * 1024)).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || uploadedFiles.length === 0}
               className="w-full"
             >
               {isSubmitting ? "Submitting..." : "Submit Insurance Information"}

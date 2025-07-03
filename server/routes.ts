@@ -13,6 +13,9 @@ import { formatDisplayName, formatNameForSMS } from "./utils/name-formatter";
 import { db } from "./db";
 import { rideRequests, rides } from "@shared/schema";
 import { and, eq, sql } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 // Initialize Stripe
 let stripe: Stripe;
@@ -2844,8 +2847,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Configure multer for insurance document uploads
+  const storage_config = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = 'uploads/insurance';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const userId = req.user?.uid || 'unknown';
+      const timestamp = Date.now();
+      const ext = path.extname(file.originalname);
+      cb(null, `${userId}-${timestamp}-${file.fieldname}${ext}`);
+    }
+  });
+
+  const upload = multer({
+    storage: storage_config,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+      files: 10 // Maximum 10 files
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, and PDF files are allowed.'));
+      }
+    }
+  });
+
   // Insurance verification endpoints
-  app.post('/api/users/insurance', authenticate, async (req: Request, res: Response) => {
+  app.post('/api/users/insurance', authenticate, upload.array('insuranceDocument', 10), async (req: Request, res: Response) => {
     try {
       const userId = req.user?.uid;
       if (!userId) {
@@ -2853,10 +2889,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { insuranceProvider, insurancePolicyNumber, insuranceExpirationDate } = req.body;
+      const uploadedFiles = req.files as Express.Multer.File[];
 
       // Validate required fields
       if (!insuranceProvider || !insurancePolicyNumber || !insuranceExpirationDate) {
         return res.status(400).json({ message: 'All insurance fields are required' });
+      }
+
+      // Validate files are uploaded
+      if (!uploadedFiles || uploadedFiles.length === 0) {
+        return res.status(400).json({ message: 'At least one insurance document is required' });
       }
 
       // Validate expiration date is in the future
@@ -2864,6 +2906,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (expirationDate <= new Date()) {
         return res.status(400).json({ message: 'Insurance expiration date must be in the future' });
       }
+
+      // Store file paths for database storage
+      const documentPaths = uploadedFiles.map(file => file.path);
+      console.log(`Insurance documents uploaded for user ${userId}:`, documentPaths);
 
       // Update user insurance information
       const updatedUser = await storage.updateUser(userId, {
@@ -2879,8 +2925,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ 
-        message: 'Insurance information submitted successfully',
-        user: updatedUser
+        message: 'Insurance information and documents submitted successfully',
+        user: updatedUser,
+        uploadedFiles: documentPaths.length,
+        documentsUploaded: uploadedFiles.map(file => ({
+          originalName: file.originalname,
+          size: file.size,
+          type: file.mimetype
+        }))
       });
     } catch (error) {
       console.error('Error updating insurance:', error);

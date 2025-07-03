@@ -184,7 +184,7 @@ export default function WaitlistComponent({
               {status === "loading" && buttonText.loading}
               {status === "success" && buttonText.success}
               {(status === "idle" || status === "error") && (
-                !userIntent ? "Answer question first" : buttonText.idle
+                !userIntent ? "Select to proceed" : buttonText.idle
               )}
             </Button>
           </div>

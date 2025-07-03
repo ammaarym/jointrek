@@ -1343,15 +1343,17 @@ export default function Profile() {
       </Card>
 
       {/* Insurance Verification Section */}
-      <InsuranceVerification 
-        currentInsurance={userData ? {
-          insuranceProvider: userData.insuranceProvider,
-          insurancePolicyNumber: userData.insurancePolicyNumber,
-          insuranceExpirationDate: userData.insuranceExpirationDate,
-          insuranceVerified: userData.insuranceVerified
-        } : undefined}
-        onUpdate={refetchUser}
-      />
+      <div id="insurance">
+        <InsuranceVerification 
+          currentInsurance={userData ? {
+            insuranceProvider: userData.insuranceProvider,
+            insurancePolicyNumber: userData.insurancePolicyNumber,
+            insuranceExpirationDate: userData.insuranceExpirationDate,
+            insuranceVerified: userData.insuranceVerified
+          } : undefined}
+          onUpdate={refetchUser}
+        />
+      </div>
 
       {/* Payment Methods Section */}
       <Card id="payment-methods-section">

@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/use-auth-fixed';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Car, CheckCircle, AlertCircle } from 'lucide-react';
+import { CreditCard, Car, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 
 interface SetupCheckProps {
   mode: 'request' | 'post';
@@ -14,6 +14,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
   const [, setLocation] = useLocation();
   const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
   const [hasDriverSetup, setHasDriverSetup] = useState(false);
+  const [hasInsuranceVerified, setHasInsuranceVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,20 +46,39 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
 
         // Check driver setup status (only needed for posting rides)
         if (mode === 'post') {
-          const driverResponse = await fetch('/api/driver/status', {
-            headers: {
-              'x-user-id': currentUser.uid,
-              'x-user-email': currentUser.email || '',
-              'x-user-name': currentUser.displayName || ''
-            }
-          });
+          const [driverResponse, insuranceResponse] = await Promise.all([
+            fetch('/api/driver/status', {
+              headers: {
+                'x-user-id': currentUser.uid,
+                'x-user-email': currentUser.email || '',
+                'x-user-name': currentUser.displayName || ''
+              }
+            }),
+            fetch('/api/users/insurance/status', {
+              headers: {
+                'x-user-id': currentUser.uid,
+                'x-user-email': currentUser.email || '',
+                'x-user-name': currentUser.displayName || ''
+              }
+            })
+          ]);
           
           if (driverResponse.ok) {
             const driverData = await driverResponse.json();
             setHasDriverSetup(driverData.isOnboarded);
+          }
+
+          if (insuranceResponse.ok) {
+            const insuranceData = await insuranceResponse.json();
+            setHasInsuranceVerified(insuranceData.hasInsurance);
+          }
+
+          // Auto-redirect if both setups are complete
+          if (driverResponse.ok && insuranceResponse.ok) {
+            const driverData = await driverResponse.json();
+            const insuranceData = await insuranceResponse.json();
             
-            // Auto-redirect if setup is complete
-            if (driverData.isOnboarded) {
+            if (driverData.isOnboarded && insuranceData.hasInsurance) {
               setLocation('/post-ride');
               return;
             }
@@ -74,7 +94,7 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
     checkUserSetup();
   }, [currentUser, mode, setLocation]);
 
-  const canProceed = mode === 'request' ? hasPaymentMethod : hasDriverSetup;
+  const canProceed = mode === 'request' ? hasPaymentMethod : (hasDriverSetup && hasInsuranceVerified);
 
   const handleProceed = () => {
     if (mode === 'request') {
@@ -183,6 +203,48 @@ export default function SetupCheck({ mode }: SetupCheckProps) {
                   className="bg-orange-600 hover:bg-orange-700"
                 >
                   Set Up Bank Account
+                </Button>
+              </CardContent>
+            )}
+          </Card>
+        )}
+
+        {/* Insurance Verification Card (only for posting rides) */}
+        {mode === 'post' && (
+          <Card 
+            className={`${hasInsuranceVerified ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors'}`}
+            onClick={!hasInsuranceVerified ? () => setLocation('/profile#insurance') : undefined}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                {hasInsuranceVerified ? (
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-orange-600" />
+                )}
+                <Shield className="w-6 h-6" />
+                Insurance Verification
+                {!hasInsuranceVerified && (
+                  <span className="ml-auto text-sm text-orange-600 font-normal">Click to setup →</span>
+                )}
+              </CardTitle>
+              <CardDescription>
+                {hasInsuranceVerified 
+                  ? 'Your auto insurance is verified and ready for rides.'
+                  : 'Verify your auto insurance before posting rides. This ensures passenger safety and meets Trek\'s driver requirements. Click anywhere on this card to get started.'
+                }
+              </CardDescription>
+            </CardHeader>
+            {!hasInsuranceVerified && (
+              <CardContent>
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLocation('/profile#insurance');
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  Verify Insurance Now
                 </Button>
               </CardContent>
             )}

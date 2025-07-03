@@ -431,7 +431,7 @@ export default function RideCard({
             </div>
 
             {/* Right side: Price, seats, baggage, and button */}
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col justify-between items-end h-full min-h-[80px]">
               <div className="text-2xl font-bold text-neutral-900 mb-1">
                 ${ride.price}
               </div>
@@ -477,24 +477,26 @@ export default function RideCard({
                 </div>
               ) : null}
 
-              {/* Action button */}
-              {isDriverUser && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onEdit) {
-                        onEdit(ride);
-                      }
-                    }}
-                  >
-                    Edit Ride
-                  </Button>
-                </div>
-              )}
+              {/* Action buttons positioned at bottom */}
+              <div className="mt-auto">
+                {/* Action button */}
+                {isDriverUser && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onEdit) {
+                          onEdit(ride);
+                        }
+                      }}
+                    >
+                      Edit Ride
+                    </Button>
+                  </div>
+                )}
 
-              {showRequestButton && (
+                {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
                     className={`px-4 py-2 rounded-md font-medium transition ${
@@ -560,7 +562,8 @@ export default function RideCard({
                                 : "Request a Trek"}
                   </Button>
                 </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

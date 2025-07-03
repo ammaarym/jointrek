@@ -654,7 +654,7 @@ export default function AdminDashboardEnhanced() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Insurance Verification Management</h3>
             <Button 
-              onClick={handleRefresh} 
+              onClick={refreshData} 
               disabled={refreshing}
               variant="outline"
             >

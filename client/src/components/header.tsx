@@ -20,7 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MenuIcon, HelpCircle, Shield } from "lucide-react";
 import NotificationsBell from "@/components/notifications-bell";
-import trekLogo from "@assets/TREK_1751438959440.jpg";
+import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 // Helper function to format display name (convert "Last, First" to "First Last")
 const formatDisplayName = (displayName: string | null | undefined): string => {

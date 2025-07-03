@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import trekLogo from "@assets/TREK_1751438959440.jpg";
+import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
   const { currentUser, loading, signInWithGoogle } = useAuth();

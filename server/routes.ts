@@ -3813,10 +3813,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Submit waitlist signup
   app.post("/api/waitlist", async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email, userIntent, deviceType } = req.body;
       
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
+      }
+      
+      if (!userIntent || !['driver', 'passenger'].includes(userIntent)) {
+        return res.status(400).json({ message: "Valid user intent (driver or passenger) is required" });
+      }
+      
+      if (!deviceType || !['mobile', 'desktop'].includes(deviceType)) {
+        return res.status(400).json({ message: "Valid device type (mobile or desktop) is required" });
       }
       
       // Basic email validation
@@ -3832,7 +3840,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Add to waitlist
-      const waitlistEntry = await storage.createWaitlistEntry({ email });
+      const waitlistEntry = await storage.createWaitlistEntry({ 
+        email, 
+        userIntent, 
+        deviceType 
+      });
       
       res.status(201).json({ 
         message: "Successfully added to waitlist", 

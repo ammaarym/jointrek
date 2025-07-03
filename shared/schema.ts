@@ -310,6 +310,8 @@ export type InsertPollVote = z.infer<typeof insertPollVoteSchema>;
 export const waitlist = pgTable("waitlist", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
+  userIntent: text("user_intent").notNull(), // "driver" or "passenger"
+  deviceType: text("device_type").notNull(), // "mobile" or "desktop"
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -193,6 +193,68 @@ export default function Help() {
         </CardContent>
       </Card>
 
+      {/* Insurance Requirements Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            <FaShieldAlt className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <span className="text-base sm:text-lg">Insurance Requirements for Drivers</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+            <AlertDescription className="text-red-800 text-sm sm:text-base">
+              All drivers must upload valid insurance documents before posting rides.
+            </AlertDescription>
+          </Alert>
+          
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Florida State Requirements:</h3>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <ul className="space-y-2 text-sm text-yellow-800">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <span>$10,000 Personal Injury Protection (PIP)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <span>$10,000 Property Damage Liability (PDL)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Important Notice:</h3>
+            <Alert className="border-orange-200 bg-orange-50">
+              <FaExclamationTriangle className="h-5 w-5 text-orange-600 flex-shrink-0" />
+              <AlertDescription className="text-orange-800 text-sm sm:text-base">
+                Most personal auto insurance policies do not cover ride-sharing activity. You may need a ride-share endorsement or commercial policy.
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-blue-800 mb-2">What Trek Requires:</h3>
+            <ol className="space-y-1 text-sm text-blue-700">
+              <li>1. Valid insurance provider and policy information</li>
+              <li>2. Upload proof of insurance (photo or PDF)</li>
+              <li>3. Acknowledge coverage limitations for ride-sharing</li>
+            </ol>
+          </div>
+
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-green-800 mb-2">Protecting Yourself:</h3>
+            <ul className="space-y-1 text-sm text-green-700">
+              <li>• Contact your insurer about ride-share coverage</li>
+              <li>• Consider adding a ride-share endorsement ($15-30/month)</li>
+              <li>• Ensure you're covered during Trek rides</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Passenger Payment Methods Section */}
       <Card>
         <CardHeader>

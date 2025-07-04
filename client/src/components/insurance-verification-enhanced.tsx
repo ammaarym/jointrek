@@ -272,7 +272,7 @@ export function InsuranceVerificationEnhanced({ currentInsurance, onUpdate }: In
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            className="w-full" style={{ backgroundColor: '#B8956B', color: 'white' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#A17F5A'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B8956B'}
           >
             {isSubmitting ? (
               <>
@@ -293,7 +293,16 @@ export function InsuranceVerificationEnhanced({ currentInsurance, onUpdate }: In
         <Button
           variant="outline"
           onClick={() => setCurrentStep('upload')}
-          className="text-gray-600"
+          className="border-2" 
+          style={{ borderColor: '#B8956B', color: '#8A6F47' }} 
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#B8956B';
+            e.currentTarget.style.color = 'white';
+          }} 
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = '#8A6F47';
+          }}
         >
           Skip to document upload instead
         </Button>
@@ -386,7 +395,10 @@ export function InsuranceVerificationEnhanced({ currentInsurance, onUpdate }: In
         <Button
           onClick={handleDocumentUpload}
           disabled={isSubmitting || uploadedFiles.length === 0}
-          className="w-full bg-green-600 hover:bg-green-700"
+          className="w-full" 
+          style={{ backgroundColor: '#B8956B', color: 'white' }} 
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#A17F5A'} 
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B8956B'}
         >
           {isSubmitting ? (
             <>
@@ -407,7 +419,16 @@ export function InsuranceVerificationEnhanced({ currentInsurance, onUpdate }: In
           <Button
             variant="outline"
             onClick={() => setCurrentStep('instant')}
-            className="text-gray-600"
+            className="border-2" 
+            style={{ borderColor: '#B8956B', color: '#8A6F47' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#B8956B';
+              e.currentTarget.style.color = 'white';
+            }} 
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#8A6F47';
+            }}
           >
             Try instant verification instead
           </Button>

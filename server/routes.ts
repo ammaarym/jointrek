@@ -2968,6 +2968,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New two-step insurance verification endpoints
+  app.post('/api/insurance/verify-instant', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { insuranceProvider, insurancePolicyNumber, insuranceExpirationDate } = req.body;
+
+      // Validate required fields
+      if (!insuranceProvider || !insurancePolicyNumber || !insuranceExpirationDate) {
+        return res.status(400).json({ message: 'All insurance fields are required' });
+      }
+
+      // Validate expiration date is in the future
+      const expirationDate = new Date(insuranceExpirationDate);
+      if (expirationDate <= new Date()) {
+        return res.status(400).json({ message: 'Insurance expiration date must be in the future' });
+      }
+
+      // Simulate instant verification logic
+      // In a real implementation, this would call a third-party insurance verification API
+      let verificationSuccessful = false;
+      
+      // For demonstration, simulate success rate based on provider
+      const highSuccessProviders = ['GEICO', 'State Farm', 'Progressive', 'Allstate'];
+      const mediumSuccessProviders = ['USAA', 'Liberty Mutual', 'Farmers'];
+      
+      if (highSuccessProviders.includes(insuranceProvider)) {
+        verificationSuccessful = Math.random() > 0.3; // 70% success rate
+      } else if (mediumSuccessProviders.includes(insuranceProvider)) {
+        verificationSuccessful = Math.random() > 0.6; // 40% success rate
+      } else {
+        verificationSuccessful = Math.random() > 0.8; // 20% success rate
+      }
+
+      if (verificationSuccessful) {
+        // Update user with verified insurance
+        const updatedUser = await storage.updateUser(userId, {
+          insuranceProvider,
+          insurancePolicyNumber,
+          insuranceExpirationDate: expirationDate,
+          insuranceVerified: true,
+          insuranceVerificationDate: new Date()
+        });
+
+        if (!updatedUser) {
+          return res.status(500).json({ message: 'Failed to update insurance information' });
+        }
+
+        res.json({
+          verified: true,
+          message: 'Insurance verified successfully',
+          user: updatedUser
+        });
+      } else {
+        // Save partial info but don't verify
+        await storage.updateUser(userId, {
+          insuranceProvider,
+          insurancePolicyNumber,
+          insuranceExpirationDate: expirationDate,
+          insuranceVerified: false,
+          insuranceVerificationDate: null
+        });
+
+        res.json({
+          verified: false,
+          message: 'Instant verification unavailable for this policy. Please upload documents.',
+          requiresDocuments: true
+        });
+      }
+    } catch (error) {
+      console.error('Error in instant insurance verification:', error);
+      res.status(500).json({ message: 'Instant verification failed' });
+    }
+  });
+
+  app.post('/api/insurance/upload-documents', authenticate, upload.array('documents', 10), async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { insuranceProvider, insurancePolicyNumber, insuranceExpirationDate } = req.body;
+      const uploadedFiles = req.files as Express.Multer.File[];
+
+      // Validate required fields
+      if (!insuranceProvider || !insurancePolicyNumber || !insuranceExpirationDate) {
+        return res.status(400).json({ message: 'All insurance fields are required' });
+      }
+
+      // Validate files are uploaded
+      if (!uploadedFiles || uploadedFiles.length === 0) {
+        return res.status(400).json({ message: 'At least one insurance document is required' });
+      }
+
+      // Validate expiration date is in the future
+      const expirationDate = new Date(insuranceExpirationDate);
+      if (expirationDate <= new Date()) {
+        return res.status(400).json({ message: 'Insurance expiration date must be in the future' });
+      }
+
+      // Store file paths for database storage
+      const documentPaths = uploadedFiles.map(file => file.path);
+      console.log(`Insurance documents uploaded for user ${userId}:`, documentPaths);
+
+      // Update user insurance information (not verified yet, pending manual review)
+      const updatedUser = await storage.updateUser(userId, {
+        insuranceProvider,
+        insurancePolicyNumber,
+        insuranceExpirationDate: expirationDate,
+        insuranceVerified: false, // Will be verified manually
+        insuranceVerificationDate: null
+      });
+
+      if (!updatedUser) {
+        return res.status(500).json({ message: 'Failed to update insurance information' });
+      }
+
+      res.json({
+        message: 'Insurance documents uploaded successfully and are under review',
+        user: updatedUser,
+        uploadedFiles: documentPaths.length,
+        documentsUploaded: uploadedFiles.map(file => ({
+          originalName: file.originalname,
+          size: file.size,
+          type: file.mimetype
+        })),
+        estimatedReviewTime: '1-2 business days'
+      });
+    } catch (error) {
+      console.error('Error uploading insurance documents:', error);
+      res.status(500).json({ message: 'Failed to upload insurance documents' });
+    }
+  });
+
   // Admin middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

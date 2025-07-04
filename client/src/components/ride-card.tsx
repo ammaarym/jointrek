@@ -245,12 +245,12 @@ export default function RideCard({
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="w-full flex flex-col items-end justify-center">
+            {/* Action buttons - positioned at bottom right on mobile */}
+            <div className="w-full flex justify-end items-end mt-4">
               {isDriverUser && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
-                    className="block mt-2 bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                    className="bg-[#B8956B] text-white px-4 py-2 rounded-md font-medium hover:bg-[#8A6F47] transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (onEdit) {
@@ -266,7 +266,7 @@ export default function RideCard({
               {showRequestButton && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <Button
-                    className={`block mt-4 px-4 py-2 rounded-md font-medium transition ${
+                    className={`px-4 py-2 rounded-md font-medium transition ${
                       isApproved
                         ? "bg-green-600 text-white hover:bg-green-700"
                         : isRejected
@@ -281,10 +281,10 @@ export default function RideCard({
                                   ? "bg-green-600 text-white cursor-not-allowed"
                                   : existingDriverOffer.status === "rejected"
                                     ? "bg-red-500 text-white cursor-not-allowed"
-                                    : "bg-primary text-white hover:bg-primary/90"
+                                    : "bg-[#B8956B] text-white hover:bg-[#8A6F47]"
                               : isRequested
                                 ? "bg-orange-500 text-white hover:bg-orange-600"
-                                : "bg-primary text-white hover:bg-primary/90"
+                                : "bg-[#B8956B] text-white hover:bg-[#8A6F47]"
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -479,9 +479,9 @@ export default function RideCard({
             </div>
           </div>
 
-          {/* Desktop Only: Absolutely positioned button at bottom right */}
-          {showRequestButton && (
-            <div className="hidden md:block absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
+          {/* Desktop Only: Action button positioned at bottom right */}
+          <div className="hidden md:block absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
+            {showRequestButton && (
               <Button
                 className={`px-4 py-2 rounded-md font-medium transition ${
                   isApproved
@@ -498,10 +498,10 @@ export default function RideCard({
                               ? "bg-green-600 text-white cursor-not-allowed"
                               : existingDriverOffer.status === "rejected"
                                 ? "bg-red-500 text-white cursor-not-allowed"
-                                : "bg-primary text-white hover:bg-primary/90"
+                                : "bg-[#B8956B] text-white hover:bg-[#8A6F47]"
                           : isRequested
                             ? "bg-orange-500 text-white hover:bg-orange-600"
-                            : "bg-primary text-white hover:bg-primary/90"
+                            : "bg-[#B8956B] text-white hover:bg-[#8A6F47]"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -545,14 +545,11 @@ export default function RideCard({
                             ? "Offer a Trek"
                             : "Request a Trek"}
               </Button>
-            </div>
-          )}
+            )}
 
-          {/* Desktop Only: Edit button for driver */}
-          {isDriverUser && (
-            <div className="hidden md:block absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
+            {isDriverUser && (
               <Button
-                className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                className="bg-[#B8956B] text-white px-4 py-2 rounded-md font-medium hover:bg-[#8A6F47] transition"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (onEdit) {
@@ -562,8 +559,8 @@ export default function RideCard({
               >
                 Edit Ride
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

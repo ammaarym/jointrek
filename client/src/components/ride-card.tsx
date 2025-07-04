@@ -91,7 +91,7 @@ export default function RideCard({
   return (
     <>
       <div
-        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer relative"
         onClick={() => setDetailsOpen(true)}
       >
         <div className="p-5 pb-8">
@@ -430,8 +430,8 @@ export default function RideCard({
               </div>
             </div>
 
-            {/* Right side: Price, seats, baggage, and button */}
-            <div className="flex flex-col justify-between items-end h-full min-h-[80px]">
+            {/* Right side: Price, seats, baggage */}
+            <div className="flex flex-col justify-start items-end h-full min-h-[80px]">
               <div className="text-2xl font-bold text-neutral-900 mb-1">
                 ${ride.price}
               </div>
@@ -476,96 +476,94 @@ export default function RideCard({
                   </span>
                 </div>
               ) : null}
-
-              {/* Action buttons positioned at bottom */}
-              <div className="mt-auto">
-                {/* Action button */}
-                {isDriverUser && (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onEdit) {
-                          onEdit(ride);
-                        }
-                      }}
-                    >
-                      Edit Ride
-                    </Button>
-                  </div>
-                )}
-
-                {showRequestButton && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    className={`px-4 py-2 rounded-md font-medium transition ${
-                      isApproved
-                        ? "bg-green-600 text-white hover:bg-green-700"
-                        : isRejected
-                          ? "bg-red-500 text-white cursor-not-allowed"
-                          : isCancelled
-                            ? "bg-gray-500 text-white cursor-not-allowed"
-                            : existingDriverOffer &&
-                                rideTypeFilter === "passenger"
-                              ? existingDriverOffer.status === "pending"
-                                ? "bg-orange-500 text-white cursor-not-allowed"
-                                : existingDriverOffer.status === "accepted"
-                                  ? "bg-green-600 text-white cursor-not-allowed"
-                                  : existingDriverOffer.status === "rejected"
-                                    ? "bg-red-500 text-white cursor-not-allowed"
-                                    : "bg-primary text-white hover:bg-primary/90"
-                              : isRequested
-                                ? "bg-orange-500 text-white hover:bg-orange-600"
-                                : "bg-primary text-white hover:bg-primary/90"
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (
-                        onRequestRide &&
-                        !isRequested &&
-                        !isApproved &&
-                        !isRejected &&
-                        !isCancelled &&
-                        !(existingDriverOffer && rideTypeFilter === "passenger")
-                      ) {
-                        onRequestRide(Number(ride.id));
-                      }
-                    }}
-                    disabled={
-                      isRequested ||
-                      isApproved ||
-                      isRejected ||
-                      isCancelled ||
-                      (existingDriverOffer && rideTypeFilter === "passenger")
-                    }
-                  >
-                    {isApproved
-                      ? "Ride Approved"
-                      : isRejected
-                        ? "Request Denied"
-                        : isCancelled
-                          ? "CANCELLED"
-                          : existingDriverOffer &&
-                              rideTypeFilter === "passenger"
-                            ? existingDriverOffer.status === "pending"
-                              ? `Offer Sent ($${existingDriverOffer.price})`
-                              : existingDriverOffer.status === "accepted"
-                                ? `Offer Accepted ($${existingDriverOffer.price})`
-                                : existingDriverOffer.status === "rejected"
-                                  ? `Offer Rejected ($${existingDriverOffer.price})`
-                                  : "Offer a Trek"
-                            : isRequested
-                              ? "Request Sent"
-                              : rideTypeFilter === "passenger"
-                                ? "Offer a Trek"
-                                : "Request a Trek"}
-                  </Button>
-                </div>
-                )}
-              </div>
             </div>
           </div>
+
+          {/* Desktop Only: Absolutely positioned button at bottom right */}
+          {showRequestButton && (
+            <div className="hidden md:block absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
+              <Button
+                className={`px-4 py-2 rounded-md font-medium transition ${
+                  isApproved
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : isRejected
+                      ? "bg-red-500 text-white cursor-not-allowed"
+                      : isCancelled
+                        ? "bg-gray-500 text-white cursor-not-allowed"
+                        : existingDriverOffer &&
+                            rideTypeFilter === "passenger"
+                          ? existingDriverOffer.status === "pending"
+                            ? "bg-orange-500 text-white cursor-not-allowed"
+                            : existingDriverOffer.status === "accepted"
+                              ? "bg-green-600 text-white cursor-not-allowed"
+                              : existingDriverOffer.status === "rejected"
+                                ? "bg-red-500 text-white cursor-not-allowed"
+                                : "bg-primary text-white hover:bg-primary/90"
+                          : isRequested
+                            ? "bg-orange-500 text-white hover:bg-orange-600"
+                            : "bg-primary text-white hover:bg-primary/90"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (
+                    onRequestRide &&
+                    !isRequested &&
+                    !isApproved &&
+                    !isRejected &&
+                    !isCancelled &&
+                    !(existingDriverOffer && rideTypeFilter === "passenger")
+                  ) {
+                    onRequestRide(Number(ride.id));
+                  }
+                }}
+                disabled={
+                  isRequested ||
+                  isApproved ||
+                  isRejected ||
+                  isCancelled ||
+                  (existingDriverOffer && rideTypeFilter === "passenger")
+                }
+              >
+                {isApproved
+                  ? "Ride Approved"
+                  : isRejected
+                    ? "Request Denied"
+                    : isCancelled
+                      ? "CANCELLED"
+                      : existingDriverOffer &&
+                          rideTypeFilter === "passenger"
+                        ? existingDriverOffer.status === "pending"
+                          ? `Offer Sent ($${existingDriverOffer.price})`
+                          : existingDriverOffer.status === "accepted"
+                            ? `Offer Accepted ($${existingDriverOffer.price})`
+                            : existingDriverOffer.status === "rejected"
+                              ? `Offer Rejected ($${existingDriverOffer.price})`
+                              : "Offer a Trek"
+                        : isRequested
+                          ? "Request Sent"
+                          : rideTypeFilter === "passenger"
+                            ? "Offer a Trek"
+                            : "Request a Trek"}
+              </Button>
+            </div>
+          )}
+
+          {/* Desktop Only: Edit button for driver */}
+          {isDriverUser && (
+            <div className="hidden md:block absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
+              <Button
+                className="bg-primary text-white px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onEdit) {
+                    onEdit(ride);
+                  }
+                }}
+              >
+                Edit Ride
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -189,17 +189,17 @@ export function InsuranceVerificationEnhanced({ currentInsurance, onUpdate }: In
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-6 space-x-4">
-      <div className={`flex items-center space-x-2 ${currentStep === 'instant' ? 'text-blue-600' : currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'text-green-600' : 'text-gray-400'}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'instant' ? 'bg-blue-100 text-blue-600' : currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+      <div className={`flex items-center space-x-2 ${currentStep === 'instant' ? 'text-[#8A6F47]' : currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'text-[#8A6F47]' : 'text-gray-400'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'instant' ? 'bg-[#F5F0E8] text-[#8A6F47]' : currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'bg-[#F5F0E8] text-[#8A6F47]' : 'bg-gray-100 text-gray-400'}`}>
           {(currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified') ? <CheckCircle2 className="w-5 h-5" /> : '1'}
         </div>
         <span className="text-sm font-medium">Instant Verification</span>
       </div>
       
-      <div className={`w-12 h-0.5 ${currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+      <div className={`w-12 h-0.5 ${currentStep === 'upload' || currentStep === 'pending' || currentStep === 'verified' ? 'bg-[#B8956B]' : 'bg-gray-300'}`}></div>
       
-      <div className={`flex items-center space-x-2 ${currentStep === 'upload' ? 'text-blue-600' : currentStep === 'pending' || currentStep === 'verified' ? 'text-green-600' : 'text-gray-400'}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'upload' ? 'bg-blue-100 text-blue-600' : currentStep === 'pending' || currentStep === 'verified' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+      <div className={`flex items-center space-x-2 ${currentStep === 'upload' ? 'text-[#8A6F47]' : currentStep === 'pending' || currentStep === 'verified' ? 'text-[#8A6F47]' : 'text-gray-400'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep === 'upload' ? 'bg-[#F5F0E8] text-[#8A6F47]' : currentStep === 'pending' || currentStep === 'verified' ? 'bg-[#F5F0E8] text-[#8A6F47]' : 'bg-gray-100 text-gray-400'}`}>
           {(currentStep === 'pending' || currentStep === 'verified') ? <CheckCircle2 className="w-5 h-5" /> : '2'}
         </div>
         <span className="text-sm font-medium">Document Upload</span>

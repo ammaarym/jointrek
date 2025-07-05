@@ -33,6 +33,7 @@ import NotificationsPage from "@/pages/notifications";
 import StripeSetupGuide from "@/pages/stripe-setup-guide";
 import SetupCheck from "@/pages/setup-check";
 import TermsOfService from "@/pages/terms-of-service";
+import InsuranceVerification from "@/pages/insurance-verification";
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
 import { ThemeProvider } from "@/lib/theme";
@@ -322,6 +323,9 @@ function AppRoutes() {
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}
+          </Route>
+          <Route path="/insurance-verification">
+            {(params) => <ProtectedRoute component={InsuranceVerification} path="/insurance-verification" requiresContactInfo={true} />}
           </Route>
           <Route path="/requests/:requestId">
             {(params) => <ProtectedRoute component={RideRequestApproval} path="/requests/:requestId" />}

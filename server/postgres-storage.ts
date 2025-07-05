@@ -14,6 +14,7 @@ import {
   complaints,
   pollVotes,
   waitlist,
+  insuranceDocuments,
   type Ride,
   type InsertRide,
   type User,
@@ -40,6 +41,8 @@ import {
   type InsertPollVote,
   type Waitlist,
   type InsertWaitlist,
+  type InsuranceDocument,
+  type InsertInsuranceDocument,
   insertNotificationSchema
 } from "@shared/schema";
 import { eq, and, or, desc, gte, sql, lt, isNull } from "drizzle-orm";
@@ -1661,6 +1664,101 @@ export class PostgresStorage implements IStorage {
       .from(waitlist)
       .orderBy(desc(waitlist.createdAt));
     return entries;
+  }
+
+  // Insurance document methods
+  async createInsuranceDocument(document: InsertInsuranceDocument): Promise<InsuranceDocument> {
+    const [newDocument] = await db
+      .insert(insuranceDocuments)
+      .values(document)
+      .returning();
+    return newDocument;
+  }
+
+  async getInsuranceDocumentByUserId(userId: string): Promise<InsuranceDocument | undefined> {
+    const [document] = await db
+      .select()
+      .from(insuranceDocuments)
+      .where(eq(insuranceDocuments.userId, userId))
+      .orderBy(desc(insuranceDocuments.createdAt))
+      .limit(1);
+    return document;
+  }
+
+  async getAllInsuranceDocuments(): Promise<InsuranceDocument[]> {
+    return await db
+      .select()
+      .from(insuranceDocuments)
+      .orderBy(desc(insuranceDocuments.createdAt));
+  }
+
+  async getPendingInsuranceDocuments(): Promise<InsuranceDocument[]> {
+    return await db
+      .select()
+      .from(insuranceDocuments)
+      .where(eq(insuranceDocuments.status, 'pending'))
+      .orderBy(desc(insuranceDocuments.createdAt));
+  }
+
+  async updateInsuranceDocumentStatus(
+    documentId: number, 
+    status: 'approved' | 'rejected', 
+    approvedBy: string,
+    rejectionReason?: string
+  ): Promise<InsuranceDocument> {
+    const [updatedDocument] = await db
+      .update(insuranceDocuments)
+      .set({
+        status,
+        approvedBy,
+        approvedAt: new Date(),
+        rejectionReason
+      })
+      .where(eq(insuranceDocuments.id, documentId))
+      .returning();
+    
+    // Update user's insurance verification status if approved
+    if (status === 'approved') {
+      await db
+        .update(users)
+        .set({
+          insuranceVerified: true,
+          insuranceVerificationDate: new Date(),
+          insuranceStatus: 'approved'
+        })
+        .where(eq(users.firebaseUid, updatedDocument.userId));
+    } else {
+      await db
+        .update(users)
+        .set({
+          insuranceStatus: 'rejected'
+        })
+        .where(eq(users.firebaseUid, updatedDocument.userId));
+    }
+    
+    return updatedDocument;
+  }
+
+  async updateUserInsuranceInfo(
+    userId: string,
+    provider: string,
+    policyNumber: string,
+    expirationDate: Date,
+    documentPath: string
+  ): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        insuranceProvider: provider,
+        insurancePolicyNumber: policyNumber,
+        insuranceExpirationDate: expirationDate,
+        insuranceDocumentPath: documentPath,
+        insuranceStatus: 'pending'
+      })
+      .where(eq(users.firebaseUid, userId))
+      .returning();
+    
+    return updatedUser;
   }
 }
 

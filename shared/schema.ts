@@ -22,6 +22,9 @@ export const users = pgTable("users", {
   insuranceExpirationDate: timestamp("insurance_expiration_date"),
   insuranceVerified: boolean("insurance_verified").default(false),
   insuranceVerificationDate: timestamp("insurance_verification_date"),
+  insuranceStatus: text("insurance_status").default("none"), // none, pending, approved, rejected
+  insuranceDocumentPath: text("insurance_document_path"),
+  insuranceRejectionReason: text("insurance_rejection_reason"),
   interestTags: text("interest_tags").array(),
   cancellationStrikeCount: integer("cancellation_strike_count").default(0).notNull(),
   strikeResetDate: timestamp("strike_reset_date"),
@@ -305,6 +308,30 @@ export const insertPollVoteSchema = createInsertSchema(pollVotes).omit({
 
 export type PollVote = typeof pollVotes.$inferSelect;
 export type InsertPollVote = z.infer<typeof insertPollVoteSchema>;
+
+// Insurance documents table schema
+export const insuranceDocuments = pgTable("insurance_documents", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.firebaseUid),
+  provider: text("provider").notNull(),
+  policyNumber: text("policy_number").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
+  documentPath: text("document_path").notNull(),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  rejectionReason: text("rejection_reason"),
+  approvedBy: text("approved_by"), // Admin user ID who approved/rejected
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Insurance documents insert schema
+export const insertInsuranceDocumentSchema = createInsertSchema(insuranceDocuments).omit({
+  id: true,
+  createdAt: true
+});
+
+export type InsuranceDocument = typeof insuranceDocuments.$inferSelect;
+export type InsertInsuranceDocument = z.infer<typeof insertInsuranceDocumentSchema>;
 
 // Waitlist table schema
 export const waitlist = pgTable("waitlist", {

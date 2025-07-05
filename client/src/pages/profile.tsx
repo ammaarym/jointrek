@@ -17,6 +17,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { stripePromise } from '@/lib/stripe';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { InsuranceVerificationUnified } from '@/components/insurance-verification-unified';
+import VehicleRegistrationVerification from '@/components/vehicle-registration-verification';
 import { INTEREST_TAGS, MAX_INTEREST_TAGS } from '@shared/constants';
 
 // Helper function to format display name (convert "Last, First" to "First Last")

@@ -3106,6 +3106,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Configure multer for vehicle registration document uploads
+  const vehicleUploadStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = 'uploads/vehicle-registration';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const userId = req.user?.uid || 'unknown';
+      const timestamp = Date.now();
+      const ext = path.extname(file.originalname);
+      cb(null, `${userId}-${timestamp}-vehicle-registration${ext}`);
+    }
+  });
+
+  const vehicleUpload = multer({
+    storage: vehicleUploadStorage,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+      files: 1 // Only 1 registration document
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, and PDF files are allowed.'));
+      }
+    }
+  });
+
+  // Vehicle registration verification endpoints
+  app.post('/api/users/vehicle-registration', authenticate, vehicleUpload.single('registrationDocument'), async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const { vehicleMake, vehicleModel, vehicleYear, licensePlate } = req.body;
+      const uploadedFile = req.file;
+
+      // Validate required fields
+      if (!vehicleMake || !vehicleModel || !vehicleYear || !licensePlate) {
+        return res.status(400).json({ message: 'All vehicle fields are required' });
+      }
+
+      // Validate file is uploaded
+      if (!uploadedFile) {
+        return res.status(400).json({ message: 'Vehicle registration document is required' });
+      }
+
+      // Validate year is reasonable
+      const year = parseInt(vehicleYear);
+      const currentYear = new Date().getFullYear();
+      if (year < 1980 || year > currentYear + 1) {
+        return res.status(400).json({ message: 'Vehicle year must be between 1980 and ' + (currentYear + 1) });
+      }
+
+      // Store file path for database storage
+      const documentPath = uploadedFile.path;
+      console.log(`Vehicle registration document uploaded for user ${userId}:`, documentPath);
+
+      // Update user vehicle registration information
+      const updatedUser = await storage.updateUser(userId, {
+        vehicleMake,
+        vehicleModel,
+        vehicleYear: year,
+        licensePlate: licensePlate.toUpperCase(),
+        vehicleRegistrationVerified: false, // Will be verified manually
+        vehicleRegistrationStatus: 'pending',
+        vehicleRegistrationDocumentPath: documentPath,
+        vehicleRegistrationRejectionReason: null
+      });
+
+      if (!updatedUser) {
+        return res.status(500).json({ message: 'Failed to update vehicle registration information' });
+      }
+
+      res.json({ 
+        message: 'Vehicle registration information submitted successfully',
+        user: updatedUser,
+        documentUploaded: {
+          originalName: uploadedFile.originalname,
+          size: uploadedFile.size,
+          type: uploadedFile.mimetype
+        }
+      });
+    } catch (error) {
+      console.error('Error updating vehicle registration:', error);
+      res.status(500).json({ message: 'Failed to update vehicle registration information' });
+    }
+  });
+
+  app.get('/api/users/vehicle-registration/status', authenticate, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.uid;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const user = await storage.getUserByFirebaseUid(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const vehicleStatus = {
+        hasVehicle: !!(user.vehicleMake && user.vehicleModel && user.vehicleYear && user.licensePlate),
+        isVerified: user.vehicleRegistrationVerified || false,
+        status: user.vehicleRegistrationStatus || 'none',
+        make: user.vehicleMake,
+        model: user.vehicleModel,
+        year: user.vehicleYear,
+        licensePlate: user.licensePlate,
+        rejectionReason: user.vehicleRegistrationRejectionReason
+      };
+
+      res.json(vehicleStatus);
+    } catch (error) {
+      console.error('Error getting vehicle registration status:', error);
+      res.status(500).json({ message: 'Failed to get vehicle registration status' });
+    }
+  });
+
   // Admin middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

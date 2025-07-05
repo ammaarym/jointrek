@@ -25,6 +25,14 @@ export const users = pgTable("users", {
   insuranceStatus: text("insurance_status").default("none"), // none, pending, approved, rejected
   insuranceDocumentPath: text("insurance_document_path"),
   insuranceRejectionReason: text("insurance_rejection_reason"),
+  vehicleMake: text("vehicle_make"),
+  vehicleModel: text("vehicle_model"),
+  vehicleYear: integer("vehicle_year"),
+  licensePlate: text("license_plate"),
+  vehicleRegistrationVerified: boolean("vehicle_registration_verified").default(false),
+  vehicleRegistrationStatus: text("vehicle_registration_status").default("none"), // none, pending, approved, rejected
+  vehicleRegistrationDocumentPath: text("vehicle_registration_document_path"),
+  vehicleRegistrationRejectionReason: text("vehicle_registration_rejection_reason"),
   interestTags: text("interest_tags").array(),
   cancellationStrikeCount: integer("cancellation_strike_count").default(0).notNull(),
   strikeResetDate: timestamp("strike_reset_date"),

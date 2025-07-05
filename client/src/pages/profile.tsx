@@ -1358,6 +1358,22 @@ export default function Profile() {
         />
       </div>
 
+      {/* Vehicle Registration Verification Section */}
+      <div id="vehicle-registration">
+        <VehicleRegistrationVerification 
+          currentVehicle={userData ? {
+            vehicleMake: userData.vehicleMake,
+            vehicleModel: userData.vehicleModel,
+            vehicleYear: userData.vehicleYear,
+            licensePlate: userData.licensePlate,
+            vehicleRegistrationVerified: userData.vehicleRegistrationVerified,
+            vehicleRegistrationStatus: userData.vehicleRegistrationStatus || 'none',
+            vehicleRegistrationRejectionReason: userData.vehicleRegistrationRejectionReason
+          } : undefined}
+          onUpdate={refetchUser}
+        />
+      </div>
+
       {/* Payment Methods Section */}
       <Card id="payment-methods-section">
         <CardHeader>

@@ -16,7 +16,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { InsuranceVerificationEnhanced } from '@/components/insurance-verification-enhanced';
+import { InsuranceVerificationUnified } from '@/components/insurance-verification-unified';
 import { INTEREST_TAGS, MAX_INTEREST_TAGS } from '@shared/constants';
 
 // Helper function to format display name (convert "Last, First" to "First Last")
@@ -1344,12 +1344,14 @@ export default function Profile() {
 
       {/* Insurance Verification Section */}
       <div id="insurance">
-        <InsuranceVerificationEnhanced 
+        <InsuranceVerificationUnified 
           currentInsurance={userData ? {
             insuranceProvider: userData.insuranceProvider,
             insurancePolicyNumber: userData.insurancePolicyNumber,
             insuranceExpirationDate: userData.insuranceExpirationDate,
-            insuranceVerified: userData.insuranceVerified
+            insuranceVerified: userData.insuranceVerified,
+            insuranceStatus: userData.insuranceStatus || 'none',
+            insuranceRejectionReason: userData.insuranceRejectionReason
           } : undefined}
           onUpdate={refetchUser}
         />

@@ -244,6 +244,7 @@ DATABASE_URL
 - July 4, 2025: Fixed critical database connectivity issues - resolved WebSocket connection failures by switching from neon-serverless with WebSocket to neon-http driver for better Replit environment compatibility, eliminating "All attempts to open a WebSocket to connect to the database failed" errors and restoring full application functionality
 - July 5, 2025: Fixed JSX syntax error in insurance verification page - resolved IIFE execution during render causing application startup failures by moving state logic to useEffect hook and cleaning up JSX structure
 - July 5, 2025: Unified insurance verification workflow - combined separate instant verification and document upload steps into single form requiring both policy information (provider, policy number, expiration date) and insurance document upload for streamlined user experience
+- July 5, 2025: Integrated unified insurance verification into profile page - moved insurance verification from standalone page into profile page section, removed standalone /insurance-verification route, created InsuranceVerificationUnified component with single form interface that shows verification status after submission
 
 ## User Preferences
 

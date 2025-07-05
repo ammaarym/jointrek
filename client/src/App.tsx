@@ -33,6 +33,9 @@ import NotificationsPage from "@/pages/notifications";
 import StripeSetupGuide from "@/pages/stripe-setup-guide";
 import SetupCheck from "@/pages/setup-check";
 import TermsOfService from "@/pages/terms-of-service";
+import VehicleVerificationPage from "@/pages/vehicle-verification";
+import InsuranceVerificationPage from "@/pages/insurance-verification";
+import BankSetupPage from "@/pages/bank-setup";
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
@@ -323,6 +326,15 @@ function AppRoutes() {
           </Route>
           <Route path="/profile">
             {(params) => <ProtectedRoute component={Profile} path="/profile" />}
+          </Route>
+          <Route path="/vehicle-verification">
+            {(params) => <ProtectedRoute component={VehicleVerificationPage} path="/vehicle-verification" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/insurance-verification">
+            {(params) => <ProtectedRoute component={InsuranceVerificationPage} path="/insurance-verification" requiresContactInfo={true} />}
+          </Route>
+          <Route path="/bank-setup">
+            {(params) => <ProtectedRoute component={BankSetupPage} path="/bank-setup" requiresContactInfo={true} />}
           </Route>
 
           <Route path="/requests/:requestId">

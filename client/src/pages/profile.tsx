@@ -1174,205 +1174,179 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Bank Account Setup Section */}
-      <Card id="bank-account">
+      {/* Driver Setup Section */}
+      <Card id="driver-setup">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <FaCar className="w-5 h-5" />
-              Bank Account Setup
-            </div>
-            {driverStatus?.isOnboarded && (
-              <button
-                onClick={handleDeleteDriverAccount}
-                disabled={deleteDriverMutation.isPending}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded p-1 disabled:opacity-50"
-                title="Delete bank account setup"
-              >
-                ×
-              </button>
+          <CardTitle className="flex items-center gap-2">
+            <FaCar className="w-5 h-5" />
+            Driver Setup
+            {/* Show checkmark if all verifications are complete */}
+            {userData?.vehicleRegistrationVerified && 
+             userData?.insuranceVerified && 
+             driverStatus?.isOnboarded && (
+              <CheckCircle className="w-5 h-5 text-green-600" />
             )}
           </CardTitle>
           <CardDescription>
-            Set up your bank account to post rides and receive payments from passengers
+            Complete all three verification steps to become a verified driver
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {isDriverLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-              <span className="ml-2 text-sm text-muted-foreground">Loading driver status...</span>
-            </div>
-          ) : driverStatus?.isOnboarded ? (
-            <div className="space-y-4">
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Your driver account is fully set up and ready to accept rides!
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    {driverStatus.detailsSubmitted ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="grid gap-4">
+            {/* Vehicle Registration Verification */}
+            <div 
+              className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                userData?.vehicleRegistrationVerified ? 'border-green-200 bg-green-50 dark:bg-green-950' : 'border-gray-200'
+              }`}
+              onClick={() => window.location.href = '/vehicle-verification'}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    userData?.vehicleRegistrationVerified 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {userData?.vehicleRegistrationVerified ? (
+                      <CheckCircle className="w-5 h-5" />
                     ) : (
-                      <Clock className="w-5 h-5 text-yellow-600" />
+                      <span className="text-sm font-medium">1</span>
                     )}
-                    <span className="font-medium">Account Details</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {driverStatus.detailsSubmitted 
-                      ? "Identity and bank information verified" 
-                      : "Verification in progress"}
-                  </p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    {driverStatus.payoutsEnabled ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-yellow-600" />
-                    )}
-                    <span className="font-medium">Bank Payouts</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {driverStatus.payoutsEnabled 
-                      ? "Ready to receive payments" 
-                      : "Bank verification in progress"}
-                  </p>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    {driverStatus.chargesEnabled ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-yellow-600" />
-                    )}
-                    <span className="font-medium">Payment Processing</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {driverStatus.chargesEnabled 
-                      ? "Can accept ride payments" 
-                      : "Payment setup in progress"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={openDashboard}
-                  disabled={isLoadingDashboard}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  {isLoadingDashboard ? "Loading..." : "Manage Account"}
-                </Button>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3 mt-4">
-                <div className="flex items-start">
-                  <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h4 className="font-medium text-green-800 dark:text-green-200 text-sm">Secure Driver Account</h4>
-                    <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                      Your banking and identity information is securely handled by Stripe. Trek never sees your bank account details or SSN.
+                    <h3 className="font-medium">Vehicle Registration Verification</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Upload your vehicle registration and provide vehicle details
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-center py-8">
-                <FaCar className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium mb-2">Become a Driver</h3>
-                <p className="text-muted-foreground mb-6">
-                  Set up your driver account to post rides and earn money from passengers. You'll need to provide identity verification and banking information.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    onClick={() => window.location.href = '/stripe-setup-guide'}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Setup Guide
-                  </Button>
-                  <Button
-                    onClick={startOnboarding}
-                    disabled={isOnboarding}
-                    className="bg-primary hover:bg-orange-600 text-white flex-1"
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    {isOnboarding ? "Setting up..." : "Start Driver Setup"}
-                  </Button>
+                <div className="text-right">
+                  {userData?.vehicleRegistrationVerified ? (
+                    <div className="text-green-600 text-sm font-medium">Verified</div>
+                  ) : userData?.vehicleRegistrationStatus === 'pending' ? (
+                    <div className="text-yellow-600 text-sm font-medium">Under Review</div>
+                  ) : userData?.vehicleRegistrationStatus === 'rejected' ? (
+                    <div className="text-red-600 text-sm font-medium">Rejected</div>
+                  ) : (
+                    <div className="text-gray-500 text-sm">Click to start →</div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2 text-sm">
-                  What you'll need:
-                </h3>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                  <li>• Government-issued ID (driver's license)</li>
-                  <li>• Social Security Number for tax reporting</li>
-                  <li>• Bank account information for payments</li>
-                  <li>• Business information (if applicable)</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2 text-sm flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Your Data is Secure
-                </h3>
-                <ul className="text-xs text-green-700 dark:text-green-300 space-y-1">
-                  <li>• All banking information is securely handled by Stripe</li>
-                  <li>• Trek never sees your bank account or SSN details</li>
-                  <li>• Your data is encrypted and PCI DSS compliant</li>
-                  <li>• Only you and Stripe have access to your financial data</li>
-                </ul>
+            {/* Insurance Verification */}
+            <div 
+              className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                userData?.insuranceVerified ? 'border-green-200 bg-green-50 dark:bg-green-950' : 'border-gray-200'
+              }`}
+              onClick={() => window.location.href = '/insurance-verification'}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    userData?.insuranceVerified 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {userData?.insuranceVerified ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      <span className="text-sm font-medium">2</span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Insurance Verification</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Verify your auto insurance policy and upload documents
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {userData?.insuranceVerified ? (
+                    <div className="text-green-600 text-sm font-medium">Verified</div>
+                  ) : userData?.insuranceStatus === 'pending' ? (
+                    <div className="text-yellow-600 text-sm font-medium">Under Review</div>
+                  ) : userData?.insuranceStatus === 'rejected' ? (
+                    <div className="text-red-600 text-sm font-medium">Rejected</div>
+                  ) : (
+                    <div className="text-gray-500 text-sm">Click to start →</div>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Bank Account Setup */}
+            <div 
+              className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                driverStatus?.isOnboarded ? 'border-green-200 bg-green-50 dark:bg-green-950' : 'border-gray-200'
+              }`}
+              onClick={() => {
+                if (driverStatus?.isOnboarded) {
+                  openDashboard();
+                } else {
+                  window.location.href = '/bank-setup';
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    driverStatus?.isOnboarded 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {driverStatus?.isOnboarded ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      <span className="text-sm font-medium">3</span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Bank Account Setup</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Set up your bank account to receive payments from passengers
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {driverStatus?.isOnboarded ? (
+                    <div className="text-green-600 text-sm font-medium">Verified</div>
+                  ) : (
+                    <div className="text-gray-500 text-sm">Click to start →</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Overall Status */}
+          {userData?.vehicleRegistrationVerified && 
+           userData?.insuranceVerified && 
+           driverStatus?.isOnboarded && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Driver setup complete!</strong> You can now post rides and accept passengers.
+              </AlertDescription>
+            </Alert>
           )}
+
+          {/* Security Notice */}
+          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
+            <div className="flex items-start">
+              <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium text-green-800 dark:text-green-200 text-sm">Secure Verification Process</h4>
+                <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                  All your sensitive information is encrypted and securely processed. Trek never stores your banking details or SSN.
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Insurance Verification Section */}
-      <div id="insurance">
-        <InsuranceVerificationUnified 
-          currentInsurance={userData ? {
-            insuranceProvider: userData.insuranceProvider,
-            insurancePolicyNumber: userData.insurancePolicyNumber,
-            insuranceExpirationDate: userData.insuranceExpirationDate,
-            insuranceVerified: userData.insuranceVerified,
-            insuranceStatus: userData.insuranceStatus || 'none',
-            insuranceRejectionReason: userData.insuranceRejectionReason
-          } : undefined}
-          onUpdate={refetchUser}
-        />
-      </div>
 
-      {/* Vehicle Registration Verification Section */}
-      <div id="vehicle-registration">
-        <VehicleRegistrationVerification 
-          currentVehicle={userData ? {
-            vehicleMake: userData.vehicleMake,
-            vehicleModel: userData.vehicleModel,
-            vehicleYear: userData.vehicleYear,
-            licensePlate: userData.licensePlate,
-            vehicleRegistrationVerified: userData.vehicleRegistrationVerified,
-            vehicleRegistrationStatus: userData.vehicleRegistrationStatus || 'none',
-            vehicleRegistrationRejectionReason: userData.vehicleRegistrationRejectionReason
-          } : undefined}
-          onUpdate={refetchUser}
-        />
-      </div>
 
       {/* Payment Methods Section */}
       <Card id="payment-methods-section">

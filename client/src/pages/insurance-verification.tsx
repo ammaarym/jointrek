@@ -170,15 +170,11 @@ export default function InsuranceVerification() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/insurance/status'] });
       toast({
-        title: "✅ Insurance Submitted",
-        description: "Your insurance information and documents have been submitted for verification.",
+        title: "✅ Insurance Submitted Successfully",
+        description: "Your insurance is now being verified. You'll receive an update within 24-48 hours.",
         variant: "default",
       });
-      // Reset form
-      setProvider('');
-      setPolicyNumber('');
-      setExpirationDate('');
-      setSelectedFile(null);
+      // Don't reset form - let the status display take over
     },
     onError: (error: Error) => {
       toast({
@@ -292,8 +288,8 @@ export default function InsuranceVerification() {
     );
   }
 
-  // Show status if already submitted and not resubmitting
-  if (insuranceStatus && (insuranceStatus.status === 'pending' || insuranceStatus.status === 'approved' || insuranceStatus.status === 'rejected') && !provider) {
+  // Show status if already submitted (including after successful submission)
+  if (insuranceStatus && (insuranceStatus.status === 'pending' || insuranceStatus.status === 'approved' || insuranceStatus.status === 'rejected')) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="text-center mb-8">
@@ -341,57 +337,62 @@ export default function InsuranceVerification() {
 
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Insurance Verification</CardTitle>
+          <CardTitle className="text-xl">Submit Insurance Information</CardTitle>
           <CardDescription>
-            Enter your policy details and upload your insurance document for verification
+            Provide your policy details and upload your insurance document
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Insurance Provider */}
-            <div>
-              <Label htmlFor="provider">Insurance Provider</Label>
-              <Select value={provider} onValueChange={setProvider}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your insurance provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INSURANCE_PROVIDERS.map((p) => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Policy Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Policy Information</h3>
+              
+              {/* Insurance Provider */}
+              <div>
+                <Label htmlFor="provider">Insurance Provider</Label>
+                <Select value={provider} onValueChange={setProvider}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your insurance provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INSURANCE_PROVIDERS.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Policy Number */}
+              <div>
+                <Label htmlFor="policyNumber">Policy Number</Label>
+                <Input
+                  id="policyNumber"
+                  value={policyNumber}
+                  onChange={(e) => setPolicyNumber(e.target.value)}
+                  placeholder="Enter your insurance policy number"
+                  disabled={submitMutation.isPending}
+                />
+              </div>
+
+              {/* Expiration Date */}
+              <div>
+                <Label htmlFor="expirationDate">Policy Expiration Date</Label>
+                <Input
+                  id="expirationDate"
+                  type="date"
+                  value={expirationDate}
+                  onChange={(e) => setExpirationDate(e.target.value)}
+                  disabled={submitMutation.isPending}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
             </div>
 
-            {/* Policy Number */}
-            <div>
-              <Label htmlFor="policyNumber">Policy Number</Label>
-              <Input
-                id="policyNumber"
-                value={policyNumber}
-                onChange={(e) => setPolicyNumber(e.target.value)}
-                placeholder="Enter your insurance policy number"
-                disabled={submitMutation.isPending}
-              />
-            </div>
-
-            {/* Expiration Date */}
-            <div>
-              <Label htmlFor="expirationDate">Policy Expiration Date</Label>
-              <Input
-                id="expirationDate"
-                type="date"
-                value={expirationDate}
-                onChange={(e) => setExpirationDate(e.target.value)}
-                disabled={submitMutation.isPending}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            {/* Document Upload */}
-            <div>
-              <Label>Insurance Document</Label>
-              <p className="text-sm text-gray-600 mb-3">
+            {/* Document Upload Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Insurance Document</h3>
+              <p className="text-sm text-gray-600">
                 Upload your insurance card or policy document (JPEG, PNG, or PDF, max 10MB)
               </p>
               
@@ -469,7 +470,7 @@ export default function InsuranceVerification() {
                   Submitting for Verification...
                 </div>
               ) : (
-                'Submit Insurance Verification'
+                'Submit Insurance for Verification'
               )}
             </Button>
           </form>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth-fixed";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -600,6 +600,13 @@ export default function InsuranceVerification() {
     setTempFormData(null);
   };
 
+  // Handle initial state - decide where to start
+  useEffect(() => {
+    if (!currentStep || (currentStep === 'status' && insuranceStatus?.status === 'none')) {
+      setCurrentStep('instant');
+    }
+  }, [currentStep, insuranceStatus?.status]);
+
   if (statusLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -613,93 +620,83 @@ export default function InsuranceVerification() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Insurance Verification</h1>
-          <p className="text-gray-600">
-            Verify your insurance to start posting rides and earning money as a driver
-          </p>
-        </div>
-
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 'instant' ? 'bg-blue-600 text-white' : 
-              (insuranceStatus?.status === 'approved' || currentStep === 'upload' || currentStep === 'status') ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
-            }`}>
-              1
-            </div>
-            <div className={`h-1 w-20 ${
-              (insuranceStatus?.status === 'approved' || currentStep === 'upload' || currentStep === 'status') ? 'bg-green-600' : 'bg-gray-300'
-            }`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 'upload' ? 'bg-blue-600 text-white' : 
-              (insuranceStatus?.status === 'approved' || currentStep === 'status') ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
-            }`}>
-              2
-            </div>
-            <div className={`h-1 w-20 ${
-              (insuranceStatus?.status === 'approved' || currentStep === 'status') ? 'bg-green-600' : 'bg-gray-300'
-            }`} />
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 'status' || insuranceStatus?.status === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
-            }`}>
-              ✓
-            </div>
-          </div>
-          <div className="flex justify-center space-x-16 text-sm text-gray-600">
-            <span>Instant Verify</span>
-            <span>Upload Documents</span>
-            <span>Complete</span>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        {currentStep === 'instant' && (
-          <InstantVerificationStep
-            onVerificationAttempt={handleInstantVerification}
-            onFallbackToUpload={() => setCurrentStep('upload')}
-            isLoading={instantVerifyMutation.isPending}
-          />
-        )}
-
-        {currentStep === 'upload' && (
-          <DocumentUploadStep
-            onDocumentSubmit={handleDocumentUpload}
-            isLoading={uploadMutation.isPending}
-            provider={tempFormData?.provider}
-            policyNumber={tempFormData?.policyNumber}
-            expirationDate={tempFormData?.expirationDate}
-          />
-        )}
-
-        {currentStep === 'status' && insuranceStatus && (
-          <div className="space-y-6">
-            <StatusDisplay status={insuranceStatus} />
-            
-            {(insuranceStatus.status === 'none' || insuranceStatus.status === 'rejected') && (
-              <div className="text-center">
-                <Button
-                  onClick={startNewVerification}
-                  className="bg-[#B8956B] hover:bg-[#8A6F47] text-white"
-                >
-                  {insuranceStatus.status === 'rejected' ? 'Resubmit Insurance' : 'Start Verification'}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Initial state - decide where to start */}
-        {(() => {
-          if (!currentStep || (currentStep === 'status' && insuranceStatus?.status === 'none')) {
-            setCurrentStep('instant');
-            return null;
-          }
-          return null;
-        })()}
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">Insurance Verification</h1>
+        <p className="text-gray-600">
+          Verify your insurance to start posting rides and earning money as a driver
+        </p>
       </div>
+
+      {/* Progress Indicator */}
+      <div className="mb-8">
+        <div className="flex items-center justify-center space-x-4 mb-4">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            currentStep === 'instant' ? 'bg-blue-600 text-white' : 
+            (insuranceStatus?.status === 'approved' || currentStep === 'upload' || currentStep === 'status') ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
+          }`}>
+            1
+          </div>
+          <div className={`h-1 w-20 ${
+            (insuranceStatus?.status === 'approved' || currentStep === 'upload' || currentStep === 'status') ? 'bg-green-600' : 'bg-gray-300'
+          }`} />
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            currentStep === 'upload' ? 'bg-blue-600 text-white' : 
+            (insuranceStatus?.status === 'approved' || currentStep === 'status') ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
+          }`}>
+            2
+          </div>
+          <div className={`h-1 w-20 ${
+            (insuranceStatus?.status === 'approved' || currentStep === 'status') ? 'bg-green-600' : 'bg-gray-300'
+          }`} />
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            currentStep === 'status' || insuranceStatus?.status === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'
+          }`}>
+            ✓
+          </div>
+        </div>
+        <div className="flex justify-center space-x-16 text-sm text-gray-600">
+          <span>Instant Verify</span>
+          <span>Upload Documents</span>
+          <span>Complete</span>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      {currentStep === 'instant' && (
+        <InstantVerificationStep
+          onVerificationAttempt={handleInstantVerification}
+          onFallbackToUpload={() => setCurrentStep('upload')}
+          isLoading={instantVerifyMutation.isPending}
+        />
+      )}
+
+      {currentStep === 'upload' && (
+        <DocumentUploadStep
+          onDocumentSubmit={handleDocumentUpload}
+          isLoading={uploadMutation.isPending}
+          provider={tempFormData?.provider}
+          policyNumber={tempFormData?.policyNumber}
+          expirationDate={tempFormData?.expirationDate}
+        />
+      )}
+
+      {currentStep === 'status' && insuranceStatus && (
+        <div className="space-y-6">
+          <StatusDisplay status={insuranceStatus} />
+          
+          {(insuranceStatus.status === 'none' || insuranceStatus.status === 'rejected') && (
+            <div className="text-center">
+              <Button
+                onClick={startNewVerification}
+                className="bg-[#B8956B] hover:bg-[#8A6F47] text-white"
+              >
+                {insuranceStatus.status === 'rejected' ? 'Resubmit Insurance' : 'Start Verification'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

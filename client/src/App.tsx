@@ -37,6 +37,7 @@ import VehicleVerificationPage from "@/pages/vehicle-verification";
 import InsuranceVerificationPage from "@/pages/insurance-verification";
 import BankSetupPage from "@/pages/bank-setup";
 import MobileAuthTest from "@/pages/mobile-auth-test";
+import MobileDebug from "@/pages/mobile-debug";
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useAuth, AuthProvider } from "@/hooks/use-auth-fixed";
@@ -347,6 +348,7 @@ function AppRoutes() {
           <Route path="/admin-complaints" component={AdminComplaints} />
           <Route path="/admin-poll-data" component={AdminPollData} />
           <Route path="/mobile-auth-test" component={MobileAuthTest} />
+          <Route path="/mobile-debug" component={MobileDebug} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route component={NotFound} />
         </Switch>

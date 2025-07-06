@@ -8,11 +8,10 @@ import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { 
-  isMobileBrowserEnhanced, 
-  isReplitIframe, 
-  processMobileRedirectResult,
-  signInWithGoogleMobileReplit 
-} from "@/lib/mobile-auth-replit-fix";
+  isMobileDevice, 
+  authenticateDirectMobile, 
+  processDirectRedirectResult 
+} from "@/lib/mobile-auth-direct-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -29,14 +28,14 @@ export default function Login() {
       console.log("🔍 Enhanced redirect handling starting...");
       
       // Detect mobile device and set state
-      const isMobileDevice = isMobileBrowserEnhanced();
-      setIsMobile(isMobileDevice);
+      const isMobileAuth = isMobileDevice();
+      setIsMobile(isMobileAuth);
       
       // Handle mobile redirect result if mobile browser
-      if (isMobileDevice) {
+      if (isMobileAuth) {
         console.log("📱 Mobile browser detected, processing redirect...");
         try {
-          const mobileUser = await processMobileRedirectResult();
+          const mobileUser = await processDirectRedirectResult();
           if (mobileUser) {
             console.log("✅ Mobile redirect handled successfully");
             setRedirectResultChecked(true);
@@ -139,12 +138,12 @@ export default function Login() {
       setIsSigningIn(true);
       
       // Detect mobile device and use appropriate authentication
-      const isMobileDevice = isMobileBrowserEnhanced();
-      console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileDevice, isReplit: isReplitIframe() });
+      const isMobileAuth = isMobileDevice();
+      console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileAuth });
       
-      if (isMobileDevice) {
-        console.log('🔵 [LOGIN] Mobile device - using mobile authentication');
-        await signInWithGoogleMobileReplit();
+      if (isMobileAuth) {
+        console.log('🔵 [LOGIN] Mobile device - using direct mobile authentication');
+        await authenticateDirectMobile();
         console.log('🔵 [LOGIN] Mobile authentication initiated');
         // Keep loading state for mobile redirect
       } else {

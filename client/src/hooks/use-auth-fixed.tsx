@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
+import { isMobileBrowser, setMobileAuthRedirect, checkMobileAuthTimeout, isReturningFromMobileAuth, clearAllAuthFlags } from '@/lib/mobile-auth-fix';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -22,8 +23,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Detect mobile browser
-    const isMobileBrowser = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Check for mobile auth timeout on component mount
+    if (checkMobileAuthTimeout()) {
+      console.log('📱 [MOBILE_AUTH] Mobile auth timeout detected, clearing state');
+    }
     
     // Initialize authentication with proper persistence
     const initializeAuth = async () => {
@@ -32,12 +35,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       
       try {
-        // Set persistence to browserLocalPersistence for mobile compatibility
-        console.log('🔐 [AUTH_INIT] Setting Firebase persistence to browserLocalPersistence');
-        await setPersistence(auth, browserLocalPersistence);
+        // Use different persistence for mobile vs desktop
+        const persistenceType = isMobileBrowser ? browserSessionPersistence : browserLocalPersistence;
+        console.log('🔐 [AUTH_INIT] Setting Firebase persistence to:', isMobileBrowser ? 'browserSessionPersistence' : 'browserLocalPersistence');
+        await setPersistence(auth, persistenceType);
         console.log('✅ [AUTH_INIT] Firebase persistence set successfully');
         
-        // Check for redirect result (important for mobile)
+        // For mobile, check if we're returning from a redirect
+        if (isMobileBrowser) {
+          console.log('📱 [MOBILE_AUTH] Checking mobile redirect state...');
+          const mobileRedirectFlag = sessionStorage.getItem('mobile_auth_redirect');
+          console.log('📱 [MOBILE_AUTH] Mobile redirect flag:', mobileRedirectFlag);
+          
+          if (mobileRedirectFlag) {
+            console.log('📱 [MOBILE_AUTH] Returning from mobile redirect, clearing flag');
+            sessionStorage.removeItem('mobile_auth_redirect');
+            
+            // Wait longer for mobile redirect to complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+        
+        // Check for redirect result
         console.log('🔍 [AUTH_INIT] Checking for redirect result...');
         const result = await getRedirectResult(auth);
         
@@ -47,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log('❌ [AUTH_INIT] Non-UF email, signing out');
             await firebaseSignOut(auth);
             alert('Please use your @ufl.edu email address to sign in.');
+          } else {
+            console.log('✅ [AUTH_INIT] Valid UF email from redirect, user should be authenticated');
           }
         } else {
           console.log('ℹ️ [AUTH_INIT] No redirect result found');
@@ -84,11 +105,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const isRedirectInProgress = sessionStorage.getItem('auth_redirect_in_progress');
           const isMobileBrowser = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           
+          // Check if we're returning from mobile auth redirect
+          const mobileRedirectFlag = sessionStorage.getItem('mobile_auth_redirect');
+          
           if ((currentPath === '/login' || currentPath === '/') && !isRedirectInProgress) {
             console.log('🔀 [AUTH_STATE] Redirecting authenticated user to profile');
             sessionStorage.setItem('auth_redirect_in_progress', 'true');
             
-            if (isMobileBrowser) {
+            if (isMobileBrowser && mobileRedirectFlag) {
+              // Mobile returning from OAuth - immediate redirect to profile
+              console.log('📱 [MOBILE_AUTH] Mobile user returning from OAuth, redirecting to profile');
+              sessionStorage.removeItem('mobile_auth_redirect');
+              sessionStorage.removeItem('auth_redirect_in_progress');
+              window.location.href = '/profile';
+            } else if (isMobileBrowser) {
               // For mobile browsers, wait a bit for state to settle then redirect
               setTimeout(() => {
                 sessionStorage.removeItem('auth_redirect_in_progress');
@@ -109,6 +139,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           console.log('👤 [AUTH_STATE] No user or invalid user, setting to null');
           setCurrentUser(null);
+          
+          // Clear mobile redirect flag if user is not authenticated
+          sessionStorage.removeItem('mobile_auth_redirect');
         }
         
         console.log('⏳ [AUTH_STATE] Setting loading to false');
@@ -143,9 +176,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('📱 [AUTH] Mobile browser detected:', isMobileBrowser);
     
     try {
-      // Set persistence before any sign-in attempt
-      console.log('🔐 [AUTH] Setting Firebase persistence before sign in');
-      await setPersistence(auth, browserLocalPersistence);
+      // Set persistence before any sign-in attempt (different for mobile vs desktop)
+      const persistenceType = isMobileBrowser ? browserSessionPersistence : browserLocalPersistence;
+      console.log('🔐 [AUTH] Setting Firebase persistence before sign in:', isMobileBrowser ? 'browserSessionPersistence' : 'browserLocalPersistence');
+      await setPersistence(auth, persistenceType);
       
       const provider = new GoogleAuthProvider();
       provider.addScope('email');
@@ -155,9 +189,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'prompt': 'select_account'
       });
       
-      if (isMobileBrowser) {
-        // Mobile: Always use redirect
-        console.log('📱 [MOBILE_AUTH] Using redirect authentication');
+      if (isMobileBrowser()) {
+        // Mobile: Set redirect flag and use redirect authentication
+        console.log('📱 [MOBILE_AUTH] Setting mobile redirect flag and using redirect authentication');
+        setMobileAuthRedirect();
         await signInWithRedirect(auth, provider);
       } else {
         // Desktop: Try popup, fallback to redirect

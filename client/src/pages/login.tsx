@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { handleMobileRedirectResult, isMobileBrowser, checkMobileAuthTimeout } from "@/lib/mobile-auth-replit-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -17,24 +18,48 @@ export default function Login() {
   const [isMobile, setIsMobile] = useState(false);
   const [redirectResultChecked, setRedirectResultChecked] = useState(false);
 
-  // Check for redirect result on login page load - MUST complete before any redirects
+  // Enhanced mobile redirect handling for Replit environment
   useEffect(() => {
-    console.log("🔍 Checking redirect result on load...");
-    getRedirectResult(auth)
-      .then((result) => {
+    const handleAuthRedirect = async () => {
+      console.log("🔍 Enhanced redirect handling starting...");
+      
+      // Check for mobile auth timeout first
+      if (checkMobileAuthTimeout()) {
+        console.log("📱 Mobile auth timeout detected");
+      }
+      
+      // Handle mobile redirect result if mobile browser
+      if (isMobileBrowser()) {
+        console.log("📱 Mobile browser detected, handling redirect...");
+        try {
+          const mobileSuccess = await handleMobileRedirectResult();
+          if (mobileSuccess) {
+            console.log("✅ Mobile redirect handled successfully");
+            setRedirectResultChecked(true);
+            return;
+          }
+        } catch (error) {
+          console.error("❌ Mobile redirect error:", error);
+        }
+      }
+      
+      // Fallback to standard redirect handling
+      try {
+        const result = await getRedirectResult(auth);
         if (result?.user) {
           console.log("✅ User returned from redirect:", result.user);
-          // Optionally update state/context here
         } else {
           console.log("ℹ️ No redirect result found");
         }
-        console.log("✅ Finished checking redirect result");
-        setRedirectResultChecked(true); // Mark as complete
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("❌ Error handling redirect:", error);
-        setRedirectResultChecked(true); // Still mark as complete even on error
-      });
+      } finally {
+        console.log("✅ Finished checking redirect result");
+        setRedirectResultChecked(true);
+      }
+    };
+
+    handleAuthRedirect();
   }, []);
 
   // Detect mobile device on component mount

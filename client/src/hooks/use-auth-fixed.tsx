@@ -31,28 +31,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize authentication with proper persistence
     const initializeAuth = async () => {
       console.log('🔥 [AUTH_INIT] Starting authentication initialization');
-      console.log('📱 [AUTH_INIT] Mobile browser detected:', isMobileBrowser);
+      console.log('📱 [AUTH_INIT] Mobile browser detected:', isMobileBrowser());
       setLoading(true);
       
       try {
         // Use different persistence for mobile vs desktop
-        const persistenceType = isMobileBrowser ? browserSessionPersistence : browserLocalPersistence;
-        console.log('🔐 [AUTH_INIT] Setting Firebase persistence to:', isMobileBrowser ? 'browserSessionPersistence' : 'browserLocalPersistence');
+        const persistenceType = isMobileBrowser() ? browserSessionPersistence : browserLocalPersistence;
+        console.log('🔐 [AUTH_INIT] Setting Firebase persistence to:', isMobileBrowser() ? 'browserSessionPersistence' : 'browserLocalPersistence');
         await setPersistence(auth, persistenceType);
         console.log('✅ [AUTH_INIT] Firebase persistence set successfully');
         
-        // For mobile, check if we're returning from a redirect
-        if (isMobileBrowser) {
-          console.log('📱 [MOBILE_AUTH] Checking mobile redirect state...');
+        // Enhanced mobile redirect handling
+        if (isMobileBrowser()) {
+          console.log('📱 [MOBILE_AUTH] Mobile browser - checking redirect state...');
+          
+          // Check if we're returning from OAuth redirect by looking for auth parameters
+          const urlParams = new URLSearchParams(window.location.search);
+          const hasAuthParams = urlParams.has('code') || urlParams.has('state') || urlParams.has('authuser') || urlParams.has('scope');
+          
+          if (hasAuthParams) {
+            console.log('📱 [MOBILE_AUTH] OAuth parameters detected in URL - processing redirect');
+            // Clear URL parameters immediately to prevent redirect loops
+            const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+          
           const mobileRedirectFlag = sessionStorage.getItem('mobile_auth_redirect');
           console.log('📱 [MOBILE_AUTH] Mobile redirect flag:', mobileRedirectFlag);
           
-          if (mobileRedirectFlag) {
-            console.log('📱 [MOBILE_AUTH] Returning from mobile redirect, clearing flag');
-            sessionStorage.removeItem('mobile_auth_redirect');
-            
-            // Wait longer for mobile redirect to complete
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          // Clear stale redirect state if timeout occurred
+          if (checkMobileAuthTimeout()) {
+            console.log('📱 [MOBILE_AUTH] Mobile auth timeout detected, state cleared');
+          }
+          
+          if (mobileRedirectFlag && hasAuthParams) {
+            console.log('📱 [MOBILE_AUTH] Valid mobile redirect detected, processing...');
+            // Wait for redirect to complete on mobile
+            await new Promise(resolve => setTimeout(resolve, 1500));
           }
         }
         
@@ -80,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('👂 [AUTH_INIT] Setting up auth state listener');
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         // Small delay to ensure state is properly settled (especially on mobile)
-        await new Promise(resolve => setTimeout(resolve, isMobileBrowser ? 200 : 50));
+        await new Promise(resolve => setTimeout(resolve, isMobileBrowser() ? 200 : 50));
         
         console.log('🔥 [AUTH_STATE] Auth state changed:', {
           hasUser: !!user,

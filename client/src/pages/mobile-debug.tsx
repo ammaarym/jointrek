@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   isMobileDevice, 
-  authenticateDirectMobile, 
-  processDirectRedirectResult,
-  clearMobileAuthData 
-} from '@/lib/mobile-auth-direct-fix';
+  authenticateMobilePersistent, 
+  processRedirectResultPersistent,
+  persistentState,
+  getMobileAuthDebugInfo,
+  navigateToProfile
+} from '@/lib/mobile-auth-persistent';
 import { useAuth } from '@/hooks/use-auth-fixed';
 
 export default function MobileDebug() {
@@ -23,17 +25,22 @@ export default function MobileDebug() {
   useEffect(() => {
     // Run initial diagnostics
     addLog('=== MOBILE DEBUG STARTED ===');
-    addLog(`Device is mobile: ${isMobileDevice()}`);
-    addLog(`User agent: ${navigator.userAgent.substring(0, 100)}...`);
+    const debugInfo = getMobileAuthDebugInfo();
+    addLog(`Device is mobile: ${debugInfo.isMobile}`);
+    addLog(`User agent: ${debugInfo.userAgent}`);
     addLog(`Current user: ${currentUser?.email || 'None'}`);
     addLog(`Loading state: ${loading}`);
-    addLog(`Current URL: ${window.location.href}`);
+    addLog(`Current URL: ${debugInfo.currentUrl}`);
+    addLog(`Ready state: ${debugInfo.readyState}`);
+    addLog(`Persistent state: ${JSON.stringify(debugInfo.persistentState)}`);
     
     // Check for redirect result immediately
-    processDirectRedirectResult()
+    processRedirectResultPersistent()
       .then(user => {
         if (user) {
           addLog(`✅ Found redirect result: ${user.email}`);
+          addLog('🧭 Preparing safe navigation to profile...');
+          navigateToProfile(user);
         } else {
           addLog('ℹ️ No redirect result found');
         }
@@ -45,10 +52,10 @@ export default function MobileDebug() {
 
   const handleMobileAuth = async () => {
     setIsAuthenticating(true);
-    addLog('🚀 Starting mobile authentication...');
+    addLog('🚀 Starting persistent mobile authentication...');
     
     try {
-      await authenticateDirectMobile();
+      await authenticateMobilePersistent();
       addLog('✅ Authentication initiated successfully');
     } catch (error: any) {
       addLog(`❌ Authentication failed: ${error.message}`);
@@ -57,18 +64,20 @@ export default function MobileDebug() {
   };
 
   const handleClearData = () => {
-    clearMobileAuthData();
-    addLog('🧹 Cleared all mobile auth data');
+    persistentState.clearAll();
+    addLog('🧹 Cleared all persistent mobile auth data');
     setLogs([]);
     window.location.reload();
   };
 
   const handleCheckRedirect = async () => {
-    addLog('🔍 Checking for redirect result...');
+    addLog('🔍 Checking for persistent redirect result...');
     try {
-      const user = await processDirectRedirectResult();
+      const user = await processRedirectResultPersistent();
       if (user) {
         addLog(`✅ Redirect found: ${user.email}`);
+        addLog('🧭 Initiating safe navigation...');
+        navigateToProfile(user);
       } else {
         addLog('ℹ️ No redirect result');
       }
@@ -100,7 +109,13 @@ export default function MobileDebug() {
                 <strong>Loading:</strong> {loading ? 'Yes' : 'No'}
               </div>
               <div>
-                <strong>Auth Started:</strong> {sessionStorage.getItem('mobile_auth_started') ? 'Yes' : 'No'}
+                <strong>Redirect Started:</strong> {persistentState.isRedirectStarted() ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <strong>Redirect Checked:</strong> {persistentState.hasRedirectBeenChecked() ? 'Yes' : 'No'}
+              </div>
+              <div>
+                <strong>Page Loaded:</strong> {persistentState.isPageLoaded() ? 'Yes' : 'No'}
               </div>
             </div>
           </CardContent>

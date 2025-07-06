@@ -9,9 +9,10 @@ import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { 
   isMobileDevice, 
-  authenticateDirectMobile, 
-  processDirectRedirectResult 
-} from "@/lib/mobile-auth-direct-fix";
+  authenticateMobilePersistent, 
+  processRedirectResultPersistent,
+  navigateToProfile
+} from "@/lib/mobile-auth-persistent";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -35,10 +36,11 @@ export default function Login() {
       if (isMobileAuth) {
         console.log("📱 Mobile browser detected, processing redirect...");
         try {
-          const mobileUser = await processDirectRedirectResult();
+          const mobileUser = await processRedirectResultPersistent();
           if (mobileUser) {
             console.log("✅ Mobile redirect handled successfully");
             setRedirectResultChecked(true);
+            navigateToProfile(mobileUser);
             return;
           }
         } catch (error) {
@@ -142,8 +144,8 @@ export default function Login() {
       console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileAuth });
       
       if (isMobileAuth) {
-        console.log('🔵 [LOGIN] Mobile device - using direct mobile authentication');
-        await authenticateDirectMobile();
+        console.log('🔵 [LOGIN] Mobile device - using persistent mobile authentication');
+        await authenticateMobilePersistent();
         console.log('🔵 [LOGIN] Mobile authentication initiated');
         // Keep loading state for mobile redirect
       } else {

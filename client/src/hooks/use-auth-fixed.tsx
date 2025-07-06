@@ -3,6 +3,8 @@ import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
 import { isMobileBrowser, setMobileAuthRedirect, checkMobileAuthTimeout, isReturningFromMobileAuth, clearAllAuthFlags } from '@/lib/mobile-auth-fix';
+import { MobileAuthCircuitBreaker } from '@/lib/mobile-auth-circuit-breaker';
+import { shouldPreventAutoRedirect, handleMobileAuthSuccess, setupMobileAuthForReplit } from '@/lib/mobile-auth-ultimate-fix';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -27,6 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (checkMobileAuthTimeout()) {
       console.log('📱 [MOBILE_AUTH] Mobile auth timeout detected, clearing state');
     }
+    
+    // Initialize mobile auth for Replit environment
+    setupMobileAuthForReplit();
     
     // Initialize authentication with proper persistence
     const initializeAuth = async () => {
@@ -116,31 +121,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const currentPath = window.location.pathname;
           console.log('🧭 [AUTH_STATE] Current path:', currentPath);
           
-          // Simplified redirect logic for mobile browsers
+          // Enhanced redirect logic with mobile loop prevention
           const isRedirectInProgress = sessionStorage.getItem('auth_redirect_in_progress');
-          const isMobileBrowser = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          
-          // Check if we're returning from mobile auth redirect
           const mobileRedirectFlag = sessionStorage.getItem('mobile_auth_redirect');
           
+          // Check if we already completed mobile auth successfully
+          const mobileAuthCompleted = localStorage.getItem('mobile_auth_completed');
+          
           if ((currentPath === '/login' || currentPath === '/') && !isRedirectInProgress) {
+            // For mobile browsers in Replit, prevent auto-redirect to stop loops
+            if (shouldPreventAutoRedirect()) {
+              console.log('📱 [MOBILE_FIX] Preventing auto-redirect for mobile Replit - showing manual navigation');
+              handleMobileAuthSuccess();
+              return;
+            }
+            
+            // Check circuit breaker first to prevent infinite loops
+            if (!MobileAuthCircuitBreaker.shouldAllowRedirect()) {
+              console.log('🚫 [AUTH_STATE] Circuit breaker blocked redirect - too many attempts');
+              MobileAuthCircuitBreaker.forceReset();
+              return;
+            }
+            
             console.log('🔀 [AUTH_STATE] Redirecting authenticated user to profile');
+            MobileAuthCircuitBreaker.recordRedirectAttempt();
+            
+            // Prevent multiple redirects by setting a flag
             sessionStorage.setItem('auth_redirect_in_progress', 'true');
             
-            if (isMobileBrowser && mobileRedirectFlag) {
-              // Mobile returning from OAuth - immediate redirect to profile
-              console.log('📱 [MOBILE_AUTH] Mobile user returning from OAuth, redirecting to profile');
+            if (isMobileBrowser() && (mobileRedirectFlag || mobileAuthCompleted)) {
+              // Mobile user - immediate redirect and clear all flags
+              console.log('📱 [MOBILE_AUTH] Mobile user authenticated, clearing all flags and redirecting');
               sessionStorage.removeItem('mobile_auth_redirect');
               sessionStorage.removeItem('auth_redirect_in_progress');
-              window.location.href = '/profile';
-            } else if (isMobileBrowser) {
-              // For mobile browsers, wait a bit for state to settle then redirect
+              localStorage.removeItem('mobile_auth_completed');
+              MobileAuthCircuitBreaker.reset();
+              
+              // Force navigation to profile page
+              window.location.replace('/profile');
+            } else if (isMobileBrowser()) {
+              // Mobile browser without redirect flags - standard redirect
+              console.log('📱 [MOBILE_AUTH] Mobile user standard redirect');
               setTimeout(() => {
                 sessionStorage.removeItem('auth_redirect_in_progress');
-                window.location.href = '/profile';
-              }, 500);
+                window.location.replace('/profile');
+              }, 300);
             } else {
-              // Delayed redirect for desktop browsers
+              // Desktop browser - standard redirect
               setTimeout(() => {
                 sessionStorage.removeItem('auth_redirect_in_progress');
                 window.location.replace('/profile');

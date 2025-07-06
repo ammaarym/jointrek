@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserLocalPersistence } from 'firebase/auth';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -25,39 +25,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Detect mobile browser
     const isMobileBrowser = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Simplified authentication initialization
+    // Initialize authentication with proper persistence
     const initializeAuth = async () => {
       console.log('🔥 [AUTH_INIT] Starting authentication initialization');
       console.log('📱 [AUTH_INIT] Mobile browser detected:', isMobileBrowser);
       setLoading(true);
       
-      // Skip complex redirect checking for mobile browsers
-      if (isMobileBrowser) {
-        console.log('📱 [MOBILE_SIMPLE] Skipping complex redirect checks for mobile');
-      } else {
-        try {
-          // Only do redirect result checking for desktop browsers
-          console.log('🔍 [DESKTOP] Checking for redirect result...');
-          const result = await getRedirectResult(auth);
-          
-          if (result?.user) {
-            console.log('✅ [DESKTOP] User returned from redirect:', result.user.email);
-            if (!isUFEmail(result.user.email || '')) {
-              console.log('❌ [DESKTOP] Non-UF email, signing out');
-              await firebaseSignOut(auth);
-              alert('Please use your @ufl.edu email address to sign in.');
-            }
-          } else {
-            console.log('ℹ️ [DESKTOP] No redirect result found');
+      try {
+        // Set persistence to browserLocalPersistence for mobile compatibility
+        console.log('🔐 [AUTH_INIT] Setting Firebase persistence to browserLocalPersistence');
+        await setPersistence(auth, browserLocalPersistence);
+        console.log('✅ [AUTH_INIT] Firebase persistence set successfully');
+        
+        // Check for redirect result (important for mobile)
+        console.log('🔍 [AUTH_INIT] Checking for redirect result...');
+        const result = await getRedirectResult(auth);
+        
+        if (result?.user) {
+          console.log('✅ [AUTH_INIT] User returned from redirect:', result.user.email);
+          if (!isUFEmail(result.user.email || '')) {
+            console.log('❌ [AUTH_INIT] Non-UF email, signing out');
+            await firebaseSignOut(auth);
+            alert('Please use your @ufl.edu email address to sign in.');
           }
-        } catch (error) {
-          console.error('💥 [AUTH_INIT] Redirect result error:', error);
+        } else {
+          console.log('ℹ️ [AUTH_INIT] No redirect result found');
         }
+      } catch (error) {
+        console.error('💥 [AUTH_INIT] Initialization error:', error);
       }
       
-      // Set up auth state listener
+      // Set up auth state listener with mobile compatibility delay
       console.log('👂 [AUTH_INIT] Setting up auth state listener');
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        // Small delay to ensure state is properly settled (especially on mobile)
+        await new Promise(resolve => setTimeout(resolve, isMobileBrowser ? 200 : 50));
+        
         console.log('🔥 [AUTH_STATE] Auth state changed:', {
           hasUser: !!user,
           email: user?.email || 'null',
@@ -69,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user && user.email && isUFEmail(user.email)) {
           console.log('✅ [AUTH_STATE] Valid UF user detected, setting current user');
           setCurrentUser(user);
+          
+          // Clear any redirect flags that might cause loops
+          sessionStorage.removeItem('auth_redirect_in_progress');
           
           // Handle redirects for authenticated users - prevent redirect loops
           const currentPath = window.location.pathname;
@@ -83,8 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             sessionStorage.setItem('auth_redirect_in_progress', 'true');
             
             if (isMobileBrowser) {
-              // Immediate redirect for mobile browsers
-              window.location.href = '/profile';
+              // For mobile browsers, wait a bit for state to settle then redirect
+              setTimeout(() => {
+                sessionStorage.removeItem('auth_redirect_in_progress');
+                window.location.href = '/profile';
+              }, 500);
             } else {
               // Delayed redirect for desktop browsers
               setTimeout(() => {
@@ -133,18 +142,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('🚀 [AUTH] Starting Google sign in');
     console.log('📱 [AUTH] Mobile browser detected:', isMobileBrowser);
     
-    const provider = new GoogleAuthProvider();
-    provider.addScope('email');
-    provider.addScope('profile');
-    provider.setCustomParameters({
-      'hd': 'ufl.edu',
-      'prompt': 'select_account'
-    });
-    
     try {
+      // Set persistence before any sign-in attempt
+      console.log('🔐 [AUTH] Setting Firebase persistence before sign in');
+      await setPersistence(auth, browserLocalPersistence);
+      
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      provider.setCustomParameters({
+        'hd': 'ufl.edu',
+        'prompt': 'select_account'
+      });
+      
       if (isMobileBrowser) {
-        // Mobile: Always use redirect, clear any previous redirect flags
-        sessionStorage.removeItem('auth_redirect_in_progress');
+        // Mobile: Always use redirect
         console.log('📱 [MOBILE_AUTH] Using redirect authentication');
         await signInWithRedirect(auth, provider);
       } else {

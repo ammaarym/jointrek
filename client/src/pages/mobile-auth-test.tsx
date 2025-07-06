@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth-fixed';
-import { isMobileBrowser, isReplitEnvironment, clearAllMobileAuthState } from '@/lib/mobile-auth-ultimate-fix';
-import { MobileAuthCircuitBreaker } from '@/lib/mobile-auth-circuit-breaker';
+import { 
+  isMobileBrowserEnhanced, 
+  isReplitIframe, 
+  clearMobileAuthState,
+  signInWithGoogleMobileReplit 
+} from '@/lib/mobile-auth-replit-fix';
 
 export default function MobileAuthTest() {
   const { currentUser, signInWithGoogle } = useAuth();
@@ -15,8 +19,8 @@ export default function MobileAuthTest() {
 
   useEffect(() => {
     // Run initial diagnostics
-    addResult(`Mobile Browser: ${isMobileBrowser()}`);
-    addResult(`Replit Environment: ${isReplitEnvironment()}`);
+    addResult(`Mobile Browser: ${isMobileBrowserEnhanced()}`);
+    addResult(`Replit Iframe: ${isReplitIframe()}`);
     addResult(`Current User: ${currentUser?.email || 'None'}`);
     addResult(`Current URL: ${window.location.href}`);
     
@@ -39,16 +43,20 @@ export default function MobileAuthTest() {
     addResult('Starting mobile auth test...');
     
     try {
-      await signInWithGoogle();
-      addResult('Google sign-in initiated successfully');
+      if (isMobileBrowserEnhanced()) {
+        await signInWithGoogleMobileReplit();
+        addResult('Mobile Google sign-in initiated successfully');
+      } else {
+        await signInWithGoogle();
+        addResult('Desktop Google sign-in initiated successfully');
+      }
     } catch (error) {
       addResult(`Error during sign-in: ${error}`);
     }
   };
 
   const clearAllState = () => {
-    clearAllMobileAuthState();
-    MobileAuthCircuitBreaker.forceReset();
+    clearMobileAuthState();
     addResult('Cleared all mobile auth state');
     window.location.reload();
   };

@@ -7,7 +7,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { handleMobileRedirectResult, isMobileBrowser, checkMobileAuthTimeout } from "@/lib/mobile-auth-replit-fix";
+import { 
+  isMobileBrowserEnhanced, 
+  isReplitIframe, 
+  processMobileRedirectResult,
+  signInWithGoogleMobileReplit 
+} from "@/lib/mobile-auth-replit-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -23,17 +28,16 @@ export default function Login() {
     const handleAuthRedirect = async () => {
       console.log("🔍 Enhanced redirect handling starting...");
       
-      // Check for mobile auth timeout first
-      if (checkMobileAuthTimeout()) {
-        console.log("📱 Mobile auth timeout detected");
-      }
+      // Detect mobile device and set state
+      const isMobileDevice = isMobileBrowserEnhanced();
+      setIsMobile(isMobileDevice);
       
       // Handle mobile redirect result if mobile browser
-      if (isMobileBrowser()) {
-        console.log("📱 Mobile browser detected, handling redirect...");
+      if (isMobileDevice) {
+        console.log("📱 Mobile browser detected, processing redirect...");
         try {
-          const mobileSuccess = await handleMobileRedirectResult();
-          if (mobileSuccess) {
+          const mobileUser = await processMobileRedirectResult();
+          if (mobileUser) {
             console.log("✅ Mobile redirect handled successfully");
             setRedirectResultChecked(true);
             return;
@@ -134,26 +138,20 @@ export default function Login() {
       console.log('🔵 [LOGIN] Setting isSigningIn to true');
       setIsSigningIn(true);
       
-      // Detect mobile device
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      console.log('🔵 [LOGIN] Device detection:', { isMobile, userAgent: navigator.userAgent });
+      // Detect mobile device and use appropriate authentication
+      const isMobileDevice = isMobileBrowserEnhanced();
+      console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileDevice, isReplit: isReplitIframe() });
       
-      if (isMobile) {
-        console.log('🔵 [LOGIN] Mobile device - will not reset loading state after signInWithGoogle');
+      if (isMobileDevice) {
+        console.log('🔵 [LOGIN] Mobile device - using mobile authentication');
+        await signInWithGoogleMobileReplit();
+        console.log('🔵 [LOGIN] Mobile authentication initiated');
+        // Keep loading state for mobile redirect
       } else {
-        console.log('🔵 [LOGIN] Desktop device - will reset loading state after signInWithGoogle');
-      }
-      
-      console.log('🔵 [LOGIN] Calling signInWithGoogle...');
-      await signInWithGoogle();
-      console.log('🔵 [LOGIN] signInWithGoogle completed');
-      
-      // Only reset loading state if not mobile (since mobile redirects)
-      if (!isMobile) {
-        console.log('🔵 [LOGIN] Resetting isSigningIn to false for desktop');
+        console.log('🔵 [LOGIN] Desktop device - using standard authentication');
+        await signInWithGoogle();
+        console.log('🔵 [LOGIN] Desktop authentication completed');
         setIsSigningIn(false);
-      } else {
-        console.log('🔵 [LOGIN] Keeping isSigningIn true for mobile redirect');
       }
       
     } catch (error: any) {

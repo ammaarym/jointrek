@@ -28,21 +28,26 @@ export function isProductionDomain(): boolean {
 }
 
 export function shouldUsePopupAuth(): boolean {
-  // Always use popup on Replit domains to avoid redirect loops
-  if (isReplitEnvironment()) {
-    console.log('🎯 [DOMAIN_CHECK] Replit domain detected - using popup authentication');
-    return true;
+  const hostname = window.location.hostname;
+  const isMobile = isMobileDevice();
+  
+  // Check if we're on production domain (jointrek.com)
+  if (hostname === 'jointrek.com' || hostname === 'www.jointrek.com') {
+    console.log('🎯 [DOMAIN_CHECK] Production domain (jointrek.com) detected');
+    console.log('🎯 [DOMAIN_CHECK] Device type:', isMobile ? 'Mobile' : 'Desktop');
+    
+    if (isMobile) {
+      console.log('🎯 [DOMAIN_CHECK] Using redirect authentication for mobile on production');
+      return false; // Use redirect for mobile on production
+    } else {
+      console.log('🎯 [DOMAIN_CHECK] Using popup authentication for desktop on production');
+      return true; // Use popup for desktop on production
+    }
   }
   
-  // On production domain, use popup for desktop, redirect for mobile
-  if (isProductionDomain()) {
-    const useMobile = isMobileDevice();
-    console.log('🎯 [DOMAIN_CHECK] Production domain detected - mobile:', useMobile);
-    return !useMobile; // Popup for desktop, redirect for mobile
-  }
-  
-  // Default to popup for other domains
-  console.log('🎯 [DOMAIN_CHECK] Other domain detected - using popup authentication');
+  // For all other domains (including Replit), always use popup to avoid redirect loops
+  console.log('🎯 [DOMAIN_CHECK] Non-production domain detected:', hostname);
+  console.log('🎯 [DOMAIN_CHECK] Using popup authentication to avoid redirect loops');
   return true;
 }
 
@@ -206,14 +211,23 @@ class FirebasePopupAuth {
   }
   
   getDebugInfo(): any {
+    const hostname = window.location.hostname;
+    const isMobile = isMobileDevice();
+    const isProduction = hostname === 'jointrek.com' || hostname === 'www.jointrek.com';
+    const shouldPopup = shouldUsePopupAuth();
+    
     return {
-      isMobile: isMobileDevice(),
-      isReplit: isReplitEnvironment(),
-      isProduction: isProductionDomain(),
-      shouldUsePopup: shouldUsePopupAuth(),
+      currentDomain: hostname,
+      targetProductionDomain: 'jointrek.com',
+      isProductionDomain: isProduction,
+      isReplitDomain: isReplitEnvironment(),
+      deviceType: isMobile ? 'Mobile' : 'Desktop',
+      authMethod: shouldPopup ? 'Popup' : 'Redirect',
+      authStrategy: isProduction 
+        ? (isMobile ? 'Mobile Redirect on Production' : 'Desktop Popup on Production')
+        : 'Popup Only (Non-Production)',
       hasFallbackFlag: !!sessionStorage.getItem('firebase_popup_fallback'),
       hasRedirectFlag: !!sessionStorage.getItem('firebase_redirect_auth'),
-      currentDomain: window.location.hostname,
       currentUrl: window.location.href,
       userAgent: navigator.userAgent.substring(0, 100) + '...'
     };

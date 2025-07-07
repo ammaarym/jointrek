@@ -22,6 +22,30 @@ export function isReplitEnvironment(): boolean {
          window.location.hostname.includes('replit.dev');
 }
 
+export function isProductionDomain(): boolean {
+  return window.location.hostname === 'jointrek.com' || 
+         window.location.hostname === 'www.jointrek.com';
+}
+
+export function shouldUsePopupAuth(): boolean {
+  // Always use popup on Replit domains to avoid redirect loops
+  if (isReplitEnvironment()) {
+    console.log('🎯 [DOMAIN_CHECK] Replit domain detected - using popup authentication');
+    return true;
+  }
+  
+  // On production domain, use popup for desktop, redirect for mobile
+  if (isProductionDomain()) {
+    const useMobile = isMobileDevice();
+    console.log('🎯 [DOMAIN_CHECK] Production domain detected - mobile:', useMobile);
+    return !useMobile; // Popup for desktop, redirect for mobile
+  }
+  
+  // Default to popup for other domains
+  console.log('🎯 [DOMAIN_CHECK] Other domain detected - using popup authentication');
+  return true;
+}
+
 // Firebase popup authentication solution for Replit
 class FirebasePopupAuth {
   private provider: GoogleAuthProvider;
@@ -46,12 +70,25 @@ class FirebasePopupAuth {
   }
   
   async signInWithGoogle(): Promise<User> {
-    console.log('🚀 [POPUP_AUTH] Starting Google sign-in with popup');
+    console.log('🚀 [POPUP_AUTH] Starting domain-aware Google sign-in');
+    console.log('🎯 [POPUP_AUTH] Current domain:', window.location.hostname);
     
     await this.initialize();
     
+    const usePopup = shouldUsePopupAuth();
+    console.log('🎯 [POPUP_AUTH] Authentication method:', usePopup ? 'popup' : 'redirect');
+    
+    if (usePopup) {
+      return this.signInWithPopupMethod();
+    } else {
+      return this.signInWithRedirectMethod();
+    }
+  }
+  
+  private async signInWithPopupMethod(): Promise<User> {
+    console.log('🪟 [POPUP_AUTH] Using popup authentication');
+    
     try {
-      // Try popup first (works on desktop and some mobile browsers)
       const result = await signInWithPopup(auth, this.provider);
       
       if (!result.user.email?.endsWith('@ufl.edu')) {
@@ -79,6 +116,19 @@ class FirebasePopupAuth {
     }
   }
   
+  private async signInWithRedirectMethod(): Promise<never> {
+    console.log('🔄 [POPUP_AUTH] Using redirect authentication for mobile on production');
+    
+    // Mark that we're using redirect
+    sessionStorage.setItem('firebase_redirect_auth', 'true');
+    
+    // Start redirect
+    await signInWithRedirect(auth, this.provider);
+    
+    // This will redirect, so we never reach here
+    throw new Error('Redirect initiated');
+  }
+  
   private async fallbackToRedirect(): Promise<never> {
     console.log('🔄 [POPUP_AUTH] Falling back to redirect method');
     
@@ -93,10 +143,14 @@ class FirebasePopupAuth {
   }
   
   async handleRedirectFallback(): Promise<User | null> {
-    console.log('🔍 [POPUP_AUTH] Checking for redirect fallback result');
+    console.log('🔍 [POPUP_AUTH] Checking for redirect result');
     
-    // Only process if we used redirect fallback
-    if (!sessionStorage.getItem('firebase_popup_fallback')) {
+    // Check for both fallback and direct redirect flags
+    const hasFallbackFlag = sessionStorage.getItem('firebase_popup_fallback');
+    const hasRedirectFlag = sessionStorage.getItem('firebase_redirect_auth');
+    
+    if (!hasFallbackFlag && !hasRedirectFlag) {
+      console.log('ℹ️ [POPUP_AUTH] No redirect flags found');
       return null;
     }
     
@@ -104,7 +158,7 @@ class FirebasePopupAuth {
       const result = await getRedirectResult(auth);
       
       if (result?.user) {
-        console.log('✅ [POPUP_AUTH] Redirect fallback successful:', result.user.email);
+        console.log('✅ [POPUP_AUTH] Redirect successful:', result.user.email);
         
         // Validate UF email
         if (!result.user.email?.endsWith('@ufl.edu')) {
@@ -113,16 +167,19 @@ class FirebasePopupAuth {
           throw new Error('Please use your UF email address (@ufl.edu)');
         }
         
-        // Clear fallback flag
+        // Clear all redirect flags
         sessionStorage.removeItem('firebase_popup_fallback');
+        sessionStorage.removeItem('firebase_redirect_auth');
         return result.user;
       }
       
+      console.log('ℹ️ [POPUP_AUTH] No redirect result found');
       return null;
       
     } catch (error) {
-      console.error('❌ [POPUP_AUTH] Redirect fallback failed:', error);
+      console.error('❌ [POPUP_AUTH] Redirect processing failed:', error);
       sessionStorage.removeItem('firebase_popup_fallback');
+      sessionStorage.removeItem('firebase_redirect_auth');
       throw error;
     }
   }
@@ -144,6 +201,7 @@ class FirebasePopupAuth {
   async signOut(): Promise<void> {
     console.log('🚪 [POPUP_AUTH] Signing out');
     sessionStorage.removeItem('firebase_popup_fallback');
+    sessionStorage.removeItem('firebase_redirect_auth');
     await signOut(auth);
   }
   
@@ -151,7 +209,11 @@ class FirebasePopupAuth {
     return {
       isMobile: isMobileDevice(),
       isReplit: isReplitEnvironment(),
+      isProduction: isProductionDomain(),
+      shouldUsePopup: shouldUsePopupAuth(),
       hasFallbackFlag: !!sessionStorage.getItem('firebase_popup_fallback'),
+      hasRedirectFlag: !!sessionStorage.getItem('firebase_redirect_auth'),
+      currentDomain: window.location.hostname,
       currentUrl: window.location.href,
       userAgent: navigator.userAgent.substring(0, 100) + '...'
     };

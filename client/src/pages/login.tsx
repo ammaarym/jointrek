@@ -11,7 +11,10 @@ import {
   signInWithGooglePopup, 
   handlePopupRedirectFallback,
   getPopupAuthDebugInfo,
-  isMobileDevice
+  isMobileDevice,
+  shouldUsePopupAuth,
+  isReplitEnvironment,
+  isProductionDomain
 } from "@/lib/firebase-auth-popup-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 

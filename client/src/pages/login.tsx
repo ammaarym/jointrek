@@ -31,6 +31,11 @@ export default function Login() {
     const handleAuthRedirect = async () => {
       console.log("🔍 Enhanced redirect handling starting...");
       
+      // Debug patch for Firebase configuration verification
+      console.log("🌍 Checking Firebase auth domain:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
+      console.log("🔧 Full Firebase config:", auth.app.options);
+      console.log("🌐 Current URL:", window.location.href);
+      
       // Detect mobile device and set state
       const isMobileAuth = isMobileDevice();
       setIsMobile(isMobileAuth);

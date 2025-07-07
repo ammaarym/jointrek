@@ -123,6 +123,7 @@ class FirebasePopupAuth {
   
   private async signInWithRedirectMethod(): Promise<never> {
     console.log('🔄 [POPUP_AUTH] Using redirect authentication for mobile on production');
+    console.log('🚀 Starting redirect...');
     
     // Mark that we're using redirect
     sessionStorage.setItem('firebase_redirect_auth', 'true');

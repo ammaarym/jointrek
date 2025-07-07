@@ -1,4 +1,5 @@
 import { Switch, Route, useLocation, Redirect } from "wouter";
+import { lazy } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -351,6 +352,7 @@ function AppRoutes() {
           <Route path="/admin-poll-data" component={AdminPollData} />
           <Route path="/mobile-auth-test" component={MobileAuthTest} />
           <Route path="/mobile-debug" component={MobileDebug} />
+          <Route path="/mobile-auth-debug" component={lazy(() => import('./pages/mobile-auth-debug'))} />
           <Route path="/mobile-auth-replit-test" component={MobileAuthReplitTest} />
           <Route path="/firebase-popup-test" component={FirebasePopupTest} />
           <Route path="/terms-of-service" component={TermsOfService} />

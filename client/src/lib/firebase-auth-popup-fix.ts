@@ -30,15 +30,20 @@ export function isProductionDomain(): boolean {
 export function shouldUsePopupAuth(): boolean {
   const hostname = window.location.hostname;
   const isMobile = isMobileDevice();
+  const isSafari = isMobileSafari();
   
   // Check if we're on production domain (jointrek.com)
   if (hostname === 'jointrek.com' || hostname === 'www.jointrek.com') {
     console.log('🎯 [DOMAIN_CHECK] Production domain (jointrek.com) detected');
     console.log('🎯 [DOMAIN_CHECK] Device type:', isMobile ? 'Mobile' : 'Desktop');
+    console.log('🎯 [DOMAIN_CHECK] Safari detected:', isSafari);
     
-    if (isMobile) {
-      console.log('🎯 [DOMAIN_CHECK] Using redirect authentication for mobile on production');
-      return false; // Use redirect for mobile on production
+    if (isSafari || (isMobile && navigator.userAgent.includes('Safari'))) {
+      console.log('🎯 [DOMAIN_CHECK] Using redirect for Safari/Mobile Safari (popup blocked)');
+      return false; // Always use redirect for Safari
+    } else if (isMobile) {
+      console.log('🎯 [DOMAIN_CHECK] Using popup for non-Safari mobile browsers');
+      return true; // Use popup for mobile non-Safari where available
     } else {
       console.log('🎯 [DOMAIN_CHECK] Using popup authentication for desktop on production');
       return true; // Use popup for desktop on production
@@ -49,6 +54,12 @@ export function shouldUsePopupAuth(): boolean {
   console.log('🎯 [DOMAIN_CHECK] Non-production domain detected:', hostname);
   console.log('🎯 [DOMAIN_CHECK] Using popup authentication to avoid redirect loops');
   return true;
+}
+
+// Enhanced mobile detection including Safari
+export function isMobileSafari(): boolean {
+  const userAgent = navigator.userAgent;
+  return /iPhone|iPad|iPod/i.test(userAgent) && /Safari/i.test(userAgent) && !/Chrome|CriOS|FxiOS/i.test(userAgent);
 }
 
 // Firebase popup authentication solution for Replit
@@ -124,6 +135,14 @@ class FirebasePopupAuth {
   private async signInWithRedirectMethod(): Promise<never> {
     console.log('🔄 [POPUP_AUTH] Using redirect authentication for mobile on production');
     console.log('🚀 Starting redirect...');
+    
+    // CRITICAL: Set persistence BEFORE redirect to ensure auth state survives
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      console.log('✅ [POPUP_AUTH] Persistence set to browserLocalPersistence before redirect');
+    } catch (error) {
+      console.error('❌ [POPUP_AUTH] Failed to set persistence:', error);
+    }
     
     // Mark that we're using redirect
     sessionStorage.setItem('firebase_redirect_auth', 'true');

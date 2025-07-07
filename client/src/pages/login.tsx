@@ -8,11 +8,11 @@ import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { 
-  isMobileDevice, 
-  authenticateMobilePersistent, 
-  processRedirectResultPersistent,
-  navigateToProfile
-} from "@/lib/mobile-auth-persistent";
+  signInWithGooglePopup, 
+  handlePopupRedirectFallback,
+  getPopupAuthDebugInfo,
+  isMobileDevice
+} from "@/lib/firebase-auth-popup-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -36,15 +36,14 @@ export default function Login() {
       if (isMobileAuth) {
         console.log("📱 Mobile browser detected, processing redirect...");
         try {
-          const mobileUser = await processRedirectResultPersistent();
-          if (mobileUser) {
-            console.log("✅ Mobile redirect handled successfully");
+          const fallbackUser = await handlePopupRedirectFallback();
+          if (fallbackUser) {
+            console.log("✅ Popup redirect fallback handled successfully");
             setRedirectResultChecked(true);
-            navigateToProfile(mobileUser);
             return;
           }
         } catch (error) {
-          console.error("❌ Mobile redirect error:", error);
+          console.error("❌ Popup redirect fallback error:", error);
         }
       }
       
@@ -143,17 +142,11 @@ export default function Login() {
       const isMobileAuth = isMobileDevice();
       console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileAuth });
       
-      if (isMobileAuth) {
-        console.log('🔵 [LOGIN] Mobile device - using persistent mobile authentication');
-        await authenticateMobilePersistent();
-        console.log('🔵 [LOGIN] Mobile authentication initiated');
-        // Keep loading state for mobile redirect
-      } else {
-        console.log('🔵 [LOGIN] Desktop device - using standard authentication');
-        await signInWithGoogle();
-        console.log('🔵 [LOGIN] Desktop authentication completed');
-        setIsSigningIn(false);
-      }
+      // Use popup authentication for all devices (fixes mobile redirect loops)
+      console.log('🔵 [LOGIN] Using popup authentication to avoid redirect loops');
+      const user = await signInWithGooglePopup();
+      console.log('✅ [LOGIN] Popup authentication successful:', user.email);
+      setIsSigningIn(false);
       
     } catch (error: any) {
       console.log('💥 [LOGIN] Error in handleGoogleSignIn:', { 

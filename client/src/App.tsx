@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Header from "@/components/header";
 
-import Home from "@/pages/home-landing";
+import Home from "@/pages/home-optimized";
 import Login from "@/pages/login";
 import AuthTab from "@/pages/auth-tab";
 import FindRidesPostgres from "@/pages/find-rides-postgres";

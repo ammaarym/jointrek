@@ -21,8 +21,10 @@ if (
   console.error("Missing essential Firebase environment variables!");
 }
 
-// Print current origin for debugging
+// Print current origin and hostname for debugging
 console.log("Current origin:", window.location.origin);
+console.log("Current hostname:", window.location.hostname);
+console.log("Full URL:", window.location.href);
 
 // Initialize Firebase only once
 import { getApps, getApp } from "firebase/app";

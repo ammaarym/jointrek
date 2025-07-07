@@ -219,6 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('📱 [AUTH] Mobile browser detected:', isMobileBrowser);
     
     // Log current domain information for debugging
+    console.log("window.location.hostname:", window.location.hostname);
     DomainAuthValidator.logCurrentDomainInfo();
     
     try {

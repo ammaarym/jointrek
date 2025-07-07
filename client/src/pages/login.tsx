@@ -31,15 +31,6 @@ export default function Login() {
     const handleAuthRedirect = async () => {
       console.log("🔍 Enhanced redirect handling starting...");
       
-      // Debug Firebase configuration as recommended
-      console.log("🔧 Checking Firebase auth domain:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
-      console.log("🔧 Full Firebase config:", {
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        appId: import.meta.env.VITE_FIREBASE_APP_ID
-      });
-      console.log("🌐 Current URL:", window.location.href);
-      
       // Detect mobile device and set state
       const isMobileAuth = isMobileDevice();
       setIsMobile(isMobileAuth);

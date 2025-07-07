@@ -127,9 +127,6 @@ class FirebasePopupAuth {
     // Mark that we're using redirect
     sessionStorage.setItem('firebase_redirect_auth', 'true');
     
-    // Add debug logging as recommended
-    console.log("🚀 Starting redirect...");
-    
     // Start redirect
     await signInWithRedirect(auth, this.provider);
     
@@ -142,9 +139,6 @@ class FirebasePopupAuth {
     
     // Mark that we're using redirect fallback
     sessionStorage.setItem('firebase_popup_fallback', 'true');
-    
-    // Add debug logging as recommended
-    console.log("🚀 Starting redirect...");
     
     // Start redirect
     await signInWithRedirect(auth, this.provider);

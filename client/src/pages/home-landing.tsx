@@ -29,7 +29,7 @@ import {
 import findRidesScreenshot from "@assets/image_1751477334294.png";
 import trekLogo from "@assets/TREK (Presentation)_1751439938143.png";
 
-// Optimized Performance Components
+// Particles Component
 interface MousePosition {
   x: number;
   y: number;
@@ -42,26 +42,14 @@ function useMousePosition(): MousePosition {
   });
 
   useEffect(() => {
-    let animationFrameId: number;
-    
     const handleMouseMove = (event: MouseEvent) => {
-      // Throttle mouse updates to animation frame
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      
-      animationFrameId = requestAnimationFrame(() => {
-        setMousePosition({ x: event.clientX, y: event.clientY });
-      });
+      setMousePosition({ x: event.clientX, y: event.clientY });
     };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
     };
   }, []);
 
@@ -99,7 +87,7 @@ function hexToRgb(hex: string): number[] {
 
 const Particles: React.FC<ParticlesProps> = ({
   className = "",
-  quantity = 30, // Reduced from 100 to 30 for better performance
+  quantity = 100,
   staticity = 50,
   ease = 50,
   size = 0.4,
@@ -116,7 +104,6 @@ const Particles: React.FC<ParticlesProps> = ({
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
   const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
-  const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -128,9 +115,6 @@ const Particles: React.FC<ParticlesProps> = ({
 
     return () => {
       window.removeEventListener("resize", initCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
     };
   }, [color]);
 
@@ -263,8 +247,6 @@ const Particles: React.FC<ParticlesProps> = ({
   };
 
   const animate = () => {
-    if (!context.current || !canvasRef.current) return;
-    
     clearContext();
     circles.current.forEach((circle: Circle, i: number) => {
       const edge = [
@@ -307,7 +289,7 @@ const Particles: React.FC<ParticlesProps> = ({
         drawCircle(newCircle);
       }
     });
-    animationRef.current = window.requestAnimationFrame(animate);
+    window.requestAnimationFrame(animate);
   };
 
   return (
@@ -321,9 +303,36 @@ const Particles: React.FC<ParticlesProps> = ({
   );
 };
 
-// Removed FloatingElements component for better performance
+// Floating Elements Component
+const FloatingElements = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-4 h-4 bg-gradient-to-r from-[#B48A5C] to-[#B48A5C] rounded-full opacity-20"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 8 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 1.5,
+          }}
+          style={{
+            left: `${10 + i * 15}%`,
+            top: `${20 + i * 10}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
-// Optimized Shape Component
+// Morphing Shape Component
 const MorphingShape = ({ className }: { className?: string }) => {
   return (
     <motion.div
@@ -332,19 +341,20 @@ const MorphingShape = ({ className }: { className?: string }) => {
         className,
       )}
       animate={{
-        scale: [1, 1.1, 1],
-        rotate: [0, 360],
+        borderRadius: ["50%", "30%", "50%"],
+        scale: [1, 1.2, 1],
+        rotate: [0, 180, 360],
       }}
       transition={{
-        duration: 20, // Slower animation for better performance
+        duration: 12,
         repeat: Infinity,
-        ease: "linear", // Linear easing is more performant
+        ease: "easeInOut",
       }}
     />
   );
 };
 
-// Optimized Card Component 
+// Enhanced Card Component with Hover Effects
 const EnhancedCard = ({
   children,
   className,
@@ -359,9 +369,10 @@ const EnhancedCard = ({
         className,
       )}
       whileHover={{
-        scale: 1.01, // Reduced from 1.02
+        scale: 1.02,
+        boxShadow: "0 20px 40px rgba(180, 138, 92, 0.1)",
       }}
-      transition={{ duration: 0.2, ease: "easeOut" }} // Faster, simpler transition
+      transition={{ duration: 0.3 }}
     >
       {children}
     </motion.div>
@@ -399,14 +410,15 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FCFAF7] via-[#F8F4ED] via-[#F5F0E8] via-[#F0EBE1] to-[#EDE8DC] relative will-change-transform transform-gpu">
+    <div className="min-h-screen bg-gradient-to-b from-[#FCFAF7] via-[#F8F4ED] via-[#F5F0E8] via-[#F0EBE1] to-[#EDE8DC] relative">
       {/* Hero Section with Enhanced Effects */}
       <section className="relative bg-transparent overflow-hidden pt-8 pb-4 flex items-start justify-center">
-        <MorphingShape className="w-72 h-72 -top-36 -right-36" />
+        <MorphingShape className="w-96 h-96 -top-48 -right-48" />
+        <MorphingShape className="w-64 h-64 -bottom-32 -left-32" />
 
-        {/* Simplified Background Effect */}
+        {/* Aurora Background Effect */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -inset-[10px] opacity-20 pointer-events-none bg-gradient-to-br from-[#B48A5C]/20 via-transparent to-[#B48A5C]/20"></div>
+          <div className="absolute -inset-[10px] opacity-30 will-change-transform pointer-events-none blur-sm bg-gradient-to-br from-[#B48A5C] via-transparent to-[#B48A5C] animate-pulse"></div>
         </div>
 
         <div className="relative flex flex-col items-center justify-center px-4 z-10 text-center max-w-6xl mx-auto">
@@ -441,9 +453,14 @@ export default function Home() {
 
             <motion.div
               className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-1 md:mb-2 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
+              animate={{
+                backgroundPosition: ["0%", "100%", "0%"],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
               Rideshare Marketplace Built for{" "}
               <span style={{ color: "#B8956B" }}>Gators</span>
@@ -495,8 +512,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How Trek Works Section */}
+      {/* How Trek Works Section with Enhanced Effects */}
       <section className="pt-8 pb-4 sm:pt-12 sm:pb-8 bg-transparent relative overflow-hidden">
+        <MorphingShape className="w-72 h-72 -top-20 -right-20 opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
             className="text-2xl sm:text-3xl font-bold text-center mb-2 sm:mb-4 text-stone-900"
@@ -534,14 +552,14 @@ export default function Home() {
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -10 }}
               >
                 <motion.div
                   className="w-10 h-10 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4 shadow-lg transition-transform duration-300"
                   style={{
                     background: "linear-gradient(135deg, #F0E6D6, #E8DCC6)",
                   }}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
                 >
                   <step.icon
                     className="h-5 w-5 sm:h-6 sm:w-6"
@@ -560,8 +578,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Security Features Section */}
+      {/* Security Features Section with Enhanced Effects */}
       <section className="py-8 sm:py-12 bg-transparent relative overflow-hidden">
+        <MorphingShape className="w-96 h-96 -bottom-48 -left-48 opacity-15" />
         <div className="container mx-auto px-4 relative z-10">
           <motion.h2
             className="text-2xl sm:text-3xl font-bold text-center mb-1 sm:mb-2 text-stone-900"

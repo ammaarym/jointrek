@@ -5,7 +5,6 @@ import { onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, sig
 import { isMobileBrowser, setMobileAuthRedirect, checkMobileAuthTimeout, isReturningFromMobileAuth, clearAllAuthFlags } from '@/lib/mobile-auth-fix';
 import { MobileAuthCircuitBreaker } from '@/lib/mobile-auth-circuit-breaker';
 import { shouldPreventAutoRedirect, handleMobileAuthSuccess, setupMobileAuthForReplit } from '@/lib/mobile-auth-ultimate-fix';
-import { DomainAuthValidator } from '@/lib/domain-auth-validator';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -218,10 +217,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('🚀 [AUTH] Starting Google sign in');
     console.log('📱 [AUTH] Mobile browser detected:', isMobileBrowser);
     
-    // Log current domain information for debugging
-    console.log("window.location.hostname:", window.location.hostname);
-    DomainAuthValidator.logCurrentDomainInfo();
-    
     try {
       // Set persistence before any sign-in attempt (different for mobile vs desktop)
       const persistenceType = isMobileBrowser ? browserSessionPersistence : browserLocalPersistence;
@@ -237,15 +232,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (isMobileBrowser()) {
-        // CRITICAL: Check domain before attempting mobile redirect
-        if (!DomainAuthValidator.shouldAllowMobileRedirect()) {
-          const blockMessage = DomainAuthValidator.getBlockedDomainMessage();
-          console.error('🚫 [MOBILE_AUTH] Mobile redirect blocked:', blockMessage);
-          throw new Error(blockMessage);
-        }
-        
-        // Mobile: Set redirect flag and use redirect authentication (only on jointrek.com)
-        console.log('📱 [MOBILE_AUTH] Domain validated - setting mobile redirect flag and using redirect authentication');
+        // Mobile: Set redirect flag and use redirect authentication
+        console.log('📱 [MOBILE_AUTH] Setting mobile redirect flag and using redirect authentication');
         setMobileAuthRedirect();
         await signInWithRedirect(auth, provider);
       } else {
@@ -264,11 +252,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               popupError.code === 'auth/popup-closed-by-user' ||
               popupError.code === 'auth/cancelled-popup-request' ||
               popupError.code === 'auth/unauthorized-domain') {
-            
-            // For desktop redirect fallback, also check domain if it's mobile-like behavior
-            if (DomainAuthValidator.isUnsupportedForMobileRedirect()) {
-              console.warn('⚠️ [DESKTOP_AUTH] Redirect fallback on unsupported domain');
-            }
             await signInWithRedirect(auth, provider);
           } else {
             throw popupError;
@@ -280,8 +263,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error.message?.includes('@ufl.edu')) {
         throw error;
-      } else if (error.message?.includes('jointrek.com')) {
-        throw error; // Domain validation error - pass through as-is
       } else if (error.code === 'auth/network-request-failed') {
         throw new Error('Network connection failed. Please check your internet and try again.');
       } else {
@@ -307,14 +288,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    console.error('🚨 [AUTH] useAuth called outside AuthProvider context');
-    // Return a safe default instead of throwing
-    return {
-      currentUser: null,
-      loading: true,
-      signOut: async () => {},
-      signInWithGoogle: async () => {}
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

@@ -8,13 +8,11 @@ import MobileAuthFixed from "@/components/mobile-auth-fixed";
 import { getRedirectResult } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { 
-  setupMobileAuthForReplit,
-  shouldPreventAutoRedirect,
-  handleMobileAuthSuccess,
-  clearAllMobileAuthState,
-  isMobileBrowser
-} from "@/lib/mobile-auth-ultimate-fix";
-import { MobileAuthCircuitBreaker } from "@/lib/mobile-auth-circuit-breaker";
+  signInWithGooglePopup, 
+  handlePopupRedirectFallback,
+  getPopupAuthDebugInfo,
+  isMobileDevice
+} from "@/lib/firebase-auth-popup-fix";
 import trekLogo from "@assets/TREK (1)_1751582306581.png";
 
 export default function Login() {
@@ -30,22 +28,30 @@ export default function Login() {
     const handleAuthRedirect = async () => {
       console.log("🔍 Enhanced redirect handling starting...");
       
-      // Setup mobile auth for Replit environment  
-      await setupMobileAuthForReplit();
-      setIsMobile(true); // Will be set properly by setupMobileAuthForReplit
+      // Detect mobile device and set state
+      const isMobileAuth = isMobileDevice();
+      setIsMobile(isMobileAuth);
       
-      // Check for redirect result with mobile auth handling
+      // Handle mobile redirect result if mobile browser
+      if (isMobileAuth) {
+        console.log("📱 Mobile browser detected, processing redirect...");
+        try {
+          const fallbackUser = await handlePopupRedirectFallback();
+          if (fallbackUser) {
+            console.log("✅ Popup redirect fallback handled successfully");
+            setRedirectResultChecked(true);
+            return;
+          }
+        } catch (error) {
+          console.error("❌ Popup redirect fallback error:", error);
+        }
+      }
+      
+      // Fallback to standard redirect handling
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          console.log("✅ User returned from redirect:", result.user.email);
-          
-          // For mobile devices in Replit, prevent auto-redirect and show manual navigation
-          if (shouldPreventAutoRedirect()) {
-            console.log('📱 [MOBILE_FIX] Preventing auto-redirect, showing manual navigation');
-            handleMobileAuthSuccess();
-            return;
-          }
+          console.log("✅ User returned from redirect:", result.user);
         } else {
           console.log("ℹ️ No redirect result found");
         }
@@ -133,20 +139,13 @@ export default function Login() {
       setIsSigningIn(true);
       
       // Detect mobile device and use appropriate authentication
-      const isMobileAuth = isMobileBrowser();
+      const isMobileAuth = isMobileDevice();
       console.log('🔵 [LOGIN] Device detection:', { isMobile: isMobileAuth });
       
-      // Use standard authentication with mobile circuit breaker protection
-      console.log('🔵 [LOGIN] Using mobile-safe authentication');
-      
-      // Check circuit breaker before attempting sign-in
-      if (!MobileAuthCircuitBreaker.shouldAllowRedirect()) {
-        console.log('🚫 [LOGIN] Circuit breaker blocked authentication - too many attempts');
-        throw new Error('Too many authentication attempts. Please wait and try again.');
-      }
-      
-      await signInWithGoogle();
-      console.log('✅ [LOGIN] Authentication initiated');
+      // Use popup authentication for all devices (fixes mobile redirect loops)
+      console.log('🔵 [LOGIN] Using popup authentication to avoid redirect loops');
+      const user = await signInWithGooglePopup();
+      console.log('✅ [LOGIN] Popup authentication successful:', user.email);
       setIsSigningIn(false);
       
     } catch (error: any) {

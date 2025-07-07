@@ -6,7 +6,7 @@ import { getAnalytics } from "firebase/analytics";
 // Firebase configuration with environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "gatorlift-a1a82.firebaseapp.com",
+  authDomain: "jointrek.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
